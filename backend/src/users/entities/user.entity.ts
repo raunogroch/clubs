@@ -17,9 +17,6 @@ export class User {
   @Column()
   password: string;
 
-  @Column({ nullable: true })
-  name: string;
-
   @CreateDateColumn()
   createdAt: Date;
 
