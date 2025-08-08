@@ -4,7 +4,7 @@ import { UsersService } from '../users/users.service';
 import { User } from '../users/schemas/user.schema';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
-import { Roles } from 'src/users/users.controller';
+import { Roles } from 'src/users/enum/roles.enum';
 
 @Injectable()
 export class AuthService {

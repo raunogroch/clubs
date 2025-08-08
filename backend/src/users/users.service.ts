@@ -1,20 +1,36 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from './schemas/user.schema';
-import { CreateSuperUserDto, CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto, UpdateUserDto } from './dto';
+import bcrypt from 'node_modules/bcryptjs';
+import { Roles } from './enum/roles.enum';
 
 @Injectable()
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
+    const existingUser = await this.findByUsername(createUserDto.username);
+    if (existingUser) {
+      throw new Error('Username already exists');
+    }
+
+    if (!createUserDto.roles || createUserDto.roles.length == 0)
+      createUserDto.roles = [Roles.PARENT];
+
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    createUserDto.password = hashedPassword;
+
     const createdUser = new this.userModel(createUserDto);
     return createdUser.save();
   }
 
-  async createSuperUser(createUserDto: CreateSuperUserDto): Promise<User> {
+  async createSuperUser(createUserDto: CreateUserDto): Promise<User> {
     const createdUser = new this.userModel(createUserDto);
     return createdUser.save();
   }
@@ -31,25 +47,44 @@ export class UsersService {
     return user;
   }
 
-  findAll(): Promise<User[]> {
-    return this.userModel.find();
+  async findAll(): Promise<User[]> {
+    return await this.userModel.find();
   }
 
-  findOne(id: string): Promise<User | null> {
-    return this.userModel.findById({ id });
+  async findOne(id: string): Promise<User | null> {
+    return await this.userModel.findById(id);
   }
 
-  findByUsername(username: string): Promise<User | null> {
-    return this.userModel.findOne({ username }).exec();
+  async findByUsername(username: string): Promise<User | null> {
+    return await this.userModel.findOne({ username });
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User | null> {
+    if (updateUserDto.password) {
+      const hashedPassword = await bcrypt.hash(updateUserDto.password, 10);
+      updateUserDto.password = hashedPassword;
+    }
+
+    if (updateUserDto.roles && updateUserDto.roles.length > 0) {
+      const invalidRoles = updateUserDto.roles.filter(
+        (role) => !Object.values(Roles).includes(role),
+      );
+
+      if (invalidRoles.length > 0) {
+        throw new BadRequestException(
+          `Invalid roles provided: ${invalidRoles.join(', ')}. Valid roles are: ${Object.values(Roles).join(', ')}`,
+        );
+      }
+    }
+
     return this.userModel
       .findByIdAndUpdate(id, updateUserDto, { new: true })
       .exec();
   }
 
-  remove(id: string): Promise<User | null> {
-    return this.userModel.findByIdAndDelete(id);
+  async remove(id: string): Promise<null> {
+    const exist = await this.findOne(id);
+    if (!exist) throw new Error("User isn't exist");
+    return exist.deleteOne();
   }
 }

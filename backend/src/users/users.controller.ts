@@ -13,14 +13,6 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
-export enum Roles {
-  ATHLETE = 'athlete',
-  PARENT = 'parent',
-  COACH = 'coach',
-  ADMIN = 'admin',
-  SUPERADMIN = 'superadmin',
-}
-
 @Controller('users')
 @UseGuards(JwtAuthGuard)
 export class UsersController {

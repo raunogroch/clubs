@@ -6,8 +6,9 @@ import {
   IsString,
   MinLength,
 } from 'class-validator';
+import { Roles } from '../enum/roles.enum';
 
-class UserBasic {
+export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   username: string;
@@ -19,29 +20,26 @@ class UserBasic {
 
   @IsString()
   @IsNotEmpty()
-  roles: string[];
-}
-export class CreateUserDto extends UserBasic {
-  @IsString()
-  name: string;
+  roles: Roles[];
 
   @IsString()
-  lastname: string;
+  name?: string;
+
+  @IsString()
+  lastname?: string;
 
   @IsEmail()
-  email: string;
+  email?: string;
 
   @IsString()
-  ci: string;
+  ci?: string;
 
   @IsDate()
-  birth_date: Date;
+  birth_date?: Date;
 
   @IsNumber()
-  height: number;
+  height?: number;
 
   @IsNumber()
-  weight: number;
+  weight?: number;
 }
-
-export class CreateSuperUserDto extends UserBasic {}
