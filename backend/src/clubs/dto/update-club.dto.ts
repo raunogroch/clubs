@@ -1,23 +1,16 @@
-import { IsArray, IsMongoId, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsMongoId,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { Types } from 'mongoose';
-
-class Schedule {
-  @IsString()
-  @IsOptional()
-  startTime: string;
-
-  @IsString()
-  @IsOptional()
-  endTime: string;
-}
 
 export class UpdateClubDto {
   @IsString()
   @IsOptional()
   name?: string;
-
-  @IsOptional()
-  schedule?: Schedule;
 
   @IsString()
   @IsOptional()
@@ -26,6 +19,10 @@ export class UpdateClubDto {
   @IsString()
   @IsOptional()
   discipline?: string;
+
+  @IsNotEmpty()
+  @IsMongoId({ each: true })
+  schedule: Types.ObjectId;
 
   @IsArray()
   @IsMongoId({ each: true })

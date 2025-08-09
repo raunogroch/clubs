@@ -6,11 +6,14 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { ClubsService } from './clubs.service';
 import { CreateClubDto, UpdateClubDto } from './dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('clubs')
+@UseGuards(JwtAuthGuard)
 export class ClubsController {
   constructor(private readonly clubsService: ClubsService) {}
 

@@ -10,16 +10,19 @@ export class ClubsService {
   constructor(@InjectModel(Club.name) private clubModel: Model<Club>) {}
 
   async create(createClubDto: CreateClubDto): Promise<Club> {
-    const createClub = new this.clubModel(createClubDto);
-    return createClub.save();
+    const club = await this.clubModel.findOne({ name: createClubDto.name });
+    if (club) {
+      throw new Error('Club with this name already exists');
+    }
+    return this.clubModel.create(createClubDto);
   }
 
   async findAll(): Promise<Club[]> {
-    return this.clubModel.find().exec();
+    return this.clubModel.find();
   }
 
   async findOne(id: string): Promise<Club | null> {
-    return this.clubModel.findById(id).exec();
+    return this.clubModel.findById(id);
   }
 
   async update(id: string, updateClubDto: UpdateClubDto): Promise<Club | null> {
