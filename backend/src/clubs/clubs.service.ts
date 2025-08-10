@@ -28,6 +28,10 @@ export class ClubsService {
         select: 'startTime endTime',
       },
       {
+        path: 'discipline',
+        select: 'name',
+      },
+      {
         path: 'coaches',
         select: 'name lastname',
       },
