@@ -1,6 +1,17 @@
+import { useNavigate } from "react-router-dom";
 import { Image, Input } from "./";
+import { useContext } from "react";
+import { AuthContext } from "../auth/AuthContext";
 
 export const TopNav = () => {
+  const { logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
   return (
     <div className="row border-bottom">
       <nav
@@ -173,7 +184,7 @@ export const TopNav = () => {
           </li>
 
           <li>
-            <a href="login.html">
+            <a onClick={handleLogout}>
               <i className="fa fa-sign-out"></i> Log out
             </a>
           </li>

@@ -69,15 +69,5 @@
 
     <!-- ChartJS-->
     <script src="/src/assets/js/plugins/chartJs/Chart.min.js"></script>
-
-    <script>
-      function checkPathAndUpdateClass() {
-        const currentPath = window.location.pathname;
-        currentPath === "/login"
-          ? document.body.classList.add("gray-bg")
-          : document.body.classList.remove("gray-bg");
-      }
-      window.addEventListener("load", checkPathAndUpdateClass);
-    </script>
   </body>
 </html>

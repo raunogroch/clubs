@@ -1,13 +1,32 @@
-import { useState } from "react";
+// Login.tsx
+import { useContext, useEffect, useState } from "react";
 import { Input } from "../components";
 import { authService } from "../services/authService";
+import { AuthContext } from "../auth/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { useBodyClass } from "../hooks/useBodyClass";
+
+interface FormData {
+  username: string;
+  password: string;
+}
 
 export const Login = () => {
-  const [formData, setFormData] = useState({
+  useBodyClass();
+  const [formData, setFormData] = useState<FormData>({
     username: "",
     password: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { login, isAuthenticated } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -20,14 +39,15 @@ export const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError(null);
 
     try {
-      // Lógica de autenticación aquí
-      await authService.login(formData);
-      //console.log("Datos enviados:", formData);
-      // await authService.login(formData);
+      const response = await authService.login(formData);
+      login(response.access.authorization, response.access.user);
+      navigate("/dashboard");
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
+      setError("Invalid username or password");
     } finally {
       setIsSubmitting(false);
     }
@@ -45,6 +65,8 @@ export const Login = () => {
           pages with extra new web app views.
         </p>
         <p>Login in. To see it in action.</p>
+
+        {error && <div className="alert alert-danger">{error}</div>}
 
         <form className="m-t" role="form" onSubmit={handleSubmit}>
           <div className="form-group">

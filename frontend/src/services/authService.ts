@@ -6,19 +6,23 @@ interface LoginData {
   password: string;
 }
 
+interface User {
+  name: string;
+  lastname: string;
+  roles: string[];
+}
+
 interface LoginResponse {
-  access_token: string;
+  access: {
+    authorization: string;
+    user: User;
+  };
 }
 
 export const authService = {
   async login(credentials: LoginData): Promise<LoginResponse> {
-    try {
-      const response = await api.post("/auth/login", credentials);
-      console.log(response.data);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await api.post("/auth/login", credentials);
+    return response.data;
   },
 
   logout() {
