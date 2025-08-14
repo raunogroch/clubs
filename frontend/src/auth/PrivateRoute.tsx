@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
+import { Navigation } from "../components/Navigation"; // Importa tu Navigation
 
 export const PrivateRoute = ({
   children,
@@ -14,5 +15,11 @@ export const PrivateRoute = ({
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  return children;
+  return (
+    <div className="app-container">
+      <Navigation>
+        <main className="content">{children}</main>
+      </Navigation>
+    </div>
+  );
 };

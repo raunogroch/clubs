@@ -13,7 +13,6 @@ export const useBodyClass = () => {
       document.body.classList.remove("gray-bg");
     }
 
-    // Limpieza al desmontar
     return () => {
       document.body.classList.remove("gray-bg");
     };

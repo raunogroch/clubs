@@ -1,3 +1,4 @@
+// App.js
 import {
   BrowserRouter as Router,
   Routes,
@@ -6,15 +7,18 @@ import {
 } from "react-router-dom";
 import { AuthProvider } from "./auth/AuthProvider";
 import { PrivateRoute } from "./auth/PrivateRoute";
-import { Login } from "./layouts/Login";
-import { Dashboard } from "./layouts/Dashboard";
+import { Clubs, Dashboard, Login, NotFound, Profile } from "./layouts";
 
 export const App = () => {
   return (
     <Router>
       <AuthProvider>
         <Routes>
+          {/* Rutas públicas */}
           <Route path="/login" element={<Login />} />
+          <Route path="/404" element={<NotFound />} />
+
+          {/* Rutas privadas */}
           <Route
             path="/dashboard/*"
             element={
@@ -24,21 +28,25 @@ export const App = () => {
             }
           />
           <Route
-            path="/"
+            path="/clubs"
             element={
               <PrivateRoute>
-                <Navigate to="/dashboard" replace />
+                <Clubs name="Clubs" />
               </PrivateRoute>
             }
           />
           <Route
-            path="*"
+            path="/profile"
             element={
               <PrivateRoute>
-                <Navigate to="/dashboard" replace />
+                <Profile name="Clubs" />
               </PrivateRoute>
             }
           />
+
+          {/* Redirecciones */}
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/404" replace />} />
         </Routes>
       </AuthProvider>
     </Router>

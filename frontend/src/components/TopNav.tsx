@@ -1,5 +1,5 @@
-import { useNavigate } from "react-router-dom";
-import { Image, Input } from "./";
+import { Link, useNavigate } from "react-router-dom";
+import { Input } from "./";
 import { useContext } from "react";
 import { AuthContext } from "../auth/AuthContext";
 import { SmoothlyMenu } from "../scripts/inspinia";
@@ -13,9 +13,9 @@ export const TopNav = () => {
     navigate("/login");
   };
 
-  const handleClick = (e) => {
+  const handleClick = (e: any) => {
     e.preventDefault();
-    document.body.classList.toggle("mini-navbar"); // toggle() hace exactamente eso
+    document.body.classList.toggle("mini-navbar");
     SmoothlyMenu();
   };
 
@@ -27,179 +27,25 @@ export const TopNav = () => {
         style={{ marginBottom: "0px" }}
       >
         <div className="navbar-header">
-          <a
+          <Link
             className="navbar-minimalize minimalize-styl-2 btn btn-primary "
-            href="#"
+            to={"#"}
             onClick={(e) => handleClick(e)}
           >
             <i className="fa fa-bars"></i>{" "}
-          </a>
-          <form
-            role="search"
-            className="navbar-form-custom"
-            action="search_results.html"
-          >
-            <div className="form-group">
-              <Input
-                type="text"
-                placeholder="Search for something..."
-                className="form-control"
-                name="top-search"
-                id="top-search"
-              />
-            </div>
-          </form>
+          </Link>
         </div>
         <ul className="nav navbar-top-links navbar-right">
           <li style={{ padding: "20px" }}>
             <span className="m-r-sm text-muted welcome-message">
-              Welcome to INSPINIA+ Admin Theme.
+              BIENVENIDO AL SISTEMA DE CLUBES
             </span>
-          </li>
-          <li className="dropdown">
-            <a
-              className="dropdown-toggle count-info"
-              data-toggle="dropdown"
-              href="#"
-            >
-              <i className="fa fa-envelope"></i>{" "}
-              <span className="label label-warning">16</span>
-            </a>
-            <ul className="dropdown-menu dropdown-messages dropdown-menu-right">
-              <li>
-                <div className="dropdown-messages-box">
-                  <a className="dropdown-item float-left" href="profile.html">
-                    <Image
-                      src="/src/assets/img/a7.jpg"
-                      alt="image"
-                      className="rounded-circle"
-                    />
-                  </a>
-                  <div className="media-body">
-                    <small className="float-right">46h ago</small>
-                    <strong>Mike Loreipsum</strong> started following{" "}
-                    <strong>Monica Smith</strong>. <br />
-                    <small className="text-muted">
-                      3 days ago at 7:58 pm - 10.06.2014
-                    </small>
-                  </div>
-                </div>
-              </li>
-              <li className="dropdown-divider"></li>
-              <li>
-                <div className="dropdown-messages-box">
-                  <a className="dropdown-item float-left" href="profile.html">
-                    <Image
-                      src="/src/assets/img/a4.jpg"
-                      alt="image"
-                      className="rounded-circle"
-                    />
-                  </a>
-                  <div className="media-body ">
-                    <small className="float-right text-navy">5h ago</small>
-                    <strong>Chris Johnatan Overtunk</strong> started following{" "}
-                    <strong>Monica Smith</strong>. <br />
-                    <small className="text-muted">
-                      Yesterday 1:21 pm - 11.06.2014
-                    </small>
-                  </div>
-                </div>
-              </li>
-              <li className="dropdown-divider"></li>
-              <li>
-                <div className="dropdown-messages-box">
-                  <a className="dropdown-item float-left" href="profile.html">
-                    <Image
-                      src="/src/assets/img/profile.jpg"
-                      alt="image"
-                      className="rounded-circle"
-                    />
-                  </a>
-                  <div className="media-body ">
-                    <small className="float-right">23h ago</small>
-                    <strong>Monica Smith</strong> love{" "}
-                    <strong>Kim Smith</strong>. <br />
-                    <small className="text-muted">
-                      2 days ago at 2:30 am - 11.06.2014
-                    </small>
-                  </div>
-                </div>
-              </li>
-              <li className="dropdown-divider"></li>
-              <li>
-                <div className="text-center link-block">
-                  <a href="mailbox.html" className="dropdown-item">
-                    <i className="fa fa-envelope"></i>{" "}
-                    <strong>Read All Messages</strong>
-                  </a>
-                </div>
-              </li>
-            </ul>
-          </li>
-          <li className="dropdown">
-            <a
-              className="dropdown-toggle count-info"
-              data-toggle="dropdown"
-              href="#"
-            >
-              <i className="fa fa-bell"></i>{" "}
-              <span className="label label-primary">8</span>
-            </a>
-            <ul className="dropdown-menu dropdown-alerts">
-              <li>
-                <a href="mailbox.html" className="dropdown-item">
-                  <div>
-                    <i className="fa fa-envelope fa-fw"></i> You have 16
-                    messages
-                    <span className="float-right text-muted small">
-                      4 minutes ago
-                    </span>
-                  </div>
-                </a>
-              </li>
-              <li className="dropdown-divider"></li>
-              <li>
-                <a href="profile.html" className="dropdown-item">
-                  <div>
-                    <i className="fa fa-twitter fa-fw"></i> 3 New Followers
-                    <span className="float-right text-muted small">
-                      12 minutes ago
-                    </span>
-                  </div>
-                </a>
-              </li>
-              <li className="dropdown-divider"></li>
-              <li>
-                <a href="grid_options.html" className="dropdown-item">
-                  <div>
-                    <i className="fa fa-upload fa-fw"></i> Server Rebooted
-                    <span className="float-right text-muted small">
-                      4 minutes ago
-                    </span>
-                  </div>
-                </a>
-              </li>
-              <li className="dropdown-divider"></li>
-              <li>
-                <div className="text-center link-block">
-                  <a href="notifications.html" className="dropdown-item">
-                    <strong>See All Alerts</strong>
-                    <i className="fa fa-angle-right"></i>
-                  </a>
-                </div>
-              </li>
-            </ul>
           </li>
 
           <li>
-            <a onClick={handleLogout}>
-              <i className="fa fa-sign-out"></i> Log out
-            </a>
-          </li>
-          <li>
-            <a className="right-sidebar-toggle">
-              <i className="fa fa-tasks"></i>
-            </a>
+            <Link to={"#"} onClick={handleLogout}>
+              <i className="fa fa-sign-out"></i> Cerrar Sesion
+            </Link>
           </li>
         </ul>
       </nav>
