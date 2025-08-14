@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Image, Input } from "./";
 import { useContext } from "react";
 import { AuthContext } from "../auth/AuthContext";
+import { SmoothlyMenu } from "../scripts/inspinia";
 
 export const TopNav = () => {
   const { logout } = useContext(AuthContext);
@@ -10,6 +11,12 @@ export const TopNav = () => {
   const handleLogout = () => {
     logout();
     navigate("/login");
+  };
+
+  const handleClick = (e) => {
+    e.preventDefault();
+    document.body.classList.toggle("mini-navbar"); // toggle() hace exactamente eso
+    SmoothlyMenu();
   };
 
   return (
@@ -23,6 +30,7 @@ export const TopNav = () => {
           <a
             className="navbar-minimalize minimalize-styl-2 btn btn-primary "
             href="#"
+            onClick={(e) => handleClick(e)}
           >
             <i className="fa fa-bars"></i>{" "}
           </a>
