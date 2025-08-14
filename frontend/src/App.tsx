@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import { AuthProvider } from "./auth/AuthProvider";
 import { PrivateRoute } from "./auth/PrivateRoute";
-import { Clubs, Dashboard, Login, NotFound, Profile } from "./layouts";
+import { Clubs, Dashboard, Login, NotFound, Profile, Users } from "./layouts";
 
 export const App = () => {
   return (
@@ -39,7 +39,15 @@ export const App = () => {
             path="/profile"
             element={
               <PrivateRoute>
-                <Profile name="Clubs" />
+                <Profile name="Perfil" />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              <PrivateRoute>
+                <Users name="Registros" />
               </PrivateRoute>
             }
           />

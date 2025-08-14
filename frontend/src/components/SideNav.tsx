@@ -73,6 +73,12 @@ export const SideNav = () => {
               <span className="nav-label">Clubs</span>
             </Link>
           </li>
+          <li className={isActive("/users") ? "active" : ""}>
+            <Link to="/users">
+              <i className="fa fa-users"></i>{" "}
+              <span className="nav-label">Registros</span>
+            </Link>
+          </li>
         </ul>
       </div>
     </nav>

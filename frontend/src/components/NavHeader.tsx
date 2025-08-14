@@ -5,8 +5,8 @@ interface NavHeaderProps {
 }
 
 export const NavHeader = ({ name: page }: NavHeaderProps) => {
-  const pageTitle = page || "principal";
-  const isPrincipalPage = pageTitle === "principal";
+  const pageTitle = page || "Principal";
+  const isPrincipalPage = pageTitle === "Principal";
 
   return (
     <div className="row wrapper border-bottom white-bg page-heading">
