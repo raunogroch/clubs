@@ -29,7 +29,7 @@ export const Users = ({ name }: UsersPageProps) => {
                 <div className="ibox-tools">
                   <Link
                     to="/users/create"
-                    className="btn btn-primary text-danger"
+                    className=" btn btn-rounded btn-outline"
                   >
                     <i className="fa fa-plus"></i> Nuevo Usuario
                   </Link>

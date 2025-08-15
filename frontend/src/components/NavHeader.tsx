@@ -2,11 +2,14 @@ import { Link } from "react-router-dom";
 
 interface NavHeaderProps {
   name?: string;
+  sub?: string;
 }
 
-export const NavHeader = ({ name: page }: NavHeaderProps) => {
+export const NavHeader = ({ name: page, sub }: NavHeaderProps) => {
   const pageTitle = page || "Principal";
   const isPrincipalPage = pageTitle === "Principal";
+
+  console.log();
 
   return (
     <>
@@ -23,7 +26,19 @@ export const NavHeader = ({ name: page }: NavHeaderProps) => {
             </li>
             {!isPrincipalPage && (
               <li className="breadcrumb-item active">
-                <strong>{pageTitle}</strong>
+                {sub ? (
+                  <Link to={"/" + location.pathname.split("/")[1]}>
+                    {pageTitle}
+                  </Link>
+                ) : (
+                  <strong>{pageTitle}</strong>
+                )}
+              </li>
+            )}
+
+            {sub && (
+              <li className="breadcrumb-item active">
+                <strong>{sub}</strong>
               </li>
             )}
           </ol>

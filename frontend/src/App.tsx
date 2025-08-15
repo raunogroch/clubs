@@ -8,7 +8,7 @@ import {
 import { AuthProvider } from "./auth/AuthProvider";
 import { PrivateRoute } from "./auth/PrivateRoute";
 import { Login, NotFound } from "./layouts";
-import { Clubs, Dashboard, Profile, Users } from "./pages";
+import { Clubs, Dashboard, Profile, Users, UserNew } from "./pages";
 
 export const App = () => {
   return (
@@ -52,8 +52,15 @@ export const App = () => {
               </PrivateRoute>
             }
           />
+          <Route
+            path="/users/create"
+            element={
+              <PrivateRoute>
+                <UserNew name="Registros" sub="Crear" />
+              </PrivateRoute>
+            }
+          />
 
-          {/* Redirecciones */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<Navigate to="/404" replace />} />
         </Routes>
