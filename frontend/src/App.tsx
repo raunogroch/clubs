@@ -7,7 +7,8 @@ import {
 } from "react-router-dom";
 import { AuthProvider } from "./auth/AuthProvider";
 import { PrivateRoute } from "./auth/PrivateRoute";
-import { Clubs, Dashboard, Login, NotFound, Profile, Users } from "./layouts";
+import { Login, NotFound } from "./layouts";
+import { Clubs, Dashboard, Profile, Users } from "./pages";
 
 export const App = () => {
   return (

@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
-import { Navigation } from "../components/Navigation"; // Importa tu Navigation
+import { Navigation } from "../layouts/Navigation"; // Importa tu Navigation
 
 export const PrivateRoute = ({
   children,

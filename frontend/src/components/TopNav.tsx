@@ -1,8 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Input } from "./";
 import { useContext } from "react";
 import { AuthContext } from "../auth/AuthContext";
-import { SmoothlyMenu } from "../scripts/inspinia";
+import { SmoothlyMenu } from "../scripts/inspiniaScripts";
 
 export const TopNav = () => {
   const { logout } = useContext(AuthContext);
@@ -28,7 +27,7 @@ export const TopNav = () => {
       >
         <div className="navbar-header">
           <Link
-            className="navbar-minimalize minimalize-styl-2 btn btn-primary "
+            className="navbar-minimalize minimalize-styl-2 btn btn-primary"
             to={"#"}
             onClick={(e) => handleClick(e)}
           >

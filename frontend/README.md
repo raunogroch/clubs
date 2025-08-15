@@ -7,8 +7,8 @@ my-dashboard/
 │
 ├── src/
 │   ├── assets/             # CSS, fuentes, imágenes procesadas por Vite
-│   │   ├── style.css
-│   │   ├── animate.css
+│   │   ├── css/
+│   │   ├── js/
 │   │   └── images/
 │   │
 │   ├── components/         # Componentes reutilizables
@@ -32,6 +32,9 @@ my-dashboard/
 │   │
 │   ├── context/            # Context API (estado global)
 │   │   └── AuthContext.tsx
+│   │
+│   ├── services/           # Funciones para API, datos, etc.
+│   │   └── api.js
 │   │
 │   ├── services/           # Funciones para API, datos, etc.
 │   │   └── api.js

@@ -1,5 +1,5 @@
 import { type ReactNode } from "react";
-import { Footer, SideNav, TopNav } from ".";
+import { Footer, SideNav, TopNav } from "../components";
 
 interface NavigationProps {
   children: ReactNode;
