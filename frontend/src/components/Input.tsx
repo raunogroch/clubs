@@ -1,7 +1,16 @@
 import { useState, type ChangeEvent } from "react";
 
 interface InputProps {
-  type?: "text" | "email" | "password" | "checkbox" | "number" | "tel" | "url";
+  type?:
+    | "text"
+    | "email"
+    | "password"
+    | "checkbox"
+    | "number"
+    | "tel"
+    | "url"
+    | "radio"
+    | "date";
   name?: string;
   className?: string;
   placeholder?: string;
@@ -11,6 +20,8 @@ interface InputProps {
   value?: string;
   disabled?: boolean;
   autoComplete?: "on" | "off";
+  max?: string | number; // Added max prop
+  min?: string | number; // You might want min as well for completeness
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -25,6 +36,8 @@ export const Input = ({
   value: propValue,
   disabled = false,
   autoComplete = "off",
+  max, // Added max prop
+  min, // Added min prop
   onChange: propOnChange,
 }: InputProps) => {
   const [internalValue, setInternalValue] = useState("");
@@ -49,6 +62,8 @@ export const Input = ({
     disabled,
     autoComplete,
     onChange: handleChange,
+    max, // Added max to commonProps
+    min, // Added min to commonProps
   };
 
   if (type === "checkbox") {
