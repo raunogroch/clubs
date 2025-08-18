@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { NavHeader, LoadingIndicator, ErrorMessage } from "../../components";
 import type { UsersPageProps } from "./types/userTypes";
 import { useUsers } from "./hooks/useUsers";
@@ -6,7 +6,6 @@ import { UserTable } from "../../components";
 
 export const Users = ({ name }: UsersPageProps) => {
   const { users, loading, error, deleteUser } = useUsers();
-  const location = useLocation();
 
   if (loading) return <LoadingIndicator />;
   if (error) return <ErrorMessage message={error} />;

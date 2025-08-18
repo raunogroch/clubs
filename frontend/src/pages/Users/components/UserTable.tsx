@@ -46,13 +46,13 @@ export const UserTable = ({ users, onDelete }: UsersTableProps) => {
               <td className="text-center">
                 <Link
                   to={`/users/edit/${user._id}`}
-                  className="btn btn-primary btn-outline mx-1"
+                  className="btn btn-primary btn-outline m-1"
                 >
                   <i className="fa fa-edit"></i> Editar
                 </Link>
                 <button
                   onClick={() => handleDelete(user._id!)}
-                  className="btn btn btn-danger btn-outline mx-1"
+                  className="btn btn btn-danger btn-outline m-1"
                 >
                   <i className="fa fa-trash"></i> Eliminar
                 </button>

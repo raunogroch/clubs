@@ -40,7 +40,7 @@ export class AuthService {
         authorization: this.jwtService.sign(payload),
         user: {
           name: user.name,
-          lastname: user.lastnname,
+          lastname: user.lastname,
           role: user.role,
         },
       },

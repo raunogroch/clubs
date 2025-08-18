@@ -2,9 +2,10 @@ import { useContext } from "react";
 import { AuthContext } from "../auth/AuthContext";
 import { Image } from "./Image";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Role } from "../interfaces/roleEnum";
 
 export const SideNav = () => {
-  const { logout } = useContext(AuthContext);
+  const { logout, user } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -30,9 +31,13 @@ export const SideNav = () => {
                 className="rounded-circle"
               />
               <Link data-toggle="dropdown" className="dropdown-toggle" to="#">
-                <span className="block m-t-xs font-bold">David Williams</span>
+                <span className="block m-t-xs font-bold">
+                  {user
+                    ? `${user.name} ${user.lastname}`
+                    : "Superadministrador"}
+                </span>
                 <span className="text-muted text-xs block">
-                  Art Director <b className="caret"></b>
+                  {Role[user.role]} <b className="caret"></b>
                 </span>
               </Link>
               <ul className="dropdown-menu animated fadeInRight m-t-xs">
