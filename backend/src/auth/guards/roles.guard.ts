@@ -1,7 +1,6 @@
 // src/auth/guards/roles.guard.ts
 import {
   Injectable,
-  CanActivate,
   ExecutionContext,
   ForbiddenException,
 } from '@nestjs/common';

@@ -50,4 +50,10 @@ export class UsersController {
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
   }
+  @Get(':id/profile')
+  @Roles(Role.SUPERADMIN)
+  profile(@Param('id') id: string) {
+    console.log(id);
+    return this.usersService.profile(id);
+  }
 }

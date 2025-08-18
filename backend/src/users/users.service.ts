@@ -1,14 +1,9 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from './schemas/user.schema';
 import { CreateUserDto, UpdateUserDto } from './dto';
 import bcrypt from 'node_modules/bcryptjs';
-import { Roles } from './enum/roles.enum';
 
 @Injectable()
 export class UsersService {
@@ -71,5 +66,11 @@ export class UsersService {
     const exist = await this.findOne(id);
     if (!exist) throw new Error("User isn't exist");
     return exist.deleteOne();
+  }
+
+  async profile(id: string): Promise<User> {
+    const userExist = await this.findOneById(id);
+    if (!userExist) throw new NotFoundException('El usuario no fue encontrado');
+    return userExist;
   }
 }
