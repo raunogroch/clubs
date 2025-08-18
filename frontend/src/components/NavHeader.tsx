@@ -9,8 +9,6 @@ export const NavHeader = ({ name: page, sub }: NavHeaderProps) => {
   const pageTitle = page || "Principal";
   const isPrincipalPage = pageTitle === "Principal";
 
-  console.log();
-
   return (
     <>
       <div className="row wrapper border-bottom white-bg page-heading">

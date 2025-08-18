@@ -12,7 +12,6 @@ export const userService = {
   async getAll(): Promise<ApiResponse<User[]>> {
     try {
       const response = await api.get("/users");
-      console.log(response);
       return {
         code: response.status,
         message: "Usuarios obtenidos correctamente",

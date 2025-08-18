@@ -49,7 +49,6 @@ export const useUserForm = (initialData?: User) => {
     if (!initialData && !formData.password) {
       newErrors.password = "La contraseña es requerida";
     }
-    console.log("llego al validateForm", newErrors);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -64,7 +63,6 @@ export const useUserForm = (initialData?: User) => {
       if (initialData?._id) {
         response = await userService.update(initialData._id, formData);
       } else {
-        console.log("llego a crear");
         response = await userService.create(formData);
       }
 
