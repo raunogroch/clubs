@@ -20,9 +20,6 @@ export class UsersService {
       throw new Error('Username already exists');
     }
 
-    if (!createUserDto.roles || createUserDto.roles.length == 0)
-      createUserDto.roles = [Roles.PARENT];
-
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     createUserDto.password = hashedPassword;
 
@@ -63,18 +60,6 @@ export class UsersService {
     if (updateUserDto.password) {
       const hashedPassword = await bcrypt.hash(updateUserDto.password, 10);
       updateUserDto.password = hashedPassword;
-    }
-
-    if (updateUserDto.roles && updateUserDto.roles.length > 0) {
-      const invalidRoles = updateUserDto.roles.filter(
-        (role) => !Object.values(Roles).includes(role),
-      );
-
-      if (invalidRoles.length > 0) {
-        throw new BadRequestException(
-          `Invalid roles provided: ${invalidRoles.join(', ')}. Valid roles are: ${Object.values(Roles).join(', ')}`,
-        );
-      }
     }
 
     return this.userModel

@@ -34,7 +34,7 @@ export class RolesGuard extends JwtAuthGuard {
 
     const { user } = context.switchToHttp().getRequest();
     const hasPermission = requiredRoles.some((role) =>
-      user.roles?.includes(role),
+      user.role?.includes(role),
     );
 
     if (!hasPermission) {

@@ -33,7 +33,7 @@ export class AuthService {
     const payload = {
       username: user.username,
       sub: user._id,
-      roles: user.roles,
+      role: user.role,
     };
     return {
       access: {
@@ -41,7 +41,7 @@ export class AuthService {
         user: {
           name: user.name,
           lastname: user.lastnname,
-          roles: user.roles,
+          role: user.role,
         },
       },
     };
@@ -61,7 +61,7 @@ export class AuthService {
     const newUser = await this.usersService.createSuperUser({
       username: user.username,
       password: hashedPassword,
-      roles: [Roles.SUPERADMIN],
+      role: Roles.SUPERADMIN,
     });
 
     const { password, ...result } = newUser.toObject();

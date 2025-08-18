@@ -4,7 +4,7 @@ import { AuthContext } from "./AuthContext";
 interface User {
   name: string;
   lastname: string;
-  roles: string[];
+  role: string;
 }
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null); // Null indica "cargando"
 
   useEffect(() => {
-    const token = localStorage.getItem("UUI");
+    const token = localStorage.getItem("UUID");
     const userData = localStorage.getItem("user");
 
     if (token && userData) {
@@ -30,14 +30,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const login = (token: string, userData: User) => {
-    localStorage.setItem("UUI", token);
+    localStorage.setItem("UUID", token);
     localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);
     setIsAuthenticated(true);
   };
 
   const logout = () => {
-    localStorage.removeItem("UUI");
+    localStorage.removeItem("UUID");
     localStorage.removeItem("user");
     setUser(null);
     setIsAuthenticated(false);

@@ -20,7 +20,7 @@ export class CreateUserDto {
 
   @IsString()
   @IsNotEmpty()
-  roles: Roles[];
+  role: Roles;
 
   @IsString()
   name?: string;

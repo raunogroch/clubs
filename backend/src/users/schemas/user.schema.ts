@@ -10,7 +10,7 @@ export class User extends mongoose.Document {
   password: string;
 
   @Prop()
-  roles: string[];
+  role: string;
 
   @Prop()
   name: string;

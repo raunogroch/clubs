@@ -4,7 +4,7 @@ import { createContext } from "react";
 interface User {
   name: string;
   lastname: string;
-  roles: string[];
+  role: string;
 }
 
 interface AuthContextType {

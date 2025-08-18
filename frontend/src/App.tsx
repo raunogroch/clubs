@@ -8,7 +8,7 @@ import {
 import { AuthProvider } from "./auth/AuthProvider";
 import { PrivateRoute } from "./auth/PrivateRoute";
 import { Login, NotFound } from "./layouts";
-import { Clubs, Dashboard, Profile, Users, UserNew } from "./pages";
+import { Clubs, Dashboard, Profile, UserEdit, UserNew, Users } from "./pages";
 
 export const App = () => {
   return (
@@ -57,6 +57,15 @@ export const App = () => {
             element={
               <PrivateRoute>
                 <UserNew name="Registros" sub="Crear" />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/users/edit/:id"
+            element={
+              <PrivateRoute>
+                <UserEdit name="Registros" sub="Actualizar" />
               </PrivateRoute>
             }
           />

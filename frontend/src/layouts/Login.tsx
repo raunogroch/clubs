@@ -42,8 +42,8 @@ export const Login = () => {
     setError(null);
 
     try {
-      const response = await authService.login(formData);
-      login(response.access.authorization, response.access.user);
+      const { data } = await authService.login(formData);
+      login(data.authorization, data.user);
       navigate("/dashboard");
     } catch (error) {
       console.error("Error al iniciar sesión:", error);

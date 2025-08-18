@@ -1,5 +1,7 @@
+// UserPersonalInfo.tsx
+
 import { Input } from "../../components";
-import type { UserData, UserErrors } from "./FormUser";
+import type { UserData } from "./components/UserForm";
 
 interface UserPersonalInfoProps {
   formData: UserData;
@@ -90,6 +92,27 @@ export const UserPersonalInfo = ({
           />
           {errors.email && (
             <div className="invalid-feedback">{errors.email}</div>
+          )}
+        </div>
+      </div>
+
+      <div className="form-group row">
+        <label htmlFor="username" className="col-sm-2 col-form-label">
+          Nombre de usuario
+        </label>
+        <div className="col-sm-10">
+          <Input
+            type="text"
+            id="username"
+            name="username"
+            value={formData.username}
+            onChange={onChange}
+            className={`form-control ${errors.username ? "is-invalid" : ""}`}
+            placeholder="nick123, "
+            required
+          />
+          {errors.username && (
+            <div className="invalid-feedback">{errors.username}</div>
           )}
         </div>
       </div>

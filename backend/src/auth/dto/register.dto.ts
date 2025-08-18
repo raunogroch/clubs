@@ -11,5 +11,5 @@ export class RegisterDto {
 
   @IsString()
   @IsNotEmpty()
-  roles: string[];
+  role: string;
 }

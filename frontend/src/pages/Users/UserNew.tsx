@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom";
-import type { pageParamProps } from "../../interfaces/pageParamProps";
-import { NavHeader } from "../../components/NavHeader";
-import { FormUser } from "./FormUser";
+import { NavHeader } from "../../components";
+import type { UsersPageProps } from "./types/userTypes";
+import { UserForm } from "./components/UserForm";
 
-export const UserNew = ({ name, sub }: pageParamProps) => {
+export const UserNew = ({ name, sub }: UsersPageProps) => {
   const navigate = useNavigate();
 
   const handleSuccess = () => {
@@ -15,6 +15,10 @@ export const UserNew = ({ name, sub }: pageParamProps) => {
     });
   };
 
+  const handleCancel = () => {
+    navigate("/users");
+  };
+
   return (
     <>
       <NavHeader name={name} sub={sub} />
@@ -23,14 +27,15 @@ export const UserNew = ({ name, sub }: pageParamProps) => {
           <div className="col-12">
             <div className="ibox ">
               <div className="ibox-title">
-                <h5>
-                  Basic form <small>Simple login form example</small>
-                </h5>
+                <h5>Crear Nuevo Usuario</h5>
               </div>
               <div className="ibox-content">
                 <div className="row">
                   <div className="col-sm-12">
-                    <FormUser onSuccess={handleSuccess} />
+                    <UserForm
+                      onSuccess={handleSuccess}
+                      onCancel={handleCancel}
+                    />
                   </div>
                 </div>
               </div>

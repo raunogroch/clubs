@@ -17,11 +17,11 @@ interface InputProps {
   id?: string;
   checked?: boolean;
   required?: boolean;
-  value?: string;
+  value?: string | number;
   disabled?: boolean;
   autoComplete?: "on" | "off";
-  max?: string | number; // Added max prop
-  min?: string | number; // You might want min as well for completeness
+  max?: string | number;
+  min?: string | number;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -36,13 +36,24 @@ export const Input = ({
   value: propValue,
   disabled = false,
   autoComplete = "off",
-  max, // Added max prop
-  min, // Added min prop
+  max,
+  min,
   onChange: propOnChange,
 }: InputProps) => {
   const [internalValue, setInternalValue] = useState("");
 
-  const value = propValue !== undefined ? propValue : internalValue;
+  // Convert ISO date string to yyyy-MM-dd format if type is date
+  const formatDateValue = (value: string | number | undefined) => {
+    if (type !== "date" || value === undefined) return value;
+
+    if (typeof value === "string" && value.includes("T")) {
+      return value.split("T")[0];
+    }
+    return value;
+  };
+
+  const value =
+    propValue !== undefined ? formatDateValue(propValue) : internalValue;
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (propOnChange) {
@@ -62,8 +73,8 @@ export const Input = ({
     disabled,
     autoComplete,
     onChange: handleChange,
-    max, // Added max to commonProps
-    min, // Added min to commonProps
+    max,
+    min,
   };
 
   if (type === "checkbox") {
