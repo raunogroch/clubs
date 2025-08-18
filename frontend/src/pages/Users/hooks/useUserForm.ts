@@ -61,7 +61,6 @@ export const useUserForm = (initialData?: User) => {
 
     try {
       let response;
-      console.log("llego aqui");
       if (initialData?._id) {
         response = await userService.update(initialData._id, formData);
       } else {
