@@ -1,6 +1,10 @@
+// Archivo principal de arranque de la aplicación
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
+/**
+ * Función de arranque de la aplicación NestJS
+ */
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 

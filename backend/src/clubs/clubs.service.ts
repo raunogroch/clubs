@@ -1,3 +1,4 @@
+// Servicio para la gestión de clubes
 import { Injectable } from '@nestjs/common';
 import { CreateClubDto } from './dto/create-club.dto';
 import { UpdateClubDto } from './dto/update-club.dto';
@@ -8,11 +9,15 @@ import { User } from 'src/users/schemas/user.schema';
 
 @Injectable()
 export class ClubsService {
+  // Constructor con inyección de modelos Club y User
   constructor(
     @InjectModel(Club.name) private clubModel: Model<Club>,
     @InjectModel(User.name) private userModel: Model<User>,
   ) {}
 
+  /**
+   * Crea un nuevo club si el nombre no existe previamente
+   */
   async create(createClubDto: CreateClubDto): Promise<Club> {
     const club = await this.clubModel.findOne({ name: createClubDto.name });
     if (club) {
@@ -21,6 +26,9 @@ export class ClubsService {
     return this.clubModel.create(createClubDto);
   }
 
+  /**
+   * Obtiene todos los clubes con sus relaciones pobladas
+   */
   async findAll(): Promise<Club[]> {
     return this.clubModel.find().populate([
       {
@@ -42,14 +50,21 @@ export class ClubsService {
     ]);
   }
 
+  /**
+   * Busca un club por su ID
+   */
   async findOne(id: string): Promise<Club | null> {
     return this.clubModel.findById(id);
   }
 
+  /**
+   * Actualiza los datos de un club, validando coaches y atletas
+   */
   async update(id: string, updateClubDto: UpdateClubDto): Promise<Club | null> {
     const clubExist: any = await this.clubModel.findById(id);
-    if (!clubExist) throw new Error(`Club with id ${id} isn't exist`);
+    if (!clubExist) throw new Error(`Club with id ${id} doesn't exist`);
 
+    // Validación y actualización de coaches
     if (updateClubDto.coaches) {
       const allowedCoaches: any[] = [];
       await Promise.all(
@@ -64,14 +79,16 @@ export class ClubsService {
               allowedCoaches.push(coach);
             }
           } else {
-            console.log(`User with id ${coach} is not a coach`);
+            // Mensaje de advertencia si el usuario no es coach
+            console.warn(`User with id ${coach} is not a coach`);
           }
         }),
       );
-
+      // Se actualiza la lista de coaches agregando los nuevos válidos
       updateClubDto.coaches = [...clubExist.coaches, ...allowedCoaches];
     }
 
+    // Validación y actualización de atletas
     if (updateClubDto.athletes) {
       const allowedAthletes: any[] = [];
       await Promise.all(
@@ -87,16 +104,21 @@ export class ClubsService {
               allowedAthletes.push(athlete);
             }
           } else {
-            console.log(`User with id ${athlete} is not a coach`);
+            // Mensaje de advertencia si el usuario no es atleta
+            console.warn(`User with id ${athlete} is not an athlete`);
           }
         }),
       );
-
+      // Se actualiza la lista de atletas agregando los nuevos válidos
       updateClubDto.athletes = [...clubExist.athletes, ...allowedAthletes];
     }
+    // Actualiza el club en la base de datos y retorna el resultado
     return this.clubModel.findByIdAndUpdate(id, updateClubDto, { new: true });
   }
 
+  /**
+   * Elimina un club por su ID
+   */
   async remove(id: string): Promise<Club | null> {
     return this.clubModel.findByIdAndDelete(id).exec();
   }

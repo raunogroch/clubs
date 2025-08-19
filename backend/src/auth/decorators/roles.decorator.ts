@@ -1,4 +1,4 @@
-// src/auth/decorators/roles.decorator.ts
+// Decorador para asignar roles a endpoints
 import { SetMetadata } from '@nestjs/common';
 import { Roles as Role } from 'src/users/enum/roles.enum';
 

@@ -1,35 +1,46 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 
+// Esquema de User para Mongoose
 @Schema({ timestamps: true })
 export class User extends mongoose.Document {
+  /** Nombre de usuario */
   @Prop({ required: true, unique: true })
   username: string;
 
+  /** Contraseña encriptada */
   @Prop({ required: true })
   password: string;
 
+  /** Rol del usuario */
   @Prop()
   role: string;
 
+  /** Nombre real del usuario */
   @Prop()
   name: string;
 
+  /** Apellido del usuario */
   @Prop()
   lastname: string;
 
+  /** Correo electrónico */
   @Prop()
   email: string;
 
+  /** Cédula de identidad */
   @Prop()
   ci: string;
 
+  /** Fecha de nacimiento */
   @Prop()
   birth_date: Date;
 
+  /** Altura en centímetros */
   @Prop()
   height: number;
 
+  /** Peso en kilogramos */
   @Prop()
   weight: number;
 }

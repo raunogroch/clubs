@@ -1,3 +1,4 @@
+// Servicio para la gestión de usuarios
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -7,8 +8,12 @@ import bcrypt from 'node_modules/bcryptjs';
 
 @Injectable()
 export class UsersService {
+  // Constructor con inyección del modelo User
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
+  /**
+   * Crea un nuevo usuario si el username no existe previamente
+   */
   async create(createUserDto: CreateUserDto): Promise<User> {
     const existingUser = await this.findByUsername(createUserDto.username);
     if (existingUser) {
@@ -22,15 +27,24 @@ export class UsersService {
     return createdUser.save();
   }
 
+  /**
+   * Crea un usuario con rol SUPERADMIN
+   */
   async createSuperUser(createUserDto: CreateUserDto): Promise<User> {
     const createdUser = new this.userModel(createUserDto);
     return createdUser.save();
   }
 
+  /**
+   * Busca un usuario por su username
+   */
   async findOneByUsername(username: string): Promise<User | null> {
     return this.userModel.findOne({ username }).exec();
   }
 
+  /**
+   * Busca un usuario por su ID
+   */
   async findOneById(id: string): Promise<User> {
     const user = await this.userModel.findById(id).exec();
     if (!user) {
@@ -39,18 +53,30 @@ export class UsersService {
     return user;
   }
 
+  /**
+   * Obtiene todos los usuarios
+   */
   async findAll(): Promise<User[]> {
     return await this.userModel.find();
   }
 
+  /**
+   * Busca un usuario por su ID
+   */
   async findOne(id: string): Promise<User | null> {
     return await this.userModel.findById(id);
   }
 
+  /**
+   * Busca un usuario por su username
+   */
   async findByUsername(username: string): Promise<User | null> {
     return await this.userModel.findOne({ username });
   }
 
+  /**
+   * Actualiza los datos de un usuario
+   */
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User | null> {
     if (updateUserDto.password) {
       const hashedPassword = await bcrypt.hash(updateUserDto.password, 10);
@@ -62,12 +88,18 @@ export class UsersService {
       .exec();
   }
 
+  /**
+   * Elimina un usuario por su ID
+   */
   async remove(id: string): Promise<null> {
     const exist = await this.findOne(id);
     if (!exist) throw new Error("User isn't exist");
     return exist.deleteOne();
   }
 
+  /**
+   * Obtiene el perfil de un usuario por su ID
+   */
   async profile(id: string): Promise<User> {
     const userExist = await this.findOneById(id);
     if (!userExist) throw new NotFoundException('El usuario no fue encontrado');

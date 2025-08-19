@@ -1,4 +1,4 @@
-// src/auth/guards/roles.guard.ts
+// Guard para validar roles de usuario en rutas protegidas
 import {
   Injectable,
   ExecutionContext,

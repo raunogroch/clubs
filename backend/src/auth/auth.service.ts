@@ -1,3 +1,4 @@
+// Servicio para la autenticación de usuarios
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
@@ -8,11 +9,15 @@ import { Roles } from 'src/users/enum/roles.enum';
 
 @Injectable()
 export class AuthService {
+  // Constructor con inyección de servicios y JWT
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
   ) {}
 
+  /**
+   * Valida las credenciales de un usuario
+   */
   async validateUser(username: string, pass: string): Promise<any> {
     const user = await this.usersService.findOneByUsername(username);
 
@@ -23,6 +28,9 @@ export class AuthService {
     return null;
   }
 
+  /**
+   * Realiza el login y retorna el token JWT
+   */
   async login(loginDto: LoginDto) {
     const user = await this.validateUser(loginDto.username, loginDto.password);
 
@@ -48,6 +56,9 @@ export class AuthService {
     };
   }
 
+  /**
+   * Registra un nuevo usuario con rol SUPERADMIN
+   */
   async register(user: Partial<User>) {
     if (!user.username || !user.password) {
       throw new Error('username and password are required');
