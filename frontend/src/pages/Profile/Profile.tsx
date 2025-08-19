@@ -1,8 +1,15 @@
-import { Image } from "../components";
-import { NavHeader } from "../components/NavHeader";
-import type { pageParamProps } from "../interfaces/pageParamProps";
+import { ErrorMessage, Image, LoadingIndicator } from "../../components";
+import { NavHeader } from "../../components/NavHeader";
+import type { pageParamProps } from "../../interfaces/pageParamProps";
+import { Role } from "../../interfaces/roleEnum";
+import { useProfile } from "./hooks/useProfile";
 
 export const Profile = ({ name }: pageParamProps) => {
+  const { user, loading, error } = useProfile();
+
+  if (loading) return <LoadingIndicator />;
+  if (error) return <ErrorMessage message={error} />;
+
   return (
     <>
       <NavHeader name={name} />
@@ -19,12 +26,12 @@ export const Profile = ({ name }: pageParamProps) => {
             <div className="profile-info">
               <div className="">
                 <div>
-                  <h2 className="no-margins">Alex Smith</h2>
-                  <h4>Founder of Groupeq</h4>
+                  <h2 className="no-margins">
+                    {user.name} {user.lastname}
+                  </h2>
+                  <h4>{Role[user.role]}</h4>
                   <small>
-                    There are many variations of passages of Lorem Ipsum
-                    available, but the majority have suffered alteration in some
-                    form Ipsum available.
+                    aqui tiene que ir un poco de la historia del usuario
                   </small>
                 </div>
               </div>
@@ -36,34 +43,34 @@ export const Profile = ({ name }: pageParamProps) => {
               <tbody>
                 <tr>
                   <td>
-                    <strong>142</strong> Projects
+                    <strong>0</strong> Medallas de oro
                   </td>
                   <td>
-                    <strong>22</strong> Followers
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <strong>61</strong> Comments
-                  </td>
-                  <td>
-                    <strong>54</strong> Articles
+                    <strong>2</strong> Campeonatos
                   </td>
                 </tr>
                 <tr>
                   <td>
-                    <strong>154</strong> Tags
+                    <strong>0</strong> Medallas de plata
                   </td>
                   <td>
-                    <strong>32</strong> Friends
+                    <strong>3</strong> Disciplinas
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>0</strong> Medallas de bronce
+                  </td>
+                  <td>
+                    <strong>2</strong> nivel
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
           <div className="col-md-3">
-            <small>Sales in last 24h</small>
-            <h2 className="no-margins">206 480</h2>
+            <small>Tiempo inscrita/o</small>
+            <h2 className="no-margins">3 Meses</h2>
             <div id="sparkline1"></div>
           </div>
         </div>

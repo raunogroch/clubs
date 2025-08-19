@@ -111,4 +111,17 @@ export const userService = {
       return handleApiError(error);
     }
   },
+
+  async getProfile(id: string): Promise<ApiResponse<User>> {
+    try {
+      const response = await api.get(`/users/${id}/profile`);
+      return {
+        code: response.status,
+        message: "Usuario obtenido correctamente",
+        data: response.data,
+      };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  },
 };
