@@ -36,6 +36,7 @@ export const App = () => {
               </PrivateRoute>
             }
           />
+
           <Route
             path="/profile"
             element={

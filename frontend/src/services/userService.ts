@@ -1,16 +1,11 @@
 // Servicio para gestionar usuarios y sus operaciones CRUD
+import type { User } from "../interfaces/user";
 import { handleApiError, type ApiResponse } from "../utils/apiUtils";
 import api from "./api";
 
 /**
  * Interfaz que representa un usuario en el sistema
  */
-interface User {
-  id?: string;
-  name: string;
-  lastname: string;
-  role: string;
-}
 export const userService = {
   /**
    * Obtiene todos los usuarios del sistema.

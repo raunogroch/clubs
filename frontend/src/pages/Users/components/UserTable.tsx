@@ -29,7 +29,7 @@ export const UserTable = ({ users, onDelete }: UsersTableProps) => {
         <tbody>
           {users.map((user) => (
             <tr key={user._id}>
-              <td className="text-center text-uppercase">
+              <td className="text-center align-middle text-uppercase">
                 <div className="btn btn-info btn-rounded btn-outline btn-sm">
                   {user.role === "athlete" && "Deportista"}
                   {user.role === "parent" && "Responsable"}
@@ -38,10 +38,10 @@ export const UserTable = ({ users, onDelete }: UsersTableProps) => {
                   {user.role === "superadmin" && "Super Administrador"}
                 </div>
               </td>
-              <td>{user.ci}</td>
-              <td>{user.name}</td>
-              <td>{user.lastname}</td>
-              <td>{user.email}</td>
+              <td className="align-middle">{user.ci}</td>
+              <td className="align-middle">{user.name}</td>
+              <td className="align-middle">{user.lastname}</td>
+              <td className="align-middle">{user.email}</td>
 
               <td className="text-center">
                 <Link
