@@ -1,7 +1,13 @@
 import { useState } from "react";
+import { useAuthErrorHandler } from "../../../hooks/useAuthErrorHandler";
 import type { User, UserErrors } from "../types/userTypes";
 import { userService } from "../../../services/userService";
 
+/**
+ * Hook para gestionar el formulario de usuario (crear/editar).
+ * Incluye validación, manejo de errores y envío de datos.
+ * @param initialData - Datos iniciales del usuario (para edición).
+ */
 export const useUserForm = (initialData?: User) => {
   const [formData, setFormData] = useState<User>(
     initialData || {
@@ -20,7 +26,11 @@ export const useUserForm = (initialData?: User) => {
 
   const [errors, setErrors] = useState<UserErrors>({});
   const [message, setMessage] = useState<{ text: string; type: string }>();
+  const handleAuthError = useAuthErrorHandler();
 
+  /**
+   * Maneja el cambio de los campos del formulario.
+   */
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -32,6 +42,9 @@ export const useUserForm = (initialData?: User) => {
     }
   };
 
+  /**
+   * Valida los datos del formulario antes de enviar.
+   */
   const validateForm = (): boolean => {
     const newErrors: UserErrors = {};
 
@@ -53,6 +66,9 @@ export const useUserForm = (initialData?: User) => {
     return Object.keys(newErrors).length === 0;
   };
 
+  /**
+   * Envía el formulario para crear o editar usuario.
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     formData.password = formData.ci;
@@ -65,6 +81,10 @@ export const useUserForm = (initialData?: User) => {
       } else {
         response = await userService.create(formData);
       }
+
+      handleAuthError(response, (msg) =>
+        setMessage({ text: msg, type: "error" })
+      );
 
       if (response.code === 201 || response.code === 200) {
         setMessage({

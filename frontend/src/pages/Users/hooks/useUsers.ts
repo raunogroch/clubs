@@ -1,15 +1,21 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
+import { useAuthErrorHandler } from "../../../hooks/useAuthErrorHandler";
 import { userService } from "../../../services/userService";
-import { AuthContext } from "../../../auth/AuthContext";
-import { useNavigate } from "react-router-dom";
 
+/**
+ * Hook para gestionar la lista de usuarios y sus acciones (obtener, eliminar).
+ * Maneja estados de carga y error, y redirige si la sesión expira.
+ */
 export const useUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { logout } = useContext(AuthContext);
-  const navigate = useNavigate();
 
+  const handleAuthError = useAuthErrorHandler();
+
+  /**
+   * Obtiene la lista de usuarios desde el servicio.
+   */
   const fetchUsers = async () => {
     try {
       setLoading(true);
@@ -20,10 +26,8 @@ export const useUsers = () => {
         setUsers(data);
       }
 
-      if (response.code === 401) {
-        logout();
-        navigate("/login");
-      }
+      // Detecta expiración de token y cierra sesión automáticamente
+      handleAuthError(response, setError);
     } catch (err) {
       setError("Error al cargar los usuarios");
     } finally {
@@ -31,9 +35,14 @@ export const useUsers = () => {
     }
   };
 
+  /**
+   * Elimina un usuario y actualiza la lista.
+   * @param id - ID del usuario a eliminar.
+   */
   const deleteUser = async (id: string): Promise<void> => {
     try {
-      await userService.delete(id);
+      const response = await userService.delete(id);
+      handleAuthError(response, setError);
       fetchUsers();
     } catch (err) {
       throw new Error("Error al eliminar el usuario");

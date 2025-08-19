@@ -1,5 +1,24 @@
 import { handleApiError, type ApiResponse } from "../utils/apiUtils";
 import api from "./api";
+// Utilidades para localStorage
+const STORAGE_KEYS = {
+  UUID: "UUID",
+  USER: "user",
+};
+
+function setUserToStorage(user: User) {
+  localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+}
+
+function getUserFromStorage(): User | null {
+  const user = localStorage.getItem(STORAGE_KEYS.USER);
+  return user ? JSON.parse(user) : null;
+}
+
+function clearAuthStorage() {
+  localStorage.removeItem(STORAGE_KEYS.UUID);
+  localStorage.removeItem(STORAGE_KEYS.USER);
+}
 
 interface LoginData {
   username: string;
@@ -19,11 +38,17 @@ interface LoginResponse {
 }
 
 export const authService = {
+  /**
+   * Inicia sesión y guarda datos en localStorage
+   */
   async login(credentials: LoginData): Promise<ApiResponse<LoginResponse>> {
     try {
       const response = await api.post("/auth/login", credentials);
-      localStorage.setItem("UUID", response.data.access.authorization);
-      localStorage.setItem("user", response.data.access.user);
+      localStorage.setItem(
+        STORAGE_KEYS.UUID,
+        response.data.access.authorization
+      );
+      setUserToStorage(response.data.access.user);
       return {
         code: response.status,
         message: "Login exitoso",
@@ -34,23 +59,30 @@ export const authService = {
     }
   },
 
+  /**
+   * Cierra sesión y limpia datos de autenticación
+   */
   async logout(): Promise<ApiResponse<void>> {
     try {
       const response = await api.post("/auth/logout");
-      localStorage.removeItem("UUID");
+      clearAuthStorage();
       return {
         code: response.status,
         message: "Logout exitoso",
       };
     } catch (error: any) {
-      localStorage.removeItem("UUID");
+      clearAuthStorage();
       return handleApiError(error);
     }
   },
 
+  /**
+   * Valida el token actual
+   */
   async validateToken(): Promise<ApiResponse<User>> {
     try {
       const response = await api.get("/auth/validate");
+      setUserToStorage(response.data.user);
       return {
         code: response.status,
         message: "Token válido",
@@ -59,5 +91,12 @@ export const authService = {
     } catch (error: any) {
       return handleApiError(error);
     }
+  },
+
+  /**
+   * Obtiene el usuario autenticado desde localStorage
+   */
+  getCurrentUser(): User | null {
+    return getUserFromStorage();
   },
 };

@@ -1,15 +1,20 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
+import { useAuthErrorHandler } from "../../../hooks/useAuthErrorHandler";
 import { userService } from "../../../services/userService";
-import { AuthContext } from "../../../auth/AuthContext";
-import { useNavigate } from "react-router-dom";
 
+/**
+ * Hook para gestionar el perfil del usuario autenticado.
+ * Obtiene los datos desde el servicio y maneja estados de carga y error.
+ */
 export const useProfile = () => {
   const [user, setUser] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { logout } = useContext(AuthContext);
-  const navigate = useNavigate();
+  const handleAuthError = useAuthErrorHandler();
 
+  /**
+   * Obtiene el perfil del usuario autenticado.
+   */
   const fetchUser = async () => {
     try {
       setLoading(true);
@@ -22,10 +27,8 @@ export const useProfile = () => {
         setUser(data);
       }
 
-      if (response.code === 401) {
-        logout();
-        navigate("/login");
-      }
+      // Detecta expiración de token y cierra sesión automáticamente
+      handleAuthError(response, setError);
     } catch (err) {
       setError("Error al cargar los usuarios");
     } finally {

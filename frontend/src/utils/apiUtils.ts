@@ -1,5 +1,9 @@
 import { AxiosError } from "axios";
 
+/**
+ * Estructura estándar para las respuestas de la API.
+ * @template T Tipo de datos que retorna la API.
+ */
 export interface ApiResponse<T = any> {
   code: number;
   message: string;
@@ -7,6 +11,11 @@ export interface ApiResponse<T = any> {
   errors?: Record<string, string>;
 }
 
+/**
+ * Maneja los errores provenientes de Axios y los transforma en ApiResponse.
+ * @param error - Error lanzado por Axios.
+ * @returns ApiResponse con información del error.
+ */
 export function handleApiError(error: AxiosError): ApiResponse {
   if (error.response) {
     // Verificación de tipo segura

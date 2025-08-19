@@ -1,5 +1,9 @@
 import axios from "axios";
 
+/**
+ * Instancia de Axios configurada para la API principal.
+ * Incluye interceptor para agregar el token de autenticación.
+ */
 const api = axios.create({
   baseURL: "http://localhost:3000/",
   headers: {
@@ -7,6 +11,7 @@ const api = axios.create({
   },
 });
 
+// Interceptor para agregar el token JWT a cada petición si existe
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("UUID");
   if (token) {
