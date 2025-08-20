@@ -1,4 +1,3 @@
-//UserRoleSelector.tsx
 interface UserRoleSelectorProps {
   selectedRole: string;
   onRoleChange: (role: string) => void;

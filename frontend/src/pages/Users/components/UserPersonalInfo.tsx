@@ -1,10 +1,8 @@
-// UserPersonalInfo.tsx
-
-import { Input } from "../../components";
-import type { UserData } from "./components/UserForm";
+import { Input } from "../../../components";
+import type { UserErrors, User } from "../types/userTypes";
 
 interface UserPersonalInfoProps {
-  formData: UserData;
+  formData: User;
   errors: UserErrors;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }

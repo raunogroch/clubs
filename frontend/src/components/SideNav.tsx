@@ -15,10 +15,11 @@ export const SideNav = () => {
   };
 
   // Función para verificar si la ruta actual coincide
-  const isActive = (path) => {
-    return location.pathname === path;
+  const isActive = (path: string) => {
+    return (
+      location.pathname === path || location.pathname.startsWith(path + "/")
+    );
   };
-
   return (
     <nav className="navbar-default navbar-static-side" role="navigation">
       <div className="sidebar-collapse">
@@ -82,6 +83,18 @@ export const SideNav = () => {
             <Link to="/users">
               <i className="fa fa-users"></i>{" "}
               <span className="nav-label">Registros</span>
+            </Link>
+          </li>
+          <li className={isActive("/schedules") ? "active" : ""}>
+            <Link to="/schedules">
+              <i className="fa fa-calendar"></i>{" "}
+              <span className="nav-label">Horarios</span>
+            </Link>
+          </li>
+          <li className={isActive("/sports") ? "active" : ""}>
+            <Link to="/sports">
+              <i className="fa fa-person"></i>{" "}
+              <span className="nav-label">Disciplina</span>
             </Link>
           </li>
         </ul>

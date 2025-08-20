@@ -75,11 +75,27 @@ export const useUserForm = (initialData?: User) => {
     if (!validateForm()) return;
 
     try {
-      let response;
+      let response: any;
       if (initialData?._id) {
-        response = await userService.update(initialData._id, formData);
+        response = await userService.update(initialData._id, {
+          ...formData,
+          role: formData.role as
+            | "coach"
+            | "athlete"
+            | "parent"
+            | "admin"
+            | "superadmin",
+        });
       } else {
-        response = await userService.create(formData);
+        response = await userService.create({
+          ...formData,
+          role: formData.role as
+            | "coach"
+            | "athlete"
+            | "parent"
+            | "admin"
+            | "superadmin",
+        });
       }
 
       handleAuthError(response, (msg) =>

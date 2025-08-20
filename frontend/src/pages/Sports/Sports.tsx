@@ -2,11 +2,11 @@ import { Link } from "react-router-dom";
 import { NavHeader } from "../../components/NavHeader";
 import type { pageParamProps } from "../../interfaces/pageParamProps";
 import { ErrorMessage, LoadingIndicator } from "../../components";
-import { useClubs } from "./hooks/useClub";
-import { ClubTable } from "./components/ClubTable";
+import { useSports } from "./hooks/useSports";
+import { SportTable } from "./components/SportTable";
 
-export const Clubs = ({ name }: pageParamProps) => {
-  const { clubs, loading, error, deleteClub } = useClubs();
+export const Sports = ({ name }: pageParamProps) => {
+  const { sports, loading, error, deleteSport } = useSports();
 
   if (loading) return <LoadingIndicator />;
   if (error) return <ErrorMessage message={error} />;
@@ -19,18 +19,18 @@ export const Clubs = ({ name }: pageParamProps) => {
           <div className="col-12">
             <div className="ibox ">
               <div className="ibox-title">
-                <h5>Lista de clubs</h5>
+                <h5>Lista de disciplinas</h5>
                 <div className="ibox-tools">
                   <Link
-                    to="/clubs/create"
+                    to="/sports/create"
                     className="btn btn-rounded btn-outline"
                   >
-                    <i className="fa fa-plus"></i> Nuevo club
+                    <i className="fa fa-plus"></i> Nueva disciplina
                   </Link>
                 </div>
               </div>
               <div className="ibox-content">
-                <ClubTable clubs={clubs} onDelete={deleteClub} />
+                <SportTable sports={sports} onDelete={deleteSport} />
               </div>
             </div>
           </div>

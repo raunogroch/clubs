@@ -1,5 +1,5 @@
 export interface User {
   id: string;
   name: string;
-  role: "coach" | "athlete";
+  role: "coach" | "athlete" | "parent" | "admin" | "superadmin";
 }

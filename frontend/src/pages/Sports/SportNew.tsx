@@ -1,0 +1,48 @@
+import { useNavigate } from "react-router-dom";
+import { NavHeader } from "../../components";
+import type { UsersPageProps } from "../Users/types/userTypes";
+import { SportForm } from "./components/SportForm";
+
+export const SportNew = ({ name, sub }: UsersPageProps) => {
+  const navigate = useNavigate();
+
+  const handleSuccess = () => {
+    navigate("/sports", {
+      state: {
+        message: "El usuario fue creado exitosamente",
+        messageKind: "success",
+      },
+    });
+  };
+
+  const handleCancel = () => {
+    navigate("/sports");
+  };
+
+  return (
+    <>
+      <NavHeader name={name} sub={sub} />
+      <div className="wrapper wrapper-content animated fadeInRight">
+        <div className="row">
+          <div className="col-12">
+            <div className="ibox ">
+              <div className="ibox-title">
+                <h5>Crear nueva disciplina</h5>
+              </div>
+              <div className="ibox-content">
+                <div className="row">
+                  <div className="col-sm-12">
+                    <SportForm
+                      onSuccess={handleSuccess}
+                      onCancel={handleCancel}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};

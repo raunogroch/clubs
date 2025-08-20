@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom";
-import type { Club } from "../types/clubTypes";
+import type { Sport } from "../types/sportTypes";
 
-interface ClubsTableProps {
-  clubs: Club[];
+interface SportTableProps {
+  sports: Sport[];
   onDelete: (id: string) => Promise<void>;
 }
 
-export const ClubTable = ({ clubs, onDelete }: ClubsTableProps) => {
+export const SportTable = ({ sports, onDelete }: SportTableProps) => {
   const handleDelete = async (id: string) => {
     if (window.confirm("¿Está seguro de eliminar este usuario?")) {
       await onDelete(id);
@@ -19,36 +19,24 @@ export const ClubTable = ({ clubs, onDelete }: ClubsTableProps) => {
         <thead>
           <tr>
             <th className="text-center">Indice</th>
-            <th>Nombre</th>
-            <th>Horario</th>
-            <th>Disciplina deportiva</th>
-            <th>Lugar</th>
-            <th>Entrenadores</th>
-            <th>Deportistas</th>
+            <th>Nombre de la disciplina</th>
             <th className="text-center">Acciones</th>
           </tr>
         </thead>
         <tbody>
-          {clubs.map((club, index) => (
-            <tr key={club._id}>
+          {sports.map((sport, index) => (
+            <tr key={sport._id}>
               <td className="align-middle text-center">{index + 1}</td>
-              <td className="align-middle">{club.name}</td>
-              <td className="align-middle">
-                {club.schedule.startTime} - {club.schedule.endTime}
-              </td>
-              <td className="align-middle">{club.discipline.name}</td>
-              <td className="align-middle">{club.place}</td>
-              <td className="align-middle">{club.coaches.join(", ")}</td>
-              <td className="align-middle">{club.athletes.join(", ")}</td>
-              <td className="text-center">
+              <td className="align-middle">{sport.name}</td>
+              <td>
                 <Link
-                  to={`/clubs/edit/${club._id}`}
+                  to={`/sports/edit/${sport._id}`}
                   className="btn btn-primary btn-outline m-1"
                 >
                   <i className="fa fa-edit"></i> Editar
                 </Link>
                 <button
-                  onClick={() => handleDelete(club._id!)}
+                  onClick={() => handleDelete(sport._id!)}
                   className="btn btn btn-danger btn-outline m-1"
                 >
                   <i className="fa fa-trash"></i> Eliminar

@@ -1,26 +1,21 @@
 import { useState } from "react";
 import { useAuthErrorHandler } from "../../../hooks/useAuthErrorHandler";
-import type { ClubErrors, Club } from "../types/clubTypes";
-import { clubService } from "../../../services/clubService";
+import type { Sport, SportErrors } from "../types/sportTypes";
+import { sportService } from "../../../services/sportService";
 
 /**
  * Hook para gestionar el formulario de usuario (crear/editar).
  * Incluye validación, manejo de errores y envío de datos.
  * @param initialData - Datos iniciales del usuario (para edición).
  */
-export const useClubForm = (initialData?: Club) => {
-  const [formData, setFormData] = useState<Club>(
+export const useSportForm = (initialData?: Sport) => {
+  const [formData, setFormData] = useState<Sport>(
     initialData || {
       name: "",
-      schedule: { startTime: "", endTime: "" },
-      place: "",
-      discipline: { name: "" },
-      coaches: [],
-      athletes: [],
     }
   );
 
-  const [errors, setErrors] = useState<ClubErrors>({});
+  const [errors, setErrors] = useState<SportErrors>({});
   const [message, setMessage] = useState<{ text: string; type: string }>();
   const handleAuthError = useAuthErrorHandler();
 
@@ -33,7 +28,7 @@ export const useClubForm = (initialData?: Club) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
 
-    if (errors[name as keyof ClubErrors]) {
+    if (errors[name as keyof SportErrors]) {
       setErrors({ ...errors, [name]: undefined });
     }
   };
@@ -42,13 +37,9 @@ export const useClubForm = (initialData?: Club) => {
    * Valida los datos del formulario antes de enviar.
    */
   const validateForm = (): boolean => {
-    const newErrors: ClubErrors = {};
+    const newErrors: SportErrors = {};
 
     if (!formData.name) newErrors.name = "El nombre es requerido";
-    if (!formData.schedule) newErrors.schedule = "El horaro es requerido";
-    if (!formData.discipline)
-      newErrors.discipline = "La disciplina deportiva es requerida";
-    if (!formData.place) newErrors.place = "La ubicacion es requerida";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -64,9 +55,9 @@ export const useClubForm = (initialData?: Club) => {
     try {
       let response;
       if (initialData?._id) {
-        response = await clubService.update(initialData._id, formData);
+        response = await sportService.update(initialData._id, formData);
       } else {
-        response = await clubService.create(formData);
+        response = await sportService.create(formData);
       }
 
       handleAuthError(response, (msg) =>

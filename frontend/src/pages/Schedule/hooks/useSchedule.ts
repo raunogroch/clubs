@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { useAuthErrorHandler } from "../../../hooks/useAuthErrorHandler";
-import { clubService } from "../../../services/clubService";
+import { scheduleService } from "../../../services/scheduleService";
 
 /**
  * Hook para gestionar la lista de usuarios y sus acciones (obtener, eliminar).
  * Maneja estados de carga y error, y redirige si la sesión expira.
  */
-export const useClubs = () => {
-  const [clubs, setClubs] = useState([]);
+export const useSchedule = () => {
+  const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,20 +16,20 @@ export const useClubs = () => {
   /**
    * Obtiene la lista de usuarios desde el servicio.
    */
-  const fetchClubs = async () => {
+  const fetchSchedules = async () => {
     try {
       setLoading(true);
-      const response = await clubService.getClubs();
+      const response = await scheduleService.getAll();
 
       if (response.code === 200) {
         const { data } = response;
-        setClubs(data);
+        setSchedules(data);
       }
 
       // Detecta expiración de token y cierra sesión automáticamente
       handleAuthError(response, setError);
     } catch (err) {
-      setError("Error al cargar los clubs");
+      setError("Error al cargar los usuarios");
     } finally {
       setLoading(false);
     }
@@ -39,19 +39,19 @@ export const useClubs = () => {
    * Elimina un usuario y actualiza la lista.
    * @param id - ID del usuario a eliminar.
    */
-  const deleteClub = async (id: string): Promise<void> => {
+  const deleteSchedule = async (id: string): Promise<void> => {
     try {
-      const response = await clubService.deleteClub(id);
+      const response = await scheduleService.delete(id);
       handleAuthError(response, setError);
-      fetchClubs();
+      fetchSchedules();
     } catch (err) {
       throw new Error("Error al eliminar el usuario");
     }
   };
 
   useEffect(() => {
-    fetchClubs();
+    fetchSchedules();
   }, []);
 
-  return { clubs, loading, error, fetchClubs, deleteClub };
+  return { schedules, loading, error, fetchSchedules, deleteSchedule };
 };

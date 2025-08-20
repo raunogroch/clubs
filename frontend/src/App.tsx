@@ -9,6 +9,12 @@ import { AuthProvider } from "./auth/AuthProvider";
 import { PrivateRoute } from "./auth/PrivateRoute";
 import { Login, NotFound } from "./layouts";
 import { Clubs, Dashboard, Profile, UserEdit, UserNew, Users } from "./pages";
+import { ClubEdit } from "./pages/Clubs/ClubEdit";
+import { ClubNew } from "./pages/Clubs/ClubNew";
+import { Schedule } from "./pages/Schedule/Schedule";
+import { Sports } from "./pages/Sports/Sports";
+import { SportNew } from "./pages/Sports/SportNew";
+import { SportEdit } from "./pages/Sports/SportEdit";
 
 export const App = () => {
   return (
@@ -18,7 +24,6 @@ export const App = () => {
           {/* Rutas públicas */}
           <Route path="/login" element={<Login />} />
           <Route path="/404" element={<NotFound />} />
-
           {/* Rutas privadas */}
           <Route
             path="/dashboard/*"
@@ -36,7 +41,22 @@ export const App = () => {
               </PrivateRoute>
             }
           />
-
+          <Route
+            path="/clubs/edit/:id"
+            element={
+              <PrivateRoute>
+                <ClubEdit name="Clubs" sub="new" />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/clubs/create"
+            element={
+              <PrivateRoute>
+                <ClubNew name="Clubs" sub="Crear" />
+              </PrivateRoute>
+            }
+          />
           <Route
             path="/profile"
             element={
@@ -45,6 +65,40 @@ export const App = () => {
               </PrivateRoute>
             }
           />
+          <Route
+            path="/sports"
+            element={
+              <PrivateRoute>
+                <Sports name="Disciplinas" />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/sports/create"
+            element={
+              <PrivateRoute>
+                <SportNew name="Registros" sub="Crear" />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/sports/edit/:id"
+            element={
+              <PrivateRoute>
+                <SportEdit name="Registros" sub="Actualizar" />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/schedules"
+            element={
+              <PrivateRoute>
+                <Schedule name="Horarios" />
+              </PrivateRoute>
+            }
+          />
+
           <Route
             path="/users"
             element={
@@ -61,7 +115,6 @@ export const App = () => {
               </PrivateRoute>
             }
           />
-
           <Route
             path="/users/edit/:id"
             element={
@@ -70,7 +123,6 @@ export const App = () => {
               </PrivateRoute>
             }
           />
-
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<Navigate to="/404" replace />} />
         </Routes>
