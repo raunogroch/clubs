@@ -1,6 +1,6 @@
 //ScheduleSelector.tsx
 interface Schedule {
-  id: string;
+  _id: string;
   startTime: string;
   endTime: string;
 }
@@ -30,7 +30,7 @@ export const ScheduleClubSelector = ({
         >
           <option value="">Seleccione un horario</option>
           {schedules.map((schedule) => (
-            <option key={schedule.id} value={schedule.id}>
+            <option key={schedule._id} value={schedule._id}>
               {`${schedule.startTime} - ${schedule.endTime}`}
             </option>
           ))}

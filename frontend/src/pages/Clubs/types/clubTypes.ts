@@ -1,15 +1,9 @@
-import type { Sport } from "../../Sports/types/sportTypes";
-
-interface Schedule {
-  startTime: string;
-  endTime: string;
-}
 export interface Club {
   _id?: string;
   name: string;
-  schedule: Schedule;
+  schedule: string;
   place: string;
-  discipline: Sport;
+  discipline: string;
   coaches: string[];
   athletes: string[];
 }

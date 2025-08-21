@@ -1,37 +1,32 @@
-//ScheduleSelector.tsx
-interface Schedule {
-  id: string;
-  startTime: string;
-  endTime: string;
+import type { Sport } from "../../Sports/types/sportTypes";
+
+interface SportSelectorProps {
+  selectedSportId: string;
+  onSportChange: (sportId: string) => void;
+  sports?: Sport[];
 }
 
-interface ScheduleSelectorProps {
-  selectedScheduleId: string;
-  onScheduleChange: (scheduleId: string) => void;
-  schedules?: Schedule[];
-}
-
-export const ScheduleClubSelector = ({
-  selectedScheduleId,
-  onScheduleChange,
-  schedules = [],
-}: ScheduleSelectorProps) => {
+export const SportClubSelector = ({
+  selectedSportId,
+  onSportChange,
+  sports = [],
+}: SportSelectorProps) => {
   return (
     <div className="form-group row">
-      <label htmlFor="schedule" className="col-sm-2 col-form-label">
-        Horario
+      <label htmlFor="sport" className="col-sm-2 col-form-label">
+        Disciplina deportiva
       </label>
       <div className="col-sm-10">
         <select
-          id="schedule"
+          id="sport"
           className="form-control"
-          value={selectedScheduleId}
-          onChange={(e) => onScheduleChange(e.target.value)}
+          value={selectedSportId}
+          onChange={(e) => onSportChange(e.target.value)}
         >
-          <option value="">Seleccione un horario</option>
-          {schedules.map((schedule) => (
-            <option key={schedule.id} value={schedule.id}>
-              {`${schedule.startTime} - ${schedule.endTime}`}
+          <option value="">Seleccione una disciplina</option>
+          {sports.map((sport: Sport) => (
+            <option key={sport._id} value={sport._id}>
+              {sport.name}
             </option>
           ))}
         </select>

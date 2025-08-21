@@ -1,8 +1,10 @@
 import { CustomMessage, Input } from "../../../components";
 import { useClubForm } from "../hooks/useClubForm";
 import { useScheduleClub } from "../hooks/useScheduleClub";
+import { useSportClub } from "../hooks/useSportClub";
 import type { ClubFormProps } from "../types/clubTypes";
 import { ScheduleClubSelector } from "./ScheduleClubSelector";
+import { SportClubSelector } from "./SportClubSelector";
 
 export const ClubForm = ({
   initialData,
@@ -14,22 +16,19 @@ export const ClubForm = ({
 
   const { schedules, error: scheduleError } = useScheduleClub();
 
+  const { sports, error: sportError } = useSportClub();
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const success = await handleSubmit(e);
     if (success && onSuccess) onSuccess();
   };
 
-  // Adaptar el modelo: schedule debe ser solo el id del horario seleccionado
-  // Si el backend espera el id, mantén schedule como string
-  // Si espera el objeto, obtén el objeto desde schedules
-  const selectedScheduleId =
-    typeof formData.schedule === "string" ? formData.schedule : "";
-
   return (
     <div>
       {message && <CustomMessage message={message.text} kind={message.type} />}
       {scheduleError && <CustomMessage message={scheduleError} kind="danger" />}
+      {sportError && <CustomMessage message={sportError} kind="danger" />}
       <form onSubmit={onSubmit}>
         <div className="form-group row">
           <label htmlFor="name" className="col-sm-2 col-form-label">
@@ -53,13 +52,23 @@ export const ClubForm = ({
         </div>
 
         <ScheduleClubSelector
-          selectedScheduleId={selectedScheduleId}
+          selectedScheduleId={formData.schedule}
           schedules={schedules}
-          onScheduleChange={(scheduleId) =>
+          onScheduleChange={(scheduleId) => {
             handleChange({
               target: { name: "schedule", value: scheduleId },
-            } as any)
-          }
+            } as any);
+          }}
+        />
+
+        <SportClubSelector
+          selectedSportId={formData.discipline}
+          sports={sports}
+          onSportChange={(sportId) => {
+            handleChange({
+              target: { name: "discipline", value: sportId },
+            } as any);
+          }}
         />
 
         <div className="form-group row">
@@ -71,14 +80,14 @@ export const ClubForm = ({
               type="text"
               id="place"
               name="place"
-              value={formData.name}
+              value={formData.place}
               onChange={handleChange}
-              className={`form-control ${errors.name ? "is-invalid" : ""}`}
-              placeholder="Ej. Barcelona ..."
+              className={`form-control ${errors.place ? "is-invalid" : ""}`}
+              placeholder="Ej. Estadio Camp Nou ..."
               required
             />
-            {errors.name && (
-              <div className="invalid-feedback">{errors.name}</div>
+            {errors.place && (
+              <div className="invalid-feedback">{errors.place}</div>
             )}
           </div>
         </div>

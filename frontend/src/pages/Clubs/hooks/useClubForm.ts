@@ -12,9 +12,9 @@ export const useClubForm = (initialData?: Club) => {
   const [formData, setFormData] = useState<Club>(
     initialData || {
       name: "",
-      schedule: { startTime: "", endTime: "" },
+      schedule: "",
       place: "",
-      discipline: { name: "" },
+      discipline: "",
       coaches: [],
       athletes: [],
     }
