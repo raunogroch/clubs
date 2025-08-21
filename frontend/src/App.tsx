@@ -15,6 +15,8 @@ import { Schedule } from "./pages/Schedule/Schedule";
 import { Sports } from "./pages/Sports/Sports";
 import { SportNew } from "./pages/Sports/SportNew";
 import { SportEdit } from "./pages/Sports/SportEdit";
+import { ScheduleNew } from "./pages/Schedule/ScheduleNew";
+import { ScheduleEdit } from "./pages/Schedule/ScheduleEdit";
 
 export const App = () => {
   return (
@@ -33,6 +35,15 @@ export const App = () => {
               </PrivateRoute>
             }
           />
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute>
+                <Profile name="Perfil" />
+              </PrivateRoute>
+            }
+          />
+          {/* ---------------------------CLUBS-------------------------------- */}
           <Route
             path="/clubs"
             element={
@@ -57,14 +68,7 @@ export const App = () => {
               </PrivateRoute>
             }
           />
-          <Route
-            path="/profile"
-            element={
-              <PrivateRoute>
-                <Profile name="Perfil" />
-              </PrivateRoute>
-            }
-          />
+          {/* ---------------------------SPORTS-------------------------------- */}
           <Route
             path="/sports"
             element={
@@ -90,6 +94,7 @@ export const App = () => {
               </PrivateRoute>
             }
           />
+          {/* ---------------------------SCHEDULES-------------------------------- */}
           <Route
             path="/schedules"
             element={
@@ -98,7 +103,23 @@ export const App = () => {
               </PrivateRoute>
             }
           />
-
+          <Route
+            path="/schedules/create"
+            element={
+              <PrivateRoute>
+                <ScheduleNew name="Horarios" sub="Crear" />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/schedules/edit/:id"
+            element={
+              <PrivateRoute>
+                <ScheduleEdit name="Horarios" sub="Actualizar" />
+              </PrivateRoute>
+            }
+          />
+          {/* ---------------------------USERS-------------------------------- */}
           <Route
             path="/users"
             element={

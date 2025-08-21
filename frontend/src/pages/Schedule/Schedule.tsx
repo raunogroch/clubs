@@ -22,7 +22,7 @@ export const Schedule = ({ name }: pageParamProps) => {
                 <h5>Lista de horarios</h5>
                 <div className="ibox-tools">
                   <Link
-                    to="/users/create"
+                    to="/schedules/create"
                     className="btn btn-rounded btn-outline"
                   >
                     <i className="fa fa-plus"></i> Nuevo horario

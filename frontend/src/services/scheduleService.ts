@@ -47,7 +47,7 @@ export const scheduleService = {
     scheduleData: Partial<Schedule>
   ): Promise<ApiResponse<Schedule>> {
     try {
-      const response = await api.patch(`/Schedule/${id}`, scheduleData);
+      const response = await api.patch(`/schedules/${id}`, scheduleData);
       return {
         code: response.status,
         message: "Schedule actualizado correctamente",
@@ -65,7 +65,7 @@ export const scheduleService = {
    */
   async delete(id: string): Promise<ApiResponse<void>> {
     try {
-      const response = await api.delete(`/Schedule/${id}`);
+      const response = await api.delete(`/schedules/${id}`);
       return {
         code: response.status,
         message: "Schedule eliminado correctamente",
@@ -77,7 +77,7 @@ export const scheduleService = {
 
   async getById(id: string): Promise<ApiResponse<Schedule>> {
     try {
-      const response = await api.get(`/Schedule/${id}`);
+      const response = await api.get(`/schedules/${id}`);
       return {
         code: response.status,
         message: "Schedule obtenido correctamente",

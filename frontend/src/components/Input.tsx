@@ -10,7 +10,8 @@ interface InputProps {
     | "tel"
     | "url"
     | "radio"
-    | "date";
+    | "date"
+    | "time";
   name?: string;
   className?: string;
   placeholder?: string;

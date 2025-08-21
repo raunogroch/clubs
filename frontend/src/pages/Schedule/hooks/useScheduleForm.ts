@@ -8,10 +8,9 @@ import type { Schedule, ScheduleErrors } from "../types/scheduleTypes";
  * Incluye validación, manejo de errores y envío de datos.
  * @param initialData - Datos iniciales del usuario (para edición).
  */
-export const useUserForm = (initialData?: Schedule) => {
+export const useScheduleForm = (initialData?: Schedule) => {
   const [formData, setFormData] = useState<Schedule>(
     initialData || {
-      _id: "",
       startTime: "string",
       endTime: "string",
     }
