@@ -79,7 +79,9 @@ export const Input = ({
   };
 
   if (type === "checkbox") {
-    return <input type="checkbox" checked={checked} {...commonProps} />;
+    return (
+      <input type="checkbox" checked={checked} value={value} {...commonProps} />
+    );
   }
 
   return <input type={type} value={value} {...commonProps} />;

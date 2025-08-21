@@ -1,8 +1,13 @@
 import { CustomMessage, Input } from "../../../components";
+import { useAthleteClub } from "../hooks/useAthleteClub";
 import { useClubForm } from "../hooks/useClubForm";
+import { useCoachClub } from "../hooks/useCoachClub";
 import { useScheduleClub } from "../hooks/useScheduleClub";
 import { useSportClub } from "../hooks/useSportClub";
 import type { ClubFormProps } from "../types/clubTypes";
+import { AthleteClubCheckbox } from "./AthleteClubCheckbox";
+import { CoachClubCheckbox } from "./CoachClubCheckbox";
+import { FormField } from "./FormField";
 import { ScheduleClubSelector } from "./ScheduleClubSelector";
 import { SportClubSelector } from "./SportClubSelector";
 
@@ -14,9 +19,16 @@ export const ClubForm = ({
   const { formData, errors, message, handleChange, handleSubmit } =
     useClubForm(initialData);
 
-  const { schedules, error: scheduleError } = useScheduleClub();
+  // Añadir propiedades para los checkboxes en el estado formData si no existen
+  // Ejemplo: optionOne y optionTwo
+  // Si ya existen en useClubForm, omite este comentario
 
+  // Ya no es necesario un handleCheckboxChange personalizado, el handleChange del hook lo maneja correctamente.
+
+  const { schedules, error: scheduleError } = useScheduleClub();
   const { sports, error: sportError } = useSportClub();
+  const { coaches } = useCoachClub();
+  const { athletes } = useAthleteClub();
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,30 +42,19 @@ export const ClubForm = ({
       {scheduleError && <CustomMessage message={scheduleError} kind="danger" />}
       {sportError && <CustomMessage message={sportError} kind="danger" />}
       <form onSubmit={onSubmit}>
-        <div className="form-group row">
-          <label htmlFor="name" className="col-sm-2 col-form-label">
-            Nombre del club
-          </label>
-          <div className="col-sm-10">
-            <Input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className={`form-control ${errors.name ? "is-invalid" : ""}`}
-              placeholder="Ej. Barcelona ..."
-              required
-            />
-            {errors.name && (
-              <div className="invalid-feedback">{errors.name}</div>
-            )}
-          </div>
-        </div>
+        <FormField
+          title="Nombre del Club"
+          type="text"
+          name="name"
+          value={formData.name}
+          error={errors.name}
+          handleChange={handleChange}
+        />
 
         <ScheduleClubSelector
           selectedScheduleId={formData.schedule}
           schedules={schedules}
+          errors={errors.schedule}
           onScheduleChange={(scheduleId) => {
             handleChange({
               target: { name: "schedule", value: scheduleId },
@@ -64,6 +65,7 @@ export const ClubForm = ({
         <SportClubSelector
           selectedSportId={formData.discipline}
           sports={sports}
+          errors={errors.discipline}
           onSportChange={(sportId) => {
             handleChange({
               target: { name: "discipline", value: sportId },
@@ -71,26 +73,30 @@ export const ClubForm = ({
           }}
         />
 
-        <div className="form-group row">
-          <label htmlFor="place" className="col-sm-2 col-form-label">
-            Lugar
-          </label>
-          <div className="col-sm-10">
-            <Input
-              type="text"
-              id="place"
-              name="place"
-              value={formData.place}
-              onChange={handleChange}
-              className={`form-control ${errors.place ? "is-invalid" : ""}`}
-              placeholder="Ej. Estadio Camp Nou ..."
-              required
-            />
-            {errors.place && (
-              <div className="invalid-feedback">{errors.place}</div>
-            )}
-          </div>
-        </div>
+        <FormField
+          title="Lugar de entrenamiento"
+          type="text"
+          name="place"
+          value={formData.place}
+          error={errors.place}
+          handleChange={handleChange}
+        />
+
+        <div className="hr-line-dashed"></div>
+
+        <CoachClubCheckbox
+          dataList={coaches}
+          onChange={handleChange}
+          selectedCoaches={formData.coaches}
+        />
+
+        <div className="hr-line-dashed"></div>
+
+        <AthleteClubCheckbox
+          dataList={athletes}
+          onChange={handleChange}
+          selectedAthletes={formData.athletes}
+        />
 
         <div className="form-group row">
           <div className="col-sm-10 offset-sm-2">

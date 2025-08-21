@@ -38,8 +38,8 @@ export const ClubTable = ({ clubs, onDelete }: ClubsTableProps) => {
               </td>
               <td className="align-middle">{club.discipline.name}</td>
               <td className="align-middle">{club.place}</td>
-              <td className="align-middle">{club.coaches.join(", ")}</td>
-              <td className="align-middle">{club.athletes.join(", ")}</td>
+              <td className="align-middle">{club.coaches}</td>
+              <td className="align-middle">{club.athletes}</td>
               <td className="text-center">
                 <Link
                   to={`/clubs/edit/${club._id}`}

@@ -1,4 +1,3 @@
-//ScheduleSelector.tsx
 interface Schedule {
   _id: string;
   startTime: string;
@@ -8,12 +7,14 @@ interface Schedule {
 interface ScheduleSelectorProps {
   selectedScheduleId: string;
   onScheduleChange: (scheduleId: string) => void;
+  errors: string;
   schedules?: Schedule[];
 }
 
 export const ScheduleClubSelector = ({
   selectedScheduleId,
   onScheduleChange,
+  errors,
   schedules = [],
 }: ScheduleSelectorProps) => {
   return (
@@ -24,7 +25,7 @@ export const ScheduleClubSelector = ({
       <div className="col-sm-10">
         <select
           id="schedule"
-          className="form-control"
+          className={`form-control${errors ? " is-invalid" : ""}`}
           value={selectedScheduleId}
           onChange={(e) => onScheduleChange(e.target.value)}
         >
@@ -35,6 +36,7 @@ export const ScheduleClubSelector = ({
             </option>
           ))}
         </select>
+        {errors && <div className="invalid-feedback">{errors}</div>}
       </div>
     </div>
   );

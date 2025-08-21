@@ -164,4 +164,46 @@ export const userService = {
       return handleApiError(error);
     }
   },
+
+  /**
+   * Obtiene todos los coaches del sistema.
+   * @returns ApiResponse con la lista de coaches.
+   */
+  async getAllCoaches(): Promise<ApiResponse<User[]>> {
+    try {
+      const response = await api.get("/users");
+      // Filtrar solo los coaches con role 'coach'
+      const coaches = Array.isArray(response.data)
+        ? response.data.filter((user: User) => user.role === "coach")
+        : [];
+      return {
+        code: response.status,
+        message: "Entrenadores obtenidos correctamente",
+        data: coaches,
+      };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  },
+
+  /**
+   * Obtiene todos los athletes del sistema.
+   * @returns ApiResponse con la lista de athletes.
+   */
+  async getAllAtheles(): Promise<ApiResponse<User[]>> {
+    try {
+      const response = await api.get("/users");
+      // Filtrar solo los athletes con role 'coach'
+      const athletes = Array.isArray(response.data)
+        ? response.data.filter((user: User) => user.role === "athlete")
+        : [];
+      return {
+        code: response.status,
+        message: "Deportistas obtenidos correctamente",
+        data: athletes,
+      };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  },
 };

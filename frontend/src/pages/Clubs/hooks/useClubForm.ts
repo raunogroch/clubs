@@ -13,6 +13,7 @@ export const useClubForm = (initialData?: Club) => {
     initialData || {
       name: "",
       schedule: "",
+      sport: "",
       place: "",
       discipline: "",
       coaches: [],
@@ -30,9 +31,23 @@ export const useClubForm = (initialData?: Club) => {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target as HTMLInputElement;
+    if (type === "checkbox" && (name === "coaches" || name === "athletes")) {
+      let updatedArr = Array.isArray(formData[name]) ? [...formData[name]] : [];
+      if (checked) {
+        if (!updatedArr.includes(value)) {
+          updatedArr.push(value);
+        }
+      } else {
+        updatedArr = updatedArr.filter((id) => id !== value);
+      }
+      setFormData({ ...formData, [name]: updatedArr });
+      if (errors[name as keyof ClubErrors]) {
+        setErrors({ ...errors, [name]: undefined });
+      }
+      return;
+    }
     setFormData({ ...formData, [name]: value });
-
     if (errors[name as keyof ClubErrors]) {
       setErrors({ ...errors, [name]: undefined });
     }
@@ -44,9 +59,9 @@ export const useClubForm = (initialData?: Club) => {
   const validateForm = (): boolean => {
     const newErrors: ClubErrors = {};
 
-    if (!formData.name) newErrors.name = "El nombre es requerido";
-    if (!formData.schedule) newErrors.schedule = "El horaro es requerido";
-    if (!formData.discipline)
+    if (!formData.name) newErrors.name = "El nombre del club es requerido";
+    if (formData.schedule === "") newErrors.schedule = "El horaro es requerido";
+    if (formData.discipline === "")
       newErrors.discipline = "La disciplina deportiva es requerida";
     if (!formData.place) newErrors.place = "La ubicacion es requerida";
 
@@ -62,7 +77,7 @@ export const useClubForm = (initialData?: Club) => {
     if (!validateForm()) return;
 
     try {
-      let response;
+      let response: any;
       if (initialData?._id) {
         response = await clubService.update(initialData._id, formData);
       } else {

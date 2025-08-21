@@ -3,12 +3,14 @@ import type { Sport } from "../../Sports/types/sportTypes";
 interface SportSelectorProps {
   selectedSportId: string;
   onSportChange: (sportId: string) => void;
+  errors?: string;
   sports?: Sport[];
 }
 
 export const SportClubSelector = ({
   selectedSportId,
   onSportChange,
+  errors,
   sports = [],
 }: SportSelectorProps) => {
   return (
@@ -19,7 +21,7 @@ export const SportClubSelector = ({
       <div className="col-sm-10">
         <select
           id="sport"
-          className="form-control"
+          className={`form-control${errors ? " is-invalid" : ""}`}
           value={selectedSportId}
           onChange={(e) => onSportChange(e.target.value)}
         >
@@ -30,6 +32,7 @@ export const SportClubSelector = ({
             </option>
           ))}
         </select>
+        {errors && <div className="invalid-feedback">{errors}</div>}
       </div>
     </div>
   );
