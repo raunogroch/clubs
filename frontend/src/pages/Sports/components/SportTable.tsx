@@ -28,7 +28,7 @@ export const SportTable = ({ sports, onDelete }: SportTableProps) => {
             <tr key={sport._id}>
               <td className="align-middle text-center">{index + 1}</td>
               <td className="align-middle">{sport.name}</td>
-              <td>
+              <td className="text-center">
                 <Link
                   to={`/sports/edit/${sport._id}`}
                   className="btn btn-primary btn-outline m-1"

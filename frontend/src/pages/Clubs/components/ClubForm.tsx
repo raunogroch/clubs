@@ -19,12 +19,6 @@ export const ClubForm = ({
   const { formData, errors, message, handleChange, handleSubmit } =
     useClubForm(initialData);
 
-  // Añadir propiedades para los checkboxes en el estado formData si no existen
-  // Ejemplo: optionOne y optionTwo
-  // Si ya existen en useClubForm, omite este comentario
-
-  // Ya no es necesario un handleCheckboxChange personalizado, el handleChange del hook lo maneja correctamente.
-
   const { schedules, error: scheduleError } = useScheduleClub();
   const { sports, error: sportError } = useSportClub();
   const { coaches } = useCoachClub();

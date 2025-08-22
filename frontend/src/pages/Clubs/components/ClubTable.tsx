@@ -2,8 +2,28 @@ import { Link } from "react-router-dom";
 import type { Club } from "../types/clubTypes";
 
 interface ClubsTableProps {
-  clubs: Club[];
+  clubs: ClubsAll[];
   onDelete: (id: string) => Promise<void>;
+}
+
+interface UsersData {
+  _id: string;
+  name: string;
+  lastname: string;
+}
+interface ClubsAll {
+  _id: string;
+  name: string;
+  schedule: {
+    startTime: string;
+    endTime: string;
+  };
+  discipline: {
+    name: string;
+  };
+  place: string;
+  coaches: UsersData[];
+  athletes: UsersData[];
 }
 
 export const ClubTable = ({ clubs, onDelete }: ClubsTableProps) => {
@@ -38,8 +58,10 @@ export const ClubTable = ({ clubs, onDelete }: ClubsTableProps) => {
               </td>
               <td className="align-middle">{club.discipline.name}</td>
               <td className="align-middle">{club.place}</td>
-              <td className="align-middle">{club.coaches}</td>
-              <td className="align-middle">{club.athletes}</td>
+              <td className="align-middle">{club.coaches.length} Asignado/s</td>
+              <td className="align-middle">
+                {club.athletes.length} Asignado/s
+              </td>
               <td className="text-center">
                 <Link
                   to={`/clubs/edit/${club._id}`}

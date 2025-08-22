@@ -75,7 +75,7 @@ export const useClubForm = (initialData?: Club) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
-
+    console.log("Submitting form data:", formData);
     try {
       let response: any;
       if (initialData?._id) {
