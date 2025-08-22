@@ -64,55 +64,6 @@ export class ClubsService {
     const clubExist: any = await this.clubModel.findById(id);
     if (!clubExist) throw new Error(`Club with id ${id} doesn't exist`);
 
-    // Validación y actualización de coaches
-    if (updateClubDto.coaches) {
-      const allowedCoaches: any[] = [];
-      await Promise.all(
-        updateClubDto.coaches.map(async (coach) => {
-          const user = await this.userModel.findOne({
-            _id: coach,
-            roles: 'coach',
-          });
-          if (user) {
-            const isAlreadyAdded: boolean = clubExist.coaches.includes(coach);
-            if (!isAlreadyAdded) {
-              allowedCoaches.push(coach);
-            }
-          } else {
-            // Mensaje de advertencia si el usuario no es coach
-            console.warn(`User with id ${coach} is not a coach`);
-          }
-        }),
-      );
-      // Se actualiza la lista de coaches agregando los nuevos válidos
-      updateClubDto.coaches = [...clubExist.coaches, ...allowedCoaches];
-    }
-
-    // Validación y actualización de atletas
-    if (updateClubDto.athletes) {
-      const allowedAthletes: any[] = [];
-      await Promise.all(
-        updateClubDto.athletes.map(async (athlete) => {
-          const user = await this.userModel.findOne({
-            _id: athlete,
-            roles: 'athlete',
-          });
-          if (user) {
-            const isAlreadyAdded: boolean =
-              clubExist.athletes.includes(athlete);
-            if (!isAlreadyAdded) {
-              allowedAthletes.push(athlete);
-            }
-          } else {
-            // Mensaje de advertencia si el usuario no es atleta
-            console.warn(`User with id ${athlete} is not an athlete`);
-          }
-        }),
-      );
-      // Se actualiza la lista de atletas agregando los nuevos válidos
-      updateClubDto.athletes = [...clubExist.athletes, ...allowedAthletes];
-    }
-    // Actualiza el club en la base de datos y retorna el resultado
     return this.clubModel.findByIdAndUpdate(id, updateClubDto, { new: true });
   }
 
