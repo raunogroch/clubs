@@ -81,19 +81,19 @@ export const SideNav = () => {
           </li>
           <li className={isActive("/users") ? "active" : ""}>
             <Link to="/users">
-              <i className="fa fa-users"></i>{" "}
+              <i className="fa fa-file"></i>{" "}
               <span className="nav-label">Registros</span>
             </Link>
           </li>
           <li className={isActive("/schedules") ? "active" : ""}>
             <Link to="/schedules">
-              <i className="fa fa-calendar"></i>{" "}
+              <i className="fa fa-clock-o"></i>{" "}
               <span className="nav-label">Horarios</span>
             </Link>
           </li>
           <li className={isActive("/sports") ? "active" : ""}>
             <Link to="/sports">
-              <i className="fa fa-person"></i>{" "}
+              <i className="fa fa-soccer-ball-o"></i>{" "}
               <span className="nav-label">Disciplina</span>
             </Link>
           </li>
