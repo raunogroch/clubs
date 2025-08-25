@@ -15,8 +15,13 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Roles as Role } from 'src/users/enum/roles.enum';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 
-// Controlador para la gestión de usuarios
+interface currentAuth {
+  sub: string;
+  role: string;
+}
+
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
@@ -36,8 +41,8 @@ export class UsersController {
    */
   @Get()
   @Roles(Role.SUPERADMIN, Role.ADMIN, Role.COACH)
-  findAll() {
-    return this.usersService.findAll();
+  findAll(@CurrentUser() user: currentAuth) {
+    return this.usersService.findAll(user);
   }
 
   /**

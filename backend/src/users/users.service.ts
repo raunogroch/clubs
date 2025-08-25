@@ -6,6 +6,11 @@ import { User } from './schemas/user.schema';
 import { CreateUserDto, UpdateUserDto } from './dto';
 import bcrypt from 'node_modules/bcryptjs';
 
+interface currentAuth {
+  sub: string;
+  role: string;
+}
+
 @Injectable()
 export class UsersService {
   // Constructor con inyección del modelo User
@@ -56,8 +61,25 @@ export class UsersService {
   /**
    * Obtiene todos los usuarios
    */
-  async findAll(): Promise<User[]> {
-    return await this.userModel.find();
+  async findAll(requestingUser: currentAuth): Promise<User[]> {
+    const allUsers = (await this.userModel.find()).filter(
+      (user) => user.id !== requestingUser.sub,
+    );
+
+    switch (requestingUser.role) {
+      case 'superadmin':
+        return allUsers;
+      case 'admin':
+        return allUsers.filter((user) => user.role !== 'superadmin');
+      case 'coach':
+        return allUsers.filter((user) =>
+          ['parent', 'athlete'].includes(user.role),
+        );
+      case 'parent':
+        return allUsers.filter((user) => user.role === 'athlete');
+      default:
+        return [];
+    }
   }
 
   /**
