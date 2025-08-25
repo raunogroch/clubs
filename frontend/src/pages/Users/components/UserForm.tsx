@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Input, CustomMessage } from "../../../components";
+import { ImageCropper } from "../../../components/ImageCropper";
 import { useUserForm } from "../hooks/useUserForm";
 import type { UserFormProps } from "../types/userTypes";
 import { UserRoleSelector } from "./UserRoleSelector";
@@ -17,11 +19,39 @@ export const UserForm = ({
     if (success && onSuccess) onSuccess();
   };
 
+  const [imageSrc, setImage] = useState<string | null>(null);
+
   return (
     <div>
       {message && <CustomMessage message={message.text} kind={message.type} />}
-
+      <div className="form-group row">
+        <label htmlFor="user-image" className="col-sm-2 col-form-label">
+          Imagen
+        </label>
+        <div className="col-sm-10">
+          <input
+            type="file"
+            id="user-image"
+            accept="image/*"
+            className="form-control"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                  const result = ev.target?.result;
+                  if (typeof result === "string") setImage(result);
+                };
+                reader.readAsDataURL(file);
+              }
+            }}
+          />
+        </div>
+      </div>
       <form onSubmit={onSubmit}>
+        {/* Si ImageCropper no acepta prop 'image', comentar o ajustar según implementación */}
+        {typeof imageSrc === "string" && <ImageCropper image={imageSrc} />}
+        <br />
         <UserRoleSelector
           selectedRole={formData.role}
           onRoleChange={(role) =>
