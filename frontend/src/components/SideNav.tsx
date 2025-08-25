@@ -27,7 +27,7 @@ export const SideNav = () => {
           <li className="nav-header">
             <div className="dropdown profile-element">
               <Image
-                src="../public/assets/img/profile_small.jpg"
+                src="/assets/img/profile_small.jpg"
                 alt="image"
                 className="rounded-circle"
               />
