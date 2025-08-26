@@ -11,6 +11,7 @@ import { userService } from "../../../services/userService";
 export const useUserForm = (initialData?: User) => {
   const [formData, setFormData] = useState<User>(
     initialData || {
+      image: "",
       role: "",
       ci: "",
       name: "",
@@ -47,8 +48,8 @@ export const useUserForm = (initialData?: User) => {
    */
   const validateForm = (): boolean => {
     const newErrors: UserErrors = {};
-
-    if (!formData.role) newErrors.role = "Seleccione un rol";
+    if (!formData.image) newErrors.image = "Carga una imagen";
+    if (formData.role === "") newErrors.role = "Seleccione un rol";
     if (!formData.ci) newErrors.ci = "La cédula es requerida";
     if (!formData.name) newErrors.name = "El nombre es requerido";
     if (!formData.lastname) newErrors.lastname = "El apellido es requerido";
@@ -73,7 +74,6 @@ export const useUserForm = (initialData?: User) => {
     e.preventDefault();
     formData.password = formData.ci;
     if (!validateForm()) return;
-
     try {
       let response: any;
       if (initialData?._id) {

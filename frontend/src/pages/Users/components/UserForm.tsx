@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Input, CustomMessage } from "../../../components";
+import { UserImageInput } from "./UserImageInput";
 import { ImageCropper } from "../../../components/ImageCropper";
 import { useUserForm } from "../hooks/useUserForm";
 import type { UserFormProps } from "../types/userTypes";
@@ -13,6 +14,16 @@ export const UserForm = ({
   const { formData, errors, message, handleChange, handleSubmit } =
     useUserForm(initialData);
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      if (typeof ev.target?.result === "string") setImage(ev.target.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const success = await handleSubmit(e);
@@ -24,39 +35,33 @@ export const UserForm = ({
   return (
     <div>
       {message && <CustomMessage message={message.text} kind={message.type} />}
-      <div className="form-group row">
-        <label htmlFor="user-image" className="col-sm-2 col-form-label">
-          Imagen
-        </label>
-        <div className="col-sm-10">
-          <input
-            type="file"
-            id="user-image"
-            accept="image/*"
-            className="form-control"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                  const result = ev.target?.result;
-                  if (typeof result === "string") setImage(result);
-                };
-                reader.readAsDataURL(file);
-              }
-            }}
-          />
-        </div>
-      </div>
+      <UserImageInput
+        value={formData.image || ""}
+        error={errors.image}
+        onChange={handleImageChange}
+      />
       <form onSubmit={onSubmit}>
-        {/* Si ImageCropper no acepta prop 'image', comentar o ajustar según implementación */}
-        {typeof imageSrc === "string" && <ImageCropper image={imageSrc} />}
-        <br />
+        <div className="form-group row">
+          <div className="col-sm-10 offset-sm-2">
+            {typeof imageSrc === "string" && (
+              <ImageCropper
+                image={imageSrc}
+                onCropChange={(cropped) =>
+                  handleChange({
+                    target: { name: "image", value: cropped },
+                  } as any)
+                }
+              />
+            )}
+          </div>
+        </div>
+
         <UserRoleSelector
           selectedRole={formData.role}
           onRoleChange={(role) =>
             handleChange({ target: { name: "role", value: role } } as any)
           }
+          onError={errors.role}
         />
 
         <div className="form-group row">
@@ -72,7 +77,6 @@ export const UserForm = ({
               onChange={handleChange}
               className={`form-control ${errors.name ? "is-invalid" : ""}`}
               placeholder="Ej. Juan ..."
-              required
             />
             {errors.name && (
               <div className="invalid-feedback">{errors.name}</div>
@@ -93,7 +97,6 @@ export const UserForm = ({
               onChange={handleChange}
               className={`form-control ${errors.lastname ? "is-invalid" : ""}`}
               placeholder="Ej. Madrigal ..."
-              required
             />
             {errors.lastname && (
               <div className="invalid-feedback">{errors.lastname}</div>
@@ -114,7 +117,6 @@ export const UserForm = ({
               onChange={handleChange}
               className={`form-control ${errors.email ? "is-invalid" : ""}`}
               placeholder="Ej. Madrigal ..."
-              required
             />
             {errors.email && (
               <div className="invalid-feedback">{errors.email}</div>
@@ -135,7 +137,6 @@ export const UserForm = ({
               onChange={handleChange}
               className={`form-control ${errors.username ? "is-invalid" : ""}`}
               placeholder="Ej. usuario123 ..."
-              required
             />
             {errors.username && (
               <div className="invalid-feedback">{errors.username}</div>
@@ -156,7 +157,6 @@ export const UserForm = ({
               onChange={handleChange}
               className={`form-control ${errors.ci ? "is-invalid" : ""}`}
               placeholder="Ej. 1234567, 1234567-1Aº ..."
-              required
             />
             {errors.ci && <div className="invalid-feedback">{errors.ci}</div>}
           </div>
@@ -177,7 +177,6 @@ export const UserForm = ({
                 errors.birth_date ? "is-invalid" : ""
               }`}
               placeholder="Ej. usuario123 ..."
-              required
             />
             {errors.birth_date && (
               <div className="invalid-feedback">{errors.birth_date}</div>
@@ -218,7 +217,6 @@ export const UserForm = ({
               onChange={handleChange}
               className={`form-control ${errors.weight ? "is-invalid" : ""}`}
               placeholder="Ej. 54 ..."
-              required
             />
             {errors.weight && (
               <div className="invalid-feedback">{errors.weight}</div>

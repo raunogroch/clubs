@@ -11,10 +11,12 @@ interface InputProps {
     | "url"
     | "radio"
     | "date"
-    | "time";
+    | "time"
+    | "file";
   name?: string;
   className?: string;
   placeholder?: string;
+  accept?: string;
   id?: string;
   checked?: boolean;
   required?: boolean;
@@ -31,6 +33,7 @@ export const Input = ({
   name,
   className = "",
   placeholder,
+  accept,
   id,
   checked = false,
   required = false,
@@ -76,13 +79,16 @@ export const Input = ({
     onChange: handleChange,
     max,
     min,
+    ...(type === "file" ? { accept } : {}),
   };
 
   if (type === "checkbox") {
-    return (
-      <input type="checkbox" checked={checked} value={value} {...commonProps} />
-    );
+    return <input type="checkbox" checked={checked} {...commonProps} />;
   }
 
-  return <input type={type} value={value} {...commonProps} />;
+  if (type === "file") {
+    return <input type="file" {...commonProps} />;
+  }
+
+  return <input type={type} value={value ?? ""} {...commonProps} />;
 };
