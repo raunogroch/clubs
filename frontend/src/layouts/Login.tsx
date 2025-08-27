@@ -57,14 +57,11 @@ export const Login = () => {
     <div className="middle-box text-center loginscreen animated fadeInDown">
       <div>
         <div>
-          <h1 className="logo-name">IN+</h1>
+          <h1 className="logo-name">CS</h1>
         </div>
-        <h3>Welcome to IN+</h3>
-        <p>
-          Perfectly designed and precisely prepared admin theme with over 50
-          pages with extra new web app views.
-        </p>
-        <p>Login in. To see it in action.</p>
+        <h3>Bienvenidos a {`<Codersoft />`}</h3>
+        <p>Este sistema es una aplicacion para gestion de clubes deportivos</p>
+        <p>Ingresa. Para tomar accion.</p>
 
         {error && <div className="alert alert-danger">{error}</div>}
 
@@ -74,7 +71,7 @@ export const Login = () => {
               type="text"
               name="username"
               className="form-control"
-              placeholder="Username"
+              placeholder="Usuario"
               required
               value={formData.username}
               onChange={handleChange}
@@ -86,7 +83,7 @@ export const Login = () => {
               type="password"
               name="password"
               className="form-control"
-              placeholder="Password"
+              placeholder="Contraseña"
               required
               value={formData.password}
               onChange={handleChange}
@@ -98,25 +95,14 @@ export const Login = () => {
             className="btn btn-primary block full-width m-b"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Logging in..." : "Login"}
+            {isSubmitting ? "Ingresando ..." : "Ingresar"}
           </button>
-
-          <a href="#">
-            <small>Forgot password?</small>
-          </a>
-
-          <p className="text-muted text-center">
-            <small>Do not have an account?</small>
-          </p>
-
-          <a className="btn btn-sm btn-white btn-block" href="register.html">
-            Create an account
-          </a>
         </form>
 
         <p className="m-t">
           <small>
-            Inspinia we app framework base on Bootstrap 3 &copy; 2014
+            software de gestion de clubes &copy; 2024 &nbsp;
+            {`<Codersoft />`}
           </small>
         </p>
       </div>

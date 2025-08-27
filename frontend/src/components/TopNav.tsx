@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../auth/AuthContext";
-import { SmoothlyMenu } from "../scripts/inspiniaScripts";
+import { SmoothlyMenu } from "../scripts/coder-softScripts";
 
 export const TopNav = () => {
   const { logout } = useContext(AuthContext);

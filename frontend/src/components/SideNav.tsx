@@ -66,7 +66,7 @@ export const SideNav = () => {
                 </li>
               </ul>
             </div>
-            <div className="logo-element">IN+</div>
+            <div className="logo-element">CS</div>
           </li>
           <li className={isActive("/dashboard") ? "active" : ""}>
             <Link to="/dashboard">
