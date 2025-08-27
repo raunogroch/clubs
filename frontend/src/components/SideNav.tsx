@@ -27,9 +27,10 @@ export const SideNav = () => {
           <li className="nav-header">
             <div className="dropdown profile-element">
               <Image
-                src="/assets/img/profile_small.jpg"
+                src={`http://localhost:3000${user.image}`}
                 alt="image"
                 className="rounded-circle"
+                style={{ width: 48, height: 48 }}
               />
               <Link data-toggle="dropdown" className="dropdown-toggle" to="#">
                 <span className="block m-t-xs font-bold">

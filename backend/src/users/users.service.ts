@@ -3,6 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from './schemas/user.schema';
+import { saveProfileImage } from '../utils/imageProcessor';
 import { CreateUserDto, UpdateUserDto } from './dto';
 import bcrypt from 'node_modules/bcryptjs';
 
@@ -23,6 +24,11 @@ export class UsersService {
     const existingUser = await this.findByUsername(createUserDto.username);
     if (existingUser) {
       throw new Error('Username already exists');
+    }
+
+    // Procesa la imagen base64 si existe y guarda el link
+    if (createUserDto.image && createUserDto.image.startsWith('data:image')) {
+      createUserDto.image = saveProfileImage(createUserDto.image);
     }
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
@@ -103,6 +109,11 @@ export class UsersService {
     if (updateUserDto.password) {
       const hashedPassword = await bcrypt.hash(updateUserDto.password, 10);
       updateUserDto.password = hashedPassword;
+    }
+
+    // Procesa la imagen base64 si existe y guarda el link
+    if (updateUserDto.image && updateUserDto.image.startsWith('data:image')) {
+      updateUserDto.image = saveProfileImage(updateUserDto.image);
     }
 
     return this.userModel

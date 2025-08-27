@@ -53,4 +53,8 @@ export class CreateUserDto {
   /** Peso en kilogramos */
   @IsNumber()
   weight?: number;
+
+  /** Imagen de perfil en base64 */
+  @IsString()
+  image?: string;
 }

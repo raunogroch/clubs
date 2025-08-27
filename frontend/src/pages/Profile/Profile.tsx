@@ -18,7 +18,7 @@ export const Profile = ({ name }: pageParamProps) => {
           <div className="col-md-6">
             <div className="profile-image">
               <Image
-                src="img/a4.jpg"
+                src={`http://localhost:3000${user.image}`}
                 className="rounded-circle circle-border m-b-md"
                 alt="profile"
               />

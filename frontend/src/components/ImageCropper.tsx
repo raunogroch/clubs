@@ -36,7 +36,9 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
   const handleCrop = () => {
     const cropper = cropperRef.current?.cropper;
     if (cropper) {
-      const cropped = cropper.getCroppedCanvas().toDataURL();
+      const cropped = cropper
+        .getCroppedCanvas({ width: 100, height: 100 })
+        .toDataURL();
       setCroppedImage(cropped);
       if (onCropChange) onCropChange(cropped);
     }

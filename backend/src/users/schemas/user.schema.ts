@@ -43,5 +43,9 @@ export class User extends mongoose.Document {
   /** Peso en kilogramos */
   @Prop()
   weight: number;
+
+  /** Imagen de perfil en base64 */
+  @Prop()
+  image: string;
 }
 export const UserSchema = SchemaFactory.createForClass(User);
