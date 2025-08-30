@@ -2,59 +2,57 @@
 import { Injectable } from '@nestjs/common';
 import { CreateSportDto } from './dto/create-sport.dto';
 import { UpdateSportDto } from './dto/update-sport.dto';
-import { InjectModel } from '@nestjs/mongoose';
 import { Sport } from './schemas/sport.schemas';
-import { Model } from 'mongoose';
+import type { ISportRepository } from './repository/sport.repository.interface';
+import { SportValidatorService } from './sport-validator.service';
 
 @Injectable()
 export class SportsService {
-  // Constructor con inyección del modelo Sport
-  constructor(@InjectModel(Sport.name) private sportModel: Model<Sport>) {}
+  constructor(
+    private readonly sportRepository: ISportRepository,
+    private readonly sportValidator: SportValidatorService,
+  ) {}
 
   /**
    * Crea un nuevo deporte si el nombre no existe previamente
+   * SRP: la validación se delega al validador
    */
   async create(createSportDto: CreateSportDto): Promise<Sport> {
-    const sport = await this.sportModel.findOne({ name: createSportDto.name });
-    if (sport) {
-      throw new Error('Sport with this name already exists');
-    }
-    return this.sportModel.create(createSportDto);
+    await this.sportValidator.validateUniqueName(createSportDto.name);
+    return this.sportRepository.create(createSportDto);
   }
 
   /**
    * Obtiene todos los deportes
    */
-  async findAll() {
-    return await this.sportModel.find();
+  async findAll(): Promise<Sport[]> {
+    return this.sportRepository.findAll();
   }
 
   /**
    * Busca un deporte por su ID
    */
-  async findOne(id: string) {
-    return await this.sportModel.findById(id);
+  async findOne(id: string): Promise<Sport | null> {
+    return this.sportRepository.findById(id);
   }
 
   /**
    * Actualiza los datos de un deporte
+   * SRP: la validación se delega al validador
    */
-  async update(id: string, updateSportDto: UpdateSportDto) {
-    const sportExist = await this.sportModel.findById(id);
-    if (!sportExist) {
-      throw new Error(`Sport with id ${id} doesn't exist`);
-    }
-    return this.sportModel.findByIdAndUpdate(id, updateSportDto, { new: true });
+  async update(
+    id: string,
+    updateSportDto: UpdateSportDto,
+  ): Promise<Sport | null> {
+    await this.sportValidator.validateExistence(id);
+    return this.sportRepository.updateById(id, updateSportDto);
   }
 
   /**
    * Elimina un deporte por su ID
    */
-  async remove(id: string) {
-    const sportExist = await this.sportModel.findById(id);
-    if (!sportExist) {
-      throw new Error(`Sport with id ${id} doesn't exist`);
-    }
-    return this.sportModel.findByIdAndDelete(id);
+  async remove(id: string): Promise<Sport | null> {
+    await this.sportValidator.validateExistence(id);
+    return this.sportRepository.deleteById(id);
   }
 }

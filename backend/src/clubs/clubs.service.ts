@@ -2,75 +2,54 @@
 import { Injectable } from '@nestjs/common';
 import { CreateClubDto } from './dto/create-club.dto';
 import { UpdateClubDto } from './dto/update-club.dto';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import { Club } from './schema/club.schema';
-import { User } from 'src/users/schemas/user.schema';
+import type { IClubRepository } from './repository/club.repository.interface';
+import { ClubValidatorService } from './club-validator.service';
 
 @Injectable()
 export class ClubsService {
-  // Constructor con inyección de modelos Club y User
   constructor(
-    @InjectModel(Club.name) private clubModel: Model<Club>,
-    @InjectModel(User.name) private userModel: Model<User>,
+    private readonly clubRepository: IClubRepository,
+    private readonly clubValidator: ClubValidatorService,
   ) {}
 
   /**
    * Crea un nuevo club si el nombre no existe previamente
+   * SRP: la validación se delega al validador
    */
   async create(createClubDto: CreateClubDto): Promise<Club> {
-    const club = await this.clubModel.findOne({ name: createClubDto.name });
-    if (club) {
-      throw new Error('Club with this name already exists');
-    }
-    return this.clubModel.create(createClubDto);
+    await this.clubValidator.validateUniqueName(createClubDto.name);
+    return this.clubRepository.create(createClubDto);
   }
 
   /**
    * Obtiene todos los clubes con sus relaciones pobladas
    */
   async findAll(): Promise<Club[]> {
-    return this.clubModel.find().populate([
-      {
-        path: 'schedule',
-        select: 'startTime endTime',
-      },
-      {
-        path: 'discipline',
-        select: 'name',
-      },
-      {
-        path: 'coaches',
-        select: 'name lastname',
-      },
-      {
-        path: 'athletes',
-        select: 'name lastname',
-      },
-    ]);
+    return this.clubRepository.findAllPopulated();
   }
 
   /**
    * Busca un club por su ID
    */
   async findOne(id: string): Promise<Club | null> {
-    return this.clubModel.findById(id);
+    return this.clubRepository.findById(id);
   }
 
   /**
-   * Actualiza los datos de un club, validando coaches y atletas
+   * Actualiza los datos de un club
+   * SRP: la validación se delega al validador
    */
   async update(id: string, updateClubDto: UpdateClubDto): Promise<Club | null> {
-    const clubExist: any = await this.clubModel.findById(id);
-    if (!clubExist) throw new Error(`Club with id ${id} doesn't exist`);
-
-    return this.clubModel.findByIdAndUpdate(id, updateClubDto, { new: true });
+    await this.clubValidator.validateExistence(id);
+    return this.clubRepository.updateById(id, updateClubDto);
   }
 
   /**
    * Elimina un club por su ID
    */
   async remove(id: string): Promise<Club | null> {
-    return this.clubModel.findByIdAndDelete(id).exec();
+    await this.clubValidator.validateExistence(id);
+    return this.clubRepository.deleteById(id);
   }
 }
