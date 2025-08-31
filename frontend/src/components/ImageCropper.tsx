@@ -1,6 +1,5 @@
 import React, { useRef, useState } from "react";
 import Cropper, { type ReactCropperElement } from "react-cropper";
-import { Image } from "./Image";
 import "cropperjs/dist/cropper.css";
 
 interface ImageCropperProps {
