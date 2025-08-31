@@ -1,8 +1,9 @@
 import { useContext } from "react";
 import { AuthContext } from "../auth/AuthContext";
-import { Image } from ".";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Image } from "./Image";
 import { Role } from "../interfaces";
+import { roleRoutes } from "../routes";
 
 export const SideNav = () => {
   const { logout, user } = useContext(AuthContext);
@@ -20,6 +21,10 @@ export const SideNav = () => {
       location.pathname === path || location.pathname.startsWith(path + "/")
     );
   };
+
+  const role = user?.role || "";
+  const menuItems = roleRoutes[role] || [];
+
   return (
     <nav className="navbar-default navbar-static-side" role="navigation">
       <div className="sidebar-collapse">
@@ -72,36 +77,17 @@ export const SideNav = () => {
             </div>
             <div className="logo-element">CS</div>
           </li>
-          <li className={isActive("/dashboard") ? "active" : ""}>
-            <Link to="/dashboard">
-              <i className="fa fa-home"></i>{" "}
-              <span className="nav-label">Principal</span>
-            </Link>
-          </li>
-          <li className={isActive("/clubs") ? "active" : ""}>
-            <Link to="/clubs">
-              <i className="fa fa-diamond"></i>{" "}
-              <span className="nav-label">Clubs</span>
-            </Link>
-          </li>
-          <li className={isActive("/users") ? "active" : ""}>
-            <Link to="/users">
-              <i className="fa fa-file"></i>{" "}
-              <span className="nav-label">Registros</span>
-            </Link>
-          </li>
-          <li className={isActive("/schedules") ? "active" : ""}>
-            <Link to="/schedules">
-              <i className="fa fa-clock-o"></i>{" "}
-              <span className="nav-label">Horarios</span>
-            </Link>
-          </li>
-          <li className={isActive("/sports") ? "active" : ""}>
-            <Link to="/sports">
-              <i className="fa fa-soccer-ball-o"></i>{" "}
-              <span className="nav-label">Disciplina</span>
-            </Link>
-          </li>
+          {menuItems.map(
+            ({ path, icon, label }) =>
+              icon && (
+                <li key={path} className={isActive(path) ? "active" : ""}>
+                  <Link to={path}>
+                    <i className={`fa ${icon}`}></i>{" "}
+                    <span className="nav-label">{label}</span>
+                  </Link>
+                </li>
+              )
+          )}
         </ul>
       </div>
     </nav>

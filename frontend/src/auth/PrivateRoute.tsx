@@ -1,18 +1,24 @@
 import { useContext } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
-import { Navigation } from "../layouts/Navigation"; // Importa tu Navigation
+import { Navigation } from "../layouts/Navigation";
 
-export const PrivateRoute = ({
-  children,
-}: {
+interface PrivateRouteProps {
   children: React.ReactElement;
-}) => {
-  const { isAuthenticated } = useContext(AuthContext);
+  allowedRoles?: string[];
+}
+
+export const PrivateRoute = ({ children, allowedRoles }: PrivateRouteProps) => {
+  const { isAuthenticated, user } = useContext(AuthContext);
   const location = useLocation();
 
   if (isAuthenticated === false) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (allowedRoles && (!user || !allowedRoles.includes(user.role))) {
+    // Si el usuario no tiene el rol permitido, redirige al dashboard
+    return <Navigate to="/dashboard" replace />;
   }
 
   return (

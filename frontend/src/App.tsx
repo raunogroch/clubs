@@ -5,155 +5,42 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import { useContext } from "react";
 import { AuthProvider } from "./auth/AuthProvider";
+import { AuthContext } from "./auth/AuthContext";
 import { PrivateRoute } from "./auth/PrivateRoute";
 import { Login, NotFound } from "./layouts";
-import {
-  ClubEdit,
-  ClubNew,
-  Clubs,
-  Dashboard,
-  Schedule,
-  ScheduleEdit,
-  ScheduleNew,
-  SportEdit,
-  SportNew,
-  Sports,
-  UserEdit,
-  UserNew,
-  Users,
-} from "./pages";
-import { Profile } from "./pages/Profile/components/Profile";
+import { roleRoutes } from "./routes";
 
 export const App = () => {
+  const AppRoutes = () => {
+    const { user } = useContext(AuthContext);
+    const role = user?.role || "";
+    const allowedRoutes = roleRoutes[role] || [];
+
+    return (
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/404" element={<NotFound />} />
+        {allowedRoutes.map(({ path, element }) => (
+          <Route
+            key={path}
+            path={path}
+            element={
+              <PrivateRoute allowedRoles={[role]}>{element}</PrivateRoute>
+            }
+          />
+        ))}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/404" replace />} />
+      </Routes>
+    );
+  };
+
   return (
     <Router>
       <AuthProvider>
-        <Routes>
-          {/* Rutas públicas */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/404" element={<NotFound />} />
-          {/* Rutas privadas */}
-          <Route
-            path="/dashboard/*"
-            element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <PrivateRoute>
-                <Profile name="Perfil" />
-              </PrivateRoute>
-            }
-          />
-          {/* ---------------------------CLUBS-------------------------------- */}
-          <Route
-            path="/clubs"
-            element={
-              <PrivateRoute>
-                <Clubs name="Clubs" />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/clubs/edit/:id"
-            element={
-              <PrivateRoute>
-                <ClubEdit name="Clubs" sub="new" />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/clubs/create"
-            element={
-              <PrivateRoute>
-                <ClubNew name="Clubs" sub="Crear" />
-              </PrivateRoute>
-            }
-          />
-          {/* ---------------------------SPORTS-------------------------------- */}
-          <Route
-            path="/sports"
-            element={
-              <PrivateRoute>
-                <Sports name="Disciplinas" />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/sports/create"
-            element={
-              <PrivateRoute>
-                <SportNew name="Registros" sub="Crear" />
-              </PrivateRoute>
-            }
-          />
-
-          <Route
-            path="/sports/edit/:id"
-            element={
-              <PrivateRoute>
-                <SportEdit name="Registros" sub="Actualizar" />
-              </PrivateRoute>
-            }
-          />
-          {/* ---------------------------SCHEDULES-------------------------------- */}
-          <Route
-            path="/schedules"
-            element={
-              <PrivateRoute>
-                <Schedule name="Horarios" />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/schedules/create"
-            element={
-              <PrivateRoute>
-                <ScheduleNew name="Horarios" sub="Crear" />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/schedules/edit/:id"
-            element={
-              <PrivateRoute>
-                <ScheduleEdit name="Horarios" sub="Actualizar" />
-              </PrivateRoute>
-            }
-          />
-          {/* ---------------------------USERS-------------------------------- */}
-          <Route
-            path="/users"
-            element={
-              <PrivateRoute>
-                <Users name="Registros" />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/users/create"
-            element={
-              <PrivateRoute>
-                <UserNew name="Registros" sub="Crear" />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/users/edit/:id"
-            element={
-              <PrivateRoute>
-                <UserEdit name="Registros" sub="Actualizar" />
-              </PrivateRoute>
-            }
-          />
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="*" element={<Navigate to="/404" replace />} />
-        </Routes>
+        <AppRoutes />
       </AuthProvider>
     </Router>
   );
