@@ -28,7 +28,7 @@ export type RoleRoutes = Record<string, MenuRoute[]>;
 export const roleRoutes: RoleRoutes = {
   superadmin: [
     {
-      path: "/dashboard/*",
+      path: "/",
       icon: "fa-home",
       label: "Principal",
       element: <Dashboard />,
@@ -87,7 +87,7 @@ export const roleRoutes: RoleRoutes = {
   ],
   admin: [
     {
-      path: "/dashboard/*",
+      path: "/",
       icon: "fa-home",
       label: "Principal",
       element: <Dashboard />,
@@ -146,7 +146,7 @@ export const roleRoutes: RoleRoutes = {
   ],
   coach: [
     {
-      path: "/dashboard/*",
+      path: "/",
       icon: "fa-home",
       label: "Principal",
       element: <Dashboard />,
@@ -173,34 +173,16 @@ export const roleRoutes: RoleRoutes = {
   ],
   athlete: [
     {
-      path: "/dashboard/*",
+      path: "/",
       icon: "fa-home",
       label: "Principal",
       element: <Dashboard />,
     },
     { path: "/profile", label: "Perfil", element: <Profile name="Perfil" /> },
-    {
-      path: "/clubs",
-      icon: "fa-diamond",
-      label: "Clubs",
-      element: <Clubs name="Clubs" />,
-    },
-    {
-      path: "/sports",
-      icon: "fa-soccer-ball-o",
-      label: "Disciplina",
-      element: <Sports name="Disciplinas" />,
-    },
-    {
-      path: "/schedules",
-      icon: "fa-clock-o",
-      label: "Horarios",
-      element: <Schedule name="Horarios" />,
-    },
   ],
   parent: [
     {
-      path: "/dashboard/*",
+      path: "/",
       icon: "fa-home",
       label: "Principal",
       element: <Dashboard />,

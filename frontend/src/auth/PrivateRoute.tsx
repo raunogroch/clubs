@@ -17,8 +17,7 @@ export const PrivateRoute = ({ children, allowedRoles }: PrivateRouteProps) => {
   }
 
   if (allowedRoles && (!user || !allowedRoles.includes(user.role))) {
-    // Si el usuario no tiene el rol permitido, redirige al dashboard
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return (

@@ -16,11 +16,7 @@ export const NavHeader = ({ name: page, sub }: NavHeaderProps) => {
           <h2>{pageTitle}</h2>
           <ol className="breadcrumb">
             <li className="breadcrumb-item">
-              {isPrincipalPage ? (
-                "Principal"
-              ) : (
-                <Link to="/dashboard">Principal</Link>
-              )}
+              {isPrincipalPage ? "Principal" : <Link to="/">Principal</Link>}
             </li>
             {!isPrincipalPage && (
               <li className="breadcrumb-item active">

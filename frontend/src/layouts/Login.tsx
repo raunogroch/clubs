@@ -24,7 +24,7 @@ export const Login = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/dashboard", { replace: true });
+      navigate("/", { replace: true });
     }
   }, [isAuthenticated, navigate]);
 
@@ -44,7 +44,7 @@ export const Login = () => {
     try {
       const { data } = await authService.login(formData);
       login(data.authorization, data.user);
-      navigate("/dashboard");
+      navigate("/");
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
       setError("Invalid username or password");

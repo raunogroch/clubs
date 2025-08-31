@@ -10,9 +10,11 @@ export const SideNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (e) {}
+    navigate("/login", { replace: true });
   };
 
   // Función para verificar si la ruta actual coincide

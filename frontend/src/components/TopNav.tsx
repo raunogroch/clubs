@@ -7,9 +7,11 @@ export const TopNav = () => {
   const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (e) {}
+    navigate("/login", { replace: true });
   };
 
   const handleClick = (e: any) => {
