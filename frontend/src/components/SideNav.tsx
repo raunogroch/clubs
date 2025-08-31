@@ -17,7 +17,6 @@ export const SideNav = () => {
     navigate("/login", { replace: true });
   };
 
-  // Función para verificar si la ruta actual coincide
   const isActive = (path: string) => {
     return (
       location.pathname === path || location.pathname.startsWith(path + "/")
@@ -57,16 +56,6 @@ export const SideNav = () => {
                 <li>
                   <Link className="dropdown-item" to="/profile">
                     Profile
-                  </Link>
-                </li>
-                <li>
-                  <Link className="dropdown-item" to="contacts.html">
-                    Contacts
-                  </Link>
-                </li>
-                <li>
-                  <Link className="dropdown-item" to="mailbox.html">
-                    Mailbox
                   </Link>
                 </li>
                 <li className="dropdown-divider"></li>
