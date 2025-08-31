@@ -18,7 +18,7 @@ const PreviewImage: React.FC<PreviewImageProps> = ({
   alt = "Previsualización",
 }) => (
   <div className="mb-3">
-    <Image
+    <img
       src={src}
       alt={alt}
       style={{ maxWidth: "200px", maxHeight: "200px", borderRadius: "50%" }}

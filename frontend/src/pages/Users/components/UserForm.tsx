@@ -2,8 +2,7 @@ import { useState } from "react";
 import { CustomMessage, ImageCropper, Input } from "../../../components";
 import { useUserForm } from "../hooks";
 import type { UserFormProps } from "../interfaces";
-import { UserRoleSelector } from "./UserRoleSelector";
-import { UserImageInput } from ".";
+import { UserRoleSelector, UserImageInput } from ".";
 
 export const UserForm = ({
   initialData,
@@ -179,46 +178,6 @@ export const UserForm = ({
             />
             {errors.birth_date && (
               <div className="invalid-feedback">{errors.birth_date}</div>
-            )}
-          </div>
-        </div>
-
-        <div className="form-group row">
-          <label htmlFor="height" className="col-sm-2 col-form-label">
-            Altura
-          </label>
-          <div className="col-sm-10">
-            <Input
-              type="number"
-              id="height"
-              name="height"
-              value={formData.height}
-              onChange={handleChange}
-              className={`form-control ${errors.height ? "is-invalid" : ""}`}
-              placeholder="Ej. 1.47"
-            />
-            {errors.height && (
-              <div className="invalid-feedback">{errors.height}</div>
-            )}
-          </div>
-        </div>
-
-        <div className="form-group row">
-          <label htmlFor="weight" className="col-sm-2 col-form-label">
-            Peso
-          </label>
-          <div className="col-sm-10">
-            <Input
-              type="number"
-              id="weight"
-              name="weight"
-              value={formData.weight}
-              onChange={handleChange}
-              className={`form-control ${errors.weight ? "is-invalid" : ""}`}
-              placeholder="Ej. 54 ..."
-            />
-            {errors.weight && (
-              <div className="invalid-feedback">{errors.weight}</div>
             )}
           </div>
         </div>

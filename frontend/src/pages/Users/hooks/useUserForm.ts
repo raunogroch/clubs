@@ -25,8 +25,6 @@ export const useUserForm = (
       birth_date: "",
       username: "",
       password: "",
-      height: 0,
-      weight: 0,
     }
   );
 
@@ -58,6 +56,8 @@ export const useUserForm = (
     if (!formData.ci) newErrors.ci = "La cédula es requerida";
     if (!formData.name) newErrors.name = "El nombre es requerido";
     if (!formData.lastname) newErrors.lastname = "El apellido es requerido";
+    if (!formData.birth_date)
+      newErrors.birth_date = "La fecha de nacimiento es requerida";
     if (!formData.email) {
       newErrors.email = "El email es requerido";
     } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
