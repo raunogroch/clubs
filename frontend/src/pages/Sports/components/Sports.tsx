@@ -1,15 +1,7 @@
 import { Link } from "react-router-dom";
-
-// Tipos
-import type { pageParamProps } from "../../../interfaces/pageParamProps";
-
-// Hooks
-import { useSports } from "../interfaces/useSports";
-
-// Componentes
-import { NavHeader } from "../../../components/NavHeader";
-import { ErrorMessage } from "../../../components/ErrorMessage";
-import { LoadingIndicator } from "../../../components/LoadingIndicator";
+import type { pageParamProps } from "../../../interfaces";
+import { useSports } from "../hooks";
+import { ErrorMessage, LoadingIndicator, NavHeader } from "../../../components";
 import { SportTable } from "./SportTable";
 
 export const Sports = ({ name }: pageParamProps) => {

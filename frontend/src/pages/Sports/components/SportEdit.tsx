@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import type { pageParamProps } from "../../../interfaces/pageParamProps";
-import type { Sport } from "../interfaces/sportTypes";
-import { useSports } from "../interfaces/useSports";
-import { NavHeader } from "../../../components/NavHeader";
-import { ErrorMessage } from "../../../components/ErrorMessage";
-import { LoadingIndicator } from "../../../components/LoadingIndicator";
-import { SportForm } from "./SportForm";
+import type { pageParamProps } from "../../../interfaces";
+import type { Sport } from "../interfaces";
+import { useSports } from "../hooks";
+import { ErrorMessage, LoadingIndicator, NavHeader } from "../../../components";
+import { SportForm } from ".";
 
 export const SportEdit = ({ name, sub }: pageParamProps) => {
   const { id } = useParams<{ id: string }>();
