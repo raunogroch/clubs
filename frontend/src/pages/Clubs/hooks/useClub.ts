@@ -1,13 +1,18 @@
 import { useState, useEffect } from "react";
 import { useAuthErrorHandler } from "../../../hooks/useAuthErrorHandler";
-import { clubService } from "../../../services/clubService";
-import type { Club } from "../types/clubTypes";
+import { clubService, type IClubService } from "../../../services";
+import type { Club } from "../interfaces/clubTypes";
 
 /**
  * Hook para gestionar la lista de clubs y sus acciones (obtener, eliminar, buscar por id).
  * Maneja estados de carga y error, y redirige si la sesión expira.
  */
-export const useClubs = () => {
+/**
+ * Hook para gestionar la lista de clubs y sus acciones (obtener, eliminar, buscar por id).
+ * Ahora depende de la interfaz IClubService para cumplir DIP e ISP.
+ * @param service - Implementación de IClubService (por defecto clubService)
+ */
+export const useClubs = (service: IClubService = clubService) => {
   const [clubs, setClubs] = useState<Club[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +25,7 @@ export const useClubs = () => {
   const fetchClubs = async () => {
     try {
       setLoading(true);
-      const response = await clubService.getAll();
+      const response = await service.getAll();
       if (response.code === 200) {
         setClubs(response.data);
       }
@@ -38,7 +43,7 @@ export const useClubs = () => {
    */
   const deleteClub = async (id: string): Promise<void> => {
     try {
-      const response = await clubService.delete(id);
+      const response = await service.delete(id);
       handleAuthError(response, setError);
       fetchClubs();
     } catch (err) {
@@ -54,7 +59,7 @@ export const useClubs = () => {
   const getClubById = async (id: string): Promise<Club | null> => {
     try {
       setLoading(true);
-      const response = await clubService.getById(id);
+      const response = await service.getById(id);
       handleAuthError(response, setError);
       if (response.code === 200) {
         return response.data;

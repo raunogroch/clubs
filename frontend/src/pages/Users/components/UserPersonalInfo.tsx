@@ -1,5 +1,5 @@
 import { Input } from "../../../components";
-import type { UserErrors, User } from "../types/userTypes";
+import type { UserErrors, User } from "../interfaces/userTypes";
 
 interface UserPersonalInfoProps {
   formData: User;

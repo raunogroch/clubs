@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { NavHeader } from "../../components";
-import type { UsersPageProps } from "../Users/types/userTypes";
-import { SportForm } from "./components/SportForm";
+import { NavHeader } from "../../../components/NavHeader";
+import type { UsersPageProps } from "../../Users/interfaces/userTypes";
+import { SportForm } from "./SportForm";
 
 export const SportNew = ({ name, sub }: UsersPageProps) => {
   const navigate = useNavigate();

@@ -1,3 +1,3 @@
-export * from "./Users";
-export * from "./UserNew";
-export * from "./UserEdit";
+export * from "./components/Users";
+export * from "./components/UserNew";
+export * from "./components/UserEdit";

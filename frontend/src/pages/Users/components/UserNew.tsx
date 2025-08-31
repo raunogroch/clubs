@@ -1,22 +1,22 @@
 import { useNavigate } from "react-router-dom";
-import { NavHeader } from "../../components";
-import type { UsersPageProps } from "../Users/types/userTypes";
-import { ScheduleForm } from "./components/ScheduleForm";
+import { NavHeader } from "../../../components/NavHeader";
+import type { UsersPageProps } from "../interfaces/userTypes";
+import { UserForm } from "./UserForm";
 
-export const ScheduleNew = ({ name, sub }: UsersPageProps) => {
+export const UserNew = ({ name, sub }: UsersPageProps) => {
   const navigate = useNavigate();
 
   const handleSuccess = () => {
-    navigate("/schedules", {
+    navigate("/users", {
       state: {
-        message: "El horario fue creado exitosamente",
+        message: "El usuario fue creado exitosamente",
         messageKind: "success",
       },
     });
   };
 
   const handleCancel = () => {
-    navigate("/schedules");
+    navigate("/users");
   };
 
   return (
@@ -27,12 +27,12 @@ export const ScheduleNew = ({ name, sub }: UsersPageProps) => {
           <div className="col-12">
             <div className="ibox ">
               <div className="ibox-title">
-                <h5>Crear nuevo horario</h5>
+                <h5>Crear Nuevo Usuario</h5>
               </div>
               <div className="ibox-content">
                 <div className="row">
                   <div className="col-sm-12">
-                    <ScheduleForm
+                    <UserForm
                       onSuccess={handleSuccess}
                       onCancel={handleCancel}
                     />

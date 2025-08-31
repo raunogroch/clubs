@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
-import { useAuthErrorHandler } from "../../../hooks/useAuthErrorHandler";
-import { scheduleService } from "../../../services/scheduleService";
+import { useAuthErrorHandler } from "../../../hooks";
+import { scheduleService, type IScheduleService } from "../../../services";
 
 /**
- * Hook para gestionar la lista de usuarios y sus acciones (obtener, eliminar).
- * Maneja estados de carga y error, y redirige si la sesión expira.
+ * Hook para gestionar la lista de horarios y sus acciones (obtener, eliminar).
+ * Ahora depende de la interfaz IScheduleService para cumplir DIP e ISP.
+ * @param service - Implementación de IScheduleService (por defecto scheduleService)
  */
-export const useScheduleClub = () => {
+export const useScheduleClub = (
+  service: IScheduleService = scheduleService
+) => {
   const [schedules, setSchedules] = useState([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,7 +20,7 @@ export const useScheduleClub = () => {
    */
   const fetchSchedules = async () => {
     try {
-      const response = await scheduleService.getAll();
+      const response = await service.getAll();
 
       if (response.code === 200) {
         const { data } = response;

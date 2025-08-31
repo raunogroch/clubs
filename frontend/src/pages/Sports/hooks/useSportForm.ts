@@ -1,14 +1,19 @@
 import { useState } from "react";
 import { useAuthErrorHandler } from "../../../hooks/useAuthErrorHandler";
-import type { Sport, SportErrors } from "../types/sportTypes";
+import type { Sport, SportErrors } from "../interfaces/sportTypes";
+import type { ISportService } from "../../../services/interfaces/sportService.interface";
 import { sportService } from "../../../services/sportService";
 
 /**
- * Hook para gestionar el formulario de usuario (crear/editar).
- * Incluye validación, manejo de errores y envío de datos.
- * @param initialData - Datos iniciales del usuario (para edición).
+ * Hook para gestionar el formulario de Sport (crear/editar).
+ * Ahora depende de la interfaz ISportService para cumplir DIP e ISP.
+ * @param initialData - Datos iniciales del sport (para edición).
+ * @param service - Implementación de ISportService (por defecto sportService)
  */
-export const useSportForm = (initialData?: Sport) => {
+export const useSportForm = (
+  initialData?: Sport,
+  service: ISportService = sportService
+) => {
   const [formData, setFormData] = useState<Sport>(
     initialData || {
       name: "",
@@ -55,9 +60,9 @@ export const useSportForm = (initialData?: Sport) => {
     try {
       let response;
       if (initialData?._id) {
-        response = await sportService.update(initialData._id, formData);
+        response = await service.update(initialData._id, formData);
       } else {
-        response = await sportService.create(formData);
+        response = await service.create(formData);
       }
 
       handleAuthError(response, (msg) =>

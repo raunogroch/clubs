@@ -1,15 +1,19 @@
-import { CustomMessage, Input } from "../../../components";
-import { useAthleteClub } from "../hooks/useAthleteClub";
-import { useClubForm } from "../hooks/useClubForm";
-import { useCoachClub } from "../hooks/useCoachClub";
-import { useScheduleClub } from "../hooks/useScheduleClub";
-import { useSportClub } from "../hooks/useSportClub";
-import type { ClubFormProps } from "../types/clubTypes";
-import { AthleteClubCheckbox } from "./AthleteClubCheckbox";
-import { CoachClubCheckbox } from "./CoachClubCheckbox";
-import { FormField } from "./FormField";
-import { ScheduleClubSelector } from "./ScheduleClubSelector";
-import { SportClubSelector } from "./SportClubSelector";
+import {
+  AthleteClubCheckbox,
+  CoachClubCheckbox,
+  FormField,
+  ScheduleClubSelector,
+  SportClubSelector,
+} from ".";
+import {
+  useAthleteClub,
+  useClubForm,
+  useCoachClub,
+  useScheduleClub,
+  useSportClub,
+} from "../hooks";
+import { CustomMessage } from "../../../components";
+import type { ClubFormProps } from "../interfaces";
 
 export const ClubForm = ({
   initialData,
@@ -30,6 +34,7 @@ export const ClubForm = ({
     if (success && onSuccess) onSuccess();
   };
 
+  console.log("Form Data:", formData);
   return (
     <div>
       {message && <CustomMessage message={message.text} kind={message.type} />}

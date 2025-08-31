@@ -4,11 +4,13 @@ import { CreateCompetencyDto } from './dto/create-competency.dto';
 import { UpdateCompetencyDto } from './dto/update-competency.dto';
 import { Competency } from './schemas/competency.schema';
 import type { ICompetencyRepository } from './repository/competency.repository.interface';
+import { Inject } from '@nestjs/common';
 import { CompetencyValidatorService } from './competency-validator.service';
 
 @Injectable()
 export class CompetenciesService {
   constructor(
+    @Inject('CompetencyRepository')
     private readonly competencyRepository: ICompetencyRepository,
     private readonly competencyValidator: CompetencyValidatorService,
   ) {}

@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { Input, CustomMessage } from "../../../components";
-import { UserImageInput } from "./UserImageInput";
-import { ImageCropper } from "../../../components/ImageCropper";
-import { useUserForm } from "../hooks/useUserForm";
-import type { UserFormProps } from "../types/userTypes";
+import { CustomMessage, ImageCropper, Input } from "../../../components";
+import { useUserForm } from "../hooks";
+import type { UserFormProps } from "../interfaces";
 import { UserRoleSelector } from "./UserRoleSelector";
+import { UserImageInput } from ".";
 
 export const UserForm = ({
   initialData,

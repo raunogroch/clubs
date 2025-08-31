@@ -1,47 +1,45 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { userService } from "../../services/userService";
-import { NavHeader, LoadingIndicator, ErrorMessage } from "../../components";
-import type { UsersPageProps } from "./types/userTypes";
-import { UserForm } from "./components/UserForm";
+import type { pageParamProps } from "../../../interfaces/pageParamProps";
+import type { Club } from "../interfaces/clubTypes";
+import { useClubs } from "../hooks/useClub";
+import { ErrorMessage, LoadingIndicator, NavHeader } from "../../../components";
+import { ClubForm } from "./ClubForm";
 
-export const UserEdit = ({ name, sub }: UsersPageProps) => {
-  const { id } = useParams();
+export const ClubEdit = ({ name, sub }: pageParamProps) => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
+  const [club, setClub] = useState<Club | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await userService.getById(id!);
-        if (response.data) {
-          setUser(response.data);
-        } else {
-          setError("Usuario no encontrado");
-        }
-      } catch (err) {
-        setError("Error al cargar el usuario");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const { getClubById } = useClubs();
 
-    fetchUser();
+  useEffect(() => {
+    setLoading(true);
+    getClubById(id)
+      .then((data) => {
+        setClub(data);
+      })
+      .catch(() => {
+        setError("Error al cargar el club");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, [id]);
 
   const handleSuccess = () => {
-    navigate("/users", {
+    navigate("/clubs", {
       state: {
-        message: "El usuario fue actualizado exitosamente",
+        message: "El club fue actualizado exitosamente",
         messageKind: "success",
       },
     });
   };
 
   const handleCancel = () => {
-    navigate("/users");
+    navigate("/clubs");
   };
 
   if (loading) return <LoadingIndicator />;
@@ -55,13 +53,13 @@ export const UserEdit = ({ name, sub }: UsersPageProps) => {
           <div className="col-12">
             <div className="ibox ">
               <div className="ibox-title">
-                <h5>Editar Usuario</h5>
+                <h5>Editar Club</h5>
               </div>
               <div className="ibox-content">
                 <div className="row">
                   <div className="col-sm-12">
-                    <UserForm
-                      initialData={user}
+                    <ClubForm
+                      initialData={club}
                       onSuccess={handleSuccess}
                       onCancel={handleCancel}
                     />

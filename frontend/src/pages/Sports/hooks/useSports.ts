@@ -1,13 +1,19 @@
 import { useState, useEffect } from "react";
 import { useAuthErrorHandler } from "../../../hooks/useAuthErrorHandler";
-import type { Sport } from "../types/sportTypes";
+import type { Sport } from "../interfaces/sportTypes";
+import type { ISportService } from "../../../services/interfaces/sportService.interface";
 import { sportService } from "../../../services/sportService";
 
 /**
  * Hook para gestionar la lista de Sports y sus acciones (obtener, eliminar, buscar por id).
  * Maneja estados de carga y error, y redirige si la sesión expira.
  */
-export const useSports = () => {
+/**
+ * Hook para gestionar la lista de Sports y sus acciones (obtener, eliminar, buscar por id).
+ * Ahora depende de la interfaz ISportService para cumplir DIP e ISP.
+ * @param service - Implementación de ISportService (por defecto sportService)
+ */
+export const useSports = (service: ISportService = sportService) => {
   const [sports, setSports] = useState<Sport[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +26,7 @@ export const useSports = () => {
   const fetchSports = async () => {
     try {
       setLoading(true);
-      const response = await sportService.getAll();
+      const response = await service.getAll();
       if (response.code === 200) {
         setSports(response.data);
       }
@@ -38,7 +44,7 @@ export const useSports = () => {
    */
   const deleteSport = async (id: string): Promise<void> => {
     try {
-      const response = await sportService.delete(id);
+      const response = await service.delete(id);
       handleAuthError(response, setError);
       fetchSports();
     } catch (err) {
@@ -54,7 +60,7 @@ export const useSports = () => {
   const getSportById = async (id: string): Promise<Sport | null> => {
     try {
       setLoading(true);
-      const response = await sportService.getById(id);
+      const response = await service.getById(id);
       handleAuthError(response, setError);
       if (response.code === 200) {
         return response.data;

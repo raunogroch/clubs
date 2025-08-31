@@ -1,8 +1,11 @@
-import { ErrorMessage, Image, LoadingIndicator } from "../../components";
-import { NavHeader } from "../../components/NavHeader";
-import type { pageParamProps } from "../../interfaces/pageParamProps";
-import { Role } from "../../interfaces/roleEnum";
-import { useProfile } from "./hooks/useProfile";
+import {
+  NavHeader,
+  Image,
+  LoadingIndicator,
+  ErrorMessage,
+} from "../../../components";
+import { Role, type pageParamProps } from "../../../interfaces";
+import { useProfile } from "../hooks";
 
 export const Profile = ({ name }: pageParamProps) => {
   const { user, loading, error } = useProfile();
@@ -17,11 +20,15 @@ export const Profile = ({ name }: pageParamProps) => {
         <div className="row m-b-lg m-t-lg">
           <div className="col-md-6">
             <div className="profile-image">
-              <Image
-                src={`http://localhost:3000${user.image}`}
-                className="rounded-circle circle-border m-b-md"
-                alt="profile"
-              />
+              {user.image ? (
+                <Image
+                  src={user.image}
+                  className="rounded-circle circle-border m-b-md"
+                  alt="profile"
+                />
+              ) : (
+                "Sin Imagen"
+              )}
             </div>
             <div className="profile-info">
               <div className="">

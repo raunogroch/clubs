@@ -1,10 +1,14 @@
 // Servicio para validaciones de Competency
 import { Injectable } from '@nestjs/common';
 import type { ICompetencyRepository } from './repository/competency.repository.interface';
+import { Inject } from '@nestjs/common';
 
 @Injectable()
 export class CompetencyValidatorService {
-  constructor(private readonly competencyRepository: ICompetencyRepository) {}
+  constructor(
+    @Inject('CompetencyRepository')
+    private readonly competencyRepository: ICompetencyRepository,
+  ) {}
 
   async validateUniqueName(name: string): Promise<void> {
     const competency = await this.competencyRepository.findOneByName(name);

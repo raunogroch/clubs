@@ -1,4 +1,4 @@
-import type { Sport } from "../../Sports/types/sportTypes";
+import type { Sport } from "../../Sports/interfaces/sportTypes";
 
 interface SportSelectorProps {
   selectedSportId: string;

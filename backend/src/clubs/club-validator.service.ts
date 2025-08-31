@@ -1,10 +1,13 @@
 // Servicio para validaciones de Club
 import { Injectable } from '@nestjs/common';
 import type { IClubRepository } from './repository/club.repository.interface';
+import { Inject } from '@nestjs/common';
 
 @Injectable()
 export class ClubValidatorService {
-  constructor(private readonly clubRepository: IClubRepository) {}
+  constructor(
+    @Inject('ClubRepository') private readonly clubRepository: IClubRepository,
+  ) {}
 
   async validateUniqueName(name: string): Promise<void> {
     const club = await this.clubRepository.findOneByName(name);

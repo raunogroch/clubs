@@ -1,4 +1,4 @@
-import type { Club } from "../pages/Clubs/types/clubTypes";
+import type { Club } from "../pages/Clubs/interfaces/clubTypes";
 import { handleApiError, type ApiResponse } from "../utils/apiUtils";
 import api from "./api";
 

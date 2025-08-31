@@ -1,21 +1,24 @@
 import { useState } from "react";
-import { useAuthErrorHandler } from "../../../hooks/useAuthErrorHandler";
-import type { ClubErrors, Club } from "../types/clubTypes";
-import { clubService } from "../../../services/clubService";
+import { useAuthErrorHandler } from "../../../hooks";
+import type { ClubErrors, Club } from "../interfaces";
+import { clubService, type IClubService } from "../../../services";
 
 /**
- * Hook para gestionar el formulario de usuario (crear/editar).
- * Incluye validación, manejo de errores y envío de datos.
- * @param initialData - Datos iniciales del usuario (para edición).
+ * Hook para gestionar el formulario de Club (crear/editar).
+ * Ahora depende de la interfaz IClubService para cumplir DIP e ISP.
+ * @param initialData - Datos iniciales del club (para edición).
+ * @param service - Implementación de IClubService (por defecto clubService)
  */
-export const useClubForm = (initialData?: Club) => {
+export const useClubForm = (
+  initialData?: Club,
+  service: IClubService = clubService
+) => {
   const [formData, setFormData] = useState<Club>(
     initialData || {
       name: "",
-      schedule: "",
-      sport: "",
       place: "",
       discipline: "",
+      schedule: "",
       coaches: [],
       athletes: [],
     }
@@ -31,6 +34,7 @@ export const useClubForm = (initialData?: Club) => {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
+    console.log("Handling change for:", e.target.name, e.target.value);
     const { name, value, type, checked } = e.target as HTMLInputElement;
     if (type === "checkbox" && (name === "coaches" || name === "athletes")) {
       let updatedArr = Array.isArray(formData[name]) ? [...formData[name]] : [];
@@ -79,9 +83,9 @@ export const useClubForm = (initialData?: Club) => {
     try {
       let response: any;
       if (initialData?._id) {
-        response = await clubService.update(initialData._id, formData);
+        response = await service.update(initialData._id, formData);
       } else {
-        response = await clubService.create(formData);
+        response = await service.create(formData);
       }
 
       handleAuthError(response, (msg) =>

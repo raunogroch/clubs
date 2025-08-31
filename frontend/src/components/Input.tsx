@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent } from "react";
+import type { ChangeEvent } from "react";
 
 interface InputProps {
   type?:
@@ -44,12 +44,8 @@ export const Input = ({
   min,
   onChange: propOnChange,
 }: InputProps) => {
-  const [internalValue, setInternalValue] = useState("");
-
-  // Convert ISO date string to yyyy-MM-dd format if type is date
   const formatDateValue = (value: string | number | undefined) => {
     if (type !== "date" || value === undefined) return value;
-
     if (typeof value === "string" && value.includes("T")) {
       return value.split("T")[0];
     }
@@ -57,15 +53,10 @@ export const Input = ({
   };
 
   const value =
-    propValue !== undefined ? formatDateValue(propValue) : internalValue;
+    propValue !== undefined ? formatDateValue(propValue) : undefined;
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (propOnChange) {
-      propOnChange(e);
-    }
-    if (propValue === undefined) {
-      setInternalValue(e.target.value);
-    }
+    if (propOnChange) propOnChange(e);
   };
 
   const commonProps = {
@@ -83,12 +74,17 @@ export const Input = ({
   };
 
   if (type === "checkbox") {
-    return <input type="checkbox" checked={checked} {...commonProps} />;
+    return (
+      <input
+        type="checkbox"
+        checked={checked}
+        value={propValue}
+        {...commonProps}
+      />
+    );
   }
-
   if (type === "file") {
     return <input type="file" {...commonProps} />;
   }
-
   return <input type={type} value={value ?? ""} {...commonProps} />;
 };

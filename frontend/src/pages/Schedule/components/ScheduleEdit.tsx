@@ -1,25 +1,25 @@
 import { useNavigate, useParams } from "react-router-dom";
-import type { pageParamProps } from "../../interfaces/pageParamProps";
 import { useEffect, useState } from "react";
-import { ErrorMessage, LoadingIndicator, NavHeader } from "../../components";
-import type { Sport } from "./types/sportTypes";
-import { useSports } from "./hooks/useSports";
-import { SportForm } from "./components/SportForm";
+import { ErrorMessage, LoadingIndicator, NavHeader } from "../../../components";
+import type { pageParamProps } from "../../../interfaces/pageParamProps";
+import type { Schedule } from "../types/scheduleTypes";
+import { useSchedule } from "../hooks/useSchedule";
+import { ScheduleForm } from "./ScheduleForm";
 
-export const SportEdit = ({ name, sub }: pageParamProps) => {
+export const ScheduleEdit = ({ name, sub }: pageParamProps) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [sport, setSport] = useState<Sport | null>(null);
+  const [schedule, setSchedule] = useState<Schedule | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { getSportById } = useSports();
+  const { getScheduleById } = useSchedule();
 
   useEffect(() => {
     setLoading(true);
-    getSportById(id)
+    getScheduleById(id)
       .then((data) => {
-        setSport(data);
+        setSchedule(data);
       })
       .catch(() => {
         setError("Error al cargar las disciplinas");
@@ -30,7 +30,7 @@ export const SportEdit = ({ name, sub }: pageParamProps) => {
   }, [id]);
 
   const handleSuccess = () => {
-    navigate("/sports", {
+    navigate("/schedules", {
       state: {
         message: "La disciplina fue actualizado exitosamente",
         messageKind: "success",
@@ -39,7 +39,7 @@ export const SportEdit = ({ name, sub }: pageParamProps) => {
   };
 
   const handleCancel = () => {
-    navigate("/sports");
+    navigate("/schedules");
   };
 
   if (loading) return <LoadingIndicator />;
@@ -58,8 +58,8 @@ export const SportEdit = ({ name, sub }: pageParamProps) => {
               <div className="ibox-content">
                 <div className="row">
                   <div className="col-sm-12">
-                    <SportForm
-                      initialData={sport}
+                    <ScheduleForm
+                      initialData={schedule}
                       onSuccess={handleSuccess}
                       onCancel={handleCancel}
                     />

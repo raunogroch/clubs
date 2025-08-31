@@ -1,45 +1,49 @@
 import { useNavigate, useParams } from "react-router-dom";
-import type { pageParamProps } from "../../interfaces/pageParamProps";
 import { useEffect, useState } from "react";
-import { ErrorMessage, LoadingIndicator, NavHeader } from "../../components";
-import type { Schedule } from "./types/scheduleTypes";
-import { useSchedule } from "./hooks/useSchedule";
-import { ScheduleForm } from "./components/ScheduleForm";
+import { userService } from "../../../services/userService";
+import { NavHeader } from "../../../components/NavHeader";
+import { LoadingIndicator } from "../../../components/LoadingIndicator";
+import { ErrorMessage } from "../../../components/ErrorMessage";
+import type { UsersPageProps } from "../interfaces/userTypes";
+import { UserForm } from "./UserForm";
 
-export const ScheduleEdit = ({ name, sub }: pageParamProps) => {
-  const { id } = useParams<{ id: string }>();
+export const UserEdit = ({ name, sub }: UsersPageProps) => {
+  const { id } = useParams();
   const navigate = useNavigate();
-  const [schedule, setSchedule] = useState<Schedule | null>(null);
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { getScheduleById } = useSchedule();
-
   useEffect(() => {
-    setLoading(true);
-    getScheduleById(id)
-      .then((data) => {
-        setSchedule(data);
-      })
-      .catch(() => {
-        setError("Error al cargar las disciplinas");
-      })
-      .finally(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await userService.getById(id!);
+        if (response.data) {
+          setUser(response.data);
+        } else {
+          setError("Usuario no encontrado");
+        }
+      } catch (err) {
+        setError("Error al cargar el usuario");
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchUser();
   }, [id]);
 
   const handleSuccess = () => {
-    navigate("/schedules", {
+    navigate("/users", {
       state: {
-        message: "La disciplina fue actualizado exitosamente",
+        message: "El usuario fue actualizado exitosamente",
         messageKind: "success",
       },
     });
   };
 
   const handleCancel = () => {
-    navigate("/schedules");
+    navigate("/users");
   };
 
   if (loading) return <LoadingIndicator />;
@@ -53,13 +57,13 @@ export const ScheduleEdit = ({ name, sub }: pageParamProps) => {
           <div className="col-12">
             <div className="ibox ">
               <div className="ibox-title">
-                <h5>Editar la disciplina</h5>
+                <h5>Editar Usuario</h5>
               </div>
               <div className="ibox-content">
                 <div className="row">
                   <div className="col-sm-12">
-                    <ScheduleForm
-                      initialData={schedule}
+                    <UserForm
+                      initialData={user}
                       onSuccess={handleSuccess}
                       onCancel={handleCancel}
                     />

@@ -1,12 +1,18 @@
 import { useState, useEffect } from "react";
 import { useAuthErrorHandler } from "../../../hooks/useAuthErrorHandler";
 import { userService } from "../../../services/userService";
+import type { IUserService } from "../../../services/interfaces/userService.interface";
 
 /**
  * Hook para gestionar la lista de usuarios y sus acciones (obtener, eliminar).
  * Maneja estados de carga y error, y redirige si la sesión expira.
  */
-export const useUsers = () => {
+/**
+ * Hook para gestionar la lista de usuarios y sus acciones (obtener, eliminar).
+ * Ahora depende de la interfaz IUserService para cumplir DIP e ISP.
+ * @param service - Implementación de IUserService (por defecto userService)
+ */
+export const useUsers = (service: IUserService = userService) => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +25,7 @@ export const useUsers = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await userService.getAll();
+      const response = await service.getAll();
 
       if (response.code === 200) {
         const { data } = response;
@@ -41,7 +47,7 @@ export const useUsers = () => {
    */
   const deleteUser = async (id: string): Promise<void> => {
     try {
-      const response = await userService.delete(id);
+      const response = await service.delete(id);
       handleAuthError(response, setError);
       fetchUsers();
     } catch (err) {

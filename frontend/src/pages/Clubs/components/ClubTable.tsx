@@ -1,33 +1,29 @@
 import { Link } from "react-router-dom";
-import type { Club } from "../types/clubTypes";
 
-interface ClubsTableProps {
-  clubs: ClubsAll[];
-  onDelete: (id: string) => Promise<void>;
-}
-
-interface UsersData {
-  _id: string;
-  name: string;
-  lastname: string;
-}
-interface ClubsAll {
-  _id: string;
+interface ClubFields {
+  _id?: string;
   name: string;
   schedule: {
+    _id: string;
     startTime: string;
     endTime: string;
   };
   discipline: {
+    _id: string;
     name: string;
   };
   place: string;
-  coaches: UsersData[];
-  athletes: UsersData[];
+  coaches?: any[];
+  athletes?: any[];
 }
 
+interface ClubsTableProps {
+  clubs: ClubFields[];
+  onDelete: (id: string) => Promise<void>;
+}
 export const ClubTable = ({ clubs, onDelete }: ClubsTableProps) => {
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id?: string) => {
+    if (!id) return;
     if (window.confirm("¿Está seguro de eliminar este usuario?")) {
       await onDelete(id);
     }
@@ -49,35 +45,42 @@ export const ClubTable = ({ clubs, onDelete }: ClubsTableProps) => {
           </tr>
         </thead>
         <tbody>
-          {clubs.map((club, index) => (
-            <tr key={club._id}>
-              <td className="align-middle text-center">{index + 1}</td>
-              <td className="align-middle">{club.name}</td>
-              <td className="align-middle">
-                {club.schedule.startTime} - {club.schedule.endTime}
-              </td>
-              <td className="align-middle">{club.discipline.name}</td>
-              <td className="align-middle">{club.place}</td>
-              <td className="align-middle">{club.coaches.length} Asignado/s</td>
-              <td className="align-middle">
-                {club.athletes.length} Asignado/s
-              </td>
-              <td className="text-center">
-                <Link
-                  to={`/clubs/edit/${club._id}`}
-                  className="btn btn-primary btn-outline m-1"
-                >
-                  <i className="fa fa-edit"></i> Editar
-                </Link>
-                <button
-                  onClick={() => handleDelete(club._id!)}
-                  className="btn btn btn-danger btn-outline m-1"
-                >
-                  <i className="fa fa-trash"></i> Eliminar
-                </button>
-              </td>
-            </tr>
-          ))}
+          {clubs.map(
+            (
+              { _id, name, schedule, discipline, place, coaches, athletes },
+              index
+            ) => (
+              <tr key={_id}>
+                <td className="align-middle text-center">{index + 1}</td>
+                <td className="align-middle">{name}</td>
+                <td className="align-middle">
+                  {`${schedule.startTime} Hrs - ${schedule.endTime} Hrs`}
+                </td>
+                <td className="align-middle">{discipline.name}</td>
+                <td className="align-middle">{place}</td>
+                <td className="align-middle">
+                  {coaches?.length ?? 0} Asignado/s
+                </td>
+                <td className="align-middle">
+                  {athletes?.length ?? 0} Asignado/s
+                </td>
+                <td className="text-center">
+                  <Link
+                    to={`/clubs/edit/${_id ?? ""}`}
+                    className="btn btn-primary btn-outline m-1"
+                  >
+                    <i className="fa fa-edit"></i> Editar
+                  </Link>
+                  <button
+                    onClick={() => handleDelete(_id)}
+                    className="btn btn btn-danger btn-outline m-1"
+                  >
+                    <i className="fa fa-trash"></i> Eliminar
+                  </button>
+                </td>
+              </tr>
+            )
+          )}
         </tbody>
       </table>
     </div>

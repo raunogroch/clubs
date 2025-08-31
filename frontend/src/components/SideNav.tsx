@@ -1,8 +1,8 @@
 import { useContext } from "react";
 import { AuthContext } from "../auth/AuthContext";
-import { Image } from "./Image";
+import { Image } from ".";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Role } from "../interfaces/roleEnum";
+import { Role } from "../interfaces";
 
 export const SideNav = () => {
   const { logout, user } = useContext(AuthContext);
@@ -26,12 +26,16 @@ export const SideNav = () => {
         <ul className="nav metismenu" id="side-menu">
           <li className="nav-header">
             <div className="dropdown profile-element">
-              <Image
-                src={`http://localhost:3000${user.image}`}
-                alt="image"
-                className="rounded-circle"
-                style={{ width: 48, height: 48 }}
-              />
+              {user.image ? (
+                <Image
+                  src={user.image}
+                  alt="image"
+                  className="rounded-circle"
+                  style={{ width: 48, height: 48 }}
+                />
+              ) : (
+                "Sin Imagen"
+              )}
               <Link data-toggle="dropdown" className="dropdown-toggle" to="#">
                 <span className="block m-t-xs font-bold">
                   {user

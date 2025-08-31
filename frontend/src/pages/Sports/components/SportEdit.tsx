@@ -1,28 +1,30 @@
-import { useNavigate, useParams } from "react-router-dom";
-import type { pageParamProps } from "../../interfaces/pageParamProps";
-import { useClubs } from "./hooks/useClub";
-import { ClubForm } from "./components/ClubForm";
 import { useEffect, useState } from "react";
-import { ErrorMessage, LoadingIndicator, NavHeader } from "../../components";
-import type { Club } from "./types/clubTypes";
+import { useNavigate, useParams } from "react-router-dom";
+import type { pageParamProps } from "../../../interfaces/pageParamProps";
+import type { Sport } from "../interfaces/sportTypes";
+import { useSports } from "../interfaces/useSports";
+import { NavHeader } from "../../../components/NavHeader";
+import { ErrorMessage } from "../../../components/ErrorMessage";
+import { LoadingIndicator } from "../../../components/LoadingIndicator";
+import { SportForm } from "./SportForm";
 
-export const ClubEdit = ({ name, sub }: pageParamProps) => {
+export const SportEdit = ({ name, sub }: pageParamProps) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [club, setClub] = useState<Club | null>(null);
+  const [sport, setSport] = useState<Sport | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { getClubById } = useClubs();
+  const { getSportById } = useSports();
 
   useEffect(() => {
     setLoading(true);
-    getClubById(id)
+    getSportById(id)
       .then((data) => {
-        setClub(data);
+        setSport(data);
       })
       .catch(() => {
-        setError("Error al cargar el club");
+        setError("Error al cargar las disciplinas");
       })
       .finally(() => {
         setLoading(false);
@@ -30,16 +32,16 @@ export const ClubEdit = ({ name, sub }: pageParamProps) => {
   }, [id]);
 
   const handleSuccess = () => {
-    navigate("/clubs", {
+    navigate("/sports", {
       state: {
-        message: "El club fue actualizado exitosamente",
+        message: "La disciplina fue actualizado exitosamente",
         messageKind: "success",
       },
     });
   };
 
   const handleCancel = () => {
-    navigate("/clubs");
+    navigate("/sports");
   };
 
   if (loading) return <LoadingIndicator />;
@@ -53,13 +55,13 @@ export const ClubEdit = ({ name, sub }: pageParamProps) => {
           <div className="col-12">
             <div className="ibox ">
               <div className="ibox-title">
-                <h5>Editar Club</h5>
+                <h5>Editar la disciplina</h5>
               </div>
               <div className="ibox-content">
                 <div className="row">
                   <div className="col-sm-12">
-                    <ClubForm
-                      initialData={club}
+                    <SportForm
+                      initialData={sport}
                       onSuccess={handleSuccess}
                       onCancel={handleCancel}
                     />

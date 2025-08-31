@@ -8,15 +8,22 @@ import {
 import { AuthProvider } from "./auth/AuthProvider";
 import { PrivateRoute } from "./auth/PrivateRoute";
 import { Login, NotFound } from "./layouts";
-import { Clubs, Dashboard, Profile, UserEdit, UserNew, Users } from "./pages";
-import { ClubEdit } from "./pages/Clubs/ClubEdit";
-import { ClubNew } from "./pages/Clubs/ClubNew";
-import { Schedule } from "./pages/Schedule/Schedule";
-import { Sports } from "./pages/Sports/Sports";
-import { SportNew } from "./pages/Sports/SportNew";
-import { SportEdit } from "./pages/Sports/SportEdit";
-import { ScheduleNew } from "./pages/Schedule/ScheduleNew";
-import { ScheduleEdit } from "./pages/Schedule/ScheduleEdit";
+import {
+  ClubEdit,
+  ClubNew,
+  Clubs,
+  Dashboard,
+  Schedule,
+  ScheduleEdit,
+  ScheduleNew,
+  SportEdit,
+  SportNew,
+  Sports,
+  UserEdit,
+  UserNew,
+  Users,
+} from "./pages";
+import { Profile } from "./pages/Profile/components/Profile";
 
 export const App = () => {
   return (

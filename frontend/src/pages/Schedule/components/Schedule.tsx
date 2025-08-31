@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import { NavHeader, LoadingIndicator, ErrorMessage } from "../../components";
-import type { pageParamProps } from "../../interfaces/pageParamProps";
-import { useSchedule } from "./hooks/useSchedule";
-import { ScheduleTable } from "./components/ScheduleTable";
+import { NavHeader, LoadingIndicator, ErrorMessage } from "../../../components";
+import type { pageParamProps } from "../../../interfaces/pageParamProps";
+import { useSchedule } from "../hooks/useSchedule";
+import { ScheduleTable } from "./ScheduleTable";
 
 export const Schedule = ({ name }: pageParamProps) => {
   const { schedules, loading, error, deleteSchedule } = useSchedule();

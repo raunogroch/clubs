@@ -3,6 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from './schemas/user.schema';
 import { CreateUserDto, UpdateUserDto } from './dto';
 import type { IUserRepository } from './repository/user.repository.interface';
+import { Inject } from '@nestjs/common';
 import { UserValidatorService } from './user-validator.service';
 import { UserImageService } from './user-image.service';
 import { UserPasswordService } from './user-password.service';
@@ -15,7 +16,7 @@ interface currentAuth {
 @Injectable()
 export class UsersService {
   constructor(
-    private readonly userRepository: IUserRepository,
+    @Inject('UserRepository') private readonly userRepository: IUserRepository,
     private readonly userValidator: UserValidatorService,
     private readonly userImageService: UserImageService,
     private readonly userPasswordService: UserPasswordService,

@@ -4,11 +4,13 @@ import { CreateSportDto } from './dto/create-sport.dto';
 import { UpdateSportDto } from './dto/update-sport.dto';
 import { Sport } from './schemas/sport.schemas';
 import type { ISportRepository } from './repository/sport.repository.interface';
+import { Inject } from '@nestjs/common';
 import { SportValidatorService } from './sport-validator.service';
 
 @Injectable()
 export class SportsService {
   constructor(
+    @Inject('SportRepository')
     private readonly sportRepository: ISportRepository,
     private readonly sportValidator: SportValidatorService,
   ) {}

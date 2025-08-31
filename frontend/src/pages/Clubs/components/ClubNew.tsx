@@ -1,13 +1,13 @@
 import { useNavigate } from "react-router-dom";
-import { NavHeader } from "../../components";
-import type { UsersPageProps } from "./types/userTypes";
-import { UserForm } from "./components/UserForm";
+import type { UsersPageProps } from "../../Users/interfaces/userTypes";
+import { NavHeader } from "../../../components";
+import { ClubForm } from "./ClubForm";
 
-export const UserNew = ({ name, sub }: UsersPageProps) => {
+export const ClubNew = ({ name, sub }: UsersPageProps) => {
   const navigate = useNavigate();
 
   const handleSuccess = () => {
-    navigate("/users", {
+    navigate("/clubs", {
       state: {
         message: "El usuario fue creado exitosamente",
         messageKind: "success",
@@ -16,7 +16,7 @@ export const UserNew = ({ name, sub }: UsersPageProps) => {
   };
 
   const handleCancel = () => {
-    navigate("/users");
+    navigate("/clubs");
   };
 
   return (
@@ -32,7 +32,7 @@ export const UserNew = ({ name, sub }: UsersPageProps) => {
               <div className="ibox-content">
                 <div className="row">
                   <div className="col-sm-12">
-                    <UserForm
+                    <ClubForm
                       onSuccess={handleSuccess}
                       onCancel={handleCancel}
                     />

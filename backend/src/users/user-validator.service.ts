@@ -1,10 +1,13 @@
 // Servicio para validaciones de User
 import { Injectable } from '@nestjs/common';
 import type { IUserRepository } from './repository/user.repository.interface';
+import { Inject } from '@nestjs/common';
 
 @Injectable()
 export class UserValidatorService {
-  constructor(private readonly userRepository: IUserRepository) {}
+  constructor(
+    @Inject('UserRepository') private readonly userRepository: IUserRepository,
+  ) {}
 
   async validateUniqueUsername(username: string): Promise<void> {
     const user = await this.userRepository.findOneByUsername(username);

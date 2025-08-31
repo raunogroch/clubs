@@ -1,5 +1,5 @@
 import { Input } from "../../../components";
-import type { User } from "../../Users/types/userTypes";
+import type { User } from "../../Users/interfaces";
 
 export interface AthleteClubCheckboxProps {
   dataList: User[];

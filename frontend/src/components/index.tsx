@@ -8,4 +8,4 @@ export * from "./ErrorMessage";
 export * from "./LoadingIndicator";
 export * from "./NavHeader";
 export * from "./RoleBadge";
-export * from "../pages/Users/components/UserTable";
+export * from "./ImageCropper";

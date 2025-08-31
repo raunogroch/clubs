@@ -5,6 +5,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Club, ClubSchema } from './schema/club.schema';
 import { UsersModule } from 'src/users/users.module';
 import { User, UserSchema } from 'src/users/schemas/user.schema';
+import { ClubRepository } from './repository/club.repository';
+import { ClubValidatorService } from './club-validator.service';
 
 @Module({
   imports: [
@@ -17,6 +19,10 @@ import { User, UserSchema } from 'src/users/schemas/user.schema';
     ]),
   ],
   controllers: [ClubsController],
-  providers: [ClubsService],
+  providers: [
+    ClubsService,
+    { provide: 'ClubRepository', useClass: ClubRepository },
+    ClubValidatorService,
+  ],
 })
 export class ClubsModule {}

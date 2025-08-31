@@ -1,4 +1,4 @@
-import type { Deporte } from "../pages/sports/types/DeporteTypes";
+import type { Sport } from "../pages/Sports/interfaces/sportTypes";
 import { handleApiError, type ApiResponse } from "../utils/apiUtils";
 import api from "./api";
 

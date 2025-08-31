@@ -1,10 +1,14 @@
 // Servicio para validaciones de Schedule
 import { Injectable } from '@nestjs/common';
 import type { IScheduleRepository } from './repository/schedule.repository.interface';
+import { Inject } from '@nestjs/common';
 
 @Injectable()
 export class ScheduleValidatorService {
-  constructor(private readonly scheduleRepository: IScheduleRepository) {}
+  constructor(
+    @Inject('ScheduleRepository')
+    private readonly scheduleRepository: IScheduleRepository,
+  ) {}
 
   async validateUniqueTime(startTime: Date, endTime: Date): Promise<void> {
     const schedule = await this.scheduleRepository.findOneByTime(

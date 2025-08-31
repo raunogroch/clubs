@@ -1,12 +1,11 @@
 import { Link } from "react-router-dom";
-import { NavHeader } from "../../components/NavHeader";
-import type { pageParamProps } from "../../interfaces/pageParamProps";
-import { ErrorMessage, LoadingIndicator } from "../../components";
-import { useSports } from "./hooks/useSports";
-import { SportTable } from "./components/SportTable";
+import type { UsersPageProps } from "../interfaces";
+import { UserTable } from ".";
+import { useUsers } from "../hooks";
+import { ErrorMessage, LoadingIndicator, NavHeader } from "../../../components";
 
-export const Sports = ({ name }: pageParamProps) => {
-  const { sports, loading, error, deleteSport } = useSports();
+export const Users = ({ name }: UsersPageProps) => {
+  const { users, loading, error, deleteUser } = useUsers();
 
   if (loading) return <LoadingIndicator />;
   if (error) return <ErrorMessage message={error} />;
@@ -14,23 +13,24 @@ export const Sports = ({ name }: pageParamProps) => {
   return (
     <>
       <NavHeader name={name} />
+
       <div className="wrapper wrapper-content animated fadeInRight">
         <div className="row">
           <div className="col-12">
             <div className="ibox ">
               <div className="ibox-title">
-                <h5>Lista de disciplinas</h5>
+                <h5>Lista de Usuarios</h5>
                 <div className="ibox-tools">
                   <Link
-                    to="/sports/create"
+                    to="/users/create"
                     className="btn btn-rounded btn-outline"
                   >
-                    <i className="fa fa-plus"></i> Nueva disciplina
+                    <i className="fa fa-plus"></i> Nuevo Usuario
                   </Link>
                 </div>
               </div>
               <div className="ibox-content">
-                <SportTable sports={sports} onDelete={deleteSport} />
+                <UserTable users={users} onDelete={deleteUser} />
               </div>
             </div>
           </div>

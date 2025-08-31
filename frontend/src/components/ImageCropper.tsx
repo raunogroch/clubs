@@ -61,7 +61,7 @@ export const ImageCropper: React.FC<ImageCropperProps> = ({
         <Cropper
           src={image}
           style={{ height: 400, width: 400, marginBottom: "1em" }}
-          initialAspectRatio={1}
+          aspectRatio={1}
           guides={true}
           crop={handleCrop}
           ref={cropperRef}

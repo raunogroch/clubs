@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useAuthErrorHandler } from "../../../hooks/useAuthErrorHandler";
-import { userService } from "../../../services/userService";
+import { userService, type IUserService } from "../../../services";
 
 /**
- * Hook para gestionar la lista de deportes y sus acciones (obtener, eliminar).
- * Maneja estados de carga y error, y redirige si la sesión expira.
+ * Hook para gestionar la lista de coaches y sus acciones (obtener, eliminar).
+ * Ahora depende de la interfaz IUserService para cumplir DIP e ISP.
+ * @param service - Implementación de IUserService (por defecto userService)
  */
-export const useCoachClub = () => {
+export const useCoachClub = (service: IUserService = userService) => {
   const [coaches, setCoaches] = useState([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,7 +18,7 @@ export const useCoachClub = () => {
    */
   const fetchCoaches = async () => {
     try {
-      const response = await userService.getAllCoaches();
+      const response = await service.getAllCoaches();
 
       if (response.code === 200) {
         const { data } = response;

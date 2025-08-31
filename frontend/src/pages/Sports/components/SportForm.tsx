@@ -1,6 +1,6 @@
 import { CustomMessage, Input } from "../../../components";
 import { useSportForm } from "../hooks/useSportForm";
-import type { SportFormProps } from "../types/sportTypes";
+import type { SportFormProps } from "../interfaces/sportTypes";
 
 export const SportForm = ({
   initialData,

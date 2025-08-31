@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import type { Sport } from "../types/sportTypes";
+import type { Sport } from "../interfaces/sportTypes";
 
 interface SportTableProps {
   sports: Sport[];

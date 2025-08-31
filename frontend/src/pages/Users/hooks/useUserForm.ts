@@ -1,14 +1,19 @@
 import { useState } from "react";
 import { useAuthErrorHandler } from "../../../hooks/useAuthErrorHandler";
-import type { User, UserErrors } from "../types/userTypes";
+import type { User, UserErrors } from "../interfaces/userTypes";
 import { userService } from "../../../services/userService";
+import type { IUserService } from "../../../services/interfaces/userService.interface";
 
 /**
- * Hook para gestionar el formulario de usuario (crear/editar).
- * Incluye validación, manejo de errores y envío de datos.
+ * Hook para gestionar el formulario de Usuario (crear/editar).
+ * Ahora depende de la interfaz IUserService para cumplir DIP e ISP.
  * @param initialData - Datos iniciales del usuario (para edición).
+ * @param service - Implementación de IUserService (por defecto userService)
  */
-export const useUserForm = (initialData?: User) => {
+export const useUserForm = (
+  initialData?: User,
+  service: IUserService = userService
+) => {
   const [formData, setFormData] = useState<User>(
     initialData || {
       image: "",
@@ -77,7 +82,7 @@ export const useUserForm = (initialData?: User) => {
     try {
       let response: any;
       if (initialData?._id) {
-        response = await userService.update(initialData._id, {
+        response = await service.update(initialData._id, {
           ...formData,
           role: formData.role as
             | "coach"
@@ -87,7 +92,7 @@ export const useUserForm = (initialData?: User) => {
             | "superadmin",
         });
       } else {
-        response = await userService.create({
+        response = await service.create({
           ...formData,
           role: formData.role as
             | "coach"

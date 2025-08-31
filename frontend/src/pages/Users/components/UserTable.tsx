@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import type { User } from "../types/userTypes";
+import type { User } from "../interfaces";
+import { Image } from "../../../components";
 
 interface UsersTableProps {
   users: User[];
@@ -19,6 +20,7 @@ export const UserTable = ({ users, onDelete }: UsersTableProps) => {
         <thead>
           <tr>
             <th className="text-center">Rol</th>
+            <th className="text-center">Foto</th>
             <th>Cedula de Identidad</th>
             <th>Nombres</th>
             <th>Apellidos</th>
@@ -38,12 +40,19 @@ export const UserTable = ({ users, onDelete }: UsersTableProps) => {
                   {user.role === "superadmin" && "Super Administrador"}
                 </div>
               </td>
+              <td className="align-middle text-center">
+                {user.image ? (
+                  <Image src={user.image} alt={user.name} />
+                ) : (
+                  "Sin Foto"
+                )}
+              </td>
               <td className="align-middle">{user.ci}</td>
               <td className="align-middle">{user.name}</td>
               <td className="align-middle">{user.lastname}</td>
               <td className="align-middle">{user.email}</td>
 
-              <td className="text-center">
+              <td className="text-center align-middle">
                 <Link
                   to={`/users/edit/${user._id}`}
                   className="btn btn-primary btn-outline m-1"

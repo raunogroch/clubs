@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
-import { useAuthErrorHandler } from "../../../hooks/useAuthErrorHandler";
-import { userService } from "../../../services/userService";
+import { useAuthErrorHandler } from "../../../hooks";
+import { userService, type IUserService } from "../../../services";
 
 /**
  * Hook para gestionar el perfil del usuario autenticado.
- * Obtiene los datos desde el servicio y maneja estados de carga y error.
+ * Ahora depende de la interfaz IUserService para cumplir DIP e ISP.
+ * @param service - Implementación de IUserService (por defecto userService)
  */
-export const useProfile = () => {
+export const useProfile = (service: IUserService = userService) => {
   const [user, setUser] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -19,8 +20,7 @@ export const useProfile = () => {
     try {
       setLoading(true);
       const userExist = localStorage.getItem("user");
-
-      const response = await userService.getById(JSON.parse(userExist).code);
+      const response = await service.getById(JSON.parse(userExist).code);
 
       if (response.code === 200) {
         const { data } = response;

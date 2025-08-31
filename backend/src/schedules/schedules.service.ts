@@ -4,11 +4,13 @@ import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { Schedule } from './schema/schedule.schema';
 import type { IScheduleRepository } from './repository/schedule.repository.interface';
+import { Inject } from '@nestjs/common';
 import { ScheduleValidatorService } from './schedule-validator.service';
 
 @Injectable()
 export class SchedulesService {
   constructor(
+    @Inject('ScheduleRepository')
     private readonly scheduleRepository: IScheduleRepository,
     private readonly scheduleValidator: ScheduleValidatorService,
   ) {}
