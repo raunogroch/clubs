@@ -3,7 +3,6 @@ import { ClubsService } from './clubs.service';
 import { ClubsController } from './clubs.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Club, ClubSchema } from './schema/club.schema';
-import { UsersModule } from 'src/users/users.module';
 import { User, UserSchema } from 'src/users/schemas/user.schema';
 import { ClubRepository } from './repository/club.repository';
 import { ClubValidatorService } from './club-validator.service';
@@ -24,5 +23,6 @@ import { ClubValidatorService } from './club-validator.service';
     { provide: 'ClubRepository', useClass: ClubRepository },
     ClubValidatorService,
   ],
+  exports: [ClubsService],
 })
 export class ClubsModule {}

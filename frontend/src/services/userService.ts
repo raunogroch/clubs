@@ -206,4 +206,17 @@ export const userService = {
       return handleApiError(error);
     }
   },
+
+  async getUserClubs(userId: string): Promise<ApiResponse<any[]>> {
+    try {
+      const response = await api.get(`/users/${userId}/clubs`);
+      return {
+        code: response.status,
+        message: "Clubes del usuario obtenidos correctamente",
+        data: response.data,
+      };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  },
 };

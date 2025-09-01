@@ -1,4 +1,6 @@
 export * from "./Dashboard";
+export * from "./dashboardAthletes/DashboardAthlete";
+
 export * from "./Clubs/components/Clubs";
 export * from "./Clubs/components/ClubEdit";
 export * from "./Clubs/components/ClubForm";

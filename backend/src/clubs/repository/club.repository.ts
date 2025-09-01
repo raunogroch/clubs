@@ -46,4 +46,16 @@ export class ClubRepository implements IClubRepository {
   async deleteById(id: string): Promise<Club | null> {
     return this.clubModel.findByIdAndDelete(id).exec();
   }
+
+  async findClubsByUserId(userId: string): Promise<Club[]> {
+    return this.clubModel
+      .find({
+        $or: [{ athletes: userId }],
+      })
+      .populate([
+        { path: 'schedule', select: 'startTime endTime' },
+        { path: 'discipline', select: 'name' },
+        { path: 'coaches', select: 'name lastname' },
+      ]);
+  }
 }

@@ -13,9 +13,9 @@ import {
   UserEdit,
   UserNew,
   Users,
+  Profile,
+  DashboardAthlete,
 } from "../pages";
-import { Profile } from "../pages/Profile/components/Profile";
-
 export type MenuRoute = {
   path: string;
   icon?: string;
@@ -176,7 +176,7 @@ export const roleRoutes: RoleRoutes = {
       path: "/",
       icon: "fa-home",
       label: "Principal",
-      element: <Dashboard />,
+      element: <DashboardAthlete />,
     },
     { path: "/profile", label: "Perfil", element: <Profile name="Perfil" /> },
   ],

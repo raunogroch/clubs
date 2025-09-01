@@ -9,6 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
+import { ClubsService } from 'src/clubs/clubs.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -25,7 +26,19 @@ interface currentAuth {
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly clubsService: ClubsService,
+  ) {}
+
+  /**
+   * Endpoint para obtener los clubes donde el usuario atleta está inscrito
+   */
+  @Get(':id/clubs')
+  @Roles(Role.ATHLETE)
+  async getAthleteClubs(@Param('id') id: string) {
+    return this.clubsService.findClubsByUserId(id);
+  }
 
   /**
    * Endpoint para crear un usuario

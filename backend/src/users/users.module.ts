@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ClubsModule } from '../clubs/clubs.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
@@ -11,6 +12,7 @@ import { UserPasswordService } from './user-password.service';
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    ClubsModule,
   ],
   controllers: [UsersController],
   providers: [

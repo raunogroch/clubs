@@ -19,4 +19,5 @@ export interface IUserService {
   getProfile(id: string): Promise<ApiResponse<User>>;
   getAllCoaches(): Promise<ApiResponse<User[]>>;
   getAllAtheles(): Promise<ApiResponse<User[]>>;
+  getUserClubs(userId: string): Promise<ApiResponse<any[]>>; // Ajusta el tipo según la estructura real de los clubes
 }
