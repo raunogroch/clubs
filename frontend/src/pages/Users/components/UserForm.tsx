@@ -1,8 +1,13 @@
 import { useState } from "react";
-import { CustomMessage, ImageCropper, Input } from "../../../components";
+import {
+  CropperImageInput,
+  CustomMessage,
+  ImageCropper,
+  Input,
+} from "../../../components";
 import { useUserForm } from "../hooks";
 import type { UserFormProps } from "../interfaces";
-import { UserRoleSelector, UserImageInput } from ".";
+import { UserRoleSelector } from ".";
 
 export const UserForm = ({
   initialData,
@@ -33,7 +38,7 @@ export const UserForm = ({
   return (
     <div>
       {message && <CustomMessage message={message.text} kind={message.type} />}
-      <UserImageInput
+      <CropperImageInput
         value={formData.image || ""}
         error={errors.image}
         onChange={handleImageChange}

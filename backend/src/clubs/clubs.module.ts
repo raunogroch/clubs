@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Club, ClubSchema } from './schema/club.schema';
 import { User, UserSchema } from 'src/users/schemas/user.schema';
 import { ClubRepository } from './repository/club.repository';
+import { ImageService } from 'src/utils';
 import { ClubValidatorService } from './club-validator.service';
 
 @Module({
@@ -22,6 +23,7 @@ import { ClubValidatorService } from './club-validator.service';
     ClubsService,
     { provide: 'ClubRepository', useClass: ClubRepository },
     ClubValidatorService,
+    ImageService,
   ],
   exports: [ClubsService],
 })

@@ -38,6 +38,10 @@ export class Club extends Document {
   /** Lista de atletas */
   @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] })
   athletes: User[];
+
+  /** Imagen de club en base64 */
+  @Prop()
+  image: string;
 }
 
 export const ClubSchema = SchemaFactory.createForClass(Club);

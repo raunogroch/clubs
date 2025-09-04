@@ -7,7 +7,10 @@ import { v4 as uuidv4 } from 'uuid';
  * @param base64Image Imagen en base64
  * @returns string Link relativo a la imagen guardada
  */
-export const saveProfileImage = (base64Image: string): string => {
+export const saveProfileImage = (
+  folder: string,
+  base64Image: string,
+): string => {
   // Extrae el tipo de imagen
   const matches = base64Image.match(
     /^data:(image\/(png|jpeg|jpg));base64,(.+)$/,
@@ -19,8 +22,11 @@ export const saveProfileImage = (base64Image: string): string => {
   const data = matches[3];
   const buffer = Buffer.from(data, 'base64');
   const filename = `${uuidv4()}.${ext}`;
-  const folderPath = path.join(__dirname, '../../images/profile');
+  const folderPath = path.join(__dirname, '../../images', folder);
+  if (!fs.existsSync(folderPath)) {
+    fs.mkdirSync(folderPath, { recursive: true });
+  }
   const filePath = path.join(folderPath, filename);
   fs.writeFileSync(filePath, buffer);
-  return `/images/profile/${filename}`;
+  return `/images/${folder}/${filename}`;
 };

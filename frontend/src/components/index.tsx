@@ -9,3 +9,4 @@ export * from "./LoadingIndicator";
 export * from "./NavHeader";
 export * from "./RoleBadge";
 export * from "./ImageCropper";
+export * from "./CropperImageInput";

@@ -1,5 +1,6 @@
 export interface Club {
   _id?: string;
+  image?: string;
   name: string;
   place: string;
   discipline: string;

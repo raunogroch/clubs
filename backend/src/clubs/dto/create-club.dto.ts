@@ -32,4 +32,8 @@ export class CreateClubDto {
   @IsArray()
   @IsMongoId({ each: true })
   athletes: Types.ObjectId[];
+
+  /** Imagen de perfil en base64 */
+  @IsString()
+  image?: string;
 }

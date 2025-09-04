@@ -1,13 +1,13 @@
 import React from "react";
-import { Input } from "../../../components";
+import { Input } from ".";
 
-interface UserImageInputProps {
+interface CropperImageInputProps {
   value: string;
   error?: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export const UserImageInput: React.FC<UserImageInputProps> = ({
+export const CropperImageInput: React.FC<CropperImageInputProps> = ({
   value,
   error,
   onChange,

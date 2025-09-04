@@ -15,6 +15,7 @@ export const useClubForm = (
 ) => {
   const [formData, setFormData] = useState<Club>(
     initialData || {
+      image: "",
       name: "",
       place: "",
       discipline: "",

@@ -1,24 +1,31 @@
 // Servicio para la gestión de clubes
 import { Injectable } from '@nestjs/common';
-import { CreateClubDto } from './dto/create-club.dto';
-import { UpdateClubDto } from './dto/update-club.dto';
+import { CreateClubDto, UpdateClubDto } from './dto';
 import { Club } from './schema/club.schema';
 import type { IClubRepository } from './repository/club.repository.interface';
 import { Inject } from '@nestjs/common';
 import { ClubValidatorService } from './club-validator.service';
+import { ImageService } from 'src/utils';
 
 @Injectable()
 export class ClubsService {
   constructor(
     @Inject('ClubRepository') private readonly clubRepository: IClubRepository,
     private readonly clubValidator: ClubValidatorService,
+    private readonly clubImageService: ImageService,
   ) {}
+
+  folder = 'clubs';
 
   /**
    * Crea un nuevo club si el nombre no existe previamente
    * SRP: la validación se delega al validador
    */
   async create(createClubDto: CreateClubDto): Promise<Club> {
+    createClubDto.image = this.clubImageService.processImage(
+      this.folder,
+      createClubDto.image,
+    );
     await this.clubValidator.validateUniqueName(createClubDto.name);
     return this.clubRepository.create(createClubDto);
   }
@@ -42,6 +49,10 @@ export class ClubsService {
    * SRP: la validación se delega al validador
    */
   async update(id: string, updateClubDto: UpdateClubDto): Promise<Club | null> {
+    updateClubDto.image = this.clubImageService.processImage(
+      this.folder,
+      updateClubDto.image,
+    );
     await this.clubValidator.validateExistence(id);
     return this.clubRepository.updateById(id, updateClubDto);
   }

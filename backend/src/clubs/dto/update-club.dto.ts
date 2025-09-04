@@ -40,4 +40,8 @@ export class UpdateClubDto {
   @IsMongoId({ each: true })
   @IsOptional()
   athletes?: Types.ObjectId[];
+
+  /** Imagen de perfil en base64 */
+  @IsString()
+  image?: string;
 }

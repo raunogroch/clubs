@@ -5,8 +5,8 @@ import { CreateUserDto, UpdateUserDto } from './dto';
 import type { IUserRepository } from './repository/user.repository.interface';
 import { Inject } from '@nestjs/common';
 import { UserValidatorService } from './user-validator.service';
-import { UserImageService } from './user-image.service';
 import { UserPasswordService } from './user-password.service';
+import { ImageService } from 'src/utils';
 
 interface currentAuth {
   sub: string;
@@ -18,9 +18,11 @@ export class UsersService {
   constructor(
     @Inject('UserRepository') private readonly userRepository: IUserRepository,
     private readonly userValidator: UserValidatorService,
-    private readonly userImageService: UserImageService,
+    private readonly userImageService: ImageService,
     private readonly userPasswordService: UserPasswordService,
   ) {}
+
+  folder = 'profile'; // Define la carpeta donde se guardaran las fotos de perfil
 
   /**
    * Crea un nuevo usuario si el username no existe previamente
@@ -29,6 +31,7 @@ export class UsersService {
   async create(createUserDto: CreateUserDto): Promise<User> {
     await this.userValidator.validateUniqueUsername(createUserDto.username);
     createUserDto.image = this.userImageService.processImage(
+      this.folder,
       createUserDto.image,
     );
     createUserDto.password = await this.userPasswordService.hashPassword(
@@ -111,6 +114,7 @@ export class UsersService {
       );
     }
     updateUserDto.image = this.userImageService.processImage(
+      this.folder,
       updateUserDto.image,
     );
     return this.userRepository.updateById(id, updateUserDto);

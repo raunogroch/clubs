@@ -30,7 +30,6 @@ export * from "./Sports/components/SportTable";
 export * from "./Users/components/Users";
 export * from "./Users/components/UserEdit";
 export * from "./Users/components/UserForm";
-export * from "./Users/components/UserImageInput";
 export * from "./Users/components/UserNew";
 export * from "./Users/components/UserPersonalInfo";
 export * from "./Users/components/UserRoleSelector";
