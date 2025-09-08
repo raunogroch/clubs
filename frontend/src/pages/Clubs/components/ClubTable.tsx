@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
+import { Image } from "../../../components";
 
 interface ClubFields {
   _id?: string;
+  image?: string;
   name: string;
   schedule: {
     _id: string;
@@ -47,11 +49,23 @@ export const ClubTable = ({ clubs, onDelete }: ClubsTableProps) => {
         <tbody>
           {clubs.map(
             (
-              { _id, name, schedule, discipline, place, coaches, athletes },
+              {
+                _id,
+                image,
+                name,
+                schedule,
+                discipline,
+                place,
+                coaches,
+                athletes,
+              },
               index
             ) => (
               <tr key={_id}>
                 <td className="align-middle text-center">{index + 1}</td>
+                <td className="text-center align-middle">
+                  {image ? <Image src={image} alt={_id} /> : "Sin logo"}
+                </td>
                 <td className="align-middle">{name}</td>
                 <td className="align-middle">
                   {`${schedule.startTime} Hrs - ${schedule.endTime} Hrs`}
@@ -64,7 +78,7 @@ export const ClubTable = ({ clubs, onDelete }: ClubsTableProps) => {
                 <td className="align-middle">
                   {athletes?.length ?? 0} Asignado/s
                 </td>
-                <td className="text-center">
+                <td className="text-center align-middle">
                   <Link
                     to={`/clubs/edit/${_id ?? ""}`}
                     className="btn btn-primary btn-outline m-1"
