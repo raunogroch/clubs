@@ -2,26 +2,35 @@ import { Link } from "react-router-dom";
 import { NavHeader } from "../../components/NavHeader";
 import type { pageParamProps } from "../../interfaces/pageParamProps";
 import { useUserClubs } from "./hooks";
+import { ErrorMessage, Image, LoadingIndicator } from "../../components";
 
 export const DashboardAthlete = ({ name }: pageParamProps) => {
   const { clubs, loading, error } = useUserClubs();
-  console.log(clubs, loading, error);
+  if (loading) return <LoadingIndicator />;
+  if (error) return <ErrorMessage message={error} />;
+
   return (
     <>
       <NavHeader name={name} />
       <div className="wrapper wrapper-content animated fadeInRight">
         <div className="row ">
           {clubs?.map((club) => (
-            <div className="col-lg-4">
+            <div key={club._id} className="col-lg-4">
               <div className="contact-box">
                 <Link className="row" to="profile.html">
                   <div className="col-4">
                     <div className="text-center">
-                      <img
-                        alt="image"
-                        className="rounded-circle m-t-xs img-fluid"
-                        src="img/a1.jpg"
-                      />
+                      {club.image ? (
+                        <Image
+                          src={club.image}
+                          alt={club._id}
+                          className="img-fluid rounded-circle"
+                          style={{ width: "100%" }}
+                        />
+                      ) : (
+                        "Sin logo"
+                      )}
+
                       <div className="m-t-xs font-bold">
                         {club.discipline.name.toUpperCase()}
                       </div>
