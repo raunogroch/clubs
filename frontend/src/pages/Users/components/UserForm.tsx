@@ -1,19 +1,14 @@
-import { useState } from "react";
-import {
-  CropperImageInput,
-  CustomMessage,
-  ImageCropper,
-  Input,
-} from "../../../components";
+import { useEffect, useState } from "react";
+import { CropperImageInput, ImageCropper, Input } from "../../../components";
 import { useUserForm } from "../hooks";
 import type { UserFormProps } from "../interfaces";
 import { UserRoleSelector } from ".";
+import { useDispatch } from "react-redux";
+import { setMessage } from "../../../store/messageSlice";
+import { useNavigate } from "react-router-dom";
 
-export const UserForm = ({
-  initialData,
-  onSuccess,
-  onCancel,
-}: UserFormProps) => {
+export const UserForm = ({ initialData, onCancel }: UserFormProps) => {
+  const navigate = useNavigate();
   const { formData, errors, message, handleChange, handleSubmit } =
     useUserForm(initialData);
 
@@ -30,14 +25,25 @@ export const UserForm = ({
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const success = await handleSubmit(e);
-    if (success && onSuccess) onSuccess();
+    if (success) return navigate("/users");
   };
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (message) {
+      if (message.type === "error") {
+        dispatch(setMessage({ message: message.text, type: "danger" }));
+      } else if (message.type === "success") {
+        dispatch(setMessage({ message: message.text, type: "success" }));
+      }
+    }
+  }, [message, dispatch]);
 
   const [imageSrc, setImage] = useState<string | null>(null);
 
   return (
     <div>
-      {message && <CustomMessage message={message.text} kind={message.type} />}
       <CropperImageInput
         value={formData.image || ""}
         error={errors.image}

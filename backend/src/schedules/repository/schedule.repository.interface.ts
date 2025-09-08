@@ -6,7 +6,7 @@ import { UpdateScheduleDto } from '../dto/update-schedule.dto';
 export interface IScheduleRepository {
   findOneByTime(startTime: Date, endTime: Date): Promise<Schedule | null>;
   create(createScheduleDto: CreateScheduleDto): Promise<Schedule>;
-  findAllPaginated(skip: number, limit: number, name?: string): Promise<[Schedule[], number]>;
+  findAll(): Promise<Schedule[]>;
   findById(id: string): Promise<Schedule | null>;
   updateById(
     id: string,

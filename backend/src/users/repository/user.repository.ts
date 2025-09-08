@@ -1,4 +1,4 @@
-// Implementación de la interfaz de repositorio usando Mongoose
+// UserRepository: Implementa el acceso a datos de usuarios usando Mongoose
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -9,17 +9,35 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 
 @Injectable()
 export class UserRepository implements IUserRepository {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(
+    @InjectModel(User.name) private readonly userModel: Model<User>,
+  ) {}
 
+  /**
+   * Devuelve todos los usuarios sin filtros ni paginación
+   */
+  async findAll(): Promise<User[]> {
+    return this.userModel.find();
+  }
+
+  /**
+   * Busca un usuario por su username
+   */
   async findOneByUsername(username: string): Promise<User | null> {
     return this.userModel.findOne({ username });
   }
 
+  /**
+   * Crea un nuevo usuario
+   */
   async create(createUserDto: CreateUserDto): Promise<User> {
     const createdUser = new this.userModel(createUserDto);
     return createdUser.save();
   }
 
+  /**
+   * Devuelve usuarios paginados y filtrados por nombre, username, email, etc.
+   */
   async findAllPaginated(
     skip = 0,
     limit = 10,
@@ -45,10 +63,16 @@ export class UserRepository implements IUserRepository {
     return [users, total];
   }
 
+  /**
+   * Busca un usuario por su ID
+   */
   async findById(id: string): Promise<User | null> {
     return this.userModel.findById(id);
   }
 
+  /**
+   * Actualiza un usuario por su ID
+   */
   async updateById(
     id: string,
     updateUserDto: UpdateUserDto,
@@ -56,6 +80,9 @@ export class UserRepository implements IUserRepository {
     return this.userModel.findByIdAndUpdate(id, updateUserDto, { new: true });
   }
 
+  /**
+   * Elimina un usuario por su ID
+   */
   async deleteById(id: string): Promise<User | null> {
     return this.userModel.findByIdAndDelete(id);
   }

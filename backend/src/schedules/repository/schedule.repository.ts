@@ -24,23 +24,8 @@ export class ScheduleRepository implements IScheduleRepository {
     return this.scheduleModel.create(createScheduleDto);
   }
 
-  async findAllPaginated(
-    skip = 0,
-    limit = 10,
-    name?: string,
-  ): Promise<[Schedule[], number]> {
-    let filter: any = {};
-    if (name) {
-      const regex = { $regex: name, $options: 'i' };
-      filter = {
-        $or: [{ startTime: regex }, { endTime: regex }],
-      };
-    }
-    const [schedules, total] = await Promise.all([
-      this.scheduleModel.find(filter).skip(skip).limit(limit),
-      this.scheduleModel.countDocuments(filter),
-    ]);
-    return [schedules, total];
+  async findAll(): Promise<Schedule[]> {
+    return await this.scheduleModel.find();
   }
 
   async findById(id: string): Promise<Schedule | null> {

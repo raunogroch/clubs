@@ -1,18 +1,18 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { userService } from "../../../services/userService";
-import { NavHeader } from "../../../components/NavHeader";
-import { LoadingIndicator } from "../../../components/LoadingIndicator";
-import { ErrorMessage } from "../../../components/ErrorMessage";
+import { LoadingIndicator, NavHeader, PopUpMessage } from "../../../components";
+import { useDispatch } from "react-redux";
+import { setMessage } from "../../../store/messageSlice";
 import type { UsersPageProps } from "../interfaces/userTypes";
 import { UserForm } from "./UserForm";
 
 export const UserEdit = ({ name, sub }: UsersPageProps) => {
   const { id } = useParams();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -21,10 +21,22 @@ export const UserEdit = ({ name, sub }: UsersPageProps) => {
         if (response.data) {
           setUser(response.data);
         } else {
-          setError("Usuario no encontrado");
+          dispatch(
+            setMessage({
+              message: "Usuario no encontrado",
+              type: "warning",
+            })
+          );
+          navigate("/users");
         }
       } catch (err) {
-        setError("Error al cargar el usuario");
+        dispatch(
+          setMessage({
+            message: "Error al cargar al usuario",
+            type: "danger",
+          })
+        );
+        navigate("/users");
       } finally {
         setLoading(false);
       }
@@ -34,12 +46,7 @@ export const UserEdit = ({ name, sub }: UsersPageProps) => {
   }, [id]);
 
   const handleSuccess = () => {
-    navigate("/users", {
-      state: {
-        message: "El usuario fue actualizado exitosamente",
-        messageKind: "success",
-      },
-    });
+    navigate("/users");
   };
 
   const handleCancel = () => {
@@ -47,11 +54,11 @@ export const UserEdit = ({ name, sub }: UsersPageProps) => {
   };
 
   if (loading) return <LoadingIndicator />;
-  if (error) return <ErrorMessage message={error} />;
 
   return (
     <>
       <NavHeader name={name} sub={sub} />
+      <PopUpMessage />
       <div className="wrapper wrapper-content animated fadeInRight">
         <div className="row">
           <div className="col-12">

@@ -69,39 +69,35 @@ export class UsersService {
   /**
    * Obtiene todos los usuarios
    */
-  async findAll(requestingUser: currentAuth, page = 1, limit = 10, name?: string) {
-    const skip = (page - 1) * limit;
-    const [allUsers, total] = await this.userRepository.findAllPaginated(
-      skip,
-      limit,
-      name,
-    );
-    const filtered = allUsers.filter((user) => user.id !== requestingUser.sub);
-    let data: typeof filtered = [];
-    switch (requestingUser.role) {
-      case Roles.SUPERADMIN:
-        data = filtered;
-        break;
-      case Roles.ADMIN:
-        data = filtered.filter((user) => user.role !== Roles.SUPERADMIN);
-        break;
-      case Roles.COACH:
-        data = filtered.filter((user) =>
-          [Roles.PARENT, Roles.ATHLETE].includes(user.role as Roles),
-        );
-        break;
-      case Roles.PARENT:
-        data = filtered.filter((user) => user.role === Roles.ATHLETE);
-        break;
-      default:
-        data = [];
+  async findAll(
+    requestingUser: currentAuth,
+    page?: number,
+    limit?: number,
+    name?: string,
+  ) {
+    // Asegura que page y limit tengan valores numéricos válidos
+    page = page ?? 1;
+    limit = limit ?? 0;
+    if (!limit) {
+      // Si no hay limit, obtener todos los usuarios sin filtros ni paginación
+      const allUsers = await this.userRepository.findAll();
+      const data = this.filterByRole(allUsers, requestingUser);
+      return data;
+    } else {
+      const skip = (page - 1) * limit;
+      const [allUsers, total] = await this.userRepository.findAllPaginated(
+        skip,
+        limit,
+        name,
+      );
+      const data = this.filterByRole(allUsers, requestingUser);
+      return {
+        data,
+        total,
+        page,
+        limit,
+      };
     }
-    return {
-      data,
-      total,
-      page,
-      limit,
-    };
   }
 
   /**
@@ -150,5 +146,26 @@ export class UsersService {
     const userExist = await this.findOneById(id);
     if (!userExist) throw new NotFoundException('El usuario no fue encontrado');
     return userExist;
+  }
+
+  /**
+   * Filtra usuarios según el rol del usuario solicitante
+   */
+  private filterByRole(users: User[], requestingUser: currentAuth): User[] {
+    const filtered = users.filter((user) => user.id !== requestingUser.sub);
+    switch (requestingUser.role) {
+      case Roles.SUPERADMIN:
+        return filtered;
+      case Roles.ADMIN:
+        return filtered.filter((user) => user.role !== Roles.SUPERADMIN);
+      case Roles.COACH:
+        return filtered.filter((user) =>
+          [Roles.PARENT, Roles.ATHLETE].includes(user.role as Roles),
+        );
+      case Roles.PARENT:
+        return filtered.filter((user) => user.role === Roles.ATHLETE);
+      default:
+        return [];
+    }
   }
 }

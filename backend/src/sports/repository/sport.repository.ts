@@ -11,28 +11,30 @@ import { UpdateSportDto } from '../dto/update-sport.dto';
 export class SportRepository implements ISportRepository {
   constructor(@InjectModel(Sport.name) private sportModel: Model<Sport>) {}
 
+  /**
+   * Busca un deporte por nombre, ignorando mayúsculas, minúsculas y caracteres especiales
+   */
   async findOneByName(name: string): Promise<Sport | null> {
-    return this.sportModel.findOne({ name });
+    // Normaliza el nombre quitando espacios y caracteres especiales para comparar
+    const normalize = (str: string) =>
+      str
+        .normalize('NFD')
+        .replace(/[^\w\s]|_/g, '')
+        .replace(/\s+/g, '')
+        .toLowerCase();
+    const allSports = await this.sportModel.find();
+    return (
+      allSports.find((sport) => normalize(sport.name) === normalize(name)) ||
+      null
+    );
   }
 
   async create(createSportDto: CreateSportDto): Promise<Sport> {
     return this.sportModel.create(createSportDto);
   }
 
-  async findAllPaginated(
-    skip = 0,
-    limit = 10,
-    name?: string,
-  ): Promise<[Sport[], number]> {
-    const filter: any = {};
-    if (name) {
-      filter.name = { $regex: name, $options: 'i' };
-    }
-    const [sports, total] = await Promise.all([
-      this.sportModel.find(filter).skip(skip).limit(limit),
-      this.sportModel.countDocuments(filter),
-    ]);
-    return [sports, total];
+  async findAll(): Promise<Sport[]> {
+    return await this.sportModel.find();
   }
 
   async findById(id: string): Promise<Sport | null> {

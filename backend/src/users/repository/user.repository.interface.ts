@@ -6,7 +6,12 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 export interface IUserRepository {
   findOneByUsername(username: string): Promise<User | null>;
   create(createUserDto: CreateUserDto): Promise<User>;
-  findAllPaginated(skip: number, limit: number, name?: string): Promise<[User[], number]>;
+  findAllPaginated(
+    skip: number,
+    limit: number,
+    name?: string,
+  ): Promise<[User[], number]>;
+  findAll(): Promise<User[]>;
   findById(id: string): Promise<User | null>;
   updateById(id: string, updateUserDto: UpdateUserDto): Promise<User | null>;
   deleteById(id: string): Promise<User | null>;

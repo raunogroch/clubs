@@ -87,5 +87,5 @@ export const useSportForm = (
     return false;
   };
 
-  return { formData, errors, message, handleChange, handleSubmit, setFormData };
+  return { formData, errors, message, setMessage, handleChange, handleSubmit, setFormData };
 };

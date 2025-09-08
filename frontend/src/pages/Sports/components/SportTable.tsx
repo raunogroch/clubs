@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import type { Sport } from "../interfaces/sportTypes";
+import { useDispatch } from "react-redux";
+import { setMessage } from "../../../store/messageSlice";
 
 interface SportTableProps {
   sports: Sport[];
@@ -7,9 +9,16 @@ interface SportTableProps {
 }
 
 export const SportTable = ({ sports, onDelete }: SportTableProps) => {
+  const dispatch = useDispatch();
   const handleDelete = async (id: string) => {
-    if (window.confirm("¿Está seguro de eliminar este usuario?")) {
+    if (window.confirm("¿Está seguro de eliminar esta disciplina?")) {
       await onDelete(id);
+      dispatch(
+        setMessage({
+          message: "Disciplina eliminada exitosamente",
+          type: "warning",
+        })
+      );
     }
   };
 

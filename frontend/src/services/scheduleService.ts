@@ -28,7 +28,7 @@ export const scheduleService = {
       const response = await api.post("/schedules", scheduleData);
       return {
         code: response.status,
-        message: "Schedule creado correctamente",
+        message: "Horario creado correctamente",
         data: response.data,
       };
     } catch (error: any) {
@@ -50,7 +50,7 @@ export const scheduleService = {
       const response = await api.patch(`/schedules/${id}`, scheduleData);
       return {
         code: response.status,
-        message: "Schedule actualizado correctamente",
+        message: "Horario actualizado correctamente",
         data: response.data,
       };
     } catch (error: any) {
@@ -68,7 +68,7 @@ export const scheduleService = {
       const response = await api.delete(`/schedules/${id}`);
       return {
         code: response.status,
-        message: "Schedule eliminado correctamente",
+        message: "Horario eliminado correctamente",
       };
     } catch (error: any) {
       return handleApiError(error);
@@ -80,7 +80,7 @@ export const scheduleService = {
       const response = await api.get(`/schedules/${id}`);
       return {
         code: response.status,
-        message: "Schedule obtenido correctamente",
+        message: "Horario obtenido correctamente",
         data: response.data,
       };
     } catch (error: any) {

@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import { Image } from "../../../components";
+import { useDispatch } from "react-redux";
+import { setMessage } from "../../../store/messageSlice";
 
 interface ClubFields {
   _id?: string;
@@ -24,10 +26,14 @@ interface ClubsTableProps {
   onDelete: (id: string) => Promise<void>;
 }
 export const ClubTable = ({ clubs, onDelete }: ClubsTableProps) => {
+  const dispatch = useDispatch();
   const handleDelete = async (id?: string) => {
     if (!id) return;
     if (window.confirm("¿Está seguro de eliminar este usuario?")) {
       await onDelete(id);
+      dispatch(
+        setMessage({ message: "Club eliminado exitosamente", type: "warning" })
+      );
     }
   };
 
@@ -36,7 +42,7 @@ export const ClubTable = ({ clubs, onDelete }: ClubsTableProps) => {
       <table className="table table-striped">
         <thead>
           <tr>
-            <th className="text-center">Indice</th>
+            <th className="text-center">Logo</th>
             <th>Nombre</th>
             <th>Horario</th>
             <th>Disciplina deportiva</th>
@@ -48,21 +54,17 @@ export const ClubTable = ({ clubs, onDelete }: ClubsTableProps) => {
         </thead>
         <tbody>
           {clubs.map(
-            (
-              {
-                _id,
-                image,
-                name,
-                schedule,
-                discipline,
-                place,
-                coaches,
-                athletes,
-              },
-              index
-            ) => (
+            ({
+              _id,
+              image,
+              name,
+              schedule,
+              discipline,
+              place,
+              coaches,
+              athletes,
+            }) => (
               <tr key={_id}>
-                <td className="align-middle text-center">{index + 1}</td>
                 <td className="text-center align-middle">
                   {image ? <Image src={image} alt={_id} /> : "Sin logo"}
                 </td>

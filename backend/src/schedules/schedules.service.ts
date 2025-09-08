@@ -29,14 +29,8 @@ export class SchedulesService {
   /**
    * Obtiene todos los horarios
    */
-  async findAll(page = 1, limit = 10, name?: string) {
-    const skip = (page - 1) * limit;
-    const [data, total] = await this.scheduleRepository.findAllPaginated(
-      skip,
-      limit,
-      name,
-    );
-    return { data, total, page, limit };
+  async findAll(page?: number, limit?: number, name?: string) {
+    return await this.scheduleRepository.findAll();
   }
 
   /**

@@ -57,8 +57,8 @@ export class UsersController {
   @Roles(Role.SUPERADMIN, Role.ADMIN, Role.COACH)
   findAll(
     @CurrentUser() user: currentAuth,
-    @Query('page') page = 1,
-    @Query('limit') limit = 10,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
     @Query('name') name?: string,
   ) {
     return this.usersService.findAll(user, Number(page), Number(limit), name);

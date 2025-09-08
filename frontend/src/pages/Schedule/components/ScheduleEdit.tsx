@@ -1,6 +1,8 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { ErrorMessage, LoadingIndicator, NavHeader } from "../../../components";
+import { PopUpMessage, LoadingIndicator, NavHeader } from "../../../components";
+import { useDispatch } from "react-redux";
+import { setMessage } from "../../../store/messageSlice";
 import type { pageParamProps } from "../../../interfaces/pageParamProps";
 import type { Schedule } from "../types/scheduleTypes";
 import { useSchedule } from "../hooks/useSchedule";
@@ -42,12 +44,16 @@ export const ScheduleEdit = ({ name, sub }: pageParamProps) => {
     navigate("/schedules");
   };
 
+  const dispatch = useDispatch();
   if (loading) return <LoadingIndicator />;
-  if (error) return <ErrorMessage message={error} />;
+  if (error) {
+    dispatch(setMessage({ message: error, type: "danger" }));
+  }
 
   return (
     <>
       <NavHeader name={name} sub={sub} />
+      <PopUpMessage />
       <div className="wrapper wrapper-content animated fadeInRight">
         <div className="row">
           <div className="col-12">

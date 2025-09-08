@@ -19,30 +19,32 @@ export const App = () => {
     const allowedRoutes = roleRoutes[role] || [];
 
     return (
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/404" element={<NotFound />} />
-        {allowedRoutes.map(({ path, element }) => (
+      <>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/404" element={<NotFound />} />
+          {allowedRoutes.map(({ path, element }) => (
+            <Route
+              key={path}
+              path={path}
+              element={
+                <PrivateRoute allowedRoles={[role]}>{element}</PrivateRoute>
+              }
+            />
+          ))}
           <Route
-            key={path}
-            path={path}
+            path="/"
             element={
-              <PrivateRoute allowedRoles={[role]}>{element}</PrivateRoute>
+              user ? (
+                <Navigate to="/" replace />
+              ) : (
+                <Navigate to="/login" replace />
+              )
             }
           />
-        ))}
-        <Route
-          path="/"
-          element={
-            user ? (
-              <Navigate to="/" replace />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        <Route path="*" element={<Navigate to="/404" replace />} />
-      </Routes>
+          <Route path="*" element={<Navigate to="/404" replace />} />
+        </Routes>
+      </>
     );
   };
 

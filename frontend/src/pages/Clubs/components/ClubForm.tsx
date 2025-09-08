@@ -18,7 +18,9 @@ import {
   ImageCropper,
 } from "../../../components";
 import type { ClubFormProps } from "../interfaces";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { setMessage } from "../../../store/messageSlice";
+import { useDispatch } from "react-redux";
 
 export const ClubForm = ({
   initialData,
@@ -43,6 +45,18 @@ export const ClubForm = ({
     };
     reader.readAsDataURL(file);
   };
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (message) {
+      if (message.type === "error") {
+        dispatch(setMessage({ message: message.text, type: "danger" }));
+      } else if (message.type === "success") {
+        dispatch(setMessage({ message: message.text, type: "success" }));
+      }
+    }
+  }, [message, dispatch]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

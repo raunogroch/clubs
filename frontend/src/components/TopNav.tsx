@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../auth/AuthContext";
 import { SmoothlyMenu } from "../scripts/coder-softScripts";
+import { Input } from ".";
 
 export const TopNav = () => {
   const { logout } = useContext(AuthContext);
@@ -35,6 +36,22 @@ export const TopNav = () => {
           >
             <i className="fa fa-bars"></i>{" "}
           </Link>
+
+          <form
+            role="search"
+            className="navbar-form-custom"
+            action="search_results.html"
+          >
+            <div className="form-group">
+              <Input
+                type="text"
+                placeholder="Buscar en la lista..."
+                className="form-control"
+                name="top-search"
+                id="top-search"
+              />
+            </div>
+          </form>
         </div>
         <ul className="nav navbar-top-links navbar-right">
           <li style={{ padding: "20px" }}>

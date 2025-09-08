@@ -9,7 +9,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { SchedulesService } from './schedules.service';
-import { Query } from '@nestjs/common';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -32,12 +31,8 @@ export class SchedulesController {
    * Endpoint para obtener todos los horarios
    */
   @Get()
-  findAll(
-    @Query('page') page = 1,
-    @Query('limit') limit = 10,
-    @Query('name') name?: string,
-  ) {
-    return this.schedulesService.findAll(Number(page), Number(limit), name);
+  findAll() {
+    return this.schedulesService.findAll();
   }
 
   /**

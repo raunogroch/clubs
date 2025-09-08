@@ -2,18 +2,17 @@ import { Link } from "react-router-dom";
 import type { UsersPageProps } from "../interfaces";
 import { UserTable } from ".";
 import { useUsers } from "../hooks";
-import { ErrorMessage, LoadingIndicator, NavHeader } from "../../../components";
+import { PopUpMessage, LoadingIndicator, NavHeader } from "../../../components";
 
 export const Users = ({ name }: UsersPageProps) => {
-  const { users, loading, error, deleteUser } = useUsers();
+  const { users, loading, deleteUser } = useUsers();
 
   if (loading) return <LoadingIndicator />;
-  if (error) return <ErrorMessage message={error} />;
 
   return (
     <>
       <NavHeader name={name} />
-
+      <PopUpMessage />
       <div className="wrapper wrapper-content animated fadeInRight">
         <div className="row">
           <div className="col-12">

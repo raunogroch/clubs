@@ -1,12 +1,16 @@
-import { CustomMessage, Input } from "../../../components";
+import { useEffect } from "react";
+import { Input } from "../../../components";
 import { useScheduleForm } from "../hooks/useScheduleForm";
 import type { ScheduleFormProps } from "../types/scheduleTypes";
+import { setMessage } from "../../../store/messageSlice";
+import { useDispatch } from "react-redux";
 
 export const ScheduleForm = ({
   initialData,
   onSuccess,
   onCancel,
 }: ScheduleFormProps) => {
+  const dispatch = useDispatch();
   const { formData, errors, message, handleChange, handleSubmit } =
     useScheduleForm(initialData);
 
@@ -16,9 +20,18 @@ export const ScheduleForm = ({
     if (success && onSuccess) onSuccess();
   };
 
+  useEffect(() => {
+    if (message) {
+      if (message.type === "error") {
+        dispatch(setMessage({ message: message.text, type: "danger" }));
+      } else if (message.type === "success") {
+        dispatch(setMessage({ message: message.text, type: "success" }));
+      }
+    }
+  }, [message, dispatch]);
+
   return (
     <div>
-      {message && <CustomMessage message={message.text} kind={message.type} />}
       <form onSubmit={onSubmit}>
         <div className="form-group row">
           <label htmlFor="startTime" className="col-sm-2 col-form-label">

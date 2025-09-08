@@ -4,7 +4,7 @@ export * from "./Footer";
 export * from "./SideNav";
 export * from "./TopNav";
 export * from "./CustomMessage";
-export * from "./ErrorMessage";
+export * from "./PopUpMessage";
 export * from "./LoadingIndicator";
 export * from "./NavHeader";
 export * from "./RoleBadge";

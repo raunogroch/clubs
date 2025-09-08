@@ -1,18 +1,19 @@
 import { useNavigate } from "react-router-dom";
 import type { UsersPageProps } from "../../Users/interfaces/userTypes";
-import { NavHeader } from "../../../components";
+import { NavHeader, PopUpMessage } from "../../../components";
 import { ClubForm } from "./ClubForm";
+import { useDispatch } from "react-redux";
+import { setMessage } from "../../../store/messageSlice";
 
 export const ClubNew = ({ name, sub }: UsersPageProps) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleSuccess = () => {
-    navigate("/clubs", {
-      state: {
-        message: "El usuario fue creado exitosamente",
-        messageKind: "success",
-      },
-    });
+    dispatch(
+      setMessage({ message: "Club creado exitosamente", type: "success" })
+    );
+    navigate("/clubs");
   };
 
   const handleCancel = () => {
@@ -22,6 +23,7 @@ export const ClubNew = ({ name, sub }: UsersPageProps) => {
   return (
     <>
       <NavHeader name={name} sub={sub} />
+      <PopUpMessage />
       <div className="wrapper wrapper-content animated fadeInRight">
         <div className="row">
           <div className="col-12">

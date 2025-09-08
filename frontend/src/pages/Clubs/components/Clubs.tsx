@@ -1,32 +1,27 @@
-import { Link } from "react-router-dom";
 import type { pageParamProps } from "../../../interfaces";
 import { useClubs } from "../hooks";
-import { ErrorMessage, LoadingIndicator, NavHeader } from "../../../components";
+import { PopUpMessage, LoadingIndicator, NavHeader } from "../../../components";
 import { ClubTable } from ".";
+import { useDispatch } from "react-redux";
+import { setMessage } from "../../../store/messageSlice";
 
 export const Clubs = ({ name }: pageParamProps) => {
-  const { clubs, loading, error, deleteClub } = useClubs();
+  const { clubs, error, loading, deleteClub } = useClubs();
+  const dispatch = useDispatch();
 
   if (loading) return <LoadingIndicator />;
-  if (error) return <ErrorMessage message={error} />;
+  if (error) return dispatch(setMessage({ message: error, type: "danger" }));
 
   return (
     <>
-      <NavHeader name={name} />
+      <NavHeader name={name} pageCreate="Nuevo club" />
+      <PopUpMessage />
       <div className="wrapper wrapper-content animated fadeInRight">
         <div className="row">
           <div className="col-12">
             <div className="ibox ">
               <div className="ibox-title">
                 <h5>Lista de clubs</h5>
-                <div className="ibox-tools">
-                  <Link
-                    to="/clubs/create"
-                    className="btn btn-rounded btn-outline"
-                  >
-                    <i className="fa fa-plus"></i> Nuevo club
-                  </Link>
-                </div>
               </div>
               <div className="ibox-content">
                 <ClubTable

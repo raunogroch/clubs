@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import type { Schedule } from "../types/scheduleTypes";
+import { setMessage } from "../../../store/messageSlice";
+import { useDispatch } from "react-redux";
 
 interface ScheduleTableProps {
   schedules: Schedule[];
@@ -7,9 +9,16 @@ interface ScheduleTableProps {
 }
 
 export const ScheduleTable = ({ schedules, onDelete }: ScheduleTableProps) => {
+  const dispatch = useDispatch();
   const handleDelete = async (id: string) => {
     if (window.confirm("¿Está seguro de eliminar este horario?")) {
       await onDelete(id);
+      dispatch(
+        setMessage({
+          message: "Horario eliminado exitosamente",
+          type: "warning",
+        })
+      );
     }
   };
 

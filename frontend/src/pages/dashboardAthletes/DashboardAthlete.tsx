@@ -2,12 +2,12 @@ import { Link } from "react-router-dom";
 import { NavHeader } from "../../components/NavHeader";
 import type { pageParamProps } from "../../interfaces/pageParamProps";
 import { useUserClubs } from "./hooks";
-import { ErrorMessage, Image, LoadingIndicator } from "../../components";
+import { PopUpMessage, Image, LoadingIndicator } from "../../components";
 
 export const DashboardAthlete = ({ name }: pageParamProps) => {
   const { clubs, loading, error } = useUserClubs();
   if (loading) return <LoadingIndicator />;
-  if (error) return <ErrorMessage message={error} />;
+  if (error) return <PopUpMessage />;
 
   return (
     <>

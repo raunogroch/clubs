@@ -3,9 +3,13 @@ import { handleApiError, type ApiResponse } from "../utils/apiUtils";
 import api from "./api";
 
 export const sportService = {
-  async getAll(): Promise<ApiResponse<Sport[]>> {
+  async getAll(params?: {
+    page?: number;
+    limit?: number;
+    name?: string;
+  }): Promise<ApiResponse<Sport[]>> {
     try {
-      const response = await api.get("/sports");
+      const response = await api.get("/sports", { params });
       return {
         code: response.status,
         message: "Deporte obtenidos correctamente",

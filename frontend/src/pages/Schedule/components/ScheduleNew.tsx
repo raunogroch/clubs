@@ -7,12 +7,7 @@ export const ScheduleNew = ({ name, sub }: UsersPageProps) => {
   const navigate = useNavigate();
 
   const handleSuccess = () => {
-    navigate("/schedules", {
-      state: {
-        message: "El horario fue creado exitosamente",
-        messageKind: "success",
-      },
-    });
+    navigate("/schedules");
   };
 
   const handleCancel = () => {

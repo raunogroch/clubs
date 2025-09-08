@@ -27,14 +27,8 @@ export class SportsService {
   /**
    * Obtiene todos los deportes
    */
-  async findAll(page = 1, limit = 10, name?: string) {
-    const skip = (page - 1) * limit;
-    const [data, total] = await this.sportRepository.findAllPaginated(
-      skip,
-      limit,
-      name,
-    );
-    return { data, total, page, limit };
+  async findAll() {
+    return await this.sportRepository.findAll();
   }
 
   /**
@@ -53,6 +47,9 @@ export class SportsService {
     updateSportDto: UpdateSportDto,
   ): Promise<Sport | null> {
     await this.sportValidator.validateExistence(id);
+    if (updateSportDto.name) {
+      await this.sportValidator.validateUniqueName(updateSportDto.name);
+    }
     return this.sportRepository.updateById(id, updateSportDto);
   }
 

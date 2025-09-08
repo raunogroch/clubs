@@ -13,22 +13,61 @@ import { sportService } from "../../../services/sportService";
  * Ahora depende de la interfaz ISportService para cumplir DIP e ISP.
  * @param service - Implementación de ISportService (por defecto sportService)
  */
+export interface SportsPaginated {
+  data: Sport[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export const useSports = (service: ISportService = sportService) => {
-  const [sports, setSports] = useState<Sport[]>([]);
+  const [sports, setSports] = useState<SportsPaginated>({
+    data: [],
+    total: 0,
+    page: 1,
+    limit: 10,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [name, setName] = useState<string>("");
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
 
   const handleAuthError = useAuthErrorHandler();
 
   /**
    * Obtiene la lista de Sports desde el servicio.
    */
-  const fetchSports = async () => {
+  const fetchSports = async (
+    customPage = page,
+    customLimit = limit,
+    filterName = name
+  ) => {
     try {
       setLoading(true);
-      const response = await service.getAll();
+      const response = await service.getAll({
+        page: customPage,
+        limit: customLimit,
+        name: filterName,
+      });
       if (response.code === 200) {
-        setSports(response.data);
+        if (
+          response.data &&
+          typeof response.data === "object" &&
+          "data" in response.data &&
+          "total" in response.data &&
+          "page" in response.data &&
+          "limit" in response.data
+        ) {
+          setSports(response.data as SportsPaginated);
+        } else {
+          setSports({
+            data: response.data as Sport[],
+            total: (response.data as Sport[]).length,
+            page: 1,
+            limit: customLimit,
+          });
+        }
       }
       handleAuthError(response, setError);
     } catch (err) {
@@ -36,6 +75,26 @@ export const useSports = (service: ISportService = sportService) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Efecto para recargar cuando cambian page, limit o name
+  useEffect(() => {
+    fetchSports(page, limit, name);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, limit, name]);
+
+  const handleNameChange = (value: string) => {
+    setName(value);
+    setPage(1);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleLimitChange = (newLimit: number) => {
+    setLimit(newLimit);
+    setPage(1);
   };
 
   /**
@@ -74,9 +133,17 @@ export const useSports = (service: ISportService = sportService) => {
     }
   };
 
-  useEffect(() => {
-    fetchSports();
-  }, []);
-
-  return { sports, loading, error, fetchSports, deleteSport, getSportById };
+  return {
+    sports,
+    loading,
+    error,
+    deleteSport,
+    getSportById,
+    name,
+    handleNameChange,
+    page,
+    handlePageChange,
+    limit,
+    handleLimitChange,
+  };
 };

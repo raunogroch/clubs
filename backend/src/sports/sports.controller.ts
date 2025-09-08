@@ -9,7 +9,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { SportsService } from './sports.service';
-import { Query } from '@nestjs/common';
 import { CreateSportDto } from './dto/create-sport.dto';
 import { UpdateSportDto } from './dto/update-sport.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -32,12 +31,8 @@ export class SportsController {
    * Endpoint para obtener todos los deportes
    */
   @Get()
-  findAll(
-    @Query('page') page = 1,
-    @Query('limit') limit = 10,
-    @Query('name') name?: string,
-  ) {
-    return this.sportsService.findAll(Number(page), Number(limit), name);
+  findAll() {
+    return this.sportsService.findAll();
   }
 
   /**

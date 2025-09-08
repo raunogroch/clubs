@@ -19,9 +19,10 @@ export const useAthleteClub = (service: IUserService = userService) => {
   const fetchAthletes = async () => {
     try {
       const response = await service.getAllAtheles();
-
+      console.log(response);
       if (response.code === 200) {
         const { data } = response;
+
         setAthletes(data);
       }
 

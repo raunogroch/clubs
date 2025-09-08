@@ -19,7 +19,6 @@ export const useSportClub = (service: ISportService = sportService) => {
   const fetchSports = async () => {
     try {
       const response = await service.getAll();
-
       if (response.code === 200) {
         const { data } = response;
         setSports(data);

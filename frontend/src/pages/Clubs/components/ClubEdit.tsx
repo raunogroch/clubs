@@ -3,15 +3,18 @@ import { useEffect, useState } from "react";
 import type { pageParamProps } from "../../../interfaces/pageParamProps";
 import type { Club } from "../interfaces/clubTypes";
 import { useClubs } from "../hooks/useClub";
-import { ErrorMessage, LoadingIndicator, NavHeader } from "../../../components";
+import { PopUpMessage, LoadingIndicator, NavHeader } from "../../../components";
 import { ClubForm } from "./ClubForm";
+import { useDispatch } from "react-redux";
+import { setMessage } from "../../../store/messageSlice";
 
 export const ClubEdit = ({ name, sub }: pageParamProps) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [club, setClub] = useState<Club | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+
+  const dispatch = useDispatch();
 
   const { getClubById } = useClubs();
 
@@ -22,7 +25,13 @@ export const ClubEdit = ({ name, sub }: pageParamProps) => {
         setClub(data);
       })
       .catch(() => {
-        setError("Error al cargar el club");
+        dispatch(
+          setMessage({
+            message: "Error al cargar el club",
+            type: "danger",
+          })
+        );
+        //
       })
       .finally(() => {
         setLoading(false);
@@ -43,11 +52,11 @@ export const ClubEdit = ({ name, sub }: pageParamProps) => {
   };
 
   if (loading) return <LoadingIndicator />;
-  if (error) return <ErrorMessage message={error} />;
 
   return (
     <>
       <NavHeader name={name} sub={sub} />
+      <PopUpMessage />
       <div className="wrapper wrapper-content animated fadeInRight">
         <div className="row">
           <div className="col-12">

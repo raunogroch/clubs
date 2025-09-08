@@ -2,20 +2,26 @@ import {
   NavHeader,
   Image,
   LoadingIndicator,
-  ErrorMessage,
+  PopUpMessage,
 } from "../../../components";
+import { useDispatch } from "react-redux";
+import { setMessage } from "../../../store/messageSlice";
 import { Role, type pageParamProps } from "../../../interfaces";
 import { useProfile } from "../hooks";
 
 export const Profile = ({ name }: pageParamProps) => {
   const { user, loading, error } = useProfile();
 
+  const dispatch = useDispatch();
   if (loading) return <LoadingIndicator />;
-  if (error) return <ErrorMessage message={error} />;
+  if (error) {
+    dispatch(setMessage({ message: error, type: "danger" }));
+  }
 
   return (
     <>
       <NavHeader name={name} />
+      <PopUpMessage />
       <div className="wrapper wrapper-content animated fadeInRight">
         <div className="row m-b-lg m-t-lg">
           <div className="col-md-6">

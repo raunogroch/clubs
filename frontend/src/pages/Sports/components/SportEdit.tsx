@@ -1,41 +1,46 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import type { pageParamProps } from "../../../interfaces";
 import type { Sport } from "../interfaces";
 import { useSports } from "../hooks";
-import { ErrorMessage, LoadingIndicator, NavHeader } from "../../../components";
+import { PopUpMessage, LoadingIndicator, NavHeader } from "../../../components";
 import { SportForm } from ".";
+import type { pageParamProps } from "../../../interfaces";
+
+import { useDispatch } from "react-redux";
+import { setMessage } from "../../../store/messageSlice";
 
 export const SportEdit = ({ name, sub }: pageParamProps) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [sport, setSport] = useState<Sport | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const { getSportById } = useSports();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setLoading(true);
     getSportById(id)
-      .then((data) => {
-        setSport(data);
-      })
+      .then((data) => setSport(data))
       .catch(() => {
-        setError("Error al cargar las disciplinas");
+        dispatch(
+          setMessage({
+            message: "Error al cargar las disciplinas",
+            type: "danger",
+          })
+        );
       })
-      .finally(() => {
-        setLoading(false);
-      });
+      .finally(() => setLoading(false));
   }, [id]);
 
   const handleSuccess = () => {
-    navigate("/sports", {
-      state: {
-        message: "La disciplina fue actualizado exitosamente",
-        messageKind: "success",
-      },
-    });
+    dispatch(
+      setMessage({
+        message: "La disciplina fue actualizada exitosamente",
+        type: "success",
+      })
+    );
+    navigate("/sports");
   };
 
   const handleCancel = () => {
@@ -43,11 +48,11 @@ export const SportEdit = ({ name, sub }: pageParamProps) => {
   };
 
   if (loading) return <LoadingIndicator />;
-  if (error) return <ErrorMessage message={error} />;
 
   return (
     <>
       <NavHeader name={name} sub={sub} />
+      <PopUpMessage />
       <div className="wrapper wrapper-content animated fadeInRight">
         <div className="row">
           <div className="col-12">
