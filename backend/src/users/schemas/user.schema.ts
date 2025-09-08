@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
+import { Roles } from '../enum/roles.enum';
 
 // Esquema de User para Mongoose
 @Schema({ timestamps: true })
@@ -14,7 +15,7 @@ export class User extends mongoose.Document {
 
   /** Rol del usuario */
   @Prop()
-  role: string;
+  role: Roles;
 
   /** Nombre real del usuario */
   @Prop()

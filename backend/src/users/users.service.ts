@@ -1,6 +1,7 @@
 // Servicio para la gestión de usuarios
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from './schemas/user.schema';
+import { Roles } from './enum/roles.enum';
 import { CreateUserDto, UpdateUserDto } from './dto';
 import type { IUserRepository } from './repository/user.repository.interface';
 import { Inject } from '@nestjs/common';
@@ -74,16 +75,16 @@ export class UsersService {
     );
 
     switch (requestingUser.role) {
-      case 'superadmin':
+      case Roles.SUPERADMIN:
         return allUsers;
-      case 'admin':
-        return allUsers.filter((user) => user.role !== 'superadmin');
-      case 'coach':
+      case Roles.ADMIN:
+        return allUsers.filter((user) => user.role !== Roles.SUPERADMIN);
+      case Roles.COACH:
         return allUsers.filter((user) =>
-          ['parent', 'athlete'].includes(user.role),
+          [Roles.PARENT, Roles.ATHLETE].includes(user.role as Roles),
         );
-      case 'parent':
-        return allUsers.filter((user) => user.role === 'athlete');
+      case Roles.PARENT:
+        return allUsers.filter((user) => user.role === Roles.ATHLETE);
       default:
         return [];
     }
