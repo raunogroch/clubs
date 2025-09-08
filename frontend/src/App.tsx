@@ -9,7 +9,7 @@ import { useContext } from "react";
 import { AuthProvider } from "./auth/AuthProvider";
 import { AuthContext } from "./auth/AuthContext";
 import { PrivateRoute } from "./auth/PrivateRoute";
-import { Login, NotFound } from "./layouts";
+import { Login, NotFound } from "./pages";
 import { roleRoutes } from "./routes";
 
 export const App = () => {

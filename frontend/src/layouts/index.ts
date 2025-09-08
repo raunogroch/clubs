@@ -1,3 +1,3 @@
-export * from "./Login";
-export * from "./NotFound";
-export * from "./Navigation";
+export * from "./Footer";
+export * from "./SideNav";
+export * from "./TopNav";

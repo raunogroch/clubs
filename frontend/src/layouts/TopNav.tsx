@@ -1,17 +1,16 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useContext } from "react";
-import { AuthContext } from "../auth/AuthContext";
 import { SmoothlyMenu } from "../scripts/coder-softScripts";
-import { Input } from ".";
+import { Input } from "../components";
+import { useDispatch } from "react-redux";
+import { logout as logoutAction } from "../store/authSlice";
 
 export const TopNav = () => {
-  const { logout } = useContext(AuthContext);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (e) {}
+  const handleLogout = async (e: any) => {
+    e.preventDefault();
+    dispatch(logoutAction());
     navigate("/login", { replace: true });
   };
 

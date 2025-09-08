@@ -1,10 +1,13 @@
 // Login.tsx
-import { useContext, useEffect, useState } from "react";
-import { Input } from "../components";
+import { useEffect, useState } from "react";
+import { Input, PopUpMessage } from "../components";
 import { authService } from "../services/authService";
-import { AuthContext } from "../auth/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useBodyClass } from "../hooks/useBodyClass";
+import { useDispatch, useSelector } from "react-redux";
+import { login as loginAction } from "../store/authSlice";
+import type { RootState } from "../store";
+import { setMessage } from "../store/messageSlice";
 
 interface FormData {
   username: string;
@@ -12,6 +15,7 @@ interface FormData {
 }
 
 export const Login = () => {
+  const dispatch = useDispatch();
   useBodyClass();
   const [formData, setFormData] = useState<FormData>({
     username: "",
@@ -19,7 +23,9 @@ export const Login = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { login, isAuthenticated } = useContext(AuthContext);
+  const isAuthenticated = useSelector(
+    (state: RootState) => state.auth.isAuthenticated
+  );
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -43,11 +49,11 @@ export const Login = () => {
 
     try {
       const { data } = await authService.login(formData);
-      login(data.authorization, data.user);
-      navigate("/");
+      dispatch(loginAction({ user: data.user, token: data.authorization }));
     } catch (error) {
-      console.error("Error al iniciar sesión:", error);
-      setError("Invalid username or password");
+      dispatch(
+        setMessage({ message: "Error de autenticación", type: "danger" })
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -56,6 +62,7 @@ export const Login = () => {
   return (
     <div className="middle-box text-center loginscreen animated fadeInDown">
       <div>
+        <PopUpMessage />
         <div>
           <h1 className="logo-name">CS</h1>
         </div>
