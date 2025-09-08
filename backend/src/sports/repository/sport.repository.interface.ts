@@ -6,7 +6,11 @@ import { UpdateSportDto } from '../dto/update-sport.dto';
 export interface ISportRepository {
   findOneByName(name: string): Promise<Sport | null>;
   create(createSportDto: CreateSportDto): Promise<Sport>;
-  findAll(): Promise<Sport[]>;
+  findAllPaginated(
+    skip: number,
+    limit: number,
+    name?: string,
+  ): Promise<[Sport[], number]>;
   findById(id: string): Promise<Sport | null>;
   updateById(id: string, updateSportDto: UpdateSportDto): Promise<Sport | null>;
   deleteById(id: string): Promise<Sport | null>;

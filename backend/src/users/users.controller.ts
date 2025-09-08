@@ -9,6 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
+import { Query } from '@nestjs/common';
 import { ClubsService } from 'src/clubs/clubs.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -54,8 +55,13 @@ export class UsersController {
    */
   @Get()
   @Roles(Role.SUPERADMIN, Role.ADMIN, Role.COACH)
-  findAll(@CurrentUser() user: currentAuth) {
-    return this.usersService.findAll(user);
+  findAll(
+    @CurrentUser() user: currentAuth,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+    @Query('name') name?: string,
+  ) {
+    return this.usersService.findAll(user, Number(page), Number(limit), name);
   }
 
   /**

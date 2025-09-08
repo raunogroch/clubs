@@ -12,7 +12,7 @@ export class UserRepository implements IUserRepository {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async findOneByUsername(username: string): Promise<User | null> {
-    return this.userModel.findOne({ username }).exec();
+    return this.userModel.findOne({ username });
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -20,24 +20,43 @@ export class UserRepository implements IUserRepository {
     return createdUser.save();
   }
 
-  async findAll(): Promise<User[]> {
-    return this.userModel.find().exec();
+  async findAllPaginated(
+    skip = 0,
+    limit = 10,
+    name?: string,
+  ): Promise<[User[], number]> {
+    let filter: any = {};
+    if (name) {
+      const regex = { $regex: name, $options: 'i' };
+      filter = {
+        $or: [
+          { name: regex },
+          { lastname: regex },
+          { username: regex },
+          { email: regex },
+          { ci: regex },
+        ],
+      };
+    }
+    const [users, total] = await Promise.all([
+      this.userModel.find(filter).skip(skip).limit(limit),
+      this.userModel.countDocuments(filter),
+    ]);
+    return [users, total];
   }
 
   async findById(id: string): Promise<User | null> {
-    return this.userModel.findById(id).exec();
+    return this.userModel.findById(id);
   }
 
   async updateById(
     id: string,
     updateUserDto: UpdateUserDto,
   ): Promise<User | null> {
-    return this.userModel
-      .findByIdAndUpdate(id, updateUserDto, { new: true })
-      .exec();
+    return this.userModel.findByIdAndUpdate(id, updateUserDto, { new: true });
   }
 
   async deleteById(id: string): Promise<User | null> {
-    return this.userModel.findByIdAndDelete(id).exec();
+    return this.userModel.findByIdAndDelete(id);
   }
 }

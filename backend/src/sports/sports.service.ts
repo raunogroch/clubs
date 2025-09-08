@@ -27,8 +27,14 @@ export class SportsService {
   /**
    * Obtiene todos los deportes
    */
-  async findAll(): Promise<Sport[]> {
-    return this.sportRepository.findAll();
+  async findAll(page = 1, limit = 10, name?: string) {
+    const skip = (page - 1) * limit;
+    const [data, total] = await this.sportRepository.findAllPaginated(
+      skip,
+      limit,
+      name,
+    );
+    return { data, total, page, limit };
   }
 
   /**

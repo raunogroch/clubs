@@ -1,5 +1,6 @@
 // DTO para registro de usuario
 import { IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { Roles } from 'src/users/enum/roles.enum';
 
 export class RegisterDto {
   /** Nombre de usuario */
@@ -15,5 +16,5 @@ export class RegisterDto {
   /** Rol del usuario */
   @IsString()
   @IsNotEmpty()
-  role: string;
+  role: Roles;
 }

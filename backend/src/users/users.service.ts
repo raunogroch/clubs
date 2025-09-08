@@ -69,25 +69,39 @@ export class UsersService {
   /**
    * Obtiene todos los usuarios
    */
-  async findAll(requestingUser: currentAuth): Promise<User[]> {
-    const allUsers = (await this.userRepository.findAll()).filter(
-      (user) => user.id !== requestingUser.sub,
+  async findAll(requestingUser: currentAuth, page = 1, limit = 10, name?: string) {
+    const skip = (page - 1) * limit;
+    const [allUsers, total] = await this.userRepository.findAllPaginated(
+      skip,
+      limit,
+      name,
     );
-
+    const filtered = allUsers.filter((user) => user.id !== requestingUser.sub);
+    let data: typeof filtered = [];
     switch (requestingUser.role) {
       case Roles.SUPERADMIN:
-        return allUsers;
+        data = filtered;
+        break;
       case Roles.ADMIN:
-        return allUsers.filter((user) => user.role !== Roles.SUPERADMIN);
+        data = filtered.filter((user) => user.role !== Roles.SUPERADMIN);
+        break;
       case Roles.COACH:
-        return allUsers.filter((user) =>
+        data = filtered.filter((user) =>
           [Roles.PARENT, Roles.ATHLETE].includes(user.role as Roles),
         );
+        break;
       case Roles.PARENT:
-        return allUsers.filter((user) => user.role === Roles.ATHLETE);
+        data = filtered.filter((user) => user.role === Roles.ATHLETE);
+        break;
       default:
-        return [];
+        data = [];
     }
+    return {
+      data,
+      total,
+      page,
+      limit,
+    };
   }
 
   /**

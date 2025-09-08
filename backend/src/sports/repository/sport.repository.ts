@@ -19,8 +19,20 @@ export class SportRepository implements ISportRepository {
     return this.sportModel.create(createSportDto);
   }
 
-  async findAll(): Promise<Sport[]> {
-    return this.sportModel.find();
+  async findAllPaginated(
+    skip = 0,
+    limit = 10,
+    name?: string,
+  ): Promise<[Sport[], number]> {
+    const filter: any = {};
+    if (name) {
+      filter.name = { $regex: name, $options: 'i' };
+    }
+    const [sports, total] = await Promise.all([
+      this.sportModel.find(filter).skip(skip).limit(limit),
+      this.sportModel.countDocuments(filter),
+    ]);
+    return [sports, total];
   }
 
   async findById(id: string): Promise<Sport | null> {

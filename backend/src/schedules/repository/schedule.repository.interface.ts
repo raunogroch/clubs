@@ -6,11 +6,11 @@ import { UpdateScheduleDto } from '../dto/update-schedule.dto';
 export interface IScheduleRepository {
   findOneByTime(startTime: Date, endTime: Date): Promise<Schedule | null>;
   create(createScheduleDto: CreateScheduleDto): Promise<Schedule>;
-  findAll(): Promise<Schedule[]>;
+  findAllPaginated(skip: number, limit: number, name?: string): Promise<[Schedule[], number]>;
   findById(id: string): Promise<Schedule | null>;
   updateById(
     id: string,
-    updateScheduleDto: UpdateScheduleDto,
+    updateUserDto: UpdateScheduleDto,
   ): Promise<Schedule | null>;
   deleteById(id: string): Promise<Schedule | null>;
 }
