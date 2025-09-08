@@ -6,13 +6,16 @@ import {
   Navigate,
 } from "react-router-dom";
 import { useContext } from "react";
-import { AuthProvider } from "./auth/AuthProvider";
-import { AuthContext } from "./auth/AuthContext";
-import { PrivateRoute } from "./auth/PrivateRoute";
+import { AuthProvider, AuthContext, PrivateRoute } from "./auth";
 import { Login, NotFound } from "./pages";
 import { roleRoutes } from "./routes";
+import { useSelector } from "react-redux";
+import { Spinner } from "./components"; // Ajusta la ruta si es necesario
+import type { RootState } from "./store";
 
 export const App = () => {
+  const loading = useSelector((state: RootState) => state.loading.global);
+
   const AppRoutes = () => {
     const { user } = useContext(AuthContext);
     const role = user?.role || "";
@@ -51,6 +54,7 @@ export const App = () => {
   return (
     <Router>
       <AuthProvider>
+        {loading && <Spinner />}
         <AppRoutes />
       </AuthProvider>
     </Router>

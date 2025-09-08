@@ -10,7 +10,9 @@ export const Clubs = ({ name }: pageParamProps) => {
   const dispatch = useDispatch();
 
   if (loading) return <LoadingIndicator />;
-  if (error) return dispatch(setMessage({ message: error, type: "danger" }));
+  if (error) {
+    dispatch(setMessage({ message: error, type: "danger" }));
+  }
 
   return (
     <>
