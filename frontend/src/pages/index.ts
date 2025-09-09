@@ -6,11 +6,7 @@ export * from "./Clubs/components/ClubEdit";
 export * from "./Clubs/components/ClubForm";
 export * from "./Clubs/components/ClubNew";
 export * from "./Clubs/components/ClubTable";
-export * from "./Clubs/components/CoachClubCheckbox";
-export * from "./Clubs/components/AthleteClubCheckbox";
 export * from "./Clubs/components/FormField";
-export * from "./Clubs/components/ScheduleClubSelector";
-export * from "./Clubs/components/SportClubSelector";
 
 export * from "./Profile/components/Profile";
 

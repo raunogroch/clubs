@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { FormField, SportClubSelector } from ".";
+import { FormField } from ".";
 import { useClubForm } from "../hooks";
 import {
   CheckboxList,
@@ -97,15 +97,17 @@ export const ClubForm = ({
           }
         />
 
-        <SportClubSelector
-          selectedSportId={formData.discipline}
-          sports={sports}
+        <SelectorList
+          name="discipline"
+          label="Disciplina deportiva"
+          selectedId={formData.discipline}
+          items={sports}
           errors={errors.discipline}
-          onSportChange={(sportId) => {
+          onItemsChange={(sportId) =>
             handleChange({
               target: { name: "discipline", value: sportId },
-            } as any);
-          }}
+            } as any)
+          }
         />
 
         <FormField
