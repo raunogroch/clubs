@@ -1,7 +1,10 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 interface FiltersState {
-  [key: string]: any;
+  clubs: Record<string, unknown>;
+  sports: Record<string, unknown>;
+  users: Record<string, unknown>;
+  schedules: Record<string, unknown>;
 }
 
 const initialState: FiltersState = {
@@ -15,9 +18,9 @@ const filtersSlice = createSlice({
   name: "filters",
   initialState,
   reducers: {
-    setFilter: (
-      state,
-      action: PayloadAction<{ module: string; filter: any }>
+    setFilter: <K extends keyof FiltersState>(
+      state: FiltersState,
+      action: PayloadAction<{ module: K; filter: FiltersState[K] }>
     ) => {
       state[action.payload.module] = action.payload.filter;
     },

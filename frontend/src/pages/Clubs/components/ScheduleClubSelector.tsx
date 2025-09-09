@@ -8,7 +8,7 @@ interface ScheduleSelectorProps {
   selectedScheduleId: string;
   onScheduleChange: (scheduleId: string) => void;
   errors: string;
-  schedules?: Schedule[];
+  schedules: Schedule[];
 }
 
 export const ScheduleClubSelector = ({

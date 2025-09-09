@@ -1,4 +1,4 @@
-const AUTH_TOKEN_KEY = "UUID";
+const AUTH_TOKEN_KEY = "token";
 
 export const setToken = (token: string): void => {
   localStorage.setItem(AUTH_TOKEN_KEY, token);

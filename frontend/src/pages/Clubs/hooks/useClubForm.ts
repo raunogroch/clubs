@@ -35,7 +35,6 @@ export const useClubForm = (
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    console.log("Handling change for:", e.target.name, e.target.value);
     const { name, value, type, checked } = e.target as HTMLInputElement;
     if (type === "checkbox" && (name === "coaches" || name === "athletes")) {
       let updatedArr = Array.isArray(formData[name]) ? [...formData[name]] : [];
@@ -80,7 +79,6 @@ export const useClubForm = (
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
-    console.log("Submitting form data:", formData);
     try {
       let response: any;
       if (initialData?._id) {

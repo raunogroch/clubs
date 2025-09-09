@@ -11,7 +11,7 @@ import { Login, NotFound } from "./pages";
 import { roleRoutes } from "./routes";
 import { useSelector } from "react-redux";
 import { Spinner } from "./components"; // Ajusta la ruta si es necesario
-import type { RootState } from "./store";
+import type { RootState } from "./store/store";
 
 export const App = () => {
   const loading = useSelector((state: RootState) => state.loading.global);

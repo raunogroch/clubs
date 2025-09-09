@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import type { RootState } from "../store";
+import type { RootState } from "../store/store";
 import { clearMessage } from "../store/messageSlice";
 
 export const PopUpMessage = () => {

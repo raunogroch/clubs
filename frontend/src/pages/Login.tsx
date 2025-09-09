@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useBodyClass } from "../hooks/useBodyClass";
 import { useDispatch, useSelector } from "react-redux";
 import { login as loginAction } from "../store/authSlice";
-import type { RootState } from "../store";
+import type { RootState } from "../store/store";
 import { setMessage } from "../store/messageSlice";
 
 interface FormData {

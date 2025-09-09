@@ -1,26 +1,13 @@
-import {
-  AthleteClubCheckbox,
-  CoachClubCheckbox,
-  FormField,
-  ScheduleClubSelector,
-  SportClubSelector,
-} from ".";
-import {
-  useAthleteClub,
-  useClubForm,
-  useCoachClub,
-  useScheduleClub,
-  useSportClub,
-} from "../hooks";
-import {
-  CropperImageInput,
-  CustomMessage,
-  ImageCropper,
-} from "../../../components";
+import { FormField, SportClubSelector } from ".";
+import { useClubForm } from "../hooks";
+import { CropperImageInput, ImageCropper } from "../../../components";
 import type { ClubFormProps } from "../interfaces";
 import { useEffect, useState } from "react";
-import { setMessage } from "../../../store/messageSlice";
+import { setMessage } from "../../../store";
 import { useDispatch } from "react-redux";
+import { useClubCatalogs } from "../../../hooks";
+import { CheckboxList } from "../../../components/CheckboxList";
+import { SelectorList } from "../../../components/SelectorList";
 
 export const ClubForm = ({
   initialData,
@@ -30,10 +17,9 @@ export const ClubForm = ({
   const { formData, errors, message, handleChange, handleSubmit } =
     useClubForm(initialData);
 
-  const { schedules, error: scheduleError } = useScheduleClub();
-  const { sports, error: sportError } = useSportClub();
-  const { coaches } = useCoachClub();
-  const { athletes } = useAthleteClub();
+  const dispatch = useDispatch();
+  const { sports, coaches, athletes, schedules } = useClubCatalogs();
+
   const [imageSrc, setImage] = useState<string | null>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,8 +31,6 @@ export const ClubForm = ({
     };
     reader.readAsDataURL(file);
   };
-
-  const dispatch = useDispatch();
 
   useEffect(() => {
     if (message) {
@@ -66,10 +50,6 @@ export const ClubForm = ({
 
   return (
     <div>
-      {message && <CustomMessage message={message.text} kind={message.type} />}
-      {scheduleError && <CustomMessage message={scheduleError} kind="danger" />}
-      {sportError && <CustomMessage message={sportError} kind="danger" />}
-
       <CropperImageInput
         value={formData.image || ""}
         error={errors.image}
@@ -101,15 +81,17 @@ export const ClubForm = ({
           handleChange={handleChange}
         />
 
-        <ScheduleClubSelector
-          selectedScheduleId={formData.schedule}
-          schedules={schedules}
+        <SelectorList
+          name="schedule"
+          label="Horario"
+          selectedId={formData.schedule}
+          items={schedules}
           errors={errors.schedule}
-          onScheduleChange={(scheduleId) => {
+          onItemsChange={(scheduleId) =>
             handleChange({
               target: { name: "schedule", value: scheduleId },
-            } as any);
-          }}
+            } as any)
+          }
         />
 
         <SportClubSelector
@@ -134,18 +116,22 @@ export const ClubForm = ({
 
         <div className="hr-line-dashed"></div>
 
-        <CoachClubCheckbox
+        <CheckboxList
+          name="coaches"
+          label="Entrenadores"
           dataList={coaches}
           onChange={handleChange}
-          selectedCoaches={formData.coaches}
+          selectedItems={formData.coaches}
         />
 
         <div className="hr-line-dashed"></div>
 
-        <AthleteClubCheckbox
+        <CheckboxList
+          name="athletes"
+          label="Atletas"
           dataList={athletes}
           onChange={handleChange}
-          selectedAthletes={formData.athletes}
+          selectedItems={formData.athletes}
         />
 
         <div className="form-group row">

@@ -4,7 +4,7 @@ import { Role } from "../interfaces";
 import { roleRoutes } from "../routes";
 import { useDispatch, useSelector } from "react-redux";
 import { logout as logoutAction } from "../store/authSlice";
-import type { RootState } from "../store";
+import type { RootState } from "../store/store";
 
 export const SideNav = () => {
   const dispatch = useDispatch();

@@ -62,7 +62,15 @@ export class ClubsService {
    */
   async remove(id: string): Promise<Club | null> {
     await this.clubValidator.validateExistence(id);
-    return this.clubRepository.deleteById(id);
+    // Buscar el club antes de eliminar para obtener la ruta de la imagen
+    const club = await this.clubRepository.findById(id);
+    if (!club) return null;
+    const deleted = await this.clubRepository.deleteById(id);
+    // Solo eliminar la imagen si la eliminación fue exitosa y hay imagen
+    if (deleted && club.image) {
+      await this.clubImageService.deleteImage(this.folder, club.image);
+    }
+    return deleted;
   }
 
   /**

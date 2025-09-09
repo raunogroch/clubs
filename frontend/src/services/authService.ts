@@ -2,7 +2,7 @@ import { handleApiError, type ApiResponse } from "../utils/apiUtils";
 import api from "./api";
 // Utilidades para localStorage
 const STORAGE_KEYS = {
-  UUID: "UUID",
+  TOKEN: "token",
   USER: "user",
 };
 
@@ -16,7 +16,7 @@ function getUserFromStorage(): User | null {
 }
 
 function clearAuthStorage() {
-  localStorage.removeItem(STORAGE_KEYS.UUID);
+  localStorage.removeItem(STORAGE_KEYS.TOKEN);
   localStorage.removeItem(STORAGE_KEYS.USER);
 }
 
@@ -45,7 +45,7 @@ export const authService = {
     try {
       const response = await api.post("/auth/login", credentials);
       localStorage.setItem(
-        STORAGE_KEYS.UUID,
+        STORAGE_KEYS.TOKEN,
         response.data.access.authorization
       );
       setUserToStorage(response.data.access.user);

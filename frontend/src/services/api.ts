@@ -13,9 +13,13 @@ const api = axios.create({
 
 // Interceptor para agregar el token JWT a cada petición si existe
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("UUID");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const token = localStorage.getItem("token");
+  if (token && config.headers) {
+    if (typeof config.headers.set === "function") {
+      config.headers.set("Authorization", `Bearer ${token}`);
+    } else {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
   }
   return config;
 });

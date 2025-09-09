@@ -1,10 +1,14 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import type { Club } from "../interfaces/club";
+import type { User } from "../interfaces/user";
+import type { Sport } from "../pages/Sports/interfaces/sportTypes";
+import type { Schedule } from "../pages/Schedule/types/scheduleTypes";
 
 interface EntitiesState {
-  clubs: any[];
-  sports: any[];
-  users: any[];
-  schedules: any[];
+  clubs: Club[];
+  sports: Sport[];
+  users: User[];
+  schedules: Schedule[];
 }
 
 const initialState: EntitiesState = {
@@ -18,9 +22,9 @@ const entitiesSlice = createSlice({
   name: "entities",
   initialState,
   reducers: {
-    setEntities: (
-      state,
-      action: PayloadAction<{ name: keyof EntitiesState; data: any[] }>
+    setEntities: <K extends keyof EntitiesState>(
+      state: EntitiesState,
+      action: PayloadAction<{ name: K; data: EntitiesState[K] }>
     ) => {
       state[action.payload.name] = action.payload.data;
     },
