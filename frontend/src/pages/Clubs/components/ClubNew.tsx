@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom";
-import type { UsersPageProps } from "../../Users/interfaces/userTypes";
+import type { UsersPageProps } from "../../Users/interfaces";
 import { NavHeader, PopUpMessage } from "../../../components";
-import { ClubForm } from "./ClubForm";
 import { useDispatch } from "react-redux";
-import { setMessage } from "../../../store/messageSlice";
+import { setMessage } from "../../../store";
+import { ClubForm } from ".";
 
 export const ClubNew = ({ name, sub }: UsersPageProps) => {
   const navigate = useNavigate();

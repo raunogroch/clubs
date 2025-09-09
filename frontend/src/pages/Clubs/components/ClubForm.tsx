@@ -1,13 +1,16 @@
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { FormField, SportClubSelector } from ".";
 import { useClubForm } from "../hooks";
-import { CropperImageInput, ImageCropper } from "../../../components";
+import {
+  CheckboxList,
+  CropperImageInput,
+  ImageCropper,
+  SelectorList,
+} from "../../../components";
 import type { ClubFormProps } from "../interfaces";
-import { useEffect, useState } from "react";
 import { setMessage } from "../../../store";
-import { useDispatch } from "react-redux";
 import { useClubCatalogs } from "../../../hooks";
-import { CheckboxList } from "../../../components/CheckboxList";
-import { SelectorList } from "../../../components/SelectorList";
 
 export const ClubForm = ({
   initialData,

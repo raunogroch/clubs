@@ -1,12 +1,12 @@
-import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import type { pageParamProps } from "../../../interfaces/pageParamProps";
-import type { Club } from "../interfaces/clubTypes";
-import { useClubs } from "../hooks/useClub";
-import { PopUpMessage, LoadingIndicator, NavHeader } from "../../../components";
-import { ClubForm } from "./ClubForm";
+import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { setMessage } from "../../../store/messageSlice";
+import { useClubs } from "../hooks";
+import { PopUpMessage, LoadingIndicator, NavHeader } from "../../../components";
+import { ClubForm } from ".";
+import { setMessage } from "../../../store";
+import type { pageParamProps } from "../../../interfaces";
+import type { Club } from "../interfaces";
 
 export const ClubEdit = ({ name, sub }: pageParamProps) => {
   const { id } = useParams<{ id: string }>();
