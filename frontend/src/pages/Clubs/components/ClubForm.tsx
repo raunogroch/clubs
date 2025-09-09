@@ -15,7 +15,7 @@ export const ClubForm = ({
   onSuccess,
   onCancel,
 }: ClubFormProps) => {
-  const { formData, errors, message, handleChange, handleSubmit } =
+  const { formData, errors, handleChange, handleSubmit } =
     useClubForm(initialData);
 
   const { sports, coaches, athletes, schedules } = useClubCatalogs();

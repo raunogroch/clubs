@@ -4,6 +4,7 @@ import authReducer, { login } from "./authSlice";
 import loadingReducer from "./loadingSlice";
 import filtersReducer from "./filtersSlice";
 import entitiesReducer from "./entitiesSlice";
+import queriesReducer from "./querySlice";
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     loading: loadingReducer,
     filters: filtersReducer,
     entities: entitiesReducer,
+    queries: queriesReducer,
   },
 });
 

@@ -42,7 +42,6 @@ export const ClubTable = ({ clubs, onDelete }: ClubsTableProps) => {
       <table className="table table-striped">
         <thead>
           <tr>
-            <th className="text-center">Logo</th>
             <th>Nombre</th>
             <th>Horario</th>
             <th>Disciplina deportiva</th>
@@ -65,13 +64,6 @@ export const ClubTable = ({ clubs, onDelete }: ClubsTableProps) => {
               athletes,
             }) => (
               <tr key={_id}>
-                <td className="text-center align-middle">
-                  {image ? (
-                    <ImageWithFallback src={image} alt={name} />
-                  ) : (
-                    "Sin logo"
-                  )}
-                </td>
                 <td className="align-middle">{name}</td>
                 <td className="align-middle">
                   {`${schedule.startTime} Hrs - ${schedule.endTime} Hrs`}
@@ -87,16 +79,20 @@ export const ClubTable = ({ clubs, onDelete }: ClubsTableProps) => {
                 <td className="text-center align-middle">
                   <Link
                     to={`/clubs/edit/${_id ?? ""}`}
-                    className="btn btn-primary btn-outline m-1"
+                    className="text-success m-1"
                   >
                     <i className="fa fa-edit"></i> Editar
                   </Link>
-                  <button
-                    onClick={() => handleDelete(_id)}
-                    className="btn btn btn-danger btn-outline m-1"
+                  <Link
+                    to={`#`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleDelete(_id);
+                    }}
+                    className="text-danger m-1"
                   >
                     <i className="fa fa-trash"></i> Eliminar
-                  </button>
+                  </Link>
                 </td>
               </tr>
             )

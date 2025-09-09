@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import type { User } from "../interfaces";
 import { useDispatch } from "react-redux";
 import { setMessage } from "../../../store/messageSlice";
-import { ImageWithFallback } from "../../../components";
 
 interface UsersTableProps {
   users: User[];
@@ -28,8 +27,7 @@ export const UserTable = ({ users, onDelete }: UsersTableProps) => {
       <table className="table table-striped">
         <thead>
           <tr>
-            <th className="text-center">Rol</th>
-            <th className="text-center">Foto</th>
+            <th>Roles</th>
             <th>Cedula de Identidad</th>
             <th>Nombres</th>
             <th>Apellidos</th>
@@ -40,8 +38,8 @@ export const UserTable = ({ users, onDelete }: UsersTableProps) => {
         <tbody>
           {users.map((user) => (
             <tr key={user._id}>
-              <td className="text-center align-middle text-uppercase">
-                <div className="btn btn-info btn-rounded btn-outline btn-sm">
+              <td className="text-center align-middle">
+                <div className="text-success text-left">
                   {user.role === "athlete" && "Deportista"}
                   {user.role === "parent" && "Responsable"}
                   {user.role === "coach" && "Entrenador"}
@@ -49,17 +47,7 @@ export const UserTable = ({ users, onDelete }: UsersTableProps) => {
                   {user.role === "superadmin" && "Super Administrador"}
                 </div>
               </td>
-              <td className="align-middle text-center">
-                {user.image ? (
-                  <ImageWithFallback
-                    src={user.image}
-                    alt={user.name}
-                    style={{ width: "50px" }}
-                  />
-                ) : (
-                  "Sin Foto"
-                )}
-              </td>
+
               <td className="align-middle">{user.ci}</td>
               <td className="align-middle">{user.name}</td>
               <td className="align-middle">{user.lastname}</td>
@@ -68,16 +56,20 @@ export const UserTable = ({ users, onDelete }: UsersTableProps) => {
               <td className="text-center align-middle">
                 <Link
                   to={`/users/edit/${user._id}`}
-                  className="btn btn-primary btn-outline m-1"
+                  className="text-success m-1"
                 >
                   <i className="fa fa-edit"></i> Editar
                 </Link>
-                <button
-                  onClick={() => handleDelete(user._id!)}
-                  className="btn btn btn-danger btn-outline m-1"
+                <Link
+                  to="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleDelete(user._id!);
+                  }}
+                  className="text-danger m-1"
                 >
                   <i className="fa fa-trash"></i> Eliminar
-                </button>
+                </Link>
               </td>
             </tr>
           ))}
