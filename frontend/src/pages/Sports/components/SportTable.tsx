@@ -27,8 +27,8 @@ export const SportTable = ({ sports, onDelete }: SportTableProps) => {
       <table className="table table-striped">
         <thead>
           <tr>
-            <th className="text-center">Indice</th>
-            <th>Nombre de la disciplina</th>
+            <th className="text-center">ID</th>
+            <th>Disciplina</th>
             <th className="text-center">Acciones</th>
           </tr>
         </thead>
@@ -40,16 +40,20 @@ export const SportTable = ({ sports, onDelete }: SportTableProps) => {
               <td className="text-center">
                 <Link
                   to={`/sports/edit/${sport._id}`}
-                  className="btn btn-primary btn-outline m-1"
+                  className="text-success m-2"
                 >
                   <i className="fa fa-edit"></i> Editar
                 </Link>
-                <button
-                  onClick={() => handleDelete(sport._id!)}
-                  className="btn btn btn-danger btn-outline m-1"
+                <Link
+                  to={"#"}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleDelete(sport._id!);
+                  }}
+                  className="text-danger m-2"
                 >
                   <i className="fa fa-trash"></i> Eliminar
-                </button>
+                </Link>
               </td>
             </tr>
           ))}

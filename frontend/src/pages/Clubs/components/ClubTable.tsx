@@ -41,9 +41,10 @@ export const ClubTable = ({ clubs, onDelete }: ClubsTableProps) => {
       <table className="table table-striped">
         <thead>
           <tr>
+            <th className="text-center">ID</th>
             <th>Nombre</th>
             <th>Horario</th>
-            <th>Disciplina deportiva</th>
+            <th>Disciplina</th>
             <th>Lugar</th>
             <th>Entrenadores</th>
             <th>Deportistas</th>
@@ -52,8 +53,12 @@ export const ClubTable = ({ clubs, onDelete }: ClubsTableProps) => {
         </thead>
         <tbody>
           {clubs.map(
-            ({ _id, name, schedule, discipline, place, coaches, athletes }) => (
+            (
+              { _id, name, schedule, discipline, place, coaches, athletes },
+              index
+            ) => (
               <tr key={_id}>
+                <td className="text-center">{index + 1}</td>
                 <td className="align-middle">{name}</td>
                 <td className="align-middle">
                   {`${schedule.startTime} Hrs - ${schedule.endTime} Hrs`}
@@ -69,7 +74,7 @@ export const ClubTable = ({ clubs, onDelete }: ClubsTableProps) => {
                 <td className="text-center align-middle">
                   <Link
                     to={`/clubs/edit/${_id ?? ""}`}
-                    className="text-success m-1"
+                    className="text-success m-2"
                   >
                     <i className="fa fa-edit"></i> Editar
                   </Link>
@@ -79,7 +84,7 @@ export const ClubTable = ({ clubs, onDelete }: ClubsTableProps) => {
                       e.preventDefault();
                       handleDelete(_id);
                     }}
-                    className="text-danger m-1"
+                    className="text-danger m-2"
                   >
                     <i className="fa fa-trash"></i> Eliminar
                   </Link>

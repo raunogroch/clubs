@@ -27,6 +27,7 @@ export const UserTable = ({ users, onDelete }: UsersTableProps) => {
       <table className="table table-striped">
         <thead>
           <tr>
+            <th className="text-center">ID</th>
             <th>Roles</th>
             <th>Cedula de Identidad</th>
             <th>Nombres</th>
@@ -36,8 +37,9 @@ export const UserTable = ({ users, onDelete }: UsersTableProps) => {
           </tr>
         </thead>
         <tbody>
-          {users.map((user) => (
+          {users.map((user, index) => (
             <tr key={user._id}>
+              <td className="text-center">{index + 1}</td>
               <td className="text-center align-middle">
                 <div className="text-success text-left">
                   {user.role === "athlete" && "Deportista"}
@@ -56,7 +58,7 @@ export const UserTable = ({ users, onDelete }: UsersTableProps) => {
               <td className="text-center align-middle">
                 <Link
                   to={`/users/edit/${user._id}`}
-                  className="text-success m-1"
+                  className="text-success m-2"
                 >
                   <i className="fa fa-edit"></i> Editar
                 </Link>
@@ -66,7 +68,7 @@ export const UserTable = ({ users, onDelete }: UsersTableProps) => {
                     e.preventDefault();
                     handleDelete(user._id!);
                   }}
-                  className="text-danger m-1"
+                  className="text-danger m-2"
                 >
                   <i className="fa fa-trash"></i> Eliminar
                 </Link>

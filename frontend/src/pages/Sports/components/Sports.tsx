@@ -23,8 +23,8 @@ export const Sports = ({ name }: pageParamProps) => {
       <NavHeader name={name} pageCreate="Nueva disciplina" />
       <PopUpMessage />
       <div className="wrapper wrapper-content animated fadeInRight">
-        <div className="row">
-          <div className="col-12">
+        <div className="row justify-content-center">
+          <div className="col-6">
             <div className="ibox ">
               <div className="ibox-title">
                 <h5>Lista de disciplinas</h5>

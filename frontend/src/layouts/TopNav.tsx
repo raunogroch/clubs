@@ -11,6 +11,8 @@ export const TopNav = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
 
+  const isHere = location.pathname === "/users";
+
   const filter = useSelector((state: any) => state.queries.filter);
 
   // Hook de debounce
@@ -58,19 +60,21 @@ export const TopNav = () => {
             <i className="fa fa-bars"></i>
           </Link>
 
-          <div role="search" className="navbar-form-custom">
-            <div className="form-group">
-              <Input
-                type="text"
-                placeholder="Buscar en la lista..."
-                className="form-control"
-                name="top-search"
-                id="top-search"
-                value={search}
-                onChange={handleSearchChange}
-              />
+          {isHere && (
+            <div role="search" className="navbar-form-custom">
+              <div className="form-group">
+                <Input
+                  type="text"
+                  placeholder="Buscar en la lista..."
+                  className="form-control"
+                  name="top-search"
+                  id="top-search"
+                  value={search}
+                  onChange={handleSearchChange}
+                />
+              </div>
             </div>
-          </div>
+          )}
         </div>
         <ul className="nav navbar-top-links navbar-right">
           <li style={{ padding: "20px" }}>

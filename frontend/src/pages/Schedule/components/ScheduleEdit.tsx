@@ -55,8 +55,8 @@ export const ScheduleEdit = ({ name, sub }: pageParamProps) => {
       <NavHeader name={name} sub={sub} />
       <PopUpMessage />
       <div className="wrapper wrapper-content animated fadeInRight">
-        <div className="row">
-          <div className="col-12">
+        <div className="row justify-content-center">
+          <div className="col-4">
             <div className="ibox ">
               <div className="ibox-title">
                 <h5>Editar la disciplina</h5>

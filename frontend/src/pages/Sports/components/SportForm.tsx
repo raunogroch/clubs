@@ -40,7 +40,7 @@ export const SportForm = ({
       <form onSubmit={onSubmit}>
         <div className="form-group row">
           <label htmlFor="name" className="col-sm-2 col-form-label">
-            Nombre del deporte
+            Nombre
           </label>
           <div className="col-sm-10">
             <Input

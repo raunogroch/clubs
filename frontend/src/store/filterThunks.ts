@@ -12,7 +12,6 @@ export const fetchFilteredUsers = createAsyncThunk(
     try {
       // Solo enviar los filtros válidos
       const response = await api.get("/users", { params: filters });
-      console.log("API response:", response.data);
       // Guarda los filtros de búsqueda y los metadatos por separado
       dispatch(
         setFilter({

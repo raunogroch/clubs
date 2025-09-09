@@ -28,8 +28,8 @@ export const ScheduleTable = ({ schedules, onDelete }: ScheduleTableProps) => {
         <thead>
           <tr>
             <th className="text-center">ID</th>
-            <th className="text-center">Hora de inicio</th>
-            <th className="text-center">Hora de culminacion</th>
+            <th>Entrada</th>
+            <th>Salida</th>
             <th className="text-center">Acciones</th>
           </tr>
         </thead>
@@ -37,25 +37,22 @@ export const ScheduleTable = ({ schedules, onDelete }: ScheduleTableProps) => {
           {schedules.map((schedule: Schedule, index) => (
             <tr key={schedule._id}>
               <td className="text-center align-middle">{index + 1}</td>
-              <td className="text-center align-middle">
-                {schedule.startTime} Hrs
-              </td>
-              <td className="text-center align-middle">
-                {schedule.endTime} Hrs
-              </td>
+              <td className="align-middle">{schedule.startTime} Hrs</td>
+              <td className="align-middle">{schedule.endTime} Hrs</td>
               <td className="text-center">
                 <Link
                   to={`/schedules/edit/${schedule._id}`}
-                  className="btn btn-primary btn-outline m-1"
+                  className="text-success m-2"
                 >
                   <i className="fa fa-edit"></i> Editar
                 </Link>
-                <button
+                <Link
+                  to={"#"}
                   onClick={() => handleDelete(schedule._id!)}
-                  className="btn btn btn-danger btn-outline m-1"
+                  className="text-danger m-2"
                 >
                   <i className="fa fa-trash"></i> Eliminar
-                </button>
+                </Link>
               </td>
             </tr>
           ))}

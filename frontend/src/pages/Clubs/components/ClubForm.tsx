@@ -20,8 +20,6 @@ export const ClubForm = ({
 
   const { sports, coaches, athletes, schedules } = useClubCatalogs();
 
-  console.log("Sports in ClubForm:", sports);
-
   const [imageSrc, setImage] = useState<string | null>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,8 +31,6 @@ export const ClubForm = ({
     };
     reader.readAsDataURL(file);
   };
-
-  console.log("Sports in ClubForm:", sports);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -20,7 +20,6 @@ export const fetchSports = createAsyncThunk(
   async (_, { dispatch, rejectWithValue }) => {
     try {
       const response = await api.get("/sports");
-      console.log("Fetched sports:", response.data);
       dispatch(setEntities({ name: "sports", data: response.data }));
       return response.data;
     } catch (err: any) {

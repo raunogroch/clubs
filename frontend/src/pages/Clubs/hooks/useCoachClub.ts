@@ -19,7 +19,6 @@ export const useCoachClub = (service: IUserService = userService) => {
   const fetchCoaches = async () => {
     try {
       const response = await service.getAllCoaches();
-      console.log(response);
       if (response.code === 200) {
         const { data } = response;
         setCoaches(data);

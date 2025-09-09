@@ -18,8 +18,8 @@ export const ScheduleNew = ({ name, sub }: UsersPageProps) => {
     <>
       <NavHeader name={name} sub={sub} />
       <div className="wrapper wrapper-content animated fadeInRight">
-        <div className="row">
-          <div className="col-12">
+        <div className="row justify-content-center">
+          <div className="col-4">
             <div className="ibox ">
               <div className="ibox-title">
                 <h5>Crear nuevo horario</h5>
