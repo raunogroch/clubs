@@ -1,4 +1,3 @@
-// Servicio para la gestión de deportes
 import { Injectable } from '@nestjs/common';
 import { CreateSportDto } from './dto/create-sport.dto';
 import { UpdateSportDto } from './dto/update-sport.dto';
