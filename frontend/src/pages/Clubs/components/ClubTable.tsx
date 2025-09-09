@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { ImageWithFallback } from "../../../components";
 import { useDispatch } from "react-redux";
 import { setMessage } from "../../../store/messageSlice";
 
@@ -53,16 +52,7 @@ export const ClubTable = ({ clubs, onDelete }: ClubsTableProps) => {
         </thead>
         <tbody>
           {clubs.map(
-            ({
-              _id,
-              image,
-              name,
-              schedule,
-              discipline,
-              place,
-              coaches,
-              athletes,
-            }) => (
+            ({ _id, name, schedule, discipline, place, coaches, athletes }) => (
               <tr key={_id}>
                 <td className="align-middle">{name}</td>
                 <td className="align-middle">
