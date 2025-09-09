@@ -1,31 +1,46 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
+interface User {
+  id: string;
+  username: string;
+  email: string;
+  role: string;
+  image?: string;
+}
+
+interface UsersFilter {
+  page?: number;
+  limit?: number;
+  total?: number;
+  data: User[];
+}
+
 interface FiltersState {
-  clubs: Record<string, unknown>;
-  sports: Record<string, unknown>;
-  users: Record<string, unknown>;
-  schedules: Record<string, unknown>;
+  users: UsersFilter;
 }
 
 const initialState: FiltersState = {
-  clubs: {},
-  sports: {},
-  users: {},
-  schedules: {},
+  users: { page: 1, limit: 10, total: 0, data: [] },
 };
 
 const filtersSlice = createSlice({
   name: "filters",
   initialState,
   reducers: {
-    setFilter: <K extends keyof FiltersState>(
-      state: FiltersState,
-      action: PayloadAction<{ module: K; filter: FiltersState[K] }>
+    setFilter: (
+      state,
+      action: PayloadAction<{
+        module: keyof FiltersState;
+        filter: Partial<UsersFilter>;
+      }>
     ) => {
-      state[action.payload.module] = action.payload.filter;
+      state[action.payload.module] = {
+        ...state[action.payload.module],
+        ...action.payload.filter,
+      };
     },
-    clearFilter: (state, action: PayloadAction<string>) => {
-      state[action.payload] = {};
+    clearFilter: (state, action: PayloadAction<keyof FiltersState>) => {
+      state[action.payload] = { page: 1, limit: 10, total: 0, data: [] };
     },
   },
 });

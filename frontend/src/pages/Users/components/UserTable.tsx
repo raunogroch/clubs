@@ -6,7 +6,7 @@ import { setMessage } from "../../../store/messageSlice";
 
 interface UsersTableProps {
   users: User[];
-  onDelete: (id: string) => Promise<void>;
+  onDelete?: (id: string) => Promise<void>;
 }
 
 export const UserTable = ({ users, onDelete }: UsersTableProps) => {
@@ -51,7 +51,11 @@ export const UserTable = ({ users, onDelete }: UsersTableProps) => {
               </td>
               <td className="align-middle text-center">
                 {user.image ? (
-                  <Image src={user.image} alt={user.name} />
+                  <Image
+                    src={user.image}
+                    alt={user.name}
+                    style={{ width: "50px" }}
+                  />
                 ) : (
                   "Sin Foto"
                 )}

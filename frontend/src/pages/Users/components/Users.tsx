@@ -1,17 +1,23 @@
-import { Link } from "react-router-dom";
 import type { UsersPageProps } from "../interfaces";
 import { UserTable } from ".";
-import { useUsers } from "../hooks";
-import { PopUpMessage, LoadingIndicator, NavHeader } from "../../../components";
-
+import { PopUpMessage, NavHeader } from "../../../components";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch } from "../../../store";
+import { useEffect, useState } from "react";
+import { fetchFilteredUsers } from "../../../store/filterThunks";
 export const Users = ({ name }: UsersPageProps) => {
-  const { users, loading, deleteUser } = useUsers();
+  const dispatch = useDispatch<AppDispatch>();
+  const [filter, setFilter] = useState({ page: 1, limit: 10, name: "" });
+  useEffect(() => {
+    dispatch(fetchFilteredUsers(filter));
+  }, [dispatch, filter]);
 
-  if (loading) return <LoadingIndicator />;
-
+  const users = useSelector((state: any) => state.filters.users);
+  const loading = useSelector((state: any) => state.loading?.users?.loading);
+  const error = useSelector((state: any) => state.loading?.users?.error);
   return (
     <>
-      <NavHeader name={name} />
+      <NavHeader name={name} pageCreate="Nuevo usuario" />
       <PopUpMessage />
       <div className="wrapper wrapper-content animated fadeInRight">
         <div className="row">
@@ -19,17 +25,15 @@ export const Users = ({ name }: UsersPageProps) => {
             <div className="ibox ">
               <div className="ibox-title">
                 <h5>Lista de Usuarios</h5>
-                <div className="ibox-tools">
-                  <Link
-                    to="/users/create"
-                    className="btn btn-rounded btn-outline"
-                  >
-                    <i className="fa fa-plus"></i> Nuevo Usuario
-                  </Link>
-                </div>
               </div>
               <div className="ibox-content">
-                <UserTable users={users} onDelete={deleteUser} />
+                {loading && (
+                  <div style={{ margin: 16 }}>Cargando usuarios...</div>
+                )}
+                {error && (
+                  <div style={{ margin: 16, color: "red" }}>Error: {error}</div>
+                )}
+                {!loading && !error && <UserTable users={users.data || []} />}
               </div>
             </div>
           </div>
