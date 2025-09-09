@@ -2,7 +2,11 @@ import { Link } from "react-router-dom";
 import { NavHeader } from "../../components/NavHeader";
 import type { pageParamProps } from "../../interfaces/pageParamProps";
 import { useUserClubs } from "./hooks";
-import { PopUpMessage, Image, LoadingIndicator } from "../../components";
+import {
+  PopUpMessage,
+  ImageWithFallback,
+  LoadingIndicator,
+} from "../../components";
 
 export const DashboardAthlete = ({ name }: pageParamProps) => {
   const { clubs, loading, error } = useUserClubs();
@@ -21,7 +25,7 @@ export const DashboardAthlete = ({ name }: pageParamProps) => {
                   <div className="col-4">
                     <div className="text-center">
                       {club.image ? (
-                        <Image
+                        <ImageWithFallback
                           src={club.image}
                           alt={club._id}
                           className="img-fluid rounded-circle"

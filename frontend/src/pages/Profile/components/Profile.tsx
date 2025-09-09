@@ -1,6 +1,6 @@
 import {
   NavHeader,
-  Image,
+  ImageWithFallback,
   LoadingIndicator,
   PopUpMessage,
 } from "../../../components";
@@ -27,7 +27,7 @@ export const Profile = ({ name }: pageParamProps) => {
           <div className="col-md-6">
             <div className="profile-image">
               {user.image ? (
-                <Image
+                <ImageWithFallback
                   src={user.image}
                   className="rounded-circle circle-border m-b-md"
                   alt="profile"

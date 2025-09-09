@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Image } from "../../../components";
+import { ImageWithFallback } from "../../../components";
 import { useDispatch } from "react-redux";
 import { setMessage } from "../../../store/messageSlice";
 
@@ -66,7 +66,11 @@ export const ClubTable = ({ clubs, onDelete }: ClubsTableProps) => {
             }) => (
               <tr key={_id}>
                 <td className="text-center align-middle">
-                  {image ? <Image src={image} alt={_id} /> : "Sin logo"}
+                  {image ? (
+                    <ImageWithFallback src={image} alt={name} />
+                  ) : (
+                    "Sin logo"
+                  )}
                 </td>
                 <td className="align-middle">{name}</td>
                 <td className="align-middle">

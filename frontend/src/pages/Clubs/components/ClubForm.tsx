@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useState } from "react";
 import { FormField } from ".";
 import { useClubForm } from "../hooks";
 import {
@@ -9,7 +8,6 @@ import {
   SelectorList,
 } from "../../../components";
 import type { ClubFormProps } from "../interfaces";
-import { setMessage } from "../../../store";
 import { useClubCatalogs } from "../../../hooks";
 
 export const ClubForm = ({
@@ -20,8 +18,9 @@ export const ClubForm = ({
   const { formData, errors, message, handleChange, handleSubmit } =
     useClubForm(initialData);
 
-  const dispatch = useDispatch();
   const { sports, coaches, athletes, schedules } = useClubCatalogs();
+
+  console.log("Sports in ClubForm:", sports);
 
   const [imageSrc, setImage] = useState<string | null>(null);
 
@@ -35,15 +34,7 @@ export const ClubForm = ({
     reader.readAsDataURL(file);
   };
 
-  useEffect(() => {
-    if (message) {
-      if (message.type === "error") {
-        dispatch(setMessage({ message: message.text, type: "danger" }));
-      } else if (message.type === "success") {
-        dispatch(setMessage({ message: message.text, type: "success" }));
-      }
-    }
-  }, [message, dispatch]);
+  console.log("Sports in ClubForm:", sports);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

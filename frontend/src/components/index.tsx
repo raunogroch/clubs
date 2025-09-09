@@ -1,4 +1,4 @@
-export * from "./Image";
+export * from "./ImageWithFallback";
 export * from "./Input";
 export * from "./CustomMessage";
 export * from "./PopUpMessage";

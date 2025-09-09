@@ -20,6 +20,7 @@ export const fetchSports = createAsyncThunk(
   async (_, { dispatch, rejectWithValue }) => {
     try {
       const response = await api.get("/sports");
+      console.log("Fetched sports:", response.data);
       dispatch(setEntities({ name: "sports", data: response.data }));
       return response.data;
     } catch (err: any) {
@@ -37,6 +38,19 @@ export const fetchSchedules = createAsyncThunk(
       return response.data;
     } catch (err: any) {
       return rejectWithValue(err.response?.data || "Error al cargar schedules");
+    }
+  }
+);
+
+export const fetchUsers = createAsyncThunk(
+  "entities/fetchUsers",
+  async (_, { dispatch, rejectWithValue }) => {
+    try {
+      const response = await api.get("/users");
+      dispatch(setEntities({ name: "users", data: response.data }));
+      return response.data;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data || "Error al cargar usuarios");
     }
   }
 );

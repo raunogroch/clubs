@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import type { User } from "../interfaces";
-import { Image } from "../../../components";
 import { useDispatch } from "react-redux";
 import { setMessage } from "../../../store/messageSlice";
+import { ImageWithFallback } from "../../../components";
 
 interface UsersTableProps {
   users: User[];
@@ -51,7 +51,7 @@ export const UserTable = ({ users, onDelete }: UsersTableProps) => {
               </td>
               <td className="align-middle text-center">
                 {user.image ? (
-                  <Image
+                  <ImageWithFallback
                     src={user.image}
                     alt={user.name}
                     style={{ width: "50px" }}

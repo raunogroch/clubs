@@ -30,7 +30,8 @@ export const SelectorList = ({
           <option value="">Seleccione una opción</option>
           {items.map((item) => (
             <option key={item._id} value={item._id}>
-              {`${item.startTime} - ${item.endTime}`}
+              {item.name && item.name}
+              {item.startTime && `${item.startTime} - ${item.endTime}`}
             </option>
           ))}
         </select>

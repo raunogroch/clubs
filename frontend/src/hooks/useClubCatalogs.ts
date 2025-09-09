@@ -1,7 +1,12 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setEntities, type RootState } from "../store";
-import api from "../services/api";
+import { type RootState } from "../store";
+import {
+  fetchUsers,
+  fetchSchedules,
+  fetchClubs,
+  fetchSports,
+} from "../store/entitiesThunks";
 
 /**
  * Custom hook para obtener catálogos de coaches, athletes y schedules desde Redux,
@@ -20,43 +25,11 @@ export const useClubCatalogs = () => {
   const sports = useSelector((state: RootState) => state.entities.sports);
 
   useEffect(() => {
-    if (!coaches.length && !athletes.length) {
-      api
-        .get("/users")
-        .then((response) => {
-          dispatch(setEntities({ name: "users", data: response.data }));
-        })
-        .catch((err) => {
-          console.error("Error cargando usuarios:", err);
-        });
-    }
-    if (!schedules.length) {
-      api
-        .get("/schedules")
-        .then((response) => {
-          dispatch(setEntities({ name: "schedules", data: response.data }));
-        })
-        .catch((err) => {
-          console.error("Error cargando schedules:", err);
-        });
-    }
-    if (!sports.length) {
-      api
-        .get("/sports")
-        .then((response) => {
-          dispatch(setEntities({ name: "sports", data: response.data }));
-        })
-        .catch((err) => {
-          console.error("Error cargando sports:", err);
-        });
-    }
-  }, [
-    sports.length,
-    coaches.length,
-    athletes.length,
-    schedules.length,
-    dispatch,
-  ]);
+    dispatch(fetchUsers() as any);
+    dispatch(fetchClubs() as any);
+    dispatch(fetchSports() as any);
+    dispatch(fetchSchedules() as any);
+  }, [dispatch]);
 
   return { clubs, sports, coaches, athletes, schedules };
 };
