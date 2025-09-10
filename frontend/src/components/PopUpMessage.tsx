@@ -13,7 +13,7 @@ export const PopUpMessage = () => {
     if (showMessage) {
       const timer = setTimeout(() => {
         dispatch(clearMessage());
-      }, 5000);
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [showMessage, dispatch]);

@@ -1,0 +1,71 @@
+import { createAsyncThunk } from "@reduxjs/toolkit";
+import { login, logout } from "./authSlice";
+import api from "../services/api";
+import { setMessage } from "./messageSlice";
+
+// Login thunk
+export const loginThunk = createAsyncThunk(
+  "auth/loginThunk",
+  async (formData: { username: string; password: string }, { dispatch }) => {
+    try {
+      const response = await api.post("/auth/login", formData);
+      const { user, authorization } = response.data.access;
+      dispatch(login({ user: user, token: authorization }));
+    } catch (error: any) {
+      if (error.response && error.response.status === 401) {
+        dispatch(
+          setMessage({
+            message: "Credenciales incorrectas",
+            type: "danger",
+          })
+        );
+      } else {
+        dispatch(
+          setMessage({
+            message: "Error de conexión o inesperado",
+            type: "danger",
+          })
+        );
+      }
+    }
+  }
+);
+
+// Logout thunk
+export const logoutThunk = createAsyncThunk(
+  "auth/logoutThunk",
+  async (_, { dispatch }) => {
+    try {
+      await api.post("/auth/logout");
+    } catch (error) {
+      dispatch(
+        setMessage({
+          message: "Vuelve pronto!",
+          type: "warning",
+        })
+      );
+    } finally {
+      dispatch(logout());
+    }
+  }
+);
+
+export const checkAuth = createAsyncThunk(
+  "auth/checkAuth",
+  async (_, { dispatch }) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      dispatch(logout());
+      return false;
+    }
+    const isValid = await api.get("/auth/validate");
+    if (isValid) {
+      const user = localStorage.getItem("user");
+      dispatch(login({ user: user ? JSON.parse(user) : null, token }));
+      return true;
+    } else {
+      dispatch(logout());
+      return false;
+    }
+  }
+);

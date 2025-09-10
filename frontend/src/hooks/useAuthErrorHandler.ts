@@ -1,6 +1,7 @@
-import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../auth/AuthContext";
+import { useDispatch } from "react-redux";
+import { setMessage, type AppDispatch } from "../store";
+import { logoutThunk } from "../store/authThunk";
 
 /**
  * Hook para manejar errores de autenticación (expiración de token).
@@ -8,27 +9,22 @@ import { AuthContext } from "../auth/AuthContext";
  * @returns handleAuthError - función para manejar el error.
  */
 export const useAuthErrorHandler = () => {
-  const { logout } = useContext(AuthContext);
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
   /**
    * Maneja el error de autenticación y redirige si el token expira.
    * @param response - respuesta de la API.
-   * @param setMessage - función para mostrar mensaje al usuario.
    */
-  const handleAuthError = (
-    response: { code: number; message?: string },
-    setMessage?: (msg: string) => void
-  ) => {
+  const handleAuthError = (response: { code: number; message?: string }) => {
     if (response.code === 401) {
-      if (setMessage) {
-        setMessage(
-          "Tu sesión ha expirado. Por favor inicia sesión nuevamente."
-        );
-      } else {
-        alert("Tu sesión ha expirado. Por favor inicia sesión nuevamente.");
-      }
-      logout();
+      dispatch(
+        setMessage({
+          message: "Tu sesión ha expirado. Por favor inicia sesión nuevamente.",
+          type: "danger",
+        })
+      );
+      dispatch(logoutThunk());
       navigate("/login");
     }
   };

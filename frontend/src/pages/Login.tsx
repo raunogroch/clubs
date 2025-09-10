@@ -1,13 +1,11 @@
 // Login.tsx
 import { useEffect, useState } from "react";
 import { Input, PopUpMessage } from "../components";
-import { authService } from "../services/authService";
 import { useNavigate } from "react-router-dom";
 import { useBodyClass } from "../hooks/useBodyClass";
 import { useDispatch, useSelector } from "react-redux";
-import { login as loginAction } from "../store/authSlice";
-import type { RootState } from "../store/store";
-import { setMessage } from "../store/messageSlice";
+import type { RootState, AppDispatch } from "../store/store";
+import { loginThunk } from "../store/authThunk";
 
 interface FormData {
   username: string;
@@ -15,23 +13,23 @@ interface FormData {
 }
 
 export const Login = () => {
-  const dispatch = useDispatch();
   useBodyClass();
   const [formData, setFormData] = useState<FormData>({
     username: "",
     password: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const dispatch = useDispatch<AppDispatch>();
+
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated
   );
+
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/", { replace: true });
-    }
+    isAuthenticated && navigate("/", { replace: true });
+    setIsSubmitting(false);
   }, [isAuthenticated, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,19 +42,8 @@ export const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    dispatch(loginThunk(formData));
     setIsSubmitting(true);
-    setError(null);
-
-    try {
-      const { data } = await authService.login(formData);
-      dispatch(loginAction({ user: data.user, token: data.authorization }));
-    } catch (error) {
-      dispatch(
-        setMessage({ message: "Error de autenticación", type: "danger" })
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
   return (
@@ -69,9 +56,6 @@ export const Login = () => {
         <h3>Bienvenidos a {`<Codersoft />`}</h3>
         <p>Este sistema es una aplicacion para gestion de clubes deportivos</p>
         <p>Ingresa. Para tomar accion.</p>
-
-        {error && <div className="alert alert-danger">{error}</div>}
-
         <form className="m-t" role="form" onSubmit={handleSubmit}>
           <div className="form-group">
             <Input

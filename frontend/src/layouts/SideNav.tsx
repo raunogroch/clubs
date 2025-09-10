@@ -62,7 +62,7 @@ export const SideNav = () => {
                 </li>
                 <li className="dropdown-divider"></li>
                 <li>
-                  <Link className="dropdown-item" to="#" onClick={handleLogout}>
+                  <Link className="dropdown-item" to="/" onClick={handleLogout}>
                     Logout
                   </Link>
                 </li>

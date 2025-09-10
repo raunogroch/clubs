@@ -2,12 +2,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { SmoothlyMenu } from "../scripts/coder-softScripts";
 import { Input } from "../components";
 import { useDispatch, useSelector } from "react-redux";
-import { setQuery, logout as logoutAction } from "../store";
+import { type AppDispatch, setQuery } from "../store";
 import React, { useState, useEffect } from "react";
 import { useDebounce } from "../hooks/useDebounce"; // <- nuestro hook
+import { logoutThunk } from "../store/authThunk";
 
 export const TopNav = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
 
@@ -30,7 +31,7 @@ export const TopNav = () => {
 
   const handleLogout = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    dispatch(logoutAction());
+    dispatch(logoutThunk());
     navigate("/login", { replace: true });
   };
 
@@ -84,7 +85,7 @@ export const TopNav = () => {
           </li>
 
           <li>
-            <Link to="#" onClick={handleLogout}>
+            <Link to="/" onClick={handleLogout}>
               <i className="fa fa-sign-out"></i> Cerrar Sesión
             </Link>
           </li>

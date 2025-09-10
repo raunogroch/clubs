@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         logout();
       }
     } else {
-      setIsAuthenticated(false); // Marcamos explícitamente como no autenticado
+      setIsAuthenticated(false);
     }
   }, []);
 
@@ -50,11 +50,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       <div style={{ position: "absolute", top: "50%", left: "50%" }}>
         Loading...
       </div>
-    ); // O un spinner de carga
-
-    if (window.location.pathname !== "/login") {
-      document.body.classList.remove("gray-bg");
-    }
+    );
   }
 
   return (
