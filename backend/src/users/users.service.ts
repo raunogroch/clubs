@@ -75,22 +75,21 @@ export class UsersService {
     limit?: number,
     name?: string,
   ) {
-    // Asegura que page y limit tengan valores numéricos válidos
     page = page ?? 1;
     limit = limit ?? 0;
+    let allUsers = await this.userRepository.findAll();
+    if (name) {
+      allUsers = allUsers.filter((u) =>
+        u.name?.toLowerCase().includes(name.toLowerCase()),
+      );
+    }
+    const filtered = this.filterByRole(allUsers, requestingUser);
+    const total = filtered.length;
     if (!limit) {
-      // Si no hay limit, obtener todos los usuarios sin filtros ni paginación
-      const allUsers = await this.userRepository.findAll();
-      const data = this.filterByRole(allUsers, requestingUser);
-      return data;
+      return filtered;
     } else {
       const skip = (page - 1) * limit;
-      const [allUsers, total] = await this.userRepository.findAllPaginated(
-        skip,
-        limit,
-        name,
-      );
-      const data = this.filterByRole(allUsers, requestingUser);
+      const data = filtered.slice(skip, skip + limit);
       return {
         data,
         total,

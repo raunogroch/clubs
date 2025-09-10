@@ -57,13 +57,13 @@ export const SideNav = () => {
               <ul className="dropdown-menu animated fadeInRight m-t-xs">
                 <li>
                   <Link className="dropdown-item" to="/profile">
-                    Profile
+                    Perfil de usuario
                   </Link>
                 </li>
                 <li className="dropdown-divider"></li>
                 <li>
                   <Link className="dropdown-item" to="/" onClick={handleLogout}>
-                    Logout
+                    Cerrar Sesión
                   </Link>
                 </li>
               </ul>
