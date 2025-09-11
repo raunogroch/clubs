@@ -44,8 +44,9 @@ export const Users = ({ name: nameTitle }: UsersPageProps) => {
               <div className="ibox-title d-flex justify-content-between">
                 <h5>Lista de Usuarios</h5>
                 <div className="btn-group">
-                  {[5, 10, 20].map((level) => (
+                  {[5, 10, 15].map((level, index) => (
                     <button
+                      key={index}
                       className={`btn btn-white ${
                         limit === level ? "active" : ""
                       }`}
