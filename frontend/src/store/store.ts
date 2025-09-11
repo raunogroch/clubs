@@ -1,19 +1,15 @@
 import { configureStore } from "@reduxjs/toolkit";
 import messageReducer from "./messageSlice";
 import authReducer, { login } from "./authSlice";
-import loadingReducer from "./loadingSlice";
-import filtersReducer from "./filtersSlice";
-import entitiesReducer from "./entitiesSlice";
-import queriesReducer from "./querySlice";
+import usersReducer from "./usersSlice";
+import filterReducer from "./filterSlice";
 
 export const store = configureStore({
   reducer: {
     message: messageReducer,
     auth: authReducer,
-    loading: loadingReducer,
-    filters: filtersReducer,
-    entities: entitiesReducer,
-    queries: queriesReducer,
+    users: usersReducer,
+    filters: filterReducer,
   },
 });
 

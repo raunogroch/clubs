@@ -1,8 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { SmoothlyMenu } from "../scripts/coder-softScripts";
 import { Input } from "../components";
-import { useDispatch, useSelector } from "react-redux";
-import { type AppDispatch, setQuery } from "../store";
+import { useDispatch } from "react-redux";
+import { type AppDispatch, setName } from "../store";
 import React, { useState, useEffect } from "react";
 import { useDebounce } from "../hooks/useDebounce"; // <- nuestro hook
 import { logoutThunk } from "../store/authThunk";
@@ -14,19 +14,10 @@ export const TopNav = () => {
 
   const isHere = location.pathname === "/users";
 
-  const filter = useSelector((state: any) => state.queries.filter);
-
-  // Hook de debounce
   const debouncedSearch = useDebounce(search, 300);
 
   useEffect(() => {
-    // Se ejecuta solo cuando el usuario deja de escribir
-    dispatch(
-      setQuery({
-        module: "filter",
-        filter: { ...filter, name: debouncedSearch },
-      })
-    );
+    dispatch(setName(debouncedSearch));
   }, [debouncedSearch]);
 
   const handleLogout = (e: React.MouseEvent<HTMLAnchorElement>) => {

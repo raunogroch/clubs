@@ -1,13 +1,14 @@
 import { useDispatch } from "react-redux";
-import { setQuery } from "../store/querySlice";
+import { setPage } from "../store/filterSlice";
 
 export const PaginationList = ({ filter }) => {
   const dispatch = useDispatch();
 
+  console.log("Filter in PaginationList:", filter.total, filter.limit); // Depuración
   const totalPages = Math.ceil(filter.total / filter.limit);
 
   const handlePageChange = (page: number) => {
-    dispatch(setQuery({ module: "filter", filter: { ...filter, page } }));
+    dispatch(setPage(page));
   };
   const getPageNumbers = () => {
     const maxVisible = 5; // Máximo de botones visibles
