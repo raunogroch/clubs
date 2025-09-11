@@ -12,7 +12,8 @@ interface InputProps {
     | "radio"
     | "date"
     | "time"
-    | "file";
+    | "file"
+    | "hidden";
   name?: string;
   className?: string;
   placeholder?: string;
@@ -25,6 +26,7 @@ interface InputProps {
   autoComplete?: "on" | "off";
   max?: string | number;
   min?: string | number;
+  readOnly?: boolean;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 

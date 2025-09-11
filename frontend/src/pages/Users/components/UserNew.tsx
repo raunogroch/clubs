@@ -7,12 +7,7 @@ export const UserNew = ({ name, sub }: UsersPageProps) => {
   const navigate = useNavigate();
 
   const handleSuccess = () => {
-    navigate("/users", {
-      state: {
-        message: "El usuario fue creado exitosamente",
-        messageKind: "success",
-      },
-    });
+    navigate("/users");
   };
 
   const handleCancel = () => {

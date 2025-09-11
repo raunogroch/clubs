@@ -1,6 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { User } from "../interfaces/user";
-import { fetchUsers, createUser, deleteUser, updateUser } from "./usersThunks";
+import {
+  fetchUsers,
+  createUser,
+  deleteUser,
+  updateUser,
+  findUserById,
+} from "./usersThunks";
 
 export interface UsersResponse {
   data: User[];
@@ -11,12 +17,14 @@ export interface UsersResponse {
 }
 
 interface UsersState {
+  selectedUser: any;
   users: UsersResponse; // estructura paginada
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
 }
 
 const initialState: UsersState = {
+  selectedUser: null,
   users: { data: [], total: 0, page: 1, limit: 10, name: "" },
   status: "idle",
   error: null,
@@ -90,6 +98,20 @@ const usersSlice = createSlice({
       state.users.total -= 1;
     });
     builder.addCase(deleteUser.rejected, (state, action) => {
+      state.status = "failed";
+      state.error = action.payload as string;
+    });
+
+    // FIND BY ID
+    builder.addCase(findUserById.pending, (state) => {
+      state.status = "loading";
+    });
+    // DEBERÍA SER:
+    builder.addCase(findUserById.fulfilled, (state, action) => {
+      state.status = "succeeded";
+      state.selectedUser = action.payload;
+    });
+    builder.addCase(findUserById.rejected, (state, action) => {
       state.status = "failed";
       state.error = action.payload as string;
     });

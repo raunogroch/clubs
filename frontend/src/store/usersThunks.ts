@@ -1,7 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../services/api";
-import type { User } from "../interfaces/user";
 import type { UsersResponse } from "./usersSlice";
+import type { User } from "../pages/Users/interfaces/userTypes";
 
 export const fetchUsers = createAsyncThunk<
   UsersResponse,
@@ -31,7 +31,7 @@ export const updateUser = createAsyncThunk<User, User>(
   "users/updateUser",
   async (user, { rejectWithValue }) => {
     try {
-      const response = await api.put(`/users/${user._id}`, user);
+      const response = await api.patch(`/users/${user._id}`, user);
       return response.data;
     } catch (err: any) {
       return rejectWithValue(
@@ -49,6 +49,20 @@ export const deleteUser = createAsyncThunk<string, string>(
       return id;
     } catch (err: any) {
       return rejectWithValue(err.response?.data || "Error al eliminar usuario");
+    }
+  }
+);
+
+export const findUserById = createAsyncThunk<string, string>(
+  "users/findUserById",
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await api.get(`/users/${id}`);
+      return response.data;
+    } catch (err: any) {
+      return rejectWithValue(
+        err.response?.data || "Error al buscar al usuario"
+      );
     }
   }
 );

@@ -1,16 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CropperImageInput, ImageCropper, Input } from "../../../components";
 import { useUserForm } from "../hooks";
 import type { UserFormProps } from "../interfaces";
 import { UserRoleSelector } from ".";
-import { useDispatch } from "react-redux";
-import { setMessage } from "../../../store/messageSlice";
-import { useNavigate } from "react-router-dom";
 
-export const UserForm = ({ initialData, onCancel }: UserFormProps) => {
-  const navigate = useNavigate();
-  const { formData, errors, message, handleChange, handleSubmit } =
-    useUserForm(initialData);
+export const UserForm = ({ user, onCancel, onSuccess }: UserFormProps) => {
+  const { formData, errors, handleChange, handleSubmit } = useUserForm(user);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -24,21 +19,11 @@ export const UserForm = ({ initialData, onCancel }: UserFormProps) => {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = await handleSubmit(e);
-    if (success) return navigate("/users");
-  };
-
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    if (message) {
-      if (message.type === "error") {
-        dispatch(setMessage({ message: message.text, type: "danger" }));
-      } else if (message.type === "success") {
-        dispatch(setMessage({ message: message.text, type: "success" }));
-      }
+    const success = await handleSubmit();
+    if (success && onSuccess) {
+      onSuccess();
     }
-  }, [message, dispatch]);
+  };
 
   const [imageSrc, setImage] = useState<string | null>(null);
 
@@ -193,12 +178,10 @@ export const UserForm = ({ initialData, onCancel }: UserFormProps) => {
           </div>
         </div>
 
-        {/* Resto de los campos del formulario... */}
-
         <div className="form-group row">
           <div className="col-sm-10 offset-sm-2">
             <button type="submit" className="btn btn-primary mr-2">
-              {initialData ? "Actualizar" : "Crear"} Usuario
+              {user ? "Actualizar" : "Crear"} Usuario
             </button>
             {onCancel && (
               <button

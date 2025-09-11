@@ -1,19 +1,18 @@
 import { useState } from "react";
-import { useAuthErrorHandler } from "../../../hooks/useAuthErrorHandler";
 import type { User, UserErrors } from "../interfaces/userTypes";
-import { userService } from "../../../services/userService";
-import type { IUserService } from "../../../services/interfaces/userService.interface";
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "../../../store/store";
+import { createUser, updateUser } from "../../../store/usersThunks"; // ✅ Added createUser
+import { setMessage } from "../../../store";
 
 /**
  * Hook para gestionar el formulario de Usuario (crear/editar).
  * Ahora depende de la interfaz IUserService para cumplir DIP e ISP.
  * @param initialData - Datos iniciales del usuario (para edición).
- * @param service - Implementación de IUserService (por defecto userService)
+ * @param service - Implementación de IUserService
  */
-export const useUserForm = (
-  initialData?: User,
-  service: IUserService = userService
-) => {
+export const useUserForm = (initialData?: User) => {
+  const dispatch = useDispatch<AppDispatch>();
   const [formData, setFormData] = useState<User>(
     initialData || {
       image: "",
@@ -29,8 +28,6 @@ export const useUserForm = (
   );
 
   const [errors, setErrors] = useState<UserErrors>({});
-  const [message, setMessage] = useState<{ text: string; type: string }>();
-  const handleAuthError = useAuthErrorHandler();
 
   /**
    * Maneja el cambio de los campos del formulario.
@@ -39,10 +36,32 @@ export const useUserForm = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
 
+    setFormData((prevFormData) => {
+      const newFormData = { ...prevFormData, [name]: value };
+
+      // ✅ Si cambia el campo 'ci', actualizar también 'password'
+      if (name === "ci") {
+        newFormData.password = value; // Hacer que password sea igual a ci
+      }
+
+      return newFormData;
+    });
+
+    // ✅ Clear error for this field
     if (errors[name as keyof UserErrors]) {
-      setErrors({ ...errors, [name]: undefined });
+      setErrors({
+        ...errors,
+        [name]: undefined,
+      });
+    }
+
+    // ✅ También limpiar error de password si estamos cambiando ci
+    if (name === "ci" && errors.password) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        password: undefined,
+      }));
     }
   };
 
@@ -51,23 +70,30 @@ export const useUserForm = (
    */
   const validateForm = (): boolean => {
     const newErrors: UserErrors = {};
+
     if (!formData.image) newErrors.image = "Carga una imagen";
-    if (formData.role === "") newErrors.role = "Seleccione un rol";
+    if (!formData.role) newErrors.role = "Seleccione un rol";
     if (!formData.ci) newErrors.ci = "La cédula es requerida";
     if (!formData.name) newErrors.name = "El nombre es requerido";
     if (!formData.lastname) newErrors.lastname = "El apellido es requerido";
     if (!formData.birth_date)
       newErrors.birth_date = "La fecha de nacimiento es requerida";
+
     if (!formData.email) {
       newErrors.email = "El email es requerido";
     } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
       newErrors.email = "Email inválido";
     }
+
     if (!formData.username)
       newErrors.username = "El nombre de usuario es requerido";
+
     if (!initialData && !formData.password) {
       newErrors.password = "La contraseña es requerida";
+    } else if (formData.password && formData.password.length < 6) {
+      newErrors.password = "La contraseña debe tener al menos 6 caracteres";
     }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -75,55 +101,46 @@ export const useUserForm = (
   /**
    * Envía el formulario para crear o editar usuario.
    */
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    formData.password = formData.ci;
+  const handleSubmit = async () => {
     if (!validateForm()) return;
     try {
-      let response: any;
-      if (initialData?._id) {
-        response = await service.update(initialData._id, {
-          ...formData,
-          role: formData.role as
-            | "coach"
-            | "athlete"
-            | "parent"
-            | "admin"
-            | "superadmin",
-        });
+      if (formData._id) {
+        await dispatch(updateUser(formData)).unwrap();
+        dispatch(
+          setMessage({
+            message: "Usuario actualizado correctamente",
+            type: "success",
+          })
+        );
       } else {
-        response = await service.create({
-          ...formData,
-          role: formData.role as
-            | "coach"
-            | "athlete"
-            | "parent"
-            | "admin"
-            | "superadmin",
-        });
+        await dispatch(createUser(formData)).unwrap();
+        dispatch(
+          setMessage({
+            message: "Usuario creado correctamente",
+            type: "success",
+          })
+        );
       }
-
-      handleAuthError(response, (msg) =>
-        setMessage({ text: msg, type: "error" })
-      );
-
-      if (response.code === 201 || response.code === 200) {
-        setMessage({
-          text: response.message || "Operación exitosa",
-          type: "success",
-        });
-        return true;
-      } else {
-        setMessage({
-          text: response.message || "Error al guardar",
-          type: "error",
-        });
-      }
-    } catch (error) {
-      setMessage({ text: "Error de conexión", type: "error" });
+      return true;
+    } catch (error: any) {
+      const errorMessage = error.message || "Error de conexión";
+      dispatch(setMessage({ message: errorMessage, type: "danger" }));
+      return false;
     }
-    return false;
   };
 
-  return { formData, errors, message, handleChange, handleSubmit, setFormData };
+  /**
+   * Actualiza manualmente los datos del formulario.
+   */
+  const updateFormData = (newData: Partial<User>) => {
+    setFormData((prev) => ({ ...prev, ...newData }));
+  };
+
+  return {
+    formData,
+    errors,
+    handleChange,
+    handleSubmit,
+    setFormData: updateFormData, // ✅ Better naming
+  };
 };

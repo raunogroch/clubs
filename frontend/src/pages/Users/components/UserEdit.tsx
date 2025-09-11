@@ -1,49 +1,26 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { userService } from "../../../services/userService";
-import { LoadingIndicator, NavHeader, PopUpMessage } from "../../../components";
-import { useDispatch } from "react-redux";
-import { setMessage } from "../../../store/messageSlice";
-import type { UsersPageProps } from "../interfaces/userTypes";
+import { useEffect } from "react";
+import { NavHeader, PopUpMessage } from "../../../components";
+import { useDispatch, useSelector } from "react-redux";
+import type { User, UsersPageProps } from "../interfaces/userTypes";
 import { UserForm } from "./UserForm";
+import { findUserById } from "../../../store/usersThunks";
+import type { AppDispatch, RootState } from "../../../store";
 
-export const UserEdit = ({ name, sub }: UsersPageProps) => {
+export const UserEdit = ({ name: namePage, sub }: UsersPageProps) => {
   const { id } = useParams();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
+  const {
+    selectedUser: user,
+    error,
+    status,
+  } = useSelector((state: RootState) => state.users);
+
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await userService.getById(id!);
-        if (response.data) {
-          setUser(response.data);
-        } else {
-          dispatch(
-            setMessage({
-              message: "Usuario no encontrado",
-              type: "warning",
-            })
-          );
-          navigate("/users");
-        }
-      } catch (err) {
-        dispatch(
-          setMessage({
-            message: "Error al cargar al usuario",
-            type: "danger",
-          })
-        );
-        navigate("/users");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
-  }, [id]);
+    dispatch(findUserById(id));
+  }, [dispatch, id]);
 
   const handleSuccess = () => {
     navigate("/users");
@@ -53,11 +30,9 @@ export const UserEdit = ({ name, sub }: UsersPageProps) => {
     navigate("/users");
   };
 
-  if (loading) return <LoadingIndicator />;
-
   return (
     <>
-      <NavHeader name={name} sub={sub} />
+      <NavHeader name={namePage} sub={sub} />
       <PopUpMessage />
       <div className="wrapper wrapper-content animated fadeInRight">
         <div className="row">
@@ -69,11 +44,21 @@ export const UserEdit = ({ name, sub }: UsersPageProps) => {
               <div className="ibox-content">
                 <div className="row">
                   <div className="col-sm-12">
-                    <UserForm
-                      initialData={user}
-                      onSuccess={handleSuccess}
-                      onCancel={handleCancel}
-                    />
+                    {status === "loading" && (
+                      <div className="text-center">
+                        <div className="spinner-border" role="status">
+                          <span className="sr-only">Loading...</span>
+                        </div>
+                      </div>
+                    )}
+                    {error && <div className="alert alert-danger">{error}</div>}
+                    {status === "succeeded" && (
+                      <UserForm
+                        user={user as User}
+                        onSuccess={handleSuccess}
+                        onCancel={handleCancel}
+                      />
+                    )}
                   </div>
                 </div>
               </div>

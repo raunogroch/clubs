@@ -16,7 +16,7 @@ export type UserErrors = {
 };
 
 export interface UserFormProps {
-  initialData?: User;
+  user?: User;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
