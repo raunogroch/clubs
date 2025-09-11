@@ -95,16 +95,20 @@ export class UsersService {
 
     // Filtrar por rol según el usuario que hace la solicitud
     const filteredUsers = this.filterByRole(allUsers, requestingUser);
-    const total = filteredUsers.length;
 
-    // Si no hay límite, devolver todos los resultados
+    // INVERTIR EL ORDEN - del último al primero
+    const reversedUsers = [...filteredUsers].reverse();
+
+    const total = reversedUsers.length;
+
+    // Si no hay límite, devolver todos los resultados invertidos
     if (!itemsPerPage) {
-      return filteredUsers;
+      return reversedUsers;
     }
 
     // Paginación
     const skip = (currentPage - 1) * itemsPerPage;
-    const data = filteredUsers.slice(skip, skip + itemsPerPage);
+    const data = reversedUsers.slice(skip, skip + itemsPerPage);
 
     return {
       data,
