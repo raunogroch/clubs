@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { SmoothlyMenu } from "../scripts/coder-softScripts";
 import { Input } from "../components";
 import { useDispatch } from "react-redux";
-import { type AppDispatch, setName } from "../store";
+import { type AppDispatch, setName, setPage } from "../store";
 import React, { useState, useEffect } from "react";
 import { useDebounce } from "../hooks/useDebounce"; // <- nuestro hook
 import { logoutThunk } from "../store/authThunk";
@@ -18,6 +18,7 @@ export const TopNav = () => {
 
   useEffect(() => {
     dispatch(setName(debouncedSearch));
+    dispatch(setPage(1));
   }, [debouncedSearch]);
 
   const handleLogout = (e: React.MouseEvent<HTMLAnchorElement>) => {

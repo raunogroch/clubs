@@ -67,12 +67,8 @@ export const Users = ({ name: nameTitle }: UsersPageProps) => {
                   </div>
                 )}
                 {error && <div className="alert alert-danger">{error}</div>}
-                {status === "succeeded" && (
-                  <>
-                    <UserTable users={userList} />
-                    <PaginationList filter={users} />
-                  </>
-                )}
+                {status === "succeeded" && <UserTable users={userList} />}
+                {users.total > 1 && <PaginationList filter={users} />}
               </div>
             </div>
           </div>

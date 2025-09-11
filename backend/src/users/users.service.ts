@@ -73,30 +73,46 @@ export class UsersService {
     requestingUser: currentAuth,
     page?: number,
     limit?: number,
-    name?: string,
+    searchTerm?: string,
   ) {
-    page = page ?? 1;
-    limit = limit ?? 0;
+    const currentPage = page ?? 1;
+    const itemsPerPage = limit ?? 0;
+
+    // Obtener todos los usuarios
     let allUsers = await this.userRepository.findAll();
-    if (name) {
-      allUsers = allUsers.filter((u) =>
-        u.name?.toLowerCase().includes(name.toLowerCase()),
+
+    // Filtrar por múltiples campos (si se proporciona searchTerm)
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      allUsers = allUsers.filter(
+        (u) =>
+          u.name?.toLowerCase().includes(term) ||
+          u.lastname?.toLowerCase().includes(term) ||
+          u.email?.toLowerCase().includes(term) ||
+          u.ci?.toLowerCase().includes(term),
       );
     }
-    const filtered = this.filterByRole(allUsers, requestingUser);
-    const total = filtered.length;
-    if (!limit) {
-      return filtered;
-    } else {
-      const skip = (page - 1) * limit;
-      const data = filtered.slice(skip, skip + limit);
-      return {
-        data,
-        total,
-        page,
-        limit,
-      };
+
+    // Filtrar por rol según el usuario que hace la solicitud
+    const filteredUsers = this.filterByRole(allUsers, requestingUser);
+    const total = filteredUsers.length;
+
+    // Si no hay límite, devolver todos los resultados
+    if (!itemsPerPage) {
+      return filteredUsers;
     }
+
+    // Paginación
+    const skip = (currentPage - 1) * itemsPerPage;
+    const data = filteredUsers.slice(skip, skip + itemsPerPage);
+
+    return {
+      data,
+      total,
+      page: currentPage,
+      limit: itemsPerPage,
+      totalPages: Math.ceil(total / itemsPerPage),
+    };
   }
 
   /**

@@ -61,7 +61,7 @@ const usersSlice = createSlice({
     builder.addCase(createUser.fulfilled, (state, action) => {
       state.status = "succeeded";
       if (action.payload) {
-        state.users.data.push(action.payload);
+        state.users.data.push(action.payload as User);
         state.users.total += 1;
       }
     });
@@ -79,7 +79,7 @@ const usersSlice = createSlice({
       const index = state.users.data.findIndex(
         (u) => u._id === action.payload._id
       );
-      if (index >= 0) state.users.data[index] = action.payload;
+      if (index >= 0) state.users.data[index] = action.payload as User;
     });
     builder.addCase(updateUser.rejected, (state, action) => {
       state.status = "failed";
