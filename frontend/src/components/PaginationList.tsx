@@ -4,7 +4,6 @@ import { setPage } from "../store/filterSlice";
 export const PaginationList = ({ filter }) => {
   const dispatch = useDispatch();
 
-  console.log("Filter in PaginationList:", filter.total, filter.limit); // Depuración
   const totalPages = Math.ceil(filter.total / filter.limit);
 
   const handlePageChange = (page: number) => {
