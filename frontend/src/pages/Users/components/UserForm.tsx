@@ -1,21 +1,10 @@
-import { useState } from "react";
-import { CropperImageInput, ImageCropper, Input } from "../../../components";
+import { ImageCropperWithInput } from "../../../components/CropperImageInput";
 import { useUserForm } from "../hooks";
 import type { UserFormProps } from "../interfaces";
 import { UserRoleSelector } from ".";
-
+import { Input } from "../../../components";
 export const UserForm = ({ user, onCancel, onSuccess }: UserFormProps) => {
   const { formData, errors, handleChange, handleSubmit } = useUserForm(user);
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      if (typeof ev.target?.result === "string") setImage(ev.target.result);
-    };
-    reader.readAsDataURL(file);
-  };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,28 +14,19 @@ export const UserForm = ({ user, onCancel, onSuccess }: UserFormProps) => {
     }
   };
 
-  const [imageSrc, setImage] = useState<string | null>(null);
+  const handleChanges = (cropCoordinates) => {
+    console.log("lo estoy recibiendo aqui", cropCoordinates);
+  };
 
   return (
     <div>
-      <CropperImageInput
-        value={formData.image || ""}
-        error={errors.image}
-        onChange={handleImageChange}
-      />
       <form onSubmit={onSubmit}>
         <div className="form-group row">
-          <div className="col-sm-10 offset-sm-2">
-            {typeof imageSrc === "string" && (
-              <ImageCropper
-                image={imageSrc}
-                onCropChange={(cropped) =>
-                  handleChange({
-                    target: { name: "image", value: cropped },
-                  } as any)
-                }
-              />
-            )}
+          <label htmlFor="image" className="col-sm-2 col-form-label">
+            Foto
+          </label>
+          <div className="col-sm-10">
+            <ImageCropperWithInput handleChange={handleChanges} />
           </div>
         </div>
 

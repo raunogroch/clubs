@@ -12,10 +12,7 @@ interface PreviewImageProps {
   alt?: string;
 }
 
-const PreviewImage: React.FC<PreviewImageProps> = ({
-  src,
-  alt = "Previsualización",
-}) => (
+const PreviewImage = ({ src, alt = "Previsualización" }) => (
   <div className="mb-3">
     <img
       src={src}

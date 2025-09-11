@@ -3,7 +3,7 @@ import { FormField } from ".";
 import { useClubForm } from "../hooks";
 import {
   CheckboxList,
-  CropperImageInput,
+  //CropperImageInput,
   ImageCropper,
   SelectorList,
 } from "../../../components";
@@ -40,11 +40,11 @@ export const ClubForm = ({
 
   return (
     <div>
-      <CropperImageInput
+      {/* <CropperImageInput
         value={formData.image || ""}
         error={errors.image}
         onChange={handleImageChange}
-      />
+      /> */}
 
       <form onSubmit={onSubmit}>
         <div className="form-group row">
