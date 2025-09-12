@@ -2,10 +2,14 @@ import { useState } from "react";
 import type { User, UserErrors } from "../interfaces/userTypes";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../../store/store";
-import { createUser, updateUser } from "../../../store/usersThunks"; // ✅ Added createUser
+import { createUser, updateUser } from "../../../store/usersThunks";
 import { setMessage } from "../../../store";
+
 export const useUserForm = (initialData?: User) => {
   const dispatch = useDispatch<AppDispatch>();
+
+  const [isPasswordModified, setIsPasswordModified] = useState(false);
+
   const [formData, setFormData] = useState<User>(
     initialData || {
       image: "",
@@ -22,45 +26,28 @@ export const useUserForm = (initialData?: User) => {
 
   const [errors, setErrors] = useState<UserErrors>({});
 
-  /**
-   * Maneja el cambio de los campos del formulario.
-   */
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
 
-    setFormData((prevFormData) => {
-      const newFormData = { ...prevFormData, [name]: value };
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value,
+    }));
 
-      // ✅ Si cambia el campo 'ci', actualizar también 'password'
-      if (name === "ci") {
-        newFormData.password = value; // Hacer que password sea igual a ci
-      }
+    if (name === "password") {
+      setIsPasswordModified(true);
+    }
 
-      return newFormData;
-    });
-
-    // ✅ Clear error for this field
     if (errors[name as keyof UserErrors]) {
       setErrors({
         ...errors,
         [name]: undefined,
       });
     }
-
-    // ✅ También limpiar error de password si estamos cambiando ci
-    if (name === "ci" && errors.password) {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        password: undefined,
-      }));
-    }
   };
 
-  /**
-   * Valida los datos del formulario antes de enviar.
-   */
   const validateForm = (): boolean => {
     const newErrors: UserErrors = {};
 
@@ -83,7 +70,7 @@ export const useUserForm = (initialData?: User) => {
 
     if (!initialData && !formData.password) {
       newErrors.password = "La contraseña es requerida";
-    } else if (formData.password && formData.password.length < 6) {
+    } else if (isPasswordModified && formData.password.length < 6) {
       newErrors.password = "La contraseña debe tener al menos 6 caracteres";
     }
 
@@ -91,14 +78,17 @@ export const useUserForm = (initialData?: User) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  /**
-   * Envía el formulario para crear o editar usuario.
-   */
   const handleSubmit = async () => {
     if (!validateForm()) return;
     try {
       if (formData._id) {
-        await dispatch(updateUser(formData)).unwrap();
+        const updateData = { ...formData };
+
+        if (!isPasswordModified) {
+          delete updateData.password;
+        }
+
+        await dispatch(updateUser(updateData)).unwrap();
         dispatch(
           setMessage({
             message: "Usuario actualizado correctamente",
@@ -122,11 +112,12 @@ export const useUserForm = (initialData?: User) => {
     }
   };
 
-  /**
-   * Actualiza manualmente los datos del formulario.
-   */
   const updateFormData = (newData: Partial<User>) => {
     setFormData((prev) => ({ ...prev, ...newData }));
+
+    if (newData.password === initialData?.password) {
+      setIsPasswordModified(false);
+    }
   };
 
   return {
@@ -134,6 +125,7 @@ export const useUserForm = (initialData?: User) => {
     errors,
     handleChange,
     handleSubmit,
-    setFormData: updateFormData, // ✅ Better naming
+    setFormData: updateFormData,
+    isPasswordModified,
   };
 };

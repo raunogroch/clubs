@@ -2,21 +2,21 @@ import { Link } from "react-router-dom";
 import type { User } from "../interfaces";
 import { useDispatch, useSelector } from "react-redux";
 import { setMessage } from "../../../store/messageSlice";
-import type { RootState } from "../../../store";
+import type { AppDispatch, RootState } from "../../../store";
+import { deleteUser } from "../../../store/usersThunks";
 
 interface UsersTableProps {
   users: User[];
-  onDelete?: (id: string) => Promise<void>;
 }
 
-export const UserTable = ({ users, onDelete }: UsersTableProps) => {
-  const dispatch = useDispatch();
+export const UserTable = ({ users }: UsersTableProps) => {
+  const dispatch = useDispatch<AppDispatch>();
   const filter = useSelector((state: RootState) => state.filters);
   const { page, limit } = filter;
 
   const handleDelete = async (id: string) => {
     if (window.confirm("¿Está seguro de eliminar este usuario?")) {
-      await onDelete(id);
+      dispatch(deleteUser(id)).unwrap();
       dispatch(
         setMessage({
           message: "Usuario eliminado exitosamente",

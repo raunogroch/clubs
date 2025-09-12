@@ -48,7 +48,6 @@ export const UserForm = ({ user, onCancel, onSuccess }: UserFormProps) => {
               value={formData.name}
               onChange={handleChange}
               className={`form-control ${errors.name ? "is-invalid" : ""}`}
-              placeholder="Ej. Juan ..."
             />
             {errors.name && (
               <div className="invalid-feedback">{errors.name}</div>
@@ -68,7 +67,6 @@ export const UserForm = ({ user, onCancel, onSuccess }: UserFormProps) => {
               value={formData.lastname}
               onChange={handleChange}
               className={`form-control ${errors.lastname ? "is-invalid" : ""}`}
-              placeholder="Ej. Madrigal ..."
             />
             {errors.lastname && (
               <div className="invalid-feedback">{errors.lastname}</div>
@@ -88,7 +86,6 @@ export const UserForm = ({ user, onCancel, onSuccess }: UserFormProps) => {
               value={formData.email}
               onChange={handleChange}
               className={`form-control ${errors.email ? "is-invalid" : ""}`}
-              placeholder="Ej. Madrigal ..."
             />
             {errors.email && (
               <div className="invalid-feedback">{errors.email}</div>
@@ -108,10 +105,28 @@ export const UserForm = ({ user, onCancel, onSuccess }: UserFormProps) => {
               value={formData.username}
               onChange={handleChange}
               className={`form-control ${errors.username ? "is-invalid" : ""}`}
-              placeholder="Ej. usuario123 ..."
             />
             {errors.username && (
               <div className="invalid-feedback">{errors.username}</div>
+            )}
+          </div>
+        </div>
+
+        <div className="form-group row">
+          <label htmlFor="password" className="col-sm-2 col-form-label">
+            Contraseña
+          </label>
+          <div className="col-sm-10">
+            <Input
+              type={formData._id ? "password" : "text"}
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className={`form-control ${errors.password ? "is-invalid" : ""}`}
+            />
+            {errors.password && (
+              <div className="invalid-feedback">{errors.password}</div>
             )}
           </div>
         </div>
@@ -128,7 +143,6 @@ export const UserForm = ({ user, onCancel, onSuccess }: UserFormProps) => {
               value={formData.ci}
               onChange={handleChange}
               className={`form-control ${errors.ci ? "is-invalid" : ""}`}
-              placeholder="Ej. 1234567, 1234567-1Aº ..."
             />
             {errors.ci && <div className="invalid-feedback">{errors.ci}</div>}
           </div>
@@ -148,7 +162,6 @@ export const UserForm = ({ user, onCancel, onSuccess }: UserFormProps) => {
               className={`form-control ${
                 errors.birth_date ? "is-invalid" : ""
               }`}
-              placeholder="Ej. usuario123 ..."
             />
             {errors.birth_date && (
               <div className="invalid-feedback">{errors.birth_date}</div>

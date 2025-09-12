@@ -19,15 +19,20 @@ const CropperImageInput = ({
     [onImageSelect]
   );
   return (
-    <div>
+    <div className="custom-file">
       <Input
         type="file"
         id="cropper-image"
         name="image"
         accept="image/*"
-        className={`form-control${error ? " is-invalid" : ""}`}
+        className={`form-control custom-file-input ${
+          error ? " is-invalid" : ""
+        }`}
         onChange={handleFileChange}
       />
+      <label htmlFor="cropper-image" className="custom-file-label">
+        Selecciona una imagen
+      </label>
       {error && <div className="invalid-feedback d-block">{error}</div>}
     </div>
   );
