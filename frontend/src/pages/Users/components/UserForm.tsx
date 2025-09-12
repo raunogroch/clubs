@@ -14,8 +14,6 @@ export const UserForm = ({ user, onCancel, onSuccess }: UserFormProps) => {
     }
   };
 
-  // No custom handler needed; handleChange will be used directly
-
   return (
     <div>
       <form onSubmit={onSubmit}>
@@ -26,7 +24,7 @@ export const UserForm = ({ user, onCancel, onSuccess }: UserFormProps) => {
           <div className="col-sm-10">
             <ImageCropperWithInput
               value={formData.image}
-              onChange={handleChange as any}
+              onChange={handleChange}
             />
           </div>
         </div>
