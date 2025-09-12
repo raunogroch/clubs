@@ -1,10 +1,9 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactCropperElement } from "react-cropper";
 import { Cropper } from "react-cropper";
 import { Input, Image } from ".";
 import "cropperjs/dist/cropper.min.css";
 
-// Input de archivo reutilizable para seleccionar imágenes
 const CropperImageInput = ({
   error,
   onImageSelect,
@@ -34,7 +33,6 @@ const CropperImageInput = ({
   );
 };
 
-// Componente principal para recortar y previsualizar imágenes
 export const ImageCropperWithInput = ({
   value,
   onChange,
@@ -48,11 +46,11 @@ export const ImageCropperWithInput = ({
   const [error, setError] = useState<string>("");
   const [croppedPreview, setCroppedPreview] = useState<string>("");
   const cropperRef = useRef<ReactCropperElement>(null);
+  const animationFrameRef = useRef<number>(0);
+  const lastCropTimeRef = useRef<number>(0);
 
-  // Determina si el valor es una URL (imagen recuperada) o base64 (nueva imagen)
   const isUrl = value && !value.startsWith("data:");
 
-  // Maneja la selección de un archivo de imagen.
   const handleImageSelect = useCallback(
     (file: File) => {
       if (!file.type.startsWith("image/")) {
@@ -83,12 +81,33 @@ export const ImageCropperWithInput = ({
   }, [onChange, name]);
 
   const handleCropMove = useCallback(() => {
-    if ((handleCropMove as any).timeout) {
-      clearTimeout((handleCropMove as any).timeout);
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
     }
-    (handleCropMove as any).timeout = setTimeout(() => {
-      handleCrop();
-    }, 300);
+
+    const now = Date.now();
+    if (now - lastCropTimeRef.current < 100) {
+      return;
+    }
+
+    animationFrameRef.current = requestAnimationFrame(() => {
+      lastCropTimeRef.current = now;
+      const cropper = cropperRef.current?.cropper;
+      if (!cropper) return;
+
+      const canvas = cropper.getCroppedCanvas();
+      if (canvas) {
+        const preview = canvas.toDataURL("image/jpeg", 0.7);
+        setCroppedPreview(preview);
+      }
+    });
+  }, []);
+
+  const handleCropEnd = useCallback(() => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+    handleCrop();
   }, [handleCrop]);
 
   const handleReset = useCallback(() => {
@@ -97,7 +116,14 @@ export const ImageCropperWithInput = ({
     onChange({ target: { name, value: "" } });
   }, [onChange, name]);
 
-  // Renderizado condicional según el estado de la imagen
+  useEffect(() => {
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, []);
+
   if (isUrl) {
     return (
       <div className="image-cropper-container text-center">
@@ -161,7 +187,7 @@ export const ImageCropperWithInput = ({
             aspectRatio={1}
             guides={true}
             crop={handleCropMove}
-            cropend={handleCrop}
+            cropend={handleCropEnd}
             ref={cropperRef}
             viewMode={0}
             background={false}
