@@ -4,13 +4,6 @@ import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../../store/store";
 import { createUser, updateUser } from "../../../store/usersThunks"; // ✅ Added createUser
 import { setMessage } from "../../../store";
-
-/**
- * Hook para gestionar el formulario de Usuario (crear/editar).
- * Ahora depende de la interfaz IUserService para cumplir DIP e ISP.
- * @param initialData - Datos iniciales del usuario (para edición).
- * @param service - Implementación de IUserService
- */
 export const useUserForm = (initialData?: User) => {
   const dispatch = useDispatch<AppDispatch>();
   const [formData, setFormData] = useState<User>(

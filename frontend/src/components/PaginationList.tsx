@@ -41,7 +41,7 @@ export const PaginationList = ({ filter }) => {
         disabled={filter.page === 1}
         onClick={() => handlePageChange(filter.page - 1)}
       >
-        Anterior
+        <i className="fa fa-angle-left"></i>
       </button>
 
       {getPageNumbers().map((page, idx) =>
@@ -67,7 +67,7 @@ export const PaginationList = ({ filter }) => {
         disabled={filter.page === totalPages}
         onClick={() => handlePageChange(filter.page + 1)}
       >
-        Siguiente
+        <i className="fa fa-angle-right"></i>
       </button>
     </div>
   );

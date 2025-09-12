@@ -14,9 +14,7 @@ export const UserForm = ({ user, onCancel, onSuccess }: UserFormProps) => {
     }
   };
 
-  const handleChanges = (cropCoordinates) => {
-    console.log("lo estoy recibiendo aqui", cropCoordinates);
-  };
+  // No custom handler needed; handleChange will be used directly
 
   return (
     <div>
@@ -26,7 +24,10 @@ export const UserForm = ({ user, onCancel, onSuccess }: UserFormProps) => {
             Foto
           </label>
           <div className="col-sm-10">
-            <ImageCropperWithInput handleChange={handleChanges} />
+            <ImageCropperWithInput
+              value={formData.image}
+              onChange={handleChange as any}
+            />
           </div>
         </div>
 

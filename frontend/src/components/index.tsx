@@ -10,3 +10,4 @@ export * from "./NavHeader";
 export * from "./Spinner";
 export * from "./SelectorList";
 export * from "./CheckboxList";
+export * from "./Image";
