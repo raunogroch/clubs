@@ -137,7 +137,7 @@ export const ImageCropperWithInput = ({
       <div className="image-cropper-container text-center">
         <h3>Foto de perfil</h3>
         <Image
-          src={`http://localhost:3000/${value.replace(/^\/+/, "")}`}
+          src={`/${value.replace(/^\/+/, "")}`}
           alt="Imagen recuperada"
           style={{ width: "auto", height: "200px" }}
         />
@@ -175,6 +175,7 @@ export const ImageCropperWithInput = ({
                 borderRadius: "50%",
                 border: "1px solid #ddd",
               }}
+              local
             />
           ) : (
             <div

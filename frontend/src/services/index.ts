@@ -1,6 +1,5 @@
 export * from "./api";
 export * from "./clubService";
-export * from "./userService";
 export * from "./sportService";
 export * from "./scheduleService";
 export * from "./interfaces/clubService.interface";
