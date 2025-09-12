@@ -91,13 +91,16 @@ export const ImageCropperWithInput = ({
     }
 
     animationFrameRef.current = requestAnimationFrame(() => {
+      const now = Date.now();
+      if (now - lastCropTimeRef.current < 100) return;
+
       lastCropTimeRef.current = now;
       const cropper = cropperRef.current?.cropper;
       if (!cropper) return;
 
       const canvas = cropper.getCroppedCanvas();
       if (canvas) {
-        const preview = canvas.toDataURL("image/jpeg", 0.7);
+        const preview = canvas.toDataURL("image/jpeg", 0.4);
         setCroppedPreview(preview);
       }
     });
