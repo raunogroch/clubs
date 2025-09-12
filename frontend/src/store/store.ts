@@ -4,6 +4,7 @@ import authReducer, { login } from "./authSlice";
 import usersReducer from "./usersSlice";
 import filterReducer from "./filterSlice";
 import clubsReducer from "./clubsSlice";
+import entitiesReducer from "./entitiesSlice";
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     users: usersReducer,
     filters: filterReducer,
     clubs: clubsReducer,
+    entities: entitiesReducer,
   },
 });
 

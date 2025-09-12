@@ -1,55 +1,33 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import type { User } from "../pages/Users/interfaces/userTypes";
+import type { Sport } from "../pages/Sports/interfaces/sportTypes";
 import api from "../services/api";
-import { setEntities } from "./entitiesSlice";
+import type { Schedule } from "../pages/Schedule/types/scheduleTypes";
 
-export const fetchClubs = createAsyncThunk(
-  "entities/fetchClubs",
-  async (_, { dispatch, rejectWithValue }) => {
+interface EntitiesPayload {
+  coaches: User[];
+  athletes: User[];
+  sports: Sport[];
+  schedules: Schedule[];
+}
+export const fetchEntities = createAsyncThunk<EntitiesPayload>(
+  "entities/fetchEntities",
+  async (_, { rejectWithValue }) => {
     try {
-      const response = await api.get("/clubs");
-      dispatch(setEntities({ name: "clubs", data: response.data }));
-      return response.data;
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data || "Error al cargar clubs");
-    }
-  }
-);
+      const [users, sports, schedules] = await Promise.all([
+        api.get("/users"),
+        api.get("/sports"),
+        api.get("/schedules"),
+      ]);
 
-export const fetchSports = createAsyncThunk(
-  "entities/fetchSports",
-  async (_, { dispatch, rejectWithValue }) => {
-    try {
-      const response = await api.get("/sports");
-      dispatch(setEntities({ name: "sports", data: response.data }));
-      return response.data;
+      return {
+        coaches: users.data.filter((user: User) => user.role === "coach"),
+        athletes: users.data.filter((user: User) => user.role === "athlete"),
+        sports: sports.data,
+        schedules: schedules.data,
+      };
     } catch (err: any) {
-      return rejectWithValue(err.response?.data || "Error al cargar sports");
-    }
-  }
-);
-
-export const fetchSchedules = createAsyncThunk(
-  "entities/fetchSchedules",
-  async (_, { dispatch, rejectWithValue }) => {
-    try {
-      const response = await api.get("/schedules");
-      dispatch(setEntities({ name: "schedules", data: response.data }));
-      return response.data;
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data || "Error al cargar schedules");
-    }
-  }
-);
-
-export const fetchUsers = createAsyncThunk(
-  "entities/fetchUsers",
-  async (_, { dispatch, rejectWithValue }) => {
-    try {
-      const response = await api.get("/users");
-      dispatch(setEntities({ name: "users", data: response.data }));
-      return response.data;
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data || "Error al cargar usuarios");
+      return rejectWithValue(err.response?.data || "Error al cargar entidades");
     }
   }
 );

@@ -1,18 +1,11 @@
 import { useState } from "react";
-import { useAuthErrorHandler } from "../../../hooks";
 import type { ClubErrors, Club } from "../interfaces";
-import { clubService, type IClubService } from "../../../services";
+import { useDispatch } from "react-redux";
+import { setMessage, type AppDispatch } from "../../../store";
+import { createClub, updateClub } from "../../../store/clubsThunks";
 
-/**
- * Hook para gestionar el formulario de Club (crear/editar).
- * Ahora depende de la interfaz IClubService para cumplir DIP e ISP.
- * @param initialData - Datos iniciales del club (para edición).
- * @param service - Implementación de IClubService (por defecto clubService)
- */
-export const useClubForm = (
-  initialData?: Club,
-  service: IClubService = clubService
-) => {
+export const useClubForm = (initialData?: Club) => {
+  const dispatch = useDispatch<AppDispatch>();
   const [formData, setFormData] = useState<Club>(
     initialData || {
       image: "",
@@ -26,12 +19,7 @@ export const useClubForm = (
   );
 
   const [errors, setErrors] = useState<ClubErrors>({});
-  const [message, setMessage] = useState<{ text: string; type: string }>();
-  const handleAuthError = useAuthErrorHandler();
 
-  /**
-   * Maneja el cambio de los campos del formulario.
-   */
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -57,9 +45,6 @@ export const useClubForm = (
     }
   };
 
-  /**
-   * Valida los datos del formulario antes de enviar.
-   */
   const validateForm = (): boolean => {
     const newErrors: ClubErrors = {};
 
@@ -73,41 +58,26 @@ export const useClubForm = (
     return Object.keys(newErrors).length === 0;
   };
 
-  /**
-   * Envía el formulario para crear o editar usuario.
-   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
     try {
-      let response: any;
       if (initialData?._id) {
-        response = await service.update(initialData._id, formData);
+        dispatch(updateClub(formData)).unwrap();
       } else {
-        response = await service.create(formData);
+        dispatch(createClub(formData)).unwrap();
       }
-
-      handleAuthError(response, (msg) =>
-        setMessage({ text: msg, type: "error" })
-      );
-
-      if (response.code === 201 || response.code === 200) {
-        setMessage({
-          text: response.message || "Operación exitosa",
-          type: "success",
-        });
-        return true;
-      } else {
-        setMessage({
-          text: response.message || "Error al guardar",
-          type: "error",
-        });
-      }
+      return true;
     } catch (error) {
-      setMessage({ text: "Error de conexión", type: "error" });
+      dispatch(
+        setMessage({
+          message: "Ocurrio un error intentalo nuevamente",
+          type: "danger",
+        })
+      );
     }
     return false;
   };
 
-  return { formData, errors, message, handleChange, handleSubmit, setFormData };
+  return { formData, errors, handleChange, handleSubmit, setFormData };
 };

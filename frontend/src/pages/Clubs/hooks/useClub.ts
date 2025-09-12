@@ -5,6 +5,7 @@ import {
   fetchClubs,
   deleteClub as deleteClubThunk,
 } from "../../../store/clubsThunks";
+import { clearClubs } from "../../../store/clubsSlice";
 
 export const useClubs = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -17,6 +18,7 @@ export const useClubs = () => {
 
   useEffect(() => {
     dispatch(fetchClubs());
+    dispatch(clearClubs());
   }, []);
 
   return { clubs, deleteClub };

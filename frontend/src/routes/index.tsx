@@ -99,7 +99,10 @@ export const roleRoutes: RoleRoutes = {
       label: "Clubs",
       element: <Clubs name="Clubs" />,
     },
-    { path: "/clubs/edit/:id", element: <ClubEdit name="Clubs" sub="new" /> },
+    {
+      path: "/clubs/edit/:id",
+      element: <ClubEdit name="Clubs" sub="editar" />,
+    },
     { path: "/clubs/create", element: <ClubNew name="Clubs" sub="Crear" /> },
     {
       path: "/sports",

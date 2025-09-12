@@ -34,7 +34,7 @@ export const CheckboxList = ({
                   onChange={onChange}
                   checked={selectedItems.includes(String(item._id))}
                 />
-                <i></i> {item.name}
+                <i></i> {`${item.lastname}, ${item.name}`}
               </label>
             </div>
           );

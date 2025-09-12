@@ -27,6 +27,7 @@ const clubsSlice = createSlice({
   initialState,
   reducers: {
     clearClubs: (state) => {
+      state.selectedClub = null;
       state.clubs = [];
       state.status = "idle";
       state.error = null;

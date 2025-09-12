@@ -1,18 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import type { UsersPageProps } from "../../Users/interfaces";
 import { NavHeader, PopUpMessage } from "../../../components";
-import { useDispatch } from "react-redux";
-import { setMessage } from "../../../store";
 import { ClubForm } from ".";
 
 export const ClubNew = ({ name, sub }: UsersPageProps) => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const handleSuccess = () => {
-    dispatch(
-      setMessage({ message: "Club creado exitosamente", type: "success" })
-    );
     navigate("/clubs");
   };
 

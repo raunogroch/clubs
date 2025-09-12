@@ -1,57 +1,34 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { useClubs } from "../hooks";
-import { PopUpMessage, LoadingIndicator, NavHeader } from "../../../components";
+import { useDispatch, useSelector } from "react-redux";
+import { PopUpMessage, NavHeader } from "../../../components";
 import { ClubForm } from ".";
-import { setMessage } from "../../../store";
 import type { pageParamProps } from "../../../interfaces";
-import type { Club } from "../interfaces";
+import { findClubById } from "../../../store/clubsThunks";
+import type { AppDispatch, RootState } from "../../../store/store";
 
 export const ClubEdit = ({ name, sub }: pageParamProps) => {
-  const { id } = useParams<{ id: string }>();
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const [club, setClub] = useState<Club | null>(null);
-  const [loading, setLoading] = useState(true);
 
-  const dispatch = useDispatch();
-
-  const { getClubById } = useClubs();
+  const { id } = useParams<{ id: string }>();
+  const {
+    selectedClub: club,
+    error,
+    status,
+  } = useSelector((state: RootState) => state.clubs);
 
   useEffect(() => {
-    setLoading(true);
-    getClubById(id)
-      .then((data) => {
-        setClub(data);
-      })
-      .catch(() => {
-        dispatch(
-          setMessage({
-            message: "Error al cargar el club",
-            type: "danger",
-          })
-        );
-        //
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [id]);
+    dispatch(findClubById(id));
+  }, [id, dispatch]);
 
   const handleSuccess = () => {
-    navigate("/clubs", {
-      state: {
-        message: "El club fue actualizado exitosamente",
-        messageKind: "success",
-      },
-    });
+    navigate("/clubs");
   };
 
   const handleCancel = () => {
     navigate("/clubs");
   };
-
-  if (loading) return <LoadingIndicator />;
 
   return (
     <>
@@ -67,11 +44,14 @@ export const ClubEdit = ({ name, sub }: pageParamProps) => {
               <div className="ibox-content">
                 <div className="row">
                   <div className="col-sm-12">
-                    <ClubForm
-                      initialData={club}
-                      onSuccess={handleSuccess}
-                      onCancel={handleCancel}
-                    />
+                    {error && <div className="alert alert-danger">{error}</div>}
+                    {status === "succeeded" && (
+                      <ClubForm
+                        initialData={club}
+                        onSuccess={handleSuccess}
+                        onCancel={handleCancel}
+                      />
+                    )}
                   </div>
                 </div>
               </div>
