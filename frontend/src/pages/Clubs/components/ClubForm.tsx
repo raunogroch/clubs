@@ -1,10 +1,8 @@
-import { useState } from "react";
 import { FormField } from ".";
 import { useClubForm } from "../hooks";
 import {
   CheckboxList,
-  //CropperImageInput,
-  ImageCropper,
+  ImageCropperWithInput,
   SelectorList,
 } from "../../../components";
 import type { ClubFormProps } from "../interfaces";
@@ -20,18 +18,6 @@ export const ClubForm = ({
 
   const { sports, coaches, athletes, schedules } = useClubCatalogs();
 
-  const [imageSrc, setImage] = useState<string | null>(null);
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      if (typeof ev.target?.result === "string") setImage(ev.target.result);
-    };
-    reader.readAsDataURL(file);
-  };
-
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const success = await handleSubmit(e);
@@ -40,25 +26,13 @@ export const ClubForm = ({
 
   return (
     <div>
-      {/* <CropperImageInput
-        value={formData.image || ""}
-        error={errors.image}
-        onChange={handleImageChange}
-      /> */}
-
       <form onSubmit={onSubmit}>
         <div className="form-group row">
           <div className="col-sm-10 offset-sm-2">
-            {typeof imageSrc === "string" && (
-              <ImageCropper
-                image={imageSrc}
-                onCropChange={(cropped) =>
-                  handleChange({
-                    target: { name: "image", value: cropped },
-                  } as any)
-                }
-              />
-            )}
+            <ImageCropperWithInput
+              value={formData.image}
+              onChange={handleChange}
+            />
           </div>
         </div>
 

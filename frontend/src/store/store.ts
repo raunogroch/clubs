@@ -3,6 +3,7 @@ import messageReducer from "./messageSlice";
 import authReducer, { login } from "./authSlice";
 import usersReducer from "./usersSlice";
 import filterReducer from "./filterSlice";
+import clubsReducer from "./clubsSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     auth: authReducer,
     users: usersReducer,
     filters: filterReducer,
+    clubs: clubsReducer,
   },
 });
 

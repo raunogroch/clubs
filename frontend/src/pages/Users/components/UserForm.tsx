@@ -1,8 +1,7 @@
-import { ImageCropperWithInput } from "../../../components/CropperImageInput";
+import { UserRoleSelector } from ".";
 import { useUserForm } from "../hooks";
 import type { UserFormProps } from "../interfaces";
-import { UserRoleSelector } from ".";
-import { Input } from "../../../components";
+import { Input, ImageCropperWithInput } from "../../../components";
 export const UserForm = ({ user, onCancel, onSuccess }: UserFormProps) => {
   const { formData, errors, handleChange, handleSubmit } = useUserForm(user);
 

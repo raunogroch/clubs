@@ -1,18 +1,10 @@
 import type { pageParamProps } from "../../../interfaces";
 import { useClubs } from "../hooks";
-import { PopUpMessage, LoadingIndicator, NavHeader } from "../../../components";
+import { PopUpMessage, NavHeader } from "../../../components";
 import { ClubTable } from ".";
-import { useDispatch } from "react-redux";
-import { setMessage } from "../../../store/messageSlice";
 
 export const Clubs = ({ name }: pageParamProps) => {
-  const { clubs, error, loading, deleteClub } = useClubs();
-  const dispatch = useDispatch();
-
-  if (loading) return <LoadingIndicator />;
-  if (error) {
-    dispatch(setMessage({ message: error, type: "danger" }));
-  }
+  const { clubs, deleteClub } = useClubs();
 
   return (
     <>
