@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from "react";
 import type { ReactCropperElement } from "react-cropper";
 import { Cropper } from "react-cropper";
 import { Input, Image } from ".";
+import "cropperjs/dist/cropper.min.css";
 
 // Input de archivo reutilizable para seleccionar imágenes
 const CropperImageInput = ({
