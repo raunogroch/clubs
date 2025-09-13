@@ -1,33 +1,20 @@
 import { useState } from "react";
-import { useAuthErrorHandler } from "../../../hooks/useAuthErrorHandler";
-import type { IScheduleService } from "../../../services/interfaces/scheduleService.interface";
-import { scheduleService } from "../../../services/scheduleService";
+import { useDispatch } from "react-redux";
 import type { Schedule, ScheduleErrors } from "../types/scheduleTypes";
+import { setMessage, type AppDispatch } from "../../../store";
+import { createSchedule, updateSchedule } from "../../../store/scheduleThunks";
 
-/**
- * Hook para gestionar el formulario de horario (crear/editar).
- * Ahora depende de la interfaz IScheduleService para cumplir DIP e ISP.
- * @param initialData - Datos iniciales del horario (para edición).
- * @param service - Implementación de IScheduleService (por defecto scheduleService)
- */
-export const useScheduleForm = (
-  initialData?: Schedule,
-  service: IScheduleService = scheduleService
-) => {
+export const useScheduleForm = (initialData?: Schedule) => {
+  const dispatch = useDispatch<AppDispatch>();
   const [formData, setFormData] = useState<Schedule>(
     initialData || {
-      startTime: "string",
-      endTime: "string",
+      startTime: "00:00",
+      endTime: "00:00",
     }
   );
 
   const [errors, setErrors] = useState<ScheduleErrors>({});
-  const [message, setMessage] = useState<{ text: string; type: string }>();
-  const handleAuthError = useAuthErrorHandler();
 
-  /**
-   * Maneja el cambio de los campos del formulario.
-   */
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -39,9 +26,6 @@ export const useScheduleForm = (
     }
   };
 
-  /**
-   * Valida los datos del formulario antes de enviar.
-   */
   const validateForm = (): boolean => {
     const newErrors: ScheduleErrors = {};
 
@@ -52,42 +36,34 @@ export const useScheduleForm = (
     return Object.keys(newErrors).length === 0;
   };
 
-  /**
-   * Envía el formulario para crear o editar usuario.
-   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
 
     try {
-      let response: any;
       if (initialData?._id) {
-        response = await service.update(initialData._id, formData);
+        dispatch(updateSchedule(formData)).unwrap();
+        dispatch(
+          setMessage({
+            message: "Horario actualizado exitosamente",
+            type: "success",
+          })
+        );
       } else {
-        response = await service.create(formData);
+        dispatch(createSchedule(formData)).unwrap();
+        dispatch(
+          setMessage({
+            message: "Horario creado exitosamente",
+            type: "success",
+          })
+        );
       }
-
-      handleAuthError(response, (msg) =>
-        setMessage({ text: msg, type: "error" })
-      );
-
-      if (response.code === 201 || response.code === 200) {
-        setMessage({
-          text: response.message || "Operación exitosa",
-          type: "success",
-        });
-        return true;
-      } else {
-        setMessage({
-          text: response.message || "Error al guardar",
-          type: "error",
-        });
-      }
+      return true;
     } catch (error) {
-      setMessage({ text: "Error de conexión", type: "error" });
+      dispatch(setMessage({ message: "Error de conexión", type: "danger" }));
     }
     return false;
   };
 
-  return { formData, errors, message, handleChange, handleSubmit, setFormData };
+  return { formData, errors, handleChange, handleSubmit, setFormData };
 };

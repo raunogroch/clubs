@@ -1,17 +1,13 @@
-import { useEffect } from "react";
 import { Input } from "../../../components";
 import { useScheduleForm } from "../hooks/useScheduleForm";
 import type { ScheduleFormProps } from "../types/scheduleTypes";
-import { setMessage } from "../../../store/messageSlice";
-import { useDispatch } from "react-redux";
 
 export const ScheduleForm = ({
   initialData,
   onSuccess,
   onCancel,
 }: ScheduleFormProps) => {
-  const dispatch = useDispatch();
-  const { formData, errors, message, handleChange, handleSubmit } =
+  const { formData, errors, handleChange, handleSubmit } =
     useScheduleForm(initialData);
 
   const onSubmit = async (e: any) => {
@@ -19,16 +15,6 @@ export const ScheduleForm = ({
     const success = await handleSubmit(e);
     if (success && onSuccess) onSuccess();
   };
-
-  useEffect(() => {
-    if (message) {
-      if (message.type === "error") {
-        dispatch(setMessage({ message: message.text, type: "danger" }));
-      } else if (message.type === "success") {
-        dispatch(setMessage({ message: message.text, type: "success" }));
-      }
-    }
-  }, [message, dispatch]);
 
   return (
     <div>

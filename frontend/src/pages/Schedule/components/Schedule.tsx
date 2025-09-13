@@ -1,23 +1,31 @@
-import { NavHeader, LoadingIndicator, PopUpMessage } from "../../../components";
-import { useDispatch } from "react-redux";
-import { setMessage } from "../../../store/messageSlice";
+import { NavHeader, PopUpMessage } from "../../../components";
+import { useDispatch, useSelector } from "react-redux";
+
 import type { pageParamProps } from "../../../interfaces/pageParamProps";
-import { useSchedule } from "../hooks/useSchedule";
+
+import type { AppDispatch } from "../../../store";
+import { useEffect } from "react";
+import { fetchSchedules } from "../../../store/scheduleThunks";
 import { ScheduleTable } from "./ScheduleTable";
 
 export const Schedule = ({ name }: pageParamProps) => {
-  const { schedules, loading, error, deleteSchedule } = useSchedule();
+  const dispatch = useDispatch<AppDispatch>();
 
-  const dispatch = useDispatch();
-  if (loading) return <LoadingIndicator />;
-  if (error) {
-    dispatch(setMessage({ message: error, type: "danger" }));
-  }
+  const {
+    schedules: schedules,
+    error,
+    status,
+  } = useSelector((state: any) => state.schedules);
+
+  useEffect(() => {
+    dispatch(fetchSchedules());
+  }, []);
 
   return (
     <>
       <NavHeader name={name} pageCreate="Nuevo horario" />
       <PopUpMessage />
+
       <div className="wrapper wrapper-content animated fadeInRight">
         <div className="row justify-content-center">
           <div className="col-6">
@@ -26,10 +34,10 @@ export const Schedule = ({ name }: pageParamProps) => {
                 <h5>Lista de horarios</h5>
               </div>
               <div className="ibox-content">
-                <ScheduleTable
-                  schedules={schedules}
-                  onDelete={deleteSchedule}
-                />
+                {error && <div className="alert alert-danger">{error}</div>}
+                {status === "succeeded" && (
+                  <ScheduleTable schedules={schedules} />
+                )}
               </div>
             </div>
           </div>

@@ -5,6 +5,7 @@ import usersReducer from "./usersSlice";
 import filterReducer from "./filterSlice";
 import clubsReducer from "./clubsSlice";
 import entitiesReducer from "./entitiesSlice";
+import schedulesReducer from "./scheduleSlice";
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     filters: filterReducer,
     clubs: clubsReducer,
     entities: entitiesReducer,
+    schedules: schedulesReducer,
   },
 });
 

@@ -1,54 +1,34 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { PopUpMessage, LoadingIndicator, NavHeader } from "../../../components";
-import { useDispatch } from "react-redux";
-import { setMessage } from "../../../store/messageSlice";
+import { useEffect } from "react";
+import { PopUpMessage, NavHeader } from "../../../components";
+import { useDispatch, useSelector } from "react-redux";
 import type { pageParamProps } from "../../../interfaces/pageParamProps";
-import type { Schedule } from "../types/scheduleTypes";
-import { useSchedule } from "../hooks/useSchedule";
 import { ScheduleForm } from "./ScheduleForm";
+import type { AppDispatch } from "../../../store";
+import { findScheduleById } from "../../../store/scheduleThunks";
 
 export const ScheduleEdit = ({ name, sub }: pageParamProps) => {
-  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [schedule, setSchedule] = useState<Schedule | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const dispatch = useDispatch<AppDispatch>();
 
-  const { getScheduleById } = useSchedule();
-
-  useEffect(() => {
-    setLoading(true);
-    getScheduleById(id)
-      .then((data) => {
-        setSchedule(data);
-      })
-      .catch(() => {
-        setError("Error al cargar las disciplinas");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [id]);
+  const { id } = useParams<{ id: string }>();
+  const {
+    selectedSchedule: schedule,
+    error,
+    status,
+  } = useSelector((state: any) => state.schedules);
 
   const handleSuccess = () => {
-    navigate("/schedules", {
-      state: {
-        message: "La disciplina fue actualizado exitosamente",
-        messageKind: "success",
-      },
-    });
+    navigate("/schedules");
   };
 
   const handleCancel = () => {
     navigate("/schedules");
   };
 
-  const dispatch = useDispatch();
-  if (loading) return <LoadingIndicator />;
-  if (error) {
-    dispatch(setMessage({ message: error, type: "danger" }));
-  }
+  useEffect(() => {
+    dispatch(findScheduleById(id)).unwrap();
+  }, [id, dispatch]);
 
   return (
     <>
@@ -64,11 +44,14 @@ export const ScheduleEdit = ({ name, sub }: pageParamProps) => {
               <div className="ibox-content">
                 <div className="row">
                   <div className="col-sm-12">
-                    <ScheduleForm
-                      initialData={schedule}
-                      onSuccess={handleSuccess}
-                      onCancel={handleCancel}
-                    />
+                    {error && <div className="alert alert-danger">{error}</div>}
+                    {status === "succeeded" && schedule && (
+                      <ScheduleForm
+                        initialData={schedule}
+                        onSuccess={handleSuccess}
+                        onCancel={handleCancel}
+                      />
+                    )}
                   </div>
                 </div>
               </div>
