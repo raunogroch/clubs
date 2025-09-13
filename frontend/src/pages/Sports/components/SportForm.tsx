@@ -1,39 +1,20 @@
-// import { useEffect } from "react";
 import { Input } from "../../../components";
-import { useSportForm } from "../hooks/useSportForm";
 import type { SportFormProps } from "../interfaces/sportTypes";
-
-import { useDispatch } from "react-redux";
-import { setMessage } from "../../../store/messageSlice";
-import { useEffect } from "react";
+import { useSportForm } from "../hook/useSportForm";
 
 export const SportForm = ({
   initialData,
   onSuccess,
   onCancel,
 }: SportFormProps) => {
-  const { formData, errors, message, handleChange, handleSubmit } =
+  const { formData, errors, handleChange, handleSubmit } =
     useSportForm(initialData);
-
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    if (message) {
-      if (message.type === "error") {
-        dispatch(setMessage({ message: message.text, type: "danger" }));
-      } else if (message.type === "success") {
-        dispatch(setMessage({ message: message.text, type: "success" }));
-      }
-    }
-  }, [message, dispatch]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const success = await handleSubmit(e);
     if (success) onSuccess();
   };
-
-  // dispatch se inicializa arriba
 
   return (
     <div>

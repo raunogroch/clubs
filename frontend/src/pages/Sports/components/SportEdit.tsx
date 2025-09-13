@@ -1,37 +1,27 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import type { Sport } from "../interfaces";
-import { useSports } from "../hooks";
-import { PopUpMessage, LoadingIndicator, NavHeader } from "../../../components";
+import { PopUpMessage, NavHeader } from "../../../components";
 import { SportForm } from ".";
 import type { pageParamProps } from "../../../interfaces";
-
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setMessage } from "../../../store/messageSlice";
+import { findSportById } from "../../../store/sportsThunks";
+import type { AppDispatch } from "../../../store/store";
 
 export const SportEdit = ({ name, sub }: pageParamProps) => {
-  const { id } = useParams<{ id: string }>();
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const [sport, setSport] = useState<Sport | null>(null);
-  const [loading, setLoading] = useState(true);
 
-  const { getSportById } = useSports();
-  const dispatch = useDispatch();
+  const { id } = useParams<{ id: string }>();
+  const {
+    selectedSport: sport,
+    error,
+    status,
+  } = useSelector((state: any) => state.sports);
 
   useEffect(() => {
-    setLoading(true);
-    getSportById(id)
-      .then((data) => setSport(data))
-      .catch(() => {
-        dispatch(
-          setMessage({
-            message: "Error al cargar las disciplinas",
-            type: "danger",
-          })
-        );
-      })
-      .finally(() => setLoading(false));
-  }, [id]);
+    dispatch(findSportById(id)).unwrap();
+  }, [dispatch, id]);
 
   const handleSuccess = () => {
     dispatch(
@@ -47,8 +37,6 @@ export const SportEdit = ({ name, sub }: pageParamProps) => {
     navigate("/sports");
   };
 
-  if (loading) return <LoadingIndicator />;
-
   return (
     <>
       <NavHeader name={name} sub={sub} />
@@ -63,11 +51,18 @@ export const SportEdit = ({ name, sub }: pageParamProps) => {
               <div className="ibox-content">
                 <div className="row">
                   <div className="col-sm-12">
-                    <SportForm
-                      initialData={sport}
-                      onSuccess={handleSuccess}
-                      onCancel={handleCancel}
-                    />
+                    {error && (
+                      <div className="alert alert-danger" role="alert">
+                        {error}
+                      </div>
+                    )}
+                    {status === "succeeded" && (
+                      <SportForm
+                        initialData={sport}
+                        onSuccess={handleSuccess}
+                        onCancel={handleCancel}
+                      />
+                    )}
                   </div>
                 </div>
               </div>

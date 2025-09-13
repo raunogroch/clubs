@@ -1,22 +1,18 @@
 import { useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { LoadingIndicator, NavHeader, PopUpMessage } from "../../../components";
+import { useDispatch, useSelector } from "react-redux";
+import { NavHeader, PopUpMessage } from "../../../components";
 import type { pageParamProps } from "../../../interfaces";
-import { setMessage } from "../../../store";
-import { useSports } from "../hooks";
+import { type AppDispatch } from "../../../store";
 import { SportTable } from ".";
+import { fetchSports } from "../../../store/sportsThunks";
 
 export const Sports = ({ name }: pageParamProps) => {
-  const { sports, loading, error, deleteSport } = useSports();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
+  const { sports, error, status } = useSelector((state: any) => state.sports);
 
   useEffect(() => {
-    if (error) {
-      dispatch(setMessage({ message: error, type: "warning" }));
-    }
-  }, [error, dispatch]);
-
-  if (loading) return <LoadingIndicator />;
+    dispatch(fetchSports());
+  }, [dispatch]);
 
   return (
     <>
@@ -30,7 +26,12 @@ export const Sports = ({ name }: pageParamProps) => {
                 <h5>Lista de disciplinas</h5>
               </div>
               <div className="ibox-content">
-                <SportTable sports={sports.data} onDelete={deleteSport} />
+                {error && (
+                  <div className="alert alert-danger" role="alert">
+                    {error}
+                  </div>
+                )}
+                {status === "succeeded" && <SportTable sports={sports} />}
               </div>
             </div>
           </div>

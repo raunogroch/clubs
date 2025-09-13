@@ -2,21 +2,22 @@ import { Link } from "react-router-dom";
 import type { Sport } from "../interfaces/sportTypes";
 import { useDispatch } from "react-redux";
 import { setMessage } from "../../../store/messageSlice";
+import { deleteSport } from "../../../store/sportsThunks";
+import type { AppDispatch } from "../../../store";
 
 interface SportTableProps {
   sports: Sport[];
-  onDelete: (id: string) => Promise<void>;
 }
 
-export const SportTable = ({ sports, onDelete }: SportTableProps) => {
-  const dispatch = useDispatch();
+export const SportTable = ({ sports }: SportTableProps) => {
+  const dispatch = useDispatch<AppDispatch>();
   const handleDelete = async (id: string) => {
     if (window.confirm("¿Está seguro de eliminar esta disciplina?")) {
-      await onDelete(id);
+      dispatch(deleteSport(id)).unwrap();
       dispatch(
         setMessage({
           message: "Disciplina eliminada exitosamente",
-          type: "warning",
+          type: "success",
         })
       );
     }
