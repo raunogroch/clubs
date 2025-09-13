@@ -1,10 +1,18 @@
 import type { pageParamProps } from "../../../interfaces";
-import { useClubs } from "../hooks";
 import { PopUpMessage, NavHeader } from "../../../components";
 import { ClubTable } from ".";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { fetchClubs } from "../../../store/clubsThunks";
+import type { AppDispatch } from "../../../store/store";
 
 export const Clubs = ({ name }: pageParamProps) => {
-  const { clubs, deleteClub } = useClubs();
+  const dispatch = useDispatch<AppDispatch>();
+  const { clubs, error, status } = useSelector((state: any) => state.clubs);
+
+  useEffect(() => {
+    dispatch(fetchClubs());
+  }, [dispatch]);
 
   return (
     <>
@@ -18,20 +26,12 @@ export const Clubs = ({ name }: pageParamProps) => {
                 <h5>Lista de clubs</h5>
               </div>
               <div className="ibox-content">
-                <ClubTable
-                  clubs={clubs.map((club) => ({
-                    ...club,
-                    schedule:
-                      typeof club.schedule === "string"
-                        ? { _id: "", startTime: club.schedule, endTime: "" }
-                        : club.schedule,
-                    discipline:
-                      typeof club.discipline === "string"
-                        ? { _id: "", name: club.discipline }
-                        : club.discipline,
-                  }))}
-                  onDelete={deleteClub}
-                />
+                {error && (
+                  <div className="alert alert-danger" role="alert">
+                    {error}
+                  </div>
+                )}
+                {status === "succeeded" && <ClubTable clubs={clubs} />}
               </div>
             </div>
           </div>

@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setMessage } from "../../../store/messageSlice";
+import { deleteClub } from "../../../store/clubsThunks";
+import type { AppDispatch } from "../../../store";
 
 interface ClubFields {
   _id?: string;
@@ -22,14 +24,13 @@ interface ClubFields {
 
 interface ClubsTableProps {
   clubs: ClubFields[];
-  onDelete: (id: string) => Promise<void>;
 }
-export const ClubTable = ({ clubs, onDelete }: ClubsTableProps) => {
-  const dispatch = useDispatch();
+export const ClubTable = ({ clubs }: ClubsTableProps) => {
+  const dispatch = useDispatch<AppDispatch>();
   const handleDelete = async (id?: string) => {
     if (!id) return;
     if (window.confirm("¿Está seguro de eliminar este usuario?")) {
-      await onDelete(id);
+      dispatch(deleteClub(id)).unwrap();
       dispatch(
         setMessage({ message: "Club eliminado exitosamente", type: "warning" })
       );
