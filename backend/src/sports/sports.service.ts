@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateSportDto } from './dto/create-sport.dto';
 import { UpdateSportDto } from './dto/update-sport.dto';
 import { Sport } from './schemas/sport.schemas';
@@ -45,13 +49,25 @@ export class SportsService {
     id: string,
     updateSportDto: UpdateSportDto,
   ): Promise<Sport | null> {
-    await this.sportValidator.validateExistence(id);
-    if (updateSportDto.name) {
-      await this.sportValidator.validateUniqueName(updateSportDto.name);
+    // 1. Verificar que el deporte existe
+    const sport = await this.sportRepository.findById(id);
+    if (!sport) {
+      throw new NotFoundException('Deporte no encontrado');
     }
+
+    // 2. Si quiere cambiar el nombre, verificar que no exista otro con ese nombre
+    if (updateSportDto.name && updateSportDto.name !== sport.name) {
+      const existingSport = await this.sportRepository.findOneByName(
+        updateSportDto.name,
+      );
+      if (existingSport && existingSport.id !== id) {
+        throw new ConflictException('Ya existe un deporte con ese nombre');
+      }
+    }
+
+    // 3. Actualizar el deporte
     return this.sportRepository.updateById(id, updateSportDto);
   }
-
   /**
    * Elimina un deporte por su ID
    */
