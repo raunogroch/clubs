@@ -1,6 +1,4 @@
 import axios from "axios";
-import { store } from "../store";
-import { logout } from "../store/authSlice";
 
 /**
  * Instancia de Axios configurada para la API principal.
@@ -32,7 +30,6 @@ api.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       // Token inválido o expirado
-      store.dispatch(logout());
       window.location.href = "/login"; // Redirige al login
     }
     return Promise.reject(error);

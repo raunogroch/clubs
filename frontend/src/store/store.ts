@@ -6,6 +6,8 @@ import filterReducer from "./filterSlice";
 import clubsReducer from "./clubsSlice";
 import entitiesReducer from "./entitiesSlice";
 import schedulesReducer from "./scheduleSlice";
+import sportsReducer from "./sportsSlice";
+import { tokenSessionMiddleware } from "./middleware/tokenSessionMiddleware";
 
 export const store = configureStore({
   reducer: {
@@ -16,7 +18,10 @@ export const store = configureStore({
     clubs: clubsReducer,
     entities: entitiesReducer,
     schedules: schedulesReducer,
+    sports: sportsReducer,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(tokenSessionMiddleware),
 });
 
 const token = localStorage.getItem("token");
