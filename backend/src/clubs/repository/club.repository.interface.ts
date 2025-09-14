@@ -10,5 +10,4 @@ export interface IClubRepository {
   findById(id: string): Promise<Club | null>;
   updateById(id: string, updateClubDto: UpdateClubDto): Promise<Club | null>;
   deleteById(id: string): Promise<Club | null>;
-  findClubsByUserId(userId: string): Promise<Club[]>;
 }
