@@ -1,10 +1,10 @@
 import type { pageParamProps } from "../../../interfaces";
 import { PopUpMessage, NavHeader } from "../../../components";
-import { ClubTable } from ".";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { fetchClubs } from "../../../store/clubsThunks";
 import type { AppDispatch } from "../../../store/store";
+import { ClubList } from "./ClubList";
 
 export const Clubs = ({ name }: pageParamProps) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -31,7 +31,7 @@ export const Clubs = ({ name }: pageParamProps) => {
                     {error}
                   </div>
                 )}
-                {status === "succeeded" && <ClubTable clubs={clubs} />}
+                {status === "succeeded" && <ClubList clubs={clubs} />}
               </div>
             </div>
           </div>

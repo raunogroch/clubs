@@ -27,8 +27,8 @@ export class ClubRepository implements IClubRepository {
     return this.clubModel.find().populate([
       { path: 'schedule', select: 'startTime endTime' },
       { path: 'discipline', select: 'name' },
-      { path: 'coaches', select: 'name lastname' },
-      { path: 'athletes', select: 'name lastname' },
+      { path: 'coaches', select: 'name lastname image' },
+      { path: 'athletes', select: 'name lastname image' },
     ]);
   }
 
