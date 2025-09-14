@@ -38,7 +38,8 @@ export class UsersController {
   @Get(':id/clubs')
   @Roles(Role.ATHLETE)
   async getAthleteClubs(@Param('id') id: string) {
-    return this.clubsService.findClubsByUserId(id);
+    //return this.clubsService.findClubsByUserId(id);
+    return;
   }
 
   /**

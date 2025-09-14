@@ -17,10 +17,15 @@ export class CreateClubDto {
   @IsMongoId({ each: true })
   sport: Types.ObjectId;
 
+  /** Ubicacion de entrenamiento */
+  @IsString()
+  @IsNotEmpty()
+  place: string;
+
   /** Una breve descripcion del club */
   @IsString()
   @IsNotEmpty()
-  description?: string;
+  description: string;
 
   /** Grupo de entrenamiento asociado */
   @IsMongoId({ each: true })

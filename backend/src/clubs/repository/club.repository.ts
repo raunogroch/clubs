@@ -24,12 +24,7 @@ export class ClubRepository implements IClubRepository {
   }
 
   async findAllPopulated(): Promise<Club[]> {
-    return this.clubModel.find().populate([
-      { path: 'schedule', select: 'startTime endTime' },
-      { path: 'discipline', select: 'name' },
-      { path: 'coaches', select: 'name lastname image' },
-      { path: 'athletes', select: 'name lastname image' },
-    ]);
+    return this.clubModel.find().populate([{ path: 'sport', select: 'name' }]);
   }
 
   async findById(id: string): Promise<Club | null> {
@@ -45,17 +40,5 @@ export class ClubRepository implements IClubRepository {
 
   async deleteById(id: string): Promise<Club | null> {
     return this.clubModel.findByIdAndDelete(id).exec();
-  }
-
-  async findClubsByUserId(userId: string): Promise<Club[]> {
-    return this.clubModel
-      .find({
-        $or: [{ athletes: userId }],
-      })
-      .populate([
-        { path: 'schedule', select: 'startTime endTime' },
-        { path: 'discipline', select: 'name' },
-        { path: 'coaches', select: 'name lastname' },
-      ]);
   }
 }
