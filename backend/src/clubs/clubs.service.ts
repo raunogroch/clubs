@@ -72,12 +72,4 @@ export class ClubsService {
     }
     return deleted;
   }
-
-  /**
-   * Busca los clubes donde el usuario actual es coach o athlete
-   */
-  async findClubsByUserId(userId: string): Promise<Club[]> {
-    // Busca clubes donde el usuario esté en coaches o athletes
-    return this.clubRepository.findClubsByUserId(userId);
-  }
 }
