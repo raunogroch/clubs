@@ -1,10 +1,6 @@
-import { FormField } from ".";
+import { FormField, TextAreaField } from ".";
 import { useClubForm } from "../hooks";
-import {
-  CheckboxList,
-  ImageCropperWithInput,
-  SelectorList,
-} from "../../../components";
+import { ImageCropperWithInput, SelectorList } from "../../../components";
 import type { ClubFormProps } from "../interfaces";
 import { useClubCatalogs } from "../../../hooks";
 
@@ -16,7 +12,7 @@ export const ClubForm = ({
   const { formData, errors, handleChange, handleSubmit } =
     useClubForm(initialData);
 
-  const { sports, coaches, athletes, schedules } = useClubCatalogs();
+  const { sports } = useClubCatalogs();
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +24,10 @@ export const ClubForm = ({
     <div>
       <form onSubmit={onSubmit}>
         <div className="form-group row">
-          <div className="col-sm-10 offset-sm-2">
+          <label htmlFor="imagen" className="col-sm-2 col-form-label">
+            Logo del club
+          </label>
+          <div className="col-sm-10">
             <ImageCropperWithInput
               value={formData.image}
               onChange={handleChange}
@@ -43,30 +42,18 @@ export const ClubForm = ({
           value={formData.name}
           error={errors.name}
           handleChange={handleChange}
+          placeholder="Nombre..."
         />
 
         <SelectorList
-          name="schedule"
-          label="Horario"
-          selectedId={formData.schedule}
-          items={schedules}
-          errors={errors.schedule}
-          onItemsChange={(scheduleId) =>
-            handleChange({
-              target: { name: "schedule", value: scheduleId },
-            } as any)
-          }
-        />
-
-        <SelectorList
-          name="discipline"
+          name="sport"
           label="Disciplina deportiva"
-          selectedId={formData.discipline}
+          selected={formData.sport}
           items={sports}
-          errors={errors.discipline}
+          errors={errors.sport}
           onItemsChange={(sportId) =>
             handleChange({
-              target: { name: "discipline", value: sportId },
+              target: { name: "sport", value: sportId },
             } as any)
           }
         />
@@ -78,27 +65,20 @@ export const ClubForm = ({
           value={formData.place}
           error={errors.place}
           handleChange={handleChange}
+          placeholder="Direccion..."
+        />
+
+        <TextAreaField
+          title="Descripcion del Club"
+          name="description"
+          value={formData.description}
+          error={errors.description}
+          handleChange={handleChange}
+          placeholder="Descripcion..."
+          type={"text"}
         />
 
         <div className="hr-line-dashed"></div>
-
-        <CheckboxList
-          name="coaches"
-          label="Entrenadores"
-          dataList={coaches}
-          onChange={handleChange}
-          selectedItems={formData.coaches}
-        />
-
-        <div className="hr-line-dashed"></div>
-
-        <CheckboxList
-          name="athletes"
-          label="Atletas"
-          dataList={athletes}
-          onChange={handleChange}
-          selectedItems={formData.athletes}
-        />
 
         <div className="form-group row">
           <div className="col-sm-10 offset-sm-2">

@@ -6,6 +6,8 @@ interface InputProps {
     | "email"
     | "password"
     | "checkbox"
+    | "file"
+    | "textarea"
     | "number"
     | "tel"
     | "url"
@@ -89,4 +91,34 @@ export const Input = ({
     return <input type="file" {...commonProps} />;
   }
   return <input type={type} value={value ?? ""} {...commonProps} />;
+};
+
+export const TextArea = ({
+  name,
+  className = "",
+  placeholder,
+  id,
+  required = false,
+  value: propValue,
+  disabled = false,
+  autoComplete = "off",
+  onChange: propOnChange,
+}: InputProps) => {
+  const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    if (propOnChange) propOnChange(e as any);
+  };
+
+  return (
+    <textarea
+      name={name}
+      className={`input ${className}`.trim()}
+      placeholder={placeholder}
+      id={id}
+      required={required}
+      disabled={disabled}
+      autoComplete={autoComplete}
+      value={propValue}
+      onChange={handleChange}
+    />
+  );
 };

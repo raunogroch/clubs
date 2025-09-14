@@ -1,17 +1,12 @@
-import type { User } from "../../Users/interfaces/userTypes";
+import type { Sport } from "../../Sports/interfaces";
 
 export interface Club {
   _id?: string;
   image?: string;
   name: string;
   place: string;
-  discipline: {
-    _id: string;
-    name: string;
-  };
-  schedule: string;
-  coaches: string[];
-  athletes: User[];
+  sport: Sport;
+  description: string;
 }
 
 export type ClubErrors = {

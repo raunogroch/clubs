@@ -29,13 +29,14 @@ export const ClubList = ({ clubs }: ClubProps) => {
           <div className="widget-head-color-box navy-bg p-lg text-center">
             <div className="m-b-md">
               <h2 className="font-bold no-margins">{club.name}</h2>
-              <small>{club.discipline.name}</small>
+              <small>{club.sport.name}</small>
             </div>
             {club.image ? (
               <Image
                 src={club.image}
                 className="rounded-circle circle-border m-b-md"
                 alt="profile"
+                width={100}
               />
             ) : (
               <div className="rounded-circle circle-border m-b-md">
@@ -43,7 +44,7 @@ export const ClubList = ({ clubs }: ClubProps) => {
               </div>
             )}
             <div>
-              <span>{club.athletes.length} Atletas activos</span>
+              <span>{""} Atletas activos</span>
             </div>
           </div>
           <div className="widget-text-box">
@@ -57,15 +58,7 @@ export const ClubList = ({ clubs }: ClubProps) => {
               }}
               className="m-b-sm"
             >
-              {club.athletes.map((athlete) => (
-                <Image
-                  key={athlete._id}
-                  src={athlete.image}
-                  alt={athlete.name}
-                  width={30}
-                  className="rounded-circle"
-                />
-              ))}
+              {club.description}
             </div>
 
             <div className="d-flex justify-content-between">
