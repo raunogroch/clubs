@@ -44,7 +44,7 @@ export const ClubList = ({ clubs }: ClubProps) => {
               </div>
             )}
             <div>
-              <span>{""} Atletas activos</span>
+              <span> Atletas activos</span>
             </div>
           </div>
           <div className="widget-text-box">
@@ -63,10 +63,16 @@ export const ClubList = ({ clubs }: ClubProps) => {
 
             <div className="d-flex justify-content-between">
               <Link
-                to={`/clubs/edit/${club._id ?? ""}`}
+                to={`/clubs/${club._id}/groups`}
+                className="btn btn-xs btn-success"
+              >
+                <i className="fa fa-eye"></i> Ver
+              </Link>
+              <Link
+                to={`/clubs/edit/${club._id}`}
                 className="btn btn-xs btn-white"
               >
-                <i className="fa fa-thumbs-up"></i> Editar
+                <i className="fa fa-edit"></i> Editar
               </Link>
               <Link
                 to={"#"}

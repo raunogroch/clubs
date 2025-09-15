@@ -16,6 +16,7 @@ import {
   Profile,
   DashboardAthlete,
 } from "../pages";
+import { Groups } from "../pages/Clubs/components/groups/Groups";
 export type MenuRoute = {
   path: string;
   icon?: string;
@@ -42,6 +43,10 @@ export const roleRoutes: RoleRoutes = {
     },
     { path: "/clubs/edit/:id", element: <ClubEdit name="Clubs" sub="new" /> },
     { path: "/clubs/create", element: <ClubNew name="Clubs" sub="Crear" /> },
+    {
+      path: "/clubs/:id/groups",
+      element: <Groups name="Grupos" sub="Grupos" />,
+    },
     {
       path: "/sports",
       icon: "fa-soccer-ball-o",
@@ -104,6 +109,10 @@ export const roleRoutes: RoleRoutes = {
       element: <ClubEdit name="Clubs" sub="editar" />,
     },
     { path: "/clubs/create", element: <ClubNew name="Clubs" sub="Crear" /> },
+    {
+      path: "/clubs/:id/groups",
+      element: <Groups name="Clubs" sub="Grupos" />,
+    },
     {
       path: "/sports",
       icon: "fa-soccer-ball-o",

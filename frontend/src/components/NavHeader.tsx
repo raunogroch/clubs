@@ -10,7 +10,6 @@ export const NavHeader = ({ name: page, sub, pageCreate }: NavHeaderProps) => {
   const pageTitle = page || "Principal";
   const isPrincipalPage = pageTitle === "Principal";
   const location = useLocation();
-  // Es ruta principal si solo tiene un segmento (ej: /sports, /users, /schedules)
   const isMainRoute = location.pathname.split("/").filter(Boolean).length === 1;
 
   return (
