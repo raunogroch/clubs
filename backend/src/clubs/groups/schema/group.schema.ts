@@ -26,9 +26,6 @@ export interface DailySchedule {
 }
 @Schema({ timestamps: true })
 export class Group extends Document {
-  @Prop({ required: true })
-  clubId: string; // ID del club al que pertenece el grupo
-
   @Prop({
     type: String,
     required: true,
