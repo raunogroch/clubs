@@ -2,7 +2,6 @@
 import { Injectable } from '@nestjs/common';
 import { CreateClubDto, UpdateClubDto } from './dto';
 import { Club } from './schema/club.schema';
-import type { IClubRepository } from './repository/club.repository.interface';
 import { Inject } from '@nestjs/common';
 import { ClubValidatorService } from './club-validator.service';
 import { ImageService } from 'src/utils';
@@ -10,7 +9,7 @@ import { ImageService } from 'src/utils';
 @Injectable()
 export class ClubsService {
   constructor(
-    @Inject('ClubRepository') private readonly clubRepository: IClubRepository,
+    @Inject('ClubRepository') private readonly clubRepository,
     private readonly clubValidator: ClubValidatorService,
     private readonly clubImageService: ImageService,
   ) {}

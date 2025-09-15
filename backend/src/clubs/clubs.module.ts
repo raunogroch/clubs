@@ -7,6 +7,7 @@ import { User, UserSchema } from 'src/users/schemas/user.schema';
 import { ClubRepository } from './repository/club.repository';
 import { ImageService } from 'src/utils';
 import { ClubValidatorService } from './club-validator.service';
+import { GroupsModule } from './groups/groups.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ClubValidatorService } from './club-validator.service';
         schema: UserSchema,
       },
     ]),
+    GroupsModule,
   ],
   controllers: [ClubsController],
   providers: [

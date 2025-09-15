@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document } from 'mongoose';
-import { Group } from 'src/groups/entities/group.entity';
 import { Sport } from 'src/sports/schemas/sport.schemas';
+import { Group } from '../groups/schema/group.schema';
 
 // Esquema de Club para Mongoose
 @Schema({ timestamps: true })

@@ -7,7 +7,7 @@ import { ClubsModule } from './clubs/clubs.module';
 import { SchedulesModule } from './schedules/schedules.module';
 import { SportsModule } from './sports/sports.module';
 import { CompetenciesModule } from './competencies/competencies.module';
-import { GroupsModule } from './groups/groups.module';
+import { GroupsModule } from './clubs/groups/groups.module';
 
 @Module({
   imports: [
