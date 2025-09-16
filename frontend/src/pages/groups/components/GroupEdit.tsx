@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { PopUpMessage, NavHeader } from "../../../components";
 import type { pageParamProps } from "../../../interfaces";
 import type { AppDispatch, RootState } from "../../../store/store";
-import GroupForm from "./GroupForm";
+import { GroupForm } from "./GroupForm";
 import { findGroupById } from "../../../store/groupsThunks";
 
 export const GroupEdit = ({ name, sub, sub1 }: pageParamProps) => {

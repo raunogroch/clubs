@@ -2779,7 +2779,7 @@ div.dt-button-info {
   font-size: 0.9rem;
 }
 select.form-control:not([size]):not([multiple]) {
-  height: 2.05rem;
+  /*height: 2.05rem;*/
 }
 .input-sm,
 .form-control-sm {

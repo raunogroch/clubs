@@ -35,19 +35,50 @@ export const SelectorList = ({
     onItemsChange(selectedItem);
   };
 
-  return (
-    <div className="form-group row">
-      <label htmlFor={name} className="col-sm-2 col-form-label">
-        {label}
-      </label>
-      <div className="col-sm-10">
+  if (label) {
+    return (
+      <div className="form-group row">
+        <label htmlFor={name} className="col-sm-2 col-form-label">
+          {label}
+        </label>
+        <div className="col-sm-10">
+          <select
+            id={name}
+            className={`form-control${errors ? " is-invalid" : ""}`}
+            value={selectedValue}
+            onChange={handleChange}
+          >
+            <option value="">
+              Seleccione {name.includes("_") ? name.split("_")[0] : name}
+            </option>
+            {items.map((item) => (
+              <option
+                key={item._id || item.id || item.value}
+                value={item._id || item.id || item.value}
+              >
+                {item.label ||
+                  item.name ||
+                  (item.startTime && `${item.startTime} - ${item.endTime}`) ||
+                  item}
+              </option>
+            ))}
+          </select>
+          {errors && <div className="invalid-feedback">{errors}</div>}
+        </div>
+      </div>
+    );
+  } else {
+    return (
+      <>
         <select
           id={name}
           className={`form-control${errors ? " is-invalid" : ""}`}
           value={selectedValue}
           onChange={handleChange}
         >
-          <option value="">Seleccione una opción</option>
+          <option value="">
+            Seleccione {name.includes("_") ? name.split("_")[0] : name}
+          </option>
           {items.map((item) => (
             <option
               key={item._id || item.id || item.value}
@@ -61,7 +92,7 @@ export const SelectorList = ({
           ))}
         </select>
         {errors && <div className="invalid-feedback">{errors}</div>}
-      </div>
-    </div>
-  );
+      </>
+    );
+  }
 };

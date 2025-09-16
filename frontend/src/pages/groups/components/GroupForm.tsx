@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { CheckboxList, Input } from "../../../components";
+import { CheckboxList, Input, SelectorList } from "../../../components";
 import { FormField } from "../../Clubs/components";
 import { useGroupForm } from "../hooks/useGroupForm";
 import { Turn, WeekDays } from "../interface/group.Interface";
@@ -7,6 +7,7 @@ import type { Group } from "../interface/group.Interface";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch } from "../../../store";
 import { fetchEntities } from "../../../store/entitiesThunks";
+import Button from "../../../components/Button";
 
 /**
  * Props for GroupForm
@@ -74,50 +75,42 @@ export const GroupForm: React.FC<GroupFormProps> = ({
           <div className="mb-3">
             {formData.dailySchedules.map((schedule, idx) => (
               <div className="row mb-2" key={idx}>
-                {/* Día */}
                 <div className="col">
-                  <select
-                    className="form-control"
-                    value={schedule.day}
-                    onChange={(e) =>
-                      handleScheduleChange(idx, "day", e.target.value)
+                  <SelectorList
+                    name={`dia_${idx}`}
+                    selected={schedule.day}
+                    onItemsChange={(value) =>
+                      handleScheduleChange(
+                        idx,
+                        "day",
+                        typeof value === "string" ? value : value
+                      )
                     }
-                  >
-                    <option value="">Seleccione dia</option>
-                    {Object.values(WeekDays).map((day) => (
-                      <option key={day} value={day}>
-                        {day}
-                      </option>
-                    ))}
-                  </select>
-                  {errors[`dailySchedules_${idx}_day`] && (
-                    <div className="text-danger small">
-                      {errors[`dailySchedules_${idx}_day`]}
-                    </div>
-                  )}
+                    errors={errors[`dailySchedules_${idx}_day`] || ""}
+                    items={Object.values(WeekDays).map((day) => ({
+                      value: day,
+                      label: day,
+                    }))}
+                  />
                 </div>
 
-                {/* Turno */}
                 <div className="col">
-                  <select
-                    className="form-control"
-                    value={schedule.turn}
-                    onChange={(e) =>
-                      handleScheduleChange(idx, "turn", e.target.value)
+                  <SelectorList
+                    name={`turno_${idx}`}
+                    selected={schedule.turn}
+                    onItemsChange={(value) =>
+                      handleScheduleChange(
+                        idx,
+                        "turn",
+                        typeof value === "string" ? value : value
+                      )
                     }
-                  >
-                    <option value="">Seleccione turno</option>
-                    {Object.values(Turn).map((turn) => (
-                      <option key={turn} value={turn}>
-                        {turn}
-                      </option>
-                    ))}
-                  </select>
-                  {errors[`dailySchedules_${idx}_turn`] && (
-                    <div className="text-danger small">
-                      {errors[`dailySchedules_${idx}_turn`]}
-                    </div>
-                  )}
+                    errors={errors[`dailySchedules_${idx}_turn`] || ""}
+                    items={Object.values(Turn).map((turn) => ({
+                      value: turn,
+                      label: turn,
+                    }))}
+                  />
                 </div>
 
                 {/* Hora de inicio */}
@@ -138,7 +131,6 @@ export const GroupForm: React.FC<GroupFormProps> = ({
                   )}
                 </div>
 
-                {/* Hora de fin */}
                 <div className="col">
                   <Input
                     type="time"
@@ -156,27 +148,23 @@ export const GroupForm: React.FC<GroupFormProps> = ({
                   )}
                 </div>
 
-                {/* Eliminar día */}
                 <div className="col-auto">
-                  <button
+                  <Button
                     type="button"
                     className="btn btn-danger"
                     onClick={() => removeSchedule(idx)}
-                  >
-                    <i className="fa fa-trash"></i>
-                  </button>
+                    icon="trash"
+                  />
                 </div>
               </div>
             ))}
 
-            {/* Agregar día */}
-            <button
+            <Button
               type="button"
               className="btn btn-success"
               onClick={addSchedule}
-            >
-              Agregar día
-            </button>
+              name="Agregar cronograma"
+            />
             {errors.dailySchedules && (
               <div className="text-danger small mt-2">
                 {errors.dailySchedules}
@@ -215,25 +203,49 @@ export const GroupForm: React.FC<GroupFormProps> = ({
         selectedItems={formData.athletes ?? []}
       />
 
-      {/* Botones de acción */}
+      {formData._id && (
+        <div className="form-group row">
+          <label className="col-sm-2 col-form-label">Estado del grupo</label>
+          <div className="col-sm-10 d-flex align-items-center">
+            <input
+              type="checkbox"
+              name="active"
+              checked={!!formData.active}
+              onChange={(e) =>
+                handleChange({
+                  target: {
+                    name: "active",
+                    value: e.target.checked,
+                    type: "checkbox",
+                    checked: e.target.checked,
+                  },
+                } as any)
+              }
+            />
+            <span className="ml-2">
+              {formData.active ? "Activo" : "Inactivo"}
+            </span>
+          </div>
+        </div>
+      )}
+
       <div className="form-group row mt-3">
         <div className="col-sm-10 offset-sm-2">
-          <button type="submit" className="btn btn-primary mr-2">
-            {initialData ? "Actualizar" : "Crear"} Grupo
-          </button>
+          <Button
+            type="submit"
+            className="btn btn-primary mr-2"
+            name={initialData ? "Actualizar" : "Crear"}
+          />
           {onCancel && (
-            <button
+            <Button
               type="button"
               className="btn btn-secondary"
               onClick={onCancel}
-            >
-              Cancelar
-            </button>
+              name="Cancelar"
+            />
           )}
         </div>
       </div>
     </form>
   );
 };
-
-export default GroupForm;

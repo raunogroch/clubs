@@ -54,7 +54,7 @@ export const CheckboxList: React.FC<CheckboxListProps> = ({
                   checked={checked}
                   disabled={disabled}
                 />
-                <i></i>
+                &nbsp;
                 {`${item.lastname ?? ""}${item.lastname ? ", " : ""}${
                   item.name ?? ""
                 }`}
