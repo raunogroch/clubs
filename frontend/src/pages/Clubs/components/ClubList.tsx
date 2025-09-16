@@ -21,11 +21,10 @@ export const ClubList = ({ clubs }: ClubProps) => {
     }
   };
 
-  console.log(clubs);
   return (
     <div className="row">
-      {clubs.map((club: Club) => (
-        <div className="col-lg-4">
+      {clubs.map((club: Club, index) => (
+        <div key={index} className="col-lg-4">
           <div className="widget-head-color-box navy-bg p-lg text-center">
             <div className="m-b-md">
               <h2 className="font-bold no-margins">{club.name}</h2>

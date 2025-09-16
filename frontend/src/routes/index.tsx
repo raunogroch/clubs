@@ -16,7 +16,9 @@ import {
   Profile,
   DashboardAthlete,
 } from "../pages";
-import { Groups } from "../pages/Clubs/components/groups/Groups";
+import { Groups } from "../pages/groups/components/Groups";
+import { GroupsNew } from "../pages/groups/components/GroupsNew";
+
 export type MenuRoute = {
   path: string;
   icon?: string;
@@ -28,6 +30,10 @@ export type RoleRoutes = Record<string, MenuRoute[]>;
 
 export const roleRoutes: RoleRoutes = {
   superadmin: [
+    {
+      path: "/clubs/:id/groups/edit/:groupId",
+      element: <GroupsNew name="Clubs" sub="Grupos" sub1="Editar" />,
+    },
     {
       path: "/",
       icon: "fa-home",
@@ -45,7 +51,11 @@ export const roleRoutes: RoleRoutes = {
     { path: "/clubs/create", element: <ClubNew name="Clubs" sub="Crear" /> },
     {
       path: "/clubs/:id/groups",
-      element: <Groups name="Grupos" sub="Grupos" />,
+      element: <Groups name="Clubs" sub="Grupos" />,
+    },
+    {
+      path: "/clubs/:id/groups/create",
+      element: <GroupsNew name="Clubs" sub="Grupos" sub1="Crear" />,
     },
     {
       path: "/sports",
@@ -92,6 +102,10 @@ export const roleRoutes: RoleRoutes = {
   ],
   admin: [
     {
+      path: "/clubs/:id/groups/edit/:groupId",
+      element: <GroupsNew name="Clubs" sub="Grupos" sub1="Editar" />,
+    },
+    {
       path: "/",
       icon: "fa-home",
       label: "Principal",
@@ -113,6 +127,11 @@ export const roleRoutes: RoleRoutes = {
       path: "/clubs/:id/groups",
       element: <Groups name="Clubs" sub="Grupos" />,
     },
+    {
+      path: "/clubs/:id/groups/create",
+      element: <GroupsNew name="Clubs" sub="Groups" sub1="Crear" />,
+    },
+    //editar
     {
       path: "/sports",
       icon: "fa-soccer-ball-o",

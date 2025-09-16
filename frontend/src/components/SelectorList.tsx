@@ -1,6 +1,6 @@
 interface SelectorProps {
   name: string;
-  label: string;
+  label?: string;
   selected: any; // Puede ser string o un objeto modelo
   onItemsChange: (item: any) => void;
   errors: string;
@@ -16,12 +16,23 @@ export const SelectorList = ({
   items = [],
 }: SelectorProps) => {
   // Si selected es un objeto, extraer el _id, si es string, usarlo directamente
+
+  // Soporta items con 'id', '_id' o enums string
   const selectedValue =
-    selected && typeof selected === "object" ? selected._id : selected || "";
+    selected && typeof selected === "object"
+      ? selected._id || selected.id
+      : selected || "";
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedItem = items.find((item) => item._id === e.target.value);
-    onItemsChange(selectedItem || e.target.value);
+    // Busca por id, _id o value
+    const selectedItem =
+      items.find(
+        (item) =>
+          item._id === e.target.value ||
+          item.id === e.target.value ||
+          item.value === e.target.value
+      ) || e.target.value;
+    onItemsChange(selectedItem);
   };
 
   return (
@@ -38,9 +49,14 @@ export const SelectorList = ({
         >
           <option value="">Seleccione una opción</option>
           {items.map((item) => (
-            <option key={item._id} value={item._id}>
-              {item.name && item.name}
-              {item.startTime && `${item.startTime} - ${item.endTime}`}
+            <option
+              key={item._id || item.id || item.value}
+              value={item._id || item.id || item.value}
+            >
+              {item.label ||
+                item.name ||
+                (item.startTime && `${item.startTime} - ${item.endTime}`) ||
+                item}
             </option>
           ))}
         </select>

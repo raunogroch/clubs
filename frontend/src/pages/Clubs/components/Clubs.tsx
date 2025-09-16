@@ -16,7 +16,7 @@ export const Clubs = ({ name }: pageParamProps) => {
 
   return (
     <>
-      <NavHeader name={name} pageCreate="Nuevo club" />
+      <NavHeader name={name} isAllow pageCreate="Nuevo club" />
       <PopUpMessage />
       <div className="wrapper wrapper-content animated fadeInRight">
         <div className="row">

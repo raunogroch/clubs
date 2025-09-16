@@ -9,70 +9,59 @@ export enum Turn {
 }
 
 export enum WeekDays {
-  LUNES = 'lunes',
-  MARTES = 'martes',
-  MIERCOLES = 'miércoles',
-  JUEVES = 'jueves',
-  VIERNES = 'viernes',
-  SABADO = 'sábado',
-  DOMINGO = 'domingo',
+  LUNES = 'Lunes',
+  MARTES = 'Martes',
+  MIERCOLES = 'Miércoles',
+  JUEVES = 'Jueves',
+  VIERNES = 'Viernes',
+  SABADO = 'Sábado',
+  DOMINGO = 'Domingo',
 }
 
-export interface DailySchedule {
-  day: WeekDays;
-  startTime: string; // Formato HH:MM
-  endTime: string; // Formato HH:MM
-  active: boolean; // Para desactivar días específicos sin eliminarlos
-}
-@Schema({ timestamps: true })
-export class Group extends Document {
+export class DailySchedule {
+  @Prop({ type: String, enum: Object.values(WeekDays), required: true })
+  day: WeekDays | '';
+
+  @Prop({ type: String, enum: Object.values(Turn), required: true })
+  turn: Turn | '';
+
   @Prop({
     type: String,
     required: true,
-    trim: true,
-    maxlength: 100,
+    match: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
   })
-  name: string; // Nombre del grupo (ej: "Juveniles A", "Preinfantiles")
+  startTime: string;
 
+  @Prop({
+    type: String,
+    required: true,
+    match: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
+  })
+  endTime: string;
+
+  @Prop({ type: Boolean, default: true })
+  active: boolean;
+}
+
+@Schema({ timestamps: true })
+export class Group extends Document {
   @Prop({
     type: Types.ObjectId,
     ref: 'Club',
     required: true,
     index: true,
   })
-  club: Types.ObjectId; // Referencia al club
+  clubId: Types.ObjectId;
 
   @Prop({
     type: String,
     required: true,
-    enum: Object.values(Turn),
-    index: true,
+    trim: true,
+    maxlength: 200,
   })
-  turn: Turn;
+  name: string;
 
-  @Prop([
-    {
-      day: {
-        type: String,
-        enum: Object.values(WeekDays),
-        required: true,
-      },
-      startTime: {
-        type: String,
-        required: true,
-        match: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, // Validación formato HH:MM
-      },
-      endTime: {
-        type: String,
-        required: true,
-        match: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, // Validación formato HH:MM
-      },
-      active: {
-        type: Boolean,
-        default: true,
-      },
-    },
-  ])
+  @Prop({ type: [DailySchedule], required: true })
   dailySchedules: DailySchedule[];
 
   @Prop({
@@ -83,26 +72,16 @@ export class Group extends Document {
   })
   place: string;
 
-  @Prop([
-    {
-      type: Types.ObjectId,
-      ref: 'User',
-      validate: {
-        validator: function (coaches: Types.ObjectId[]) {
-          return coaches.length > 0; // Debe haber al menos un entrenador
-        },
-        message: 'El grupo debe tener al menos un entrenador',
-      },
-    },
-  ])
+  @Prop({
+    type: [{ type: Types.ObjectId, ref: 'User' }],
+    required: true,
+  })
   coaches: Types.ObjectId[];
 
-  @Prop([
-    {
-      type: Types.ObjectId,
-      ref: 'User',
-    },
-  ])
+  @Prop({
+    type: [{ type: Types.ObjectId, ref: 'User' }],
+    required: true,
+  })
   athletes: Types.ObjectId[];
 
   @Prop({

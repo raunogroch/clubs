@@ -4,7 +4,6 @@ import {
   IsEnum,
   IsMongoId,
   IsNotEmpty,
-  IsOptional,
   IsString,
   MaxLength,
   ValidateNested,
@@ -18,6 +17,9 @@ export class DailyScheduleDto {
   @IsEnum(WeekDays)
   day: WeekDays;
 
+  @IsEnum(Turn)
+  turn: Turn;
+
   @IsString()
   @Matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, {
     message: 'startTime debe tener formato HH:MM',
@@ -30,23 +32,19 @@ export class DailyScheduleDto {
   })
   endTime: string;
 
-  @IsOptional()
   @IsBoolean()
-  active?: boolean;
+  active: boolean;
 }
 
 export class CreateGroupDto {
   @IsMongoId()
   @IsNotEmpty()
-  club: string;
+  clubId: string;
 
   @IsString()
   @IsNotEmpty()
   @MaxLength(100)
   name: string;
-
-  @IsEnum(Turn)
-  turn: Turn;
 
   @IsArray()
   @ValidateNested({ each: true })
@@ -63,12 +61,10 @@ export class CreateGroupDto {
   @IsMongoId({ each: true })
   coaches: string[];
 
-  @IsOptional()
   @IsArray()
   @IsMongoId({ each: true })
-  athletes?: string[];
+  athletes: string[];
 
-  @IsOptional()
   @IsBoolean()
-  active?: boolean;
+  active: boolean;
 }
