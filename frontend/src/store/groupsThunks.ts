@@ -43,11 +43,11 @@ export const updateGroup = createAsyncThunk<
 
 export const deleteGroup = createAsyncThunk<
   string,
-  { clubId: string; id: string }
->("groups/deleteGroup", async ({ clubId, id }, { rejectWithValue }) => {
+  { clubId: string; groupId: string }
+>("groups/deleteGroup", async ({ clubId, groupId }, { rejectWithValue }) => {
   try {
-    await api.delete(`/clubs/${clubId}/groups/${id}`);
-    return id;
+    await api.delete(`/clubs/${clubId}/groups/${groupId}`);
+    return groupId;
   } catch (err: any) {
     return rejectWithValue(err.response?.data || "Error al eliminar grupo");
   }
@@ -55,10 +55,10 @@ export const deleteGroup = createAsyncThunk<
 
 export const findGroupById = createAsyncThunk<
   Group,
-  { clubId: string; id: string }
->("groups/findGroupById", async ({ clubId, id }, { rejectWithValue }) => {
+  { clubId: string; groupId: string }
+>("groups/findGroupById", async ({ clubId, groupId }, { rejectWithValue }) => {
   try {
-    const response = await api.get(`/clubs/${clubId}/groups/${id}`);
+    const response = await api.get(`/clubs/${clubId}/groups/${groupId}`);
     return response.data;
   } catch (err: any) {
     return rejectWithValue(err.response?.data || "Error al buscar el grupo");

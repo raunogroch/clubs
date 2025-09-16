@@ -5,18 +5,19 @@ import type { pageParamProps } from "../../../interfaces/pageParamProps";
 import { useDispatch, useSelector } from "react-redux";
 
 import { fetchGroups } from "../../../store/groupsThunks";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import type { AppDispatch } from "../../../store/store";
+import type { Group } from "../interface/group.Interface";
 
 export const Groups = ({ name, sub }: pageParamProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const { groups, error, status } = useSelector((state: any) => state.groups);
-  const { id } = useParams();
+  const { clubId } = useParams();
 
   console.log({ groups, error, status });
 
   useEffect(() => {
-    dispatch(fetchGroups({ clubId: id })).unwrap();
+    dispatch(fetchGroups({ clubId })).unwrap();
   }, [dispatch]);
   return (
     <>
@@ -32,8 +33,8 @@ export const Groups = ({ name, sub }: pageParamProps) => {
               <div className="project-list">
                 <table className="table table-hover">
                   <tbody>
-                    {groups.map((group: any, index: number) => (
-                      <tr>
+                    {groups.map((group: Group, index: number) => (
+                      <tr key={index}>
                         <td className="project-status">
                           <span className="label label-primary">
                             {group.active ? "Activo" : "Inactivo"}
@@ -56,9 +57,12 @@ export const Groups = ({ name, sub }: pageParamProps) => {
                           ))}
                         </td>
                         <td className="project-actions">
-                          <a href="#" className="btn btn-white btn-sm">
-                            <i className="fa fa-pencil"></i> Edit{" "}
-                          </a>
+                          <Link
+                            to={`/clubs/${clubId}/groups/${group._id}`}
+                            className="btn btn-white btn-sm"
+                          >
+                            <i className="fa fa-pencil"></i> Edit
+                          </Link>
                         </td>
                       </tr>
                     ))}

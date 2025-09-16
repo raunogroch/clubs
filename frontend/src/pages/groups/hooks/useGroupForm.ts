@@ -1,10 +1,11 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setMessage, type AppDispatch } from "../../../store";
 import type { Group, GroupErrors } from "../interface/group.Interface";
 import type { User } from "../../../interfaces";
 import { useParams } from "react-router-dom";
-import { createGroup } from "../../../store/groupsThunks";
+import { createGroup, updateGroup } from "../../../store/groupsThunks";
+import { fetchEntities } from "../../../store/entitiesThunks";
 
 export const initialGroupData: Group = {
   name: "",
@@ -16,20 +17,41 @@ export const initialGroupData: Group = {
 };
 
 export const useGroupForm = (initialData?: Group) => {
-  const { id: clubId } = useParams<{ id?: string }>();
+  const { clubId } = useParams<{ clubId: string }>();
   const dispatch = useDispatch<AppDispatch>();
 
-  const { coaches, athletes } = useSelector(
-    (state: any) => state.entities ?? {}
-  );
+  const { coaches, athletes } = useSelector((state: any) => state.entities);
 
   const [formData, setFormData] = useState<Group>(
     initialData ?? initialGroupData
   );
 
+  useEffect(() => {
+    dispatch(fetchEntities()).unwrap();
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        ...initialData,
+        coaches: (initialData.coaches ?? []).map((c: any) =>
+          typeof c === "object"
+            ? c
+            : coaches.find((u: any) => String(u._id ?? u.id) === String(c)) || c
+        ),
+        athletes: (initialData.athletes ?? []).map((a: any) =>
+          typeof a === "object"
+            ? a
+            : athletes.find((u: any) => String(u._id ?? u.id) === String(a)) ||
+              a
+        ),
+      });
+    }
+  }, [initialData, coaches, athletes]);
+
   const [errors, setErrors] = useState<GroupErrors>({});
 
-  const addSchedule = useCallback(() => {
+  const addSchedule = () => {
     if (formData.dailySchedules.length >= 7) return;
     setFormData((prev) => ({
       ...prev,
@@ -38,33 +60,28 @@ export const useGroupForm = (initialData?: Group) => {
         { day: "", turn: "", startTime: "", endTime: "", active: true },
       ],
     }));
-  }, [formData.dailySchedules.length]);
+  };
 
-  const removeSchedule = useCallback((idx: number) => {
+  const removeSchedule = (idx: number) => {
     setFormData((prev) => ({
       ...prev,
       dailySchedules: prev.dailySchedules.filter((_, i) => i !== idx),
     }));
-  }, []);
+  };
 
-  const handleScheduleChange = useCallback(
-    (idx: number, field: string, value: any) => {
-      setFormData((prev) => {
-        const newSchedules = prev.dailySchedules.map((s, i) =>
-          i === idx ? { ...s, [field]: value } : s
-        );
-        return { ...prev, dailySchedules: newSchedules };
-      });
-    },
-    []
-  );
+  const handleScheduleChange = (idx: number, field: string, value: any) => {
+    setFormData((prev) => {
+      const newSchedules = prev.dailySchedules.map((s, i) =>
+        i === idx ? { ...s, [field]: value } : s
+      );
+      return { ...prev, dailySchedules: newSchedules };
+    });
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    const target = e.target as HTMLInputElement;
-    const { name, value, type, checked } = target;
-
+    const { name, value, type, checked } = e.target as HTMLInputElement;
     if (type === "checkbox" && (name === "coaches" || name === "athletes")) {
       const sourceList: User[] =
         name === "coaches" ? coaches ?? [] : athletes ?? [];
@@ -92,7 +109,6 @@ export const useGroupForm = (initialData?: Group) => {
       }
       return;
     }
-
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name as keyof GroupErrors]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
@@ -101,7 +117,6 @@ export const useGroupForm = (initialData?: Group) => {
 
   function validateForm(): boolean {
     const newErrors: GroupErrors = {};
-
     if (!formData.name || formData.name.trim() === "") {
       newErrors.name = "El nombre del grupo es requerido";
     }
@@ -143,7 +158,6 @@ export const useGroupForm = (initialData?: Group) => {
     if (!formData.athletes || formData.athletes.length === 0) {
       newErrors.athletes = "Debe asignar al menos un atleta";
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }
@@ -153,13 +167,17 @@ export const useGroupForm = (initialData?: Group) => {
     if (!validateForm()) return false;
     try {
       if (initialData && initialData._id) {
-        console.log("Actualizar grupo (simulado):", formData);
+        await dispatch(updateGroup({ clubId, group: formData })).unwrap();
+        dispatch(
+          setMessage({ message: "Grupo creado exitosamente", type: "success" })
+        );
       } else {
-        dispatch(createGroup({ clubId, group: formData })).unwrap();
+        await dispatch(createGroup({ clubId, group: formData })).unwrap();
+        dispatch(
+          setMessage({ message: "Grupo creado exitosamente", type: "success" })
+        );
       }
-      dispatch(
-        setMessage({ message: "Grupo creado exitosamente", type: "success" })
-      );
+
       return true;
     } catch (error) {
       dispatch(

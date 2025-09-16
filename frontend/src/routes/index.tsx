@@ -18,6 +18,7 @@ import {
 } from "../pages";
 import { Groups } from "../pages/groups/components/Groups";
 import { GroupsNew } from "../pages/groups/components/GroupsNew";
+import { GroupEdit } from "../pages/groups/components/GroupEdit";
 
 export type MenuRoute = {
   path: string;
@@ -124,14 +125,17 @@ export const roleRoutes: RoleRoutes = {
     },
     { path: "/clubs/create", element: <ClubNew name="Clubs" sub="Crear" /> },
     {
-      path: "/clubs/:id/groups",
+      path: "/clubs/:clubId/groups",
       element: <Groups name="Clubs" sub="Grupos" />,
     },
     {
-      path: "/clubs/:id/groups/create",
+      path: "/clubs/:clubId/groups/create",
       element: <GroupsNew name="Clubs" sub="Groups" sub1="Crear" />,
     },
-    //editar
+    {
+      path: "/clubs/:clubId/groups/:groupId",
+      element: <GroupEdit name="Clubs" sub="Groups" sub1="Editar" />,
+    },
     {
       path: "/sports",
       icon: "fa-soccer-ball-o",
