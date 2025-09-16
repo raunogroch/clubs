@@ -14,8 +14,6 @@ export const Groups = ({ name, sub }: pageParamProps) => {
   const { groups, error, status } = useSelector((state: any) => state.groups);
   const { clubId } = useParams();
 
-  console.log({ groups, error, status });
-
   useEffect(() => {
     dispatch(fetchGroups({ clubId })).unwrap();
   }, [dispatch]);
@@ -23,6 +21,11 @@ export const Groups = ({ name, sub }: pageParamProps) => {
     <>
       <NavHeader name={name} sub={sub} isAllow pageCreate="Nuevo grupo" />
       <PopUpMessage />
+      {error && (
+        <div className="alert alert-danger text-center" role="alert">
+          {error}
+        </div>
+      )}
       {status === "succeeded" && (
         <div className="wrapper wrapper-content animated fadeInRight">
           <div className="ibox">

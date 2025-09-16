@@ -1,12 +1,11 @@
-import { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
 import { setMessage, type AppDispatch } from "../../../store";
 import type { Group, GroupErrors } from "../interface/group.Interface";
-import type { User } from "../../../interfaces";
 import { useParams } from "react-router-dom";
 import { createGroup, updateGroup } from "../../../store/groupsThunks";
-import { fetchEntities } from "../../../store/entitiesThunks";
 
+// Initial state for a new group
 export const initialGroupData: Group = {
   name: "",
   dailySchedules: [],
@@ -19,41 +18,15 @@ export const initialGroupData: Group = {
 export const useGroupForm = (initialData?: Group) => {
   const { clubId } = useParams<{ clubId: string }>();
   const dispatch = useDispatch<AppDispatch>();
-
-  const { coaches, athletes } = useSelector((state: any) => state.entities);
-
-  const [formData, setFormData] = useState<Group>(
+  const [groupFormState, setGroupFormState] = useState<Group>(
     initialData ?? initialGroupData
   );
+  const [groupFormErrors, setGroupFormErrors] = useState<GroupErrors>({});
 
-  useEffect(() => {
-    dispatch(fetchEntities()).unwrap();
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (initialData) {
-      setFormData({
-        ...initialData,
-        coaches: (initialData.coaches ?? []).map((c: any) =>
-          typeof c === "object"
-            ? c
-            : coaches.find((u: any) => String(u._id ?? u.id) === String(c)) || c
-        ),
-        athletes: (initialData.athletes ?? []).map((a: any) =>
-          typeof a === "object"
-            ? a
-            : athletes.find((u: any) => String(u._id ?? u.id) === String(a)) ||
-              a
-        ),
-      });
-    }
-  }, [initialData, coaches, athletes]);
-
-  const [errors, setErrors] = useState<GroupErrors>({});
-
+  // Añadir horario semanal
   const addSchedule = () => {
-    if (formData.dailySchedules.length >= 7) return;
-    setFormData((prev) => ({
+    if (groupFormState.dailySchedules.length >= 7) return;
+    setGroupFormState((prev) => ({
       ...prev,
       dailySchedules: [
         ...prev.dailySchedules,
@@ -62,122 +35,147 @@ export const useGroupForm = (initialData?: Group) => {
     }));
   };
 
-  const removeSchedule = (idx: number) => {
-    setFormData((prev) => ({
+  // Eliminar horario semanal
+  const removeSchedule = (index: number) => {
+    setGroupFormState((prev) => ({
       ...prev,
-      dailySchedules: prev.dailySchedules.filter((_, i) => i !== idx),
+      dailySchedules: prev.dailySchedules.filter((_, i) => i !== index),
     }));
   };
 
-  const handleScheduleChange = (idx: number, field: string, value: any) => {
-    setFormData((prev) => {
-      const newSchedules = prev.dailySchedules.map((s, i) =>
-        i === idx ? { ...s, [field]: value } : s
+  // Actualizar campo de horario semanal
+  const handleScheduleChange = (index: number, field: string, value: any) => {
+    setGroupFormState((prev) => {
+      const updatedSchedules = prev.dailySchedules.map((s, i) =>
+        i === index ? { ...s, [field]: value } : s
       );
-      return { ...prev, dailySchedules: newSchedules };
+      return { ...prev, dailySchedules: updatedSchedules };
     });
   };
 
+  // Manejar cambios de campos del formulario
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value, type, checked } = e.target as HTMLInputElement;
+
+    // Multi-select para coaches/athletes
     if (type === "checkbox" && (name === "coaches" || name === "athletes")) {
-      const sourceList: User[] =
-        name === "coaches" ? coaches ?? [] : athletes ?? [];
-      let updatedArr = Array.isArray(formData[name as keyof Group])
-        ? [...(formData as any)[name]]
-        : [];
-      const userObj = sourceList.find(
-        (u: any) => String(u._id ?? u.id) === String(value)
-      );
-      if (checked) {
-        if (
-          userObj &&
-          !updatedArr.some((u: any) => String(u._id ?? u.id) === String(value))
-        ) {
-          updatedArr.push(userObj);
+      setGroupFormState((prev) => {
+        const arr = Array.isArray(prev[name as keyof Group])
+          ? [...(prev as any)[name]]
+          : [];
+        if (checked) {
+          if (!arr.includes(value)) arr.push(value);
+        } else {
+          return { ...prev, [name]: arr.filter((v: any) => v !== value) };
         }
-      } else {
-        updatedArr = updatedArr.filter(
-          (u: any) => String(u._id ?? u.id) !== String(value)
-        );
-      }
-      setFormData((prev) => ({ ...prev, [name]: updatedArr }));
-      if (errors[name as keyof GroupErrors]) {
-        setErrors((prev) => ({ ...prev, [name]: undefined }));
+        return { ...prev, [name]: arr };
+      });
+      if (groupFormErrors[name as keyof GroupErrors]) {
+        setGroupFormErrors((prev) => ({ ...prev, [name]: undefined }));
       }
       return;
     }
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name as keyof GroupErrors]) {
-      setErrors((prev) => ({ ...prev, [name]: undefined }));
+
+    setGroupFormState((prev) => ({ ...prev, [name]: value }));
+    if (groupFormErrors[name as keyof GroupErrors]) {
+      setGroupFormErrors((prev) => ({ ...prev, [name]: undefined }));
     }
   };
 
+  // Validar formulario
   function validateForm(): boolean {
-    const newErrors: GroupErrors = {};
-    if (!formData.name || formData.name.trim() === "") {
-      newErrors.name = "El nombre del grupo es requerido";
+    const errors: GroupErrors = {};
+    if (!groupFormState.name || groupFormState.name.trim() === "") {
+      errors.name = "El nombre del grupo es requerido";
     }
-    if (!formData.dailySchedules || formData.dailySchedules.length === 0) {
-      newErrors.dailySchedules = "Debe agregar al menos un horario";
+    if (
+      !groupFormState.dailySchedules ||
+      groupFormState.dailySchedules.length === 0
+    ) {
+      errors.dailySchedules = "Debe agregar al menos un horario";
     } else {
-      const daysSet = new Set<string>();
-      formData.dailySchedules.forEach((ds, idx) => {
-        if (!ds.day) {
-          newErrors[`dailySchedules_${idx}_day`] = `El día es requerido`;
-        } else if (daysSet.has(String(ds.day))) {
-          newErrors[
+      const usedDays = new Set<string>();
+      groupFormState.dailySchedules.forEach((schedule, idx) => {
+        if (!schedule.day) {
+          errors[`dailySchedules_${idx}_day`] = `El día es requerido`;
+        } else if (usedDays.has(String(schedule.day))) {
+          errors[
             `dailySchedules_${idx}_day`
           ] = `El día ya está asignado en otro horario`;
         } else {
-          daysSet.add(String(ds.day));
+          usedDays.add(String(schedule.day));
         }
-        if (!ds.turn) {
-          newErrors[`dailySchedules_${idx}_turn`] = `El turno es requerido`;
+        if (!schedule.turn) {
+          errors[`dailySchedules_${idx}_turn`] = `El turno es requerido`;
         }
-        if (!ds.startTime) {
-          newErrors[
+        if (!schedule.startTime) {
+          errors[
             `dailySchedules_${idx}_startTime`
           ] = `La hora de inicio es requerida`;
         }
-        if (!ds.endTime) {
-          newErrors[
+        if (!schedule.endTime) {
+          errors[
             `dailySchedules_${idx}_endTime`
           ] = `La hora de fin es requerida`;
         }
       });
     }
-    if (!formData.place || formData.place.trim() === "") {
-      newErrors.place = "El lugar es requerido";
+    if (!groupFormState.place || groupFormState.place.trim() === "") {
+      errors.place = "El lugar es requerido";
     }
-    if (!formData.coaches || formData.coaches.length === 0) {
-      newErrors.coaches = "Debe asignar al menos un entrenador";
+    if (!groupFormState.coaches || groupFormState.coaches.length === 0) {
+      errors.coaches = "Debe asignar al menos un entrenador";
     }
-    if (!formData.athletes || formData.athletes.length === 0) {
-      newErrors.athletes = "Debe asignar al menos un atleta";
+    if (!groupFormState.athletes || groupFormState.athletes.length === 0) {
+      errors.athletes = "Debe asignar al menos un atleta";
     }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setGroupFormErrors(errors);
+    return Object.keys(errors).length === 0;
   }
 
+  // Enviar formulario
   async function handleSubmit(e?: React.FormEvent) {
     e?.preventDefault();
     if (!validateForm()) return false;
+    // Ordenar el cronograma semanal antes de enviar
+    const daysOrder = [
+      "Lunes",
+      "Martes",
+      "Miércoles",
+      "Miercoles",
+      "Jueves",
+      "Viernes",
+      "Sábado",
+      "Sabado",
+      "Domingo",
+    ];
+    const sortedSchedules = [...groupFormState.dailySchedules].sort((a, b) => {
+      const idxA = daysOrder.findIndex(
+        (d) => d.toLowerCase() === String(a.day).toLowerCase()
+      );
+      const idxB = daysOrder.findIndex(
+        (d) => d.toLowerCase() === String(b.day).toLowerCase()
+      );
+      return idxA - idxB;
+    });
+    const groupToSend = { ...groupFormState, dailySchedules: sortedSchedules };
     try {
       if (initialData && initialData._id) {
-        await dispatch(updateGroup({ clubId, group: formData })).unwrap();
+        await dispatch(updateGroup({ clubId, group: groupToSend })).unwrap();
         dispatch(
-          setMessage({ message: "Grupo creado exitosamente", type: "success" })
+          setMessage({
+            message: "Grupo actualizado exitosamente",
+            type: "success",
+          })
         );
       } else {
-        await dispatch(createGroup({ clubId, group: formData })).unwrap();
+        await dispatch(createGroup({ clubId, group: groupToSend })).unwrap();
         dispatch(
           setMessage({ message: "Grupo creado exitosamente", type: "success" })
         );
       }
-
       return true;
     } catch (error) {
       dispatch(
@@ -190,18 +188,15 @@ export const useGroupForm = (initialData?: Group) => {
     }
   }
 
+  // Retornar API del hook
   return {
-    formData,
-    errors,
+    formData: groupFormState,
+    errors: groupFormErrors,
     handleChange,
     handleSubmit,
-    setFormData,
+    setFormData: setGroupFormState,
     addSchedule,
     removeSchedule,
     handleScheduleChange,
-    coaches,
-    athletes,
   };
 };
-
-export default useGroupForm;

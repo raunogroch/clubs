@@ -1,20 +1,36 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { CheckboxList, Input } from "../../../components";
 import { FormField } from "../../Clubs/components";
 import { useGroupForm } from "../hooks/useGroupForm";
 import { Turn, WeekDays } from "../interface/group.Interface";
+import type { Group } from "../interface/group.Interface";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch } from "../../../store";
+import { fetchEntities } from "../../../store/entitiesThunks";
 
+/**
+ * Props for GroupForm
+ */
 interface GroupFormProps {
-  initialData?: any;
+  initialData?: Group;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
 
+/**
+ * Formulario para crear/editar un grupo
+ */
 export const GroupForm: React.FC<GroupFormProps> = ({
   initialData,
   onSuccess,
   onCancel,
 }) => {
+  const dispatch = useDispatch<AppDispatch>();
+  // Obtiene la lista de entrenadores y atletas del store
+  const { coaches: coachesList, athletes: athletesList } = useSelector(
+    (state: any) => state.entities
+  );
+  // Custom hook para manejar el estado y lógica del formulario
   const {
     formData,
     errors,
@@ -23,10 +39,14 @@ export const GroupForm: React.FC<GroupFormProps> = ({
     addSchedule,
     removeSchedule,
     handleScheduleChange,
-    coaches,
-    athletes,
   } = useGroupForm(initialData);
 
+  // Carga los entrenadores y atletas al montar el componente
+  useEffect(() => {
+    dispatch(fetchEntities()).unwrap();
+  }, [dispatch]);
+
+  // Handler para submit del formulario
   const onSubmit = async (e: React.FormEvent) => {
     const success = await handleSubmit(e);
     if (success && onSuccess) onSuccess();
@@ -34,6 +54,7 @@ export const GroupForm: React.FC<GroupFormProps> = ({
 
   return (
     <form onSubmit={onSubmit}>
+      {/* Campo: Nombre del grupo */}
       <FormField
         title="Nombre del grupo"
         type="text"
@@ -44,6 +65,7 @@ export const GroupForm: React.FC<GroupFormProps> = ({
         placeholder="Grupo..."
       />
 
+      {/* Cronograma semanal dinámico */}
       <div className="form-group row ">
         <label htmlFor="WeekSchedule" className="col-sm-2 col-form-label">
           Cronograma semanal
@@ -52,6 +74,7 @@ export const GroupForm: React.FC<GroupFormProps> = ({
           <div className="mb-3">
             {formData.dailySchedules.map((schedule, idx) => (
               <div className="row mb-2" key={idx}>
+                {/* Día */}
                 <div className="col">
                   <select
                     className="form-control"
@@ -74,6 +97,7 @@ export const GroupForm: React.FC<GroupFormProps> = ({
                   )}
                 </div>
 
+                {/* Turno */}
                 <div className="col">
                   <select
                     className="form-control"
@@ -96,6 +120,7 @@ export const GroupForm: React.FC<GroupFormProps> = ({
                   )}
                 </div>
 
+                {/* Hora de inicio */}
                 <div className="col">
                   <Input
                     type="time"
@@ -113,6 +138,7 @@ export const GroupForm: React.FC<GroupFormProps> = ({
                   )}
                 </div>
 
+                {/* Hora de fin */}
                 <div className="col">
                   <Input
                     type="time"
@@ -130,6 +156,7 @@ export const GroupForm: React.FC<GroupFormProps> = ({
                   )}
                 </div>
 
+                {/* Eliminar día */}
                 <div className="col-auto">
                   <button
                     type="button"
@@ -142,6 +169,7 @@ export const GroupForm: React.FC<GroupFormProps> = ({
               </div>
             ))}
 
+            {/* Agregar día */}
             <button
               type="button"
               className="btn btn-success"
@@ -158,6 +186,7 @@ export const GroupForm: React.FC<GroupFormProps> = ({
         </div>
       </div>
 
+      {/* Lugar de entrenamiento */}
       <FormField
         title="Lugar de entrenamiento"
         type="text"
@@ -168,26 +197,25 @@ export const GroupForm: React.FC<GroupFormProps> = ({
         placeholder="Dirección..."
       />
 
+      {/* Selección múltiple de entrenadores */}
       <CheckboxList
         name="coaches"
         label="Entrenadores"
-        dataList={coaches ?? []}
+        dataList={coachesList}
         onChange={handleChange}
-        selectedItems={(formData.coaches ?? []).map((c: any) =>
-          String(c._id ?? c.id)
-        )}
+        selectedItems={formData.coaches ?? []}
       />
 
+      {/* Selección múltiple de deportistas */}
       <CheckboxList
         name="athletes"
         label="Deportistas"
-        dataList={athletes ?? []}
+        dataList={athletesList ?? []}
         onChange={handleChange}
-        selectedItems={(formData.athletes ?? []).map((a: any) =>
-          String(a._id ?? a.id)
-        )}
+        selectedItems={formData.athletes ?? []}
       />
 
+      {/* Botones de acción */}
       <div className="form-group row mt-3">
         <div className="col-sm-10 offset-sm-2">
           <button type="submit" className="btn btn-primary mr-2">

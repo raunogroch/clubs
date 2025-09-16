@@ -2,8 +2,7 @@ import React from "react";
 import { Input } from ".";
 
 export interface CheckboxListItem {
-  _id?: string | number;
-  id?: string | number;
+  _id?: string;
   name?: string;
   lastname?: string;
   [key: string]: any;
@@ -15,7 +14,7 @@ export interface CheckboxListProps {
   dataList: CheckboxListItem[];
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   disabled?: boolean;
-  selectedItems?: Array<string | number>;
+  selectedItems?: Array<any>;
 }
 
 export const CheckboxList: React.FC<CheckboxListProps> = ({
@@ -26,6 +25,11 @@ export const CheckboxList: React.FC<CheckboxListProps> = ({
   disabled = false,
   selectedItems = [],
 }) => {
+  // selectedItems debe ser un array de IDs (strings)
+  const selectedIds = Array.isArray(selectedItems)
+    ? selectedItems.filter(Boolean)
+    : [];
+
   return (
     <div className="form-group row">
       {label && (
@@ -36,10 +40,8 @@ export const CheckboxList: React.FC<CheckboxListProps> = ({
       )}
       <div className={label ? "col-sm-10" : "col-12"}>
         {dataList.map((item) => {
-          const id = item._id ?? item.id ?? `${Math.random()}`;
-          const checked = selectedItems
-            ? selectedItems.includes(String(id)) || selectedItems.includes(id)
-            : false;
+          const id = item._id;
+          const checked = selectedIds.includes(String(id));
 
           return (
             <div key={String(id)} className="i-checks">
