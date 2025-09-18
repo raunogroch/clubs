@@ -1,11 +1,9 @@
 export const Footer = () => {
   return (
     <div className="footer">
-      <div className="float-right">
-        10GB of <strong>250GB</strong> Free.
-      </div>
+      <div className="float-right"></div>
       <div>
-        <strong>Copyright</strong> Example Company &copy; 2014-2018
+        <strong>Copyright</strong> Propiedad intelectual {`<coder-soft/>`}
       </div>
     </div>
   );
