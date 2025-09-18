@@ -13,8 +13,10 @@ import {
   UserEdit,
   UserNew,
   Users,
-  Profile,
   DashboardAthlete,
+  ProfileAthlete,
+  ProfileAdmin,
+  ProfileCoach,
 } from "../pages";
 import { Groups } from "../pages/groups/components/Groups";
 import { GroupsNew } from "../pages/groups/components/GroupsNew";
@@ -41,7 +43,11 @@ export const roleRoutes: RoleRoutes = {
       label: "Principal",
       element: <Dashboard />,
     },
-    { path: "/profile", label: "Perfil", element: <Profile name="Perfil" /> },
+    {
+      path: "/profile",
+      label: "Perfil",
+      element: <ProfileAthlete name="Perfil" />,
+    },
     {
       path: "/clubs",
       icon: "fa-diamond",
@@ -112,7 +118,11 @@ export const roleRoutes: RoleRoutes = {
       label: "Principal",
       element: <Dashboard />,
     },
-    { path: "/profile", label: "Perfil", element: <Profile name="Perfil" /> },
+    {
+      path: "/profile",
+      label: "Perfil",
+      element: <ProfileAdmin name="Perfil" />,
+    },
     {
       path: "/clubs",
       icon: "fa-diamond",
@@ -186,7 +196,11 @@ export const roleRoutes: RoleRoutes = {
       label: "Principal",
       element: <Dashboard />,
     },
-    { path: "/profile", label: "Perfil", element: <Profile name="Perfil" /> },
+    {
+      path: "/profile",
+      label: "Perfil",
+      element: <ProfileCoach name="Perfil" />,
+    },
     {
       path: "/clubs",
       icon: "fa-diamond",
@@ -213,7 +227,11 @@ export const roleRoutes: RoleRoutes = {
       label: "Principal",
       element: <DashboardAthlete />,
     },
-    { path: "/profile", label: "Perfil", element: <Profile name="Perfil" /> },
+    {
+      path: "/profile",
+      label: "Perfil",
+      element: <ProfileAthlete name="Perfil" />,
+    },
   ],
   parent: [
     {
@@ -222,7 +240,11 @@ export const roleRoutes: RoleRoutes = {
       label: "Principal",
       element: <Dashboard />,
     },
-    { path: "/profile", label: "Perfil", element: <Profile name="Perfil" /> },
+    {
+      path: "/profile",
+      label: "Perfil",
+      element: <ProfileAthlete name="Perfil" />,
+    },
     {
       path: "/clubs",
       icon: "fa-diamond",

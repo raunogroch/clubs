@@ -8,7 +8,9 @@ export * from "./Clubs/components/ClubNew";
 export * from "./Clubs/components/ClubTable";
 export * from "./Clubs/components/FormField";
 
-export * from "./Profile/components/Profile";
+export * from "./Profile/components/ProfileAthlete";
+export * from "./Profile/components/ProfileAdmin";
+export * from "./Profile/components/ProfileCoach";
 
 export * from "./Schedule/components/Schedule";
 export * from "./Schedule/components/ScheduleEdit";
