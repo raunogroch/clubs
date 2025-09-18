@@ -15,8 +15,17 @@ export class GroupsService {
     return this.groupModel.find({ clubId }).populate('coaches athletes');
   }
 
-  createForClub(clubId: string, createGroupDto: CreateGroupDto) {
-    return this.groupModel.create({ ...createGroupDto, clubId });
+  async createForClub(clubId: string, createGroupDto: CreateGroupDto) {
+    // Crear el grupo y obtener el documento creado
+    const group = await this.groupModel.create({ ...createGroupDto, clubId });
+    // Actualizar el club para agregar la referencia del grupo
+    const ClubModel = this.groupModel.db.model('Club');
+    await ClubModel.findByIdAndUpdate(
+      clubId,
+      { $push: { groups: group._id } },
+      { new: true },
+    );
+    return group;
   }
 
   findOneByClub(clubId: string, id: string) {
@@ -33,7 +42,18 @@ export class GroupsService {
     );
   }
 
-  removeByClub(clubId: string, id: string) {
-    return this.groupModel.findOneAndDelete({ _id: id, clubId });
+  async removeByClub(clubId: string, id: string) {
+    // Eliminar el grupo
+    const group = await this.groupModel.findOneAndDelete({ _id: id, clubId });
+    // Eliminar la referencia del grupo en el club
+    if (group) {
+      const ClubModel = this.groupModel.db.model('Club');
+      await ClubModel.findByIdAndUpdate(
+        clubId,
+        { $pull: { groups: group._id } },
+        { new: true },
+      );
+    }
+    return group;
   }
 }

@@ -31,11 +31,13 @@ export class Club extends Document {
   description: string;
 
   /** Horario asociado al club */
+  /** Grupos asociados al club */
   @Prop({
-    type: mongoose.Schema.Types.ObjectId,
+    type: [mongoose.Schema.Types.ObjectId],
     ref: 'Group',
+    default: [],
   })
-  group: Group;
+  groups: Group[];
 }
 
 export const ClubSchema = SchemaFactory.createForClass(Club);

@@ -18,25 +18,27 @@ export const Clubs = ({ name }: pageParamProps) => {
     <>
       <NavHeader name={name} isAllow pageCreate="Nuevo club" />
       <PopUpMessage />
-      <div className="wrapper wrapper-content animated fadeInRight">
-        <div className="row">
-          <div className="col-12">
-            <div className="ibox ">
-              <div className="ibox-title">
-                <h5>Lista de clubs</h5>
-              </div>
-              <div className="ibox-content">
-                {error && (
-                  <div className="alert alert-danger" role="alert">
-                    {error}
-                  </div>
-                )}
-                {status === "succeeded" && <ClubList clubs={clubs} />}
+      {error && (
+        <div className="alert alert-danger" role="alert">
+          {error}
+        </div>
+      )}
+      {status === "succeeded" && (
+        <div className="wrapper wrapper-content animated fadeInRight">
+          <div className="row">
+            <div className="col-12">
+              <div className="ibox ">
+                <div className="ibox-title">
+                  <h5>Lista de clubs</h5>
+                </div>
+                <div className="ibox-content">
+                  <ClubList clubs={clubs} />
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   );
 };

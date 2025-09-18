@@ -88,7 +88,7 @@ export const roleRoutes: RoleRoutes = {
     },
     {
       path: "/users",
-      icon: "fa-file",
+      icon: "fa-users",
       label: "Registros",
       element: <Users name="Registros" />,
     },
@@ -166,7 +166,7 @@ export const roleRoutes: RoleRoutes = {
     },
     {
       path: "/users",
-      icon: "fa-file",
+      icon: "fa-users",
       label: "Registros",
       element: <Users name="Registros" />,
     },

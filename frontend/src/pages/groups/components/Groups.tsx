@@ -26,7 +26,24 @@ export const Groups = ({ name, sub }: pageParamProps) => {
           {error}
         </div>
       )}
-      {status === "succeeded" && (
+      {status === "succeeded" && groups.length === 0 ? (
+        <div className="wrapper wrapper-content">
+          <div className="middle-box text-center animated fadeInRightBig">
+            <h3 className="font-bold">No existen grupos</h3>
+            <div className="error-desc">
+              Actualmente no tienes grupos creados. Puedes crear uno nuevo para
+              empezar a organizar y gestionar tu información.
+              <br />
+              <Link
+                to={`/clubs/${clubId}/groups/create`}
+                className="btn btn-primary m-t"
+              >
+                Crear nuevo grupo
+              </Link>
+            </div>
+          </div>
+        </div>
+      ) : (
         <div className="wrapper wrapper-content animated fadeInRight">
           <div className="ibox">
             <div className="ibox-title">

@@ -24,7 +24,43 @@ export class ClubRepository implements IClubRepository {
   }
 
   async findAllPopulated(): Promise<Club[]> {
-    return this.clubModel.find().populate([{ path: 'sport', select: 'name' }]);
+    return this.clubModel
+      .find()
+      .populate([
+        { path: 'sport', select: 'name' },
+        {
+          path: 'groups',
+          populate: [
+            {
+              path: 'athletes',
+              select: '_id',
+            },
+          ],
+        },
+      ])
+      .lean()
+      .then((clubs) =>
+        clubs.map((club) => {
+          // Obtener todos los IDs de atletas de todos los grupos
+          const allAthleteIds = club.groups
+            ? club.groups.flatMap(
+                (group) => group.athletes?.map((a) => a._id.toString()) || [],
+              )
+            : [];
+          // Eliminar duplicados
+          const uniqueAthleteIds = Array.from(new Set(allAthleteIds));
+          return {
+            ...club,
+            groups:
+              club.groups?.map((group) => ({
+                ...group,
+                athletesCount: group.athletes?.length || 0,
+              })) || [],
+            uniqueAthletes: uniqueAthleteIds,
+            uniqueAthletesCount: uniqueAthleteIds.length,
+          };
+        }),
+      );
   }
 
   async findById(id: string): Promise<Club | null> {

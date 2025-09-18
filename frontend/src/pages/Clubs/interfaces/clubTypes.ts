@@ -1,3 +1,4 @@
+import type { Group } from "../../groups/interface/group.Interface";
 import type { Sport } from "../../Sports/interfaces";
 
 export interface Club {
@@ -7,6 +8,9 @@ export interface Club {
   place: string;
   sport: Sport;
   description: string;
+  groups: Group[];
+  uniqueAthletesCount?: number;
+  createdAt: string;
 }
 
 export type ClubErrors = {

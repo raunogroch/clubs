@@ -22,71 +22,64 @@ export const ClubList = ({ clubs }: ClubProps) => {
   };
 
   return (
-    <div className="row">
-      {clubs.map((club: Club, index) => (
-        <div key={index} className="col-lg-4">
-          <div className="widget-head-color-box navy-bg p-lg text-center">
-            <div className="m-b-md">
-              <h2 className="font-bold no-margins">{club.name}</h2>
-              <small>{club.sport.name}</small>
-            </div>
-            {club.image ? (
-              <Image
-                src={club.image}
-                className="rounded-circle circle-border m-b-md"
-                alt="profile"
-                width={100}
-              />
-            ) : (
-              <div className="rounded-circle circle-border m-b-md">
-                Sin foto
-              </div>
-            )}
-            <div>
-              <span> Atletas activos</span>
-            </div>
-          </div>
-          <div className="widget-text-box">
-            <h4 className="media-heading">{club.place}</h4>
-            <div
-              style={{
-                display: "flex",
-                gap: 8,
-                flexWrap: "wrap",
-                alignItems: "center",
-              }}
-              className="m-b-sm"
-            >
-              {club.description}
-            </div>
-
-            <div className="d-flex justify-content-between">
-              <Link
-                to={`/clubs/${club._id}/groups`}
-                className="btn btn-xs btn-success"
-              >
-                <i className="fa fa-eye"></i> Ver
-              </Link>
-              <Link
-                to={`/clubs/edit/${club._id}`}
-                className="btn btn-xs btn-white"
-              >
-                <i className="fa fa-edit"></i> Editar
-              </Link>
-              <Link
-                to={"#"}
-                className="btn btn-xs btn-primary"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleDelete(club._id);
-                }}
-              >
-                <i className="fa fa-trash"></i> Eliminar
-              </Link>
-            </div>
-          </div>
-        </div>
-      ))}
+    <div className="project-list">
+      <table className="table table-hover">
+        <tbody>
+          {clubs.map((club: Club, index: number) => (
+            <tr key={index}>
+              <td className="project-status">
+                <Image
+                  src={club.image}
+                  alt={club.name}
+                  style={{ width: "50px", borderRadius: "50%" }}
+                />
+              </td>
+              <td className="project-title">
+                <a href="project_detail.html">{club.name}</a>
+                <br />
+                <small>
+                  Creado:{" "}
+                  {new Date(club.createdAt).toLocaleDateString("es-ES", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </small>
+              </td>
+              <td className="project-people">
+                Grupos: {club.groups?.length || 0}
+              </td>
+              <td className="project-people">
+                Deportistas: {club.uniqueAthletesCount}
+              </td>
+              <td className="project-actions align-middle">
+                <Link
+                  to={`/clubs/${club._id}/groups`}
+                  className=" text-primary mx-2"
+                >
+                  <i className="fa fa-eye"></i> Ver
+                </Link>
+                <Link
+                  to={`/clubs/edit/${club._id}`}
+                  className=" text-success mx-2"
+                >
+                  <i className="fa fa-edit"></i> Editar
+                </Link>
+                <Link
+                  to={"#"}
+                  className=" text-danger mx-2"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleDelete(club._id);
+                  }}
+                >
+                  <i className="fa fa-trash"></i> Eliminar
+                </Link>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
