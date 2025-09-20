@@ -3,11 +3,11 @@ import { useEffect } from "react";
 import { NavHeader, PopUpMessage } from "../../../components";
 import { useDispatch, useSelector } from "react-redux";
 import type { User, UsersPageProps } from "../interfaces/userTypes";
-import { UserForm } from "./UserForm";
+import { AthleteForm } from "./AthleteForm";
 import { findUserById } from "../../../store/usersThunks";
 import type { AppDispatch, RootState } from "../../../store";
 
-export const UserEdit = ({ name: namePage, sub }: UsersPageProps) => {
+export const AthleteEdit = ({ name: namePage, sub }: UsersPageProps) => {
   const { id } = useParams();
   const dispatch = useDispatch<AppDispatch>();
   const {
@@ -23,11 +23,11 @@ export const UserEdit = ({ name: namePage, sub }: UsersPageProps) => {
   }, [dispatch, id]);
 
   const handleSuccess = () => {
-    navigate("/users/general");
+    navigate("/users/athletes");
   };
 
   const handleCancel = () => {
-    navigate("/users/general");
+    navigate("/users/athletes");
   };
 
   return (
@@ -53,7 +53,7 @@ export const UserEdit = ({ name: namePage, sub }: UsersPageProps) => {
                     )}
                     {error && <div className="alert alert-danger">{error}</div>}
                     {status === "succeeded" && (
-                      <UserForm
+                      <AthleteForm
                         user={user as User}
                         onSuccess={handleSuccess}
                         onCancel={handleCancel}

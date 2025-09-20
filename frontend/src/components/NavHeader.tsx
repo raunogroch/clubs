@@ -1,38 +1,17 @@
 import { Link, useLocation } from "react-router-dom";
-import { isListPage } from "../routes/routeMatch";
 
 interface NavHeaderProps {
   name?: string;
   sub?: string;
   sub1?: string;
-  isAllow?: boolean;
   pageCreate?: string;
 }
 
-export const NavHeader = ({
-  name,
-  sub,
-  sub1,
-  isAllow = false,
-  pageCreate,
-}: NavHeaderProps) => {
+export const NavHeader = ({ name, sub, sub1, pageCreate }: NavHeaderProps) => {
   const pageTitle = name || "Principal";
   const isPrincipalPage = pageTitle === "Principal";
   const location = useLocation();
 
-  // Utility: show create button only on allowed list pages, not on create/edit
-  const isCreateOrEdit = /\/(create|editar)(\/|$)/.test(location.pathname);
-  const allowedPatterns = [
-    /^\/clubs\/[^/]+\/groups$/, // /clubs/:id/groups
-    /^\/sports$/, // /sports
-    // Agrega más patrones aquí
-  ];
-  const isAllowedListPage = isListPage(location.pathname, allowedPatterns);
-  const isMainRoute = location.pathname.split("/").filter(Boolean).length === 1;
-  const showCreateButton =
-    isAllow && (isMainRoute || isAllowedListPage) && !isCreateOrEdit;
-
-  // Breadcrumbs dinámicos: todos menos el último son links
   const breadcrumbItems: { label: string; to?: string }[] = [];
   breadcrumbItems.push({
     label: "Principal",
@@ -76,7 +55,7 @@ export const NavHeader = ({
         <h2>{pageTitle}</h2>
         <ol className="breadcrumb">{breadcrumbs}</ol>
       </div>
-      {showCreateButton && (
+      {pageCreate && (
         <div className="col-sm-8">
           <div className="title-action">
             <Link

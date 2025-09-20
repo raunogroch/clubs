@@ -1,11 +1,12 @@
 import type { UsersPageProps } from "../interfaces";
-import { UserTable } from ".";
+import { AthleteTable } from ".";
 import { UserListGeneric } from "../../../components/UserListGeneric";
 
-export const Users = ({ name }: UsersPageProps) => (
+export const Athletes = ({ name }: UsersPageProps) => (
   <UserListGeneric
     name={name}
-    TableComponent={UserTable}
+    TableComponent={AthleteTable}
+    role="athlete"
     pageCreateLabel="Nuevo usuario"
   />
 );

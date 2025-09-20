@@ -5,7 +5,7 @@ import type { User } from "../pages/Users/interfaces/userTypes";
 
 export const fetchUsers = createAsyncThunk<
   UsersResponse,
-  { page?: number; limit?: number; name?: string }
+  { page?: number; limit?: number; name?: string; role?: string }
 >("users/fetchUsers", async (params, { rejectWithValue }) => {
   try {
     const response = await api.get("/users", { params });

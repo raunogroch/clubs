@@ -21,6 +21,8 @@ import {
 import { Groups } from "../pages/groups/components/Groups";
 import { GroupsNew } from "../pages/groups/components/GroupsNew";
 import { GroupEdit } from "../pages/groups/components/GroupEdit";
+import { AthleteEdit, AthleteNew, Athletes } from "../pages/Athletes";
+import { CoachEdit, Coaches, CoachNew } from "../pages/Coaches/components";
 
 export type MenuRoute = {
   path: string;
@@ -201,29 +203,51 @@ export const roleRoutes: RoleRoutes = {
           path: "/users/general",
           icon: "fa-users",
           label: "General",
-          element: <Users name="Registros" />,
+          element: <Users name="Todos los registros" />,
         },
         {
           path: "/users/coaches",
           icon: "fa-vcard-o",
           label: "Entrenadores",
-          element: <ProfileCoach name="Registros" />,
+          element: <Coaches name="Entrenadores" />,
         },
         {
           path: "/users/athletes",
           icon: "fa-vcard-o",
           label: "Deportistas",
-          element: <ProfileAthlete name="Registros" />,
+          element: <Athletes name="Deportistas" />,
         },
       ],
     },
     {
-      path: "/users/create",
+      path: "/users/general/create",
       element: <UserNew name="Registros" sub="Crear" />,
     },
     {
-      path: "/users/edit/:id",
+      path: "/users/general/edit/:id",
       element: <UserEdit name="Registros" sub="Actualizar" />,
+    },
+
+    // coaches
+
+    {
+      path: "/users/coaches/create",
+      element: <CoachNew name="Registros" sub="Crear" />,
+    },
+    {
+      path: "/users/coaches/edit/:id",
+      element: <CoachEdit name="Registros" sub="Actualizar" />,
+    },
+
+    // athletes
+
+    {
+      path: "/users/athletes/create",
+      element: <AthleteNew name="Registros" sub="Crear" />,
+    },
+    {
+      path: "/users/athletes/edit/:id",
+      element: <AthleteEdit name="Registros" sub="Actualizar" />,
     },
   ],
   coach: [

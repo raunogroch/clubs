@@ -1,7 +1,7 @@
 interface SelectorProps {
   name: string;
   label?: string;
-  selected: any; // Puede ser string o un objeto modelo
+  selected: any;
   onItemsChange: (item: any) => void;
   errors: string;
   items: any[];
@@ -15,9 +15,6 @@ export const SelectorList = ({
   errors,
   items = [],
 }: SelectorProps) => {
-  // Si selected es un objeto, extraer el _id, si es string, usarlo directamente
-
-  // Soporta items con 'id', '_id' o enums string
   const selectedValue =
     selected && typeof selected === "object"
       ? selected._id || selected.id

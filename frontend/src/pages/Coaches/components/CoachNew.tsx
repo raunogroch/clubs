@@ -1,17 +1,17 @@
 import { useNavigate } from "react-router-dom";
 import { NavHeader } from "../../../components/NavHeader";
 import type { UsersPageProps } from "../interfaces/userTypes";
-import { UserForm } from "./UserForm";
+import { CoachForm } from "./CoachForm";
 
-export const UserNew = ({ name, sub }: UsersPageProps) => {
+export const CoachNew = ({ name, sub }: UsersPageProps) => {
   const navigate = useNavigate();
 
   const handleSuccess = () => {
-    navigate("/users/general");
+    navigate("/users/coaches");
   };
 
   const handleCancel = () => {
-    navigate("/users/general");
+    navigate("/users/coaches");
   };
 
   return (
@@ -27,7 +27,7 @@ export const UserNew = ({ name, sub }: UsersPageProps) => {
               <div className="ibox-content">
                 <div className="row">
                   <div className="col-sm-12">
-                    <UserForm
+                    <CoachForm
                       onSuccess={handleSuccess}
                       onCancel={handleCancel}
                     />
