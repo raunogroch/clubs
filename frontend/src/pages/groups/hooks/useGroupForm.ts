@@ -98,14 +98,18 @@ export const useGroupForm = (initialData?: Group) => {
     } else {
       const usedDays = new Set<string>();
       groupFormState.dailySchedules.forEach((schedule, idx) => {
-        if (!schedule.day) {
+        const dayValue =
+          typeof schedule.day === "object" && schedule.day !== null
+            ? schedule.day.value
+            : schedule.day;
+        if (!dayValue) {
           errors[`dailySchedules_${idx}_day`] = `El día es requerido`;
-        } else if (usedDays.has(String(schedule.day))) {
+        } else if (usedDays.has(dayValue)) {
           errors[
             `dailySchedules_${idx}_day`
           ] = `El día ya está asignado en otro horario`;
         } else {
-          usedDays.add(String(schedule.day));
+          usedDays.add(dayValue);
         }
         if (!schedule.turn) {
           errors[`dailySchedules_${idx}_turn`] = `El turno es requerido`;
@@ -131,6 +135,8 @@ export const useGroupForm = (initialData?: Group) => {
     if (!groupFormState.athletes || groupFormState.athletes.length === 0) {
       errors.athletes = "Debe asignar al menos un atleta";
     }
+    console.log("Validation Errors:", errors);
+    console.log("Group Form State:", groupFormState);
     setGroupFormErrors(errors);
     return Object.keys(errors).length === 0;
   }
