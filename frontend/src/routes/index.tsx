@@ -194,24 +194,24 @@ export const roleRoutes: RoleRoutes = {
     },
     {
       path: "/users",
-      icon: "fa-users",
-      label: "Usuarios",
+      icon: "fa-user-circle",
+      label: "Gestion de usuarios",
       children: [
         {
           path: "/users/general",
-          icon: "fa-list",
+          icon: "fa-users",
           label: "General",
           element: <ProfileAdmin name="Registros" />,
         },
         {
           path: "/users/coaches",
-          icon: "fa-list",
+          icon: "fa-user",
           label: "Entrenadores",
           element: <ProfileCoach name="Registros" />,
         },
         {
           path: "/users/athletes",
-          icon: "fa-list",
+          icon: "fa-user",
           label: "Deportistas",
           element: <ProfileAthlete name="Registros" />,
         },

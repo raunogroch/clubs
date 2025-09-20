@@ -25,12 +25,16 @@ const AppRoutes = () => {
   const role = user?.role || "";
   const allowedRoutes = roleRoutes[role] || [];
 
+  const childRoutes = allowedRoutes
+    .filter((route) => route.children)
+    .flatMap((route) => route.children);
+
   return (
-    <>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/404" element={<NotFound />} />
-        {allowedRoutes.map(({ path, element }) => (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/404" element={<NotFound />} />
+      {allowedRoutes.map(({ path, element }) =>
+        element ? (
           <Route
             key={path}
             path={path}
@@ -38,19 +42,26 @@ const AppRoutes = () => {
               <PrivateRoute allowedRoles={[role]}>{element}</PrivateRoute>
             }
           />
-        ))}
-        <Route
-          path="/"
-          element={
-            user ? (
-              <Navigate to="/" replace />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        <Route path="*" element={<Navigate to="/404" replace />} />
-      </Routes>
-    </>
+        ) : null
+      )}
+      {childRoutes.map(({ path, element }) =>
+        element ? (
+          <Route
+            key={path}
+            path={path}
+            element={
+              <PrivateRoute allowedRoles={[role]}>{element}</PrivateRoute>
+            }
+          />
+        ) : null
+      )}
+      <Route
+        path="/"
+        element={
+          user ? <Navigate to="/" replace /> : <Navigate to="/login" replace />
+        }
+      />
+      <Route path="*" element={<Navigate to="/404" replace />} />
+    </Routes>
   );
 };
