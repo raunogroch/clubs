@@ -74,6 +74,7 @@ export class UsersService {
     page?: number,
     limit?: number,
     searchTerm?: string,
+    role?: string,
   ) {
     const currentPage = page ?? 1;
     const itemsPerPage = limit ?? 0;
@@ -94,7 +95,12 @@ export class UsersService {
     }
 
     // Filtrar por rol según el usuario que hace la solicitud
-    const filteredUsers = this.filterByRole(allUsers, requestingUser);
+    let filteredUsers = this.filterByRole(allUsers, requestingUser);
+
+    // Si se pasa un parámetro de rol, filtrar por ese rol
+    if (role) {
+      filteredUsers = filteredUsers.filter((user) => user.role === role);
+    }
 
     // INVERTIR EL ORDEN - del último al primero
     const reversedUsers = [...filteredUsers].reverse();
