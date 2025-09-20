@@ -1,4 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import React from "react";
 import { ImageWithFallback } from "../components";
 import { Role } from "../interfaces";
 import { roleRoutes } from "../routes";
@@ -27,6 +28,91 @@ export const SideNav = () => {
 
   const role = user?.role || "";
   const menuItems = roleRoutes[role] || [];
+
+  const [openMenus, setOpenMenus] = React.useState<{ [key: string]: boolean }>(
+    {}
+  );
+
+  React.useEffect(() => {
+    const syncOpenMenus = (
+      items: Array<(typeof menuItems)[0]>,
+      parentKey = "",
+      acc: { [key: string]: boolean } = {}
+    ) => {
+      items.forEach((item) => {
+        const key = parentKey + item.path;
+        const children = (item as any).children as
+          | Array<(typeof menuItems)[0]>
+          | undefined;
+        if (children && children.length > 0) {
+          const isAnyChildActive = children.some((child) =>
+            isActive(child.path)
+          );
+          acc[key] = isAnyChildActive;
+          syncOpenMenus(children, key, acc);
+        }
+      });
+      return acc;
+    };
+    setOpenMenus(syncOpenMenus(menuItems));
+  }, [location.pathname, menuItems]);
+
+  const handleMenuClick = (
+    key: string,
+    e: React.MouseEvent<HTMLAnchorElement>
+  ) => {
+    e.preventDefault();
+    setOpenMenus((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  // Renderizado recursivo de los items del menú
+  function renderMenuItems(
+    items: Array<(typeof menuItems)[0]>,
+    parentKey = ""
+  ) {
+    return items
+      .filter((item) => item.icon || item.children)
+      .map((item) => {
+        const key = parentKey + item.path;
+        const children = item.children as
+          | Array<(typeof menuItems)[0]>
+          | undefined;
+        const isAnyChildActive = children?.some((child) =>
+          isActive(child.path)
+        );
+
+        if (children && children.length > 0) {
+          return (
+            <li
+              key={key}
+              className={openMenus[key] || isAnyChildActive ? "active" : ""}
+            >
+              <a href="#" onClick={(e) => handleMenuClick(key, e)}>
+                {item.icon && <i className={`fa ${item.icon}`}></i>}{" "}
+                {item.label}
+                <span className="fa arrow"></span>
+              </a>
+              <ul
+                className={`nav nav-second-level collapse${
+                  openMenus[key] || isAnyChildActive ? " in" : ""
+                }`}
+              >
+                {renderMenuItems(children, key)}
+              </ul>
+            </li>
+          );
+        }
+
+        return (
+          <li key={key} className={isActive(item.path) ? "active" : ""}>
+            <Link to={item.path}>
+              {item.icon && <i className={`fa ${item.icon}`}></i>}{" "}
+              <span className="nav-label">{item.label}</span>
+            </Link>
+          </li>
+        );
+      });
+  }
 
   return (
     <nav className="navbar-default navbar-static-side" role="navigation">
@@ -70,17 +156,7 @@ export const SideNav = () => {
             </div>
             <div className="logo-element">CS</div>
           </li>
-          {menuItems.map(
-            ({ path, icon, label }) =>
-              icon && (
-                <li key={path} className={isActive(path) ? "active" : ""}>
-                  <Link to={path}>
-                    <i className={`fa ${icon}`}></i>{" "}
-                    <span className="nav-label">{label}</span>
-                  </Link>
-                </li>
-              )
-          )}
+          {renderMenuItems(menuItems)}
         </ul>
       </div>
     </nav>

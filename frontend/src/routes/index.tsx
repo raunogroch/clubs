@@ -27,6 +27,7 @@ export type MenuRoute = {
   icon?: string;
   label?: string;
   element?: JSX.Element;
+  children?: MenuRoute[];
 };
 
 export type RoleRoutes = Record<string, MenuRoute[]>;
@@ -95,16 +96,33 @@ export const roleRoutes: RoleRoutes = {
     {
       path: "/users",
       icon: "fa-users",
-      label: "Registros",
-      element: <Users name="Registros" />,
-    },
-    {
-      path: "/users/create",
-      element: <UserNew name="Registros" sub="Crear" />,
-    },
-    {
-      path: "/users/edit/:id",
-      element: <UserEdit name="Registros" sub="Actualizar" />,
+      label: "Usuarios",
+      children: [
+        {
+          path: "/users/general",
+          icon: "fa-list",
+          label: "General",
+          element: <ProfileAdmin name="Registros" />,
+        },
+        {
+          path: "/users/coaches",
+          icon: "fa-list",
+          label: "Entrenadores",
+          element: <ProfileCoach name="Registros" />,
+        },
+        {
+          path: "/users/athletes",
+          icon: "fa-list",
+          label: "Deportistas",
+          element: <ProfileAthlete name="Registros" />,
+        },
+        {
+          path: "/users",
+          icon: "fa-list",
+          label: "Registros",
+          element: <Users name="Registros" />,
+        },
+      ],
     },
   ],
   admin: [
@@ -177,8 +195,27 @@ export const roleRoutes: RoleRoutes = {
     {
       path: "/users",
       icon: "fa-users",
-      label: "Registros",
-      element: <Users name="Registros" />,
+      label: "Usuarios",
+      children: [
+        {
+          path: "/users/general",
+          icon: "fa-list",
+          label: "General",
+          element: <ProfileAdmin name="Registros" />,
+        },
+        {
+          path: "/users/coaches",
+          icon: "fa-list",
+          label: "Entrenadores",
+          element: <ProfileCoach name="Registros" />,
+        },
+        {
+          path: "/users/athletes",
+          icon: "fa-list",
+          label: "Deportistas",
+          element: <ProfileAthlete name="Registros" />,
+        },
+      ],
     },
     {
       path: "/users/create",
