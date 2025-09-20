@@ -5,7 +5,6 @@ import type { Group, GroupErrors } from "../interface/group.Interface";
 import { useParams } from "react-router-dom";
 import { createGroup, updateGroup } from "../../../store/groupsThunks";
 
-// Initial state for a new group
 export const initialGroupData: Group = {
   name: "",
   dailySchedules: [],
@@ -23,7 +22,6 @@ export const useGroupForm = (initialData?: Group) => {
   );
   const [groupFormErrors, setGroupFormErrors] = useState<GroupErrors>({});
 
-  // Añadir horario semanal
   const addSchedule = () => {
     if (groupFormState.dailySchedules.length >= 7) return;
     setGroupFormState((prev) => ({
@@ -35,7 +33,6 @@ export const useGroupForm = (initialData?: Group) => {
     }));
   };
 
-  // Eliminar horario semanal
   const removeSchedule = (index: number) => {
     setGroupFormState((prev) => ({
       ...prev,

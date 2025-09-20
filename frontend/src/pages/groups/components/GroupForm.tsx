@@ -78,7 +78,14 @@ export const GroupForm: React.FC<GroupFormProps> = ({
                 <div className="col">
                   <SelectorList
                     name={`dia_${idx}`}
-                    selected={schedule.day}
+                    selected={
+                      schedule.day
+                        ? typeof schedule.day === "object" &&
+                          schedule.day !== null
+                          ? schedule.day.value
+                          : schedule.day
+                        : ""
+                    }
                     onItemsChange={(value) =>
                       handleScheduleChange(
                         idx,
@@ -97,7 +104,13 @@ export const GroupForm: React.FC<GroupFormProps> = ({
                 <div className="col">
                   <SelectorList
                     name={`turno_${idx}`}
-                    selected={schedule.turn}
+                    selected={
+                      schedule.turn
+                        ? typeof schedule.turn === "object"
+                          ? schedule.turn.value
+                          : schedule.turn
+                        : ""
+                    }
                     onItemsChange={(value) =>
                       handleScheduleChange(
                         idx,
