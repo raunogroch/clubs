@@ -1,59 +1,90 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { SmoothlyMenu } from "../scripts/coder-softScripts";
 import { Input } from "../components";
 import { useDispatch } from "react-redux";
 import { type AppDispatch, setName, setPage } from "../store";
-import React, { useState, useEffect } from "react";
-import { useDebounce } from "../hooks/useDebounce"; // <- nuestro hook
+import React, { useState, useEffect, useCallback } from "react";
+import { useDebounce } from "../hooks/useDebounce";
 import { logoutThunk } from "../store/authThunk";
+
+// Constantes para rutas y mensajes
+const SEARCH_PATHS: string[] = [
+  "/users/general",
+  "/users/coaches",
+  "/users/athletes",
+];
+const WELCOME_MESSAGE = "BIENVENIDO AL SISTEMA DE CLUBES";
 
 export const TopNav = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [search, setSearch] = useState("");
 
-  const isHere = location.pathname === "/users";
+  // Memoizar cálculo de rutas
+  const isSearchVisible = SEARCH_PATHS.includes(location.pathname);
 
+  // Memoizar valor debounced
   const debouncedSearch = useDebounce(search, 300);
 
+  // Efecto optimizado para búsqueda
   useEffect(() => {
-    dispatch(setName(debouncedSearch));
-    dispatch(setPage(1));
-  }, [debouncedSearch]);
+    if (isSearchVisible) {
+      dispatch(setName(debouncedSearch));
+      dispatch(setPage(1));
+    }
+  }, [debouncedSearch, dispatch, isSearchVisible]);
 
-  const handleLogout = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    dispatch(logoutThunk());
-    navigate("/login", { replace: true });
-  };
+  // Manejo de logout memoizado
+  const handleLogout = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>) => {
+      e.preventDefault();
+      dispatch(logoutThunk())
+        .unwrap()
+        .catch(() => {
+          // Manejar error de logout si es necesario
+        });
+      navigate("/login", { replace: true });
+    },
+    [dispatch, navigate]
+  );
 
-  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    document.body.classList.toggle("mini-navbar");
-    SmoothlyMenu();
-  };
+  // Manejo de toggle menú memoizado
+  const handleMenuToggle = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>) => {
+      e.preventDefault();
+      document.body.classList.toggle("mini-navbar");
+      SmoothlyMenu();
+    },
+    []
+  );
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(e.target.value);
-  };
+  // Manejo de búsqueda memoizado
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearch(e.target.value);
+    },
+    []
+  );
 
   return (
     <div className="row border-bottom">
       <nav
         className="navbar navbar-static-top"
         role="navigation"
-        style={{ marginBottom: "0px" }}
+        style={{ marginBottom: 0 }}
       >
         <div className="navbar-header">
           <Link
             className="navbar-minimalize minimalize-styl-2 btn btn-primary"
             to="#"
-            onClick={handleClick}
+            onClick={handleMenuToggle}
+            aria-label="Toggle menu"
           >
-            <i className="fa fa-bars"></i>
+            <i className="fa fa-bars" aria-hidden="true" />
           </Link>
 
-          {isHere && (
+          {isSearchVisible && (
             <div role="search" className="navbar-form-custom">
               <div className="form-group">
                 <Input
@@ -64,21 +95,22 @@ export const TopNav = () => {
                   id="top-search"
                   value={search}
                   onChange={handleSearchChange}
+                  aria-label="Search users"
                 />
               </div>
             </div>
           )}
         </div>
+
         <ul className="nav navbar-top-links navbar-right">
-          <li style={{ padding: "20px" }}>
-            <span className="m-r-sm text-muted welcome-message">
-              BIENVENIDO AL SISTEMA DE CLUBES
-            </span>
+          <li className="welcome-message">
+            <span className="m-r-sm text-muted">{WELCOME_MESSAGE}</span>
           </li>
 
           <li>
-            <Link to="/" onClick={handleLogout}>
-              <i className="fa fa-sign-out"></i> Cerrar Sesión
+            <Link to="/" onClick={handleLogout} aria-label="Logout">
+              <i className="fa fa-sign-out" aria-hidden="true" />
+              <span className="logout-text">Cerrar Sesión</span>
             </Link>
           </li>
         </ul>

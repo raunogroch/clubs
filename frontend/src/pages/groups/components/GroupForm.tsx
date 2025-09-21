@@ -10,13 +10,24 @@ import { fetchEntities } from "../../../store/entitiesThunks";
 import Button from "../../../components/Button";
 
 /**
- * Props for GroupForm
+ * Props para GroupForm
  */
 interface GroupFormProps {
   initialData?: Group;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
+
+/**
+ * Función auxiliar para extraer valores de forma segura
+ */
+const getValue = (value: any): string => {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "object" && "value" in value) {
+    return value.value;
+  }
+  return value;
+};
 
 /**
  * Formulario para crear/editar un grupo
@@ -67,7 +78,7 @@ export const GroupForm: React.FC<GroupFormProps> = ({
       />
 
       {/* Cronograma semanal dinámico */}
-      <div className="form-group row ">
+      <div className="form-group row">
         <label htmlFor="WeekSchedule" className="col-sm-2 col-form-label">
           Cronograma semanal
         </label>
@@ -78,20 +89,9 @@ export const GroupForm: React.FC<GroupFormProps> = ({
                 <div className="col">
                   <SelectorList
                     name={`dia_${idx}`}
-                    selected={
-                      schedule.day
-                        ? typeof schedule.day === "object" &&
-                          schedule.day !== null
-                          ? schedule.day.value
-                          : schedule.day
-                        : ""
-                    }
+                    selected={getValue(schedule.day)}
                     onItemsChange={(value) =>
-                      handleScheduleChange(
-                        idx,
-                        "day",
-                        typeof value === "string" ? value : value
-                      )
+                      handleScheduleChange(idx, "day", value)
                     }
                     errors={errors[`dailySchedules_${idx}_day`] || ""}
                     items={Object.values(WeekDays).map((day) => ({
@@ -104,19 +104,9 @@ export const GroupForm: React.FC<GroupFormProps> = ({
                 <div className="col">
                   <SelectorList
                     name={`turno_${idx}`}
-                    selected={
-                      schedule.turn
-                        ? typeof schedule.turn === "object"
-                          ? schedule.turn.value
-                          : schedule.turn
-                        : ""
-                    }
+                    selected={getValue(schedule.turn)}
                     onItemsChange={(value) =>
-                      handleScheduleChange(
-                        idx,
-                        "turn",
-                        typeof value === "string" ? value : value
-                      )
+                      handleScheduleChange(idx, "turn", value)
                     }
                     errors={errors[`dailySchedules_${idx}_turn`] || ""}
                     items={Object.values(Turn).map((turn) => ({
@@ -131,7 +121,7 @@ export const GroupForm: React.FC<GroupFormProps> = ({
                   <Input
                     type="time"
                     className="form-control"
-                    value={schedule.startTime}
+                    value={schedule.startTime || ""}
                     onChange={(e) =>
                       handleScheduleChange(idx, "startTime", e.target.value)
                     }
@@ -148,7 +138,7 @@ export const GroupForm: React.FC<GroupFormProps> = ({
                   <Input
                     type="time"
                     className="form-control"
-                    value={schedule.endTime}
+                    value={schedule.endTime || ""}
                     onChange={(e) =>
                       handleScheduleChange(idx, "endTime", e.target.value)
                     }
@@ -178,9 +168,13 @@ export const GroupForm: React.FC<GroupFormProps> = ({
               onClick={addSchedule}
               name="Agregar cronograma"
             />
+
+            {/* Mensaje de error para dailySchedules - Solución simplificada */}
             {errors.dailySchedules && (
               <div className="text-danger small mt-2">
-                {errors.dailySchedules}
+                {typeof errors.dailySchedules === "string"
+                  ? errors.dailySchedules
+                  : "Hay errores en el cronograma semanal"}
               </div>
             )}
           </div>
