@@ -17,7 +17,7 @@ export interface CheckboxListProps {
   selectedItems?: Array<any>;
 }
 
-export const CheckboxList: React.FC<CheckboxListProps> = ({
+export const CheckBoxList: React.FC<CheckboxListProps> = ({
   name,
   label,
   dataList,
@@ -25,7 +25,6 @@ export const CheckboxList: React.FC<CheckboxListProps> = ({
   disabled = false,
   selectedItems = [],
 }) => {
-  // selectedItems debe ser un array de IDs (strings)
   const selectedIds = Array.isArray(selectedItems)
     ? selectedItems.filter(Boolean)
     : [];
@@ -66,5 +65,3 @@ export const CheckboxList: React.FC<CheckboxListProps> = ({
     </div>
   );
 };
-
-export default CheckboxList;

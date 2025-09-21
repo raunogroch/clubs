@@ -9,7 +9,7 @@ export const fetchClubs = createAsyncThunk<Club[]>(
       const response = await api.get("/clubs");
       return response.data;
     } catch (err: any) {
-      return rejectWithValue(err.response?.data || "Error al cargar usuarios");
+      return rejectWithValue(err.response?.data || "Error al cargar clubs");
     }
   }
 );

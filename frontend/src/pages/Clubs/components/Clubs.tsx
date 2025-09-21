@@ -1,5 +1,10 @@
 import type { pageParamProps } from "../../../interfaces";
-import { PopUpMessage, NavHeader } from "../../../components";
+import {
+  PopUpMessage,
+  NavHeader,
+  Spinner,
+  StaticMessage,
+} from "../../../components";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { fetchClubs } from "../../../store/clubsThunks";
@@ -16,13 +21,11 @@ export const Clubs = ({ name }: pageParamProps) => {
 
   return (
     <>
-      <NavHeader name={name} isAllow pageCreate="Nuevo club" />
+      <NavHeader name={name} pageCreate="Nuevo club" />
       <PopUpMessage />
-      {error && (
-        <div className="alert alert-danger" role="alert">
-          {error}
-        </div>
-      )}
+      {status === "loading" && <Spinner />}
+      {error && <StaticMessage message={error} type="danger" />}
+
       {status === "succeeded" && (
         <div className="wrapper wrapper-content animated fadeInRight">
           <div className="row">

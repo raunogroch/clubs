@@ -1,7 +1,12 @@
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { PopUpMessage, NavHeader } from "../../../components";
+import {
+  PopUpMessage,
+  NavHeader,
+  Spinner,
+  StaticMessage,
+} from "../../../components";
 import { ClubForm } from ".";
 import type { pageParamProps } from "../../../interfaces";
 import { findClubById } from "../../../store/clubsThunks";
@@ -34,31 +39,32 @@ export const ClubEdit = ({ name, sub }: pageParamProps) => {
     <>
       <NavHeader name={name} sub={sub} />
       <PopUpMessage />
-      <div className="wrapper wrapper-content animated fadeInRight">
-        <div className="row">
-          <div className="col-12">
-            <div className="ibox ">
-              <div className="ibox-title">
-                <h5>Editar Club</h5>
-              </div>
-              <div className="ibox-content">
-                <div className="row">
-                  <div className="col-sm-12">
-                    {error && <div className="alert alert-danger">{error}</div>}
-                    {status === "succeeded" && (
+      {status === "loading" && <Spinner />}
+      {error && <StaticMessage message={error} type="danger" />}
+      {status === "succeeded" && (
+        <div className="wrapper wrapper-content animated fadeInRight">
+          <div className="row">
+            <div className="col-12">
+              <div className="ibox ">
+                <div className="ibox-title">
+                  <h5>Editar Club</h5>
+                </div>
+                <div className="ibox-content">
+                  <div className="row">
+                    <div className="col-sm-12">
                       <ClubForm
                         initialData={club}
                         onSuccess={handleSuccess}
                         onCancel={handleCancel}
                       />
-                    )}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   );
 };

@@ -5,7 +5,7 @@ export * from "./Clubs/components/Clubs";
 export * from "./Clubs/components/ClubEdit";
 export * from "./Clubs/components/ClubForm";
 export * from "./Clubs/components/ClubNew";
-export * from "./Clubs/components/ClubTable";
+// export * from "./Clubs/components/ClubTable";
 export * from "./Clubs/components/FormField";
 
 export * from "./Profile/components/ProfileAthlete";

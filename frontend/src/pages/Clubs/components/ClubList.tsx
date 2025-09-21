@@ -1,5 +1,6 @@
 import { useDispatch } from "react-redux";
-import { Image } from "../../../components";
+import swal from "sweetalert";
+import { ImageWithFallback } from "../../../components";
 import type { Club } from "../interfaces/clubTypes";
 import type { AppDispatch } from "../../../store/store";
 import { deleteClub } from "../../../store/clubsThunks";
@@ -13,12 +14,24 @@ export const ClubList = ({ clubs }: ClubProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const handleDelete = async (id?: string) => {
     if (!id) return;
-    if (window.confirm("¿Está seguro de eliminar este usuario?")) {
-      dispatch(deleteClub(id)).unwrap();
-      dispatch(
-        setMessage({ message: "Club eliminado exitosamente", type: "warning" })
-      );
-    }
+    swal({
+      title: "¿Estás seguro?",
+      text: "¡No podrás recuperar este club!",
+      icon: "warning",
+      buttons: ["Cancelar", "Sí, eliminar!"],
+      dangerMode: true,
+    }).then((willDelete) => {
+      if (willDelete) {
+        dispatch(deleteClub(id)).unwrap();
+        swal("Eliminado!", "El club ha sido eliminado.", "success");
+        dispatch(
+          setMessage({
+            message: "Club eliminado exitosamente",
+            type: "warning",
+          })
+        );
+      }
+    });
   };
 
   return (
@@ -28,17 +41,19 @@ export const ClubList = ({ clubs }: ClubProps) => {
           {clubs.map((club: Club, index: number) => (
             <tr key={index}>
               <td className="project-status">
-                <Image
+                <ImageWithFallback
                   src={club.image}
                   alt={club.name}
                   style={{ width: "50px", borderRadius: "50%" }}
                 />
               </td>
               <td className="project-title">
-                <a href="project_detail.html">{club.name}</a>
+                <Link to={`/clubs/${club._id}/groups`}>
+                  <i className="fa fa-eye"></i> &nbsp; {club.name}
+                </Link>
                 <br />
                 <small>
-                  Creado:{" "}
+                  Creado:&nbsp;
                   {new Date(club.createdAt).toLocaleDateString("es-ES", {
                     day: "numeric",
                     month: "long",
@@ -53,12 +68,6 @@ export const ClubList = ({ clubs }: ClubProps) => {
                 Deportistas: {club.uniqueAthletesCount}
               </td>
               <td className="project-actions align-middle">
-                <Link
-                  to={`/clubs/${club._id}/groups`}
-                  className=" text-primary mx-2"
-                >
-                  <i className="fa fa-eye"></i> Ver
-                </Link>
                 <Link
                   to={`/clubs/edit/${club._id}`}
                   className=" text-success mx-2"

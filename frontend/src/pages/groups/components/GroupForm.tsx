@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { CheckboxList, Input, SelectorList } from "../../../components";
+import { CheckBoxList, Input, SelectorList } from "../../../components";
 import { FormField } from "../../Clubs/components";
 import { useGroupForm } from "../hooks/useGroupForm";
 import { Turn, WeekDays } from "../interface/group.Interface";
@@ -193,7 +193,7 @@ export const GroupForm: React.FC<GroupFormProps> = ({
       />
 
       {/* Selección múltiple de entrenadores */}
-      <CheckboxList
+      <CheckBoxList
         name="coaches"
         label="Entrenadores"
         dataList={coachesList}
@@ -202,7 +202,7 @@ export const GroupForm: React.FC<GroupFormProps> = ({
       />
 
       {/* Selección múltiple de deportistas */}
-      <CheckboxList
+      <CheckBoxList
         name="athletes"
         label="Deportistas"
         dataList={athletesList ?? []}

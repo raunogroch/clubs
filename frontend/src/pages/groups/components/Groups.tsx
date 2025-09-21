@@ -19,7 +19,7 @@ export const Groups = ({ name, sub }: pageParamProps) => {
   }, [dispatch]);
   return (
     <>
-      <NavHeader name={name} sub={sub} isAllow pageCreate="Nuevo grupo" />
+      <NavHeader name={name} sub={sub} pageCreate="Nuevo grupo" />
       <PopUpMessage />
       {error && (
         <div className="alert alert-danger text-center" role="alert">
