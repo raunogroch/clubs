@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { NavHeader } from "../../components/NavHeader";
 import type { pageParamProps } from "../../interfaces/pageParamProps";
 import { useUserClubs } from "./hooks";
-import { ImageWithFallback } from "../../components";
+import { Image } from "../../components";
 
 export const DashboardAthlete = ({ name }: pageParamProps) => {
   const { clubs } = useUserClubs();
@@ -19,7 +19,7 @@ export const DashboardAthlete = ({ name }: pageParamProps) => {
                   <div className="col-4">
                     <div className="text-center">
                       {club.image ? (
-                        <ImageWithFallback
+                        <Image
                           src={club.image}
                           alt={club._id}
                           className="img-fluid rounded-circle"

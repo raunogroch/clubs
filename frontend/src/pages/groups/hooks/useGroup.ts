@@ -1,11 +1,13 @@
 import { useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
-import { setMessage, type AppDispatch } from "../../../store";
-import type { Group } from "../interface/group.Interface";
+import { type AppDispatch } from "../../../store";
 import { useParams } from "react-router-dom";
 import { createGroup, updateGroup } from "../../../store/groupsThunks";
+import type { IGroup } from "../../groups/interface/groupTypes";
+import toastr from "toastr";
+import "toastr/build/toastr.min.css";
 
-export const initialGroupData: Group = {
+export const initialGroupData: IGroup = {
   name: "",
   dailySchedules: [],
   place: "",
@@ -45,16 +47,16 @@ type GroupErrors = {
   athletes?: string;
 };
 
-export const useGroupForm = (initialData?: Group) => {
+export const useGroup = (initialData?: IGroup) => {
   const { clubId } = useParams<{ clubId: string }>();
   const dispatch = useDispatch<AppDispatch>();
-  const [groupFormState, setGroupFormState] = useState<Group>(
+  const [groupFormState, setGroupFormState] = useState<IGroup>(
     initialData ?? initialGroupData
   );
   const [groupFormErrors, setGroupFormErrors] = useState<GroupErrors>({});
 
   // Función para ordenar horarios (extraída para reutilización)
-  const sortSchedules = useCallback((schedules: Group["dailySchedules"]) => {
+  const sortSchedules = useCallback((schedules: IGroup["dailySchedules"]) => {
     return [...schedules].sort((a, b) => {
       const idxA = DAYS_ORDER.findIndex(
         (d) => d.toLowerCase() === String(a.day).toLowerCase()
@@ -68,7 +70,7 @@ export const useGroupForm = (initialData?: Group) => {
 
   // Manejo de cambios en arrays (coaches/athletes)
   const handleArrayChange = useCallback(
-    (name: keyof Group, value: string, checked: boolean) => {
+    (name: keyof IGroup, value: string, checked: boolean) => {
       setGroupFormState((prev) => {
         const currentArray = [...(prev[name] as any[])];
         const newArray = checked
@@ -94,7 +96,7 @@ export const useGroupForm = (initialData?: Group) => {
       const { name, value, type, checked } = e.target as HTMLInputElement;
 
       if (type === "checkbox" && (name === "coaches" || name === "athletes")) {
-        handleArrayChange(name as keyof Group, value, checked);
+        handleArrayChange(name as keyof IGroup, value, checked);
         return;
       }
 
@@ -142,7 +144,7 @@ export const useGroupForm = (initialData?: Group) => {
   // Validación modular
   const validateForm = useCallback((): boolean => {
     const errors: GroupErrors = {};
-    const scheduleErrors: ScheduleError[] = [];
+    const scheduleErrors: { [idx: number]: ScheduleError } = {};
     const usedDays = new Set<string>();
 
     // Validar nombre
@@ -169,11 +171,23 @@ export const useGroupForm = (initialData?: Group) => {
     groupFormState.dailySchedules.forEach((schedule, idx) => {
       const scheduleError: ScheduleError = {};
 
+      // Extraer el valor real del día (soporta string o { value, label })
+      let dayValue = "";
+      if (typeof schedule.day === "string") {
+        dayValue = schedule.day;
+      } else if (
+        schedule.day &&
+        typeof schedule.day === "object" &&
+        "value" in schedule.day
+      ) {
+        dayValue = (schedule.day as any).value;
+      }
+
       // Validar día
-      if (!schedule.day) {
+      if (!dayValue) {
         scheduleError.day = "El día es requerido";
       } else {
-        const dayStr = String(schedule.day).toLowerCase();
+        const dayStr = String(dayValue).toLowerCase();
         if (usedDays.has(dayStr)) {
           scheduleError.day = "El día ya está asignado en otro horario";
         } else {
@@ -181,8 +195,18 @@ export const useGroupForm = (initialData?: Group) => {
         }
       }
 
-      // Validar turno
-      if (!schedule.turn) {
+      // Validar turno (soporta string o { value, label })
+      let turnValue = "";
+      if (typeof schedule.turn === "string") {
+        turnValue = schedule.turn;
+      } else if (
+        schedule.turn &&
+        typeof schedule.turn === "object" &&
+        "value" in schedule.turn
+      ) {
+        turnValue = (schedule.turn as any).value;
+      }
+      if (!turnValue) {
         scheduleError.turn = "El turno es requerido";
       }
 
@@ -194,13 +218,23 @@ export const useGroupForm = (initialData?: Group) => {
         scheduleError.endTime = "La hora de fin es requerida";
       }
 
+      // Solo agregar si hay errores en este horario
       if (Object.keys(scheduleError).length > 0) {
         scheduleErrors[idx] = scheduleError;
       }
     });
 
-    if (scheduleErrors.length > 0) {
-      errors.dailySchedules = scheduleErrors;
+    // Convertir los errores a un array solo con los índices que tienen errores
+    const scheduleErrorsArray =
+      Object.keys(scheduleErrors).length > 0
+        ? Object.entries(scheduleErrors).map(([idx, err]) => ({
+            ...err,
+            idx: Number(idx),
+          }))
+        : [];
+
+    if (scheduleErrorsArray.length > 0) {
+      errors.dailySchedules = scheduleErrorsArray;
     } else if (groupFormState.dailySchedules.length === 0) {
       errors.dailySchedules = [{ day: "Debe agregar al menos un horario" }];
     }
@@ -215,6 +249,7 @@ export const useGroupForm = (initialData?: Group) => {
       e?.preventDefault();
       if (!validateForm()) return false;
 
+      // Ordenar dailySchedules automáticamente antes de guardar
       const sortedSchedules = sortSchedules(groupFormState.dailySchedules);
       const groupToSend = {
         ...groupFormState,
@@ -224,29 +259,14 @@ export const useGroupForm = (initialData?: Group) => {
       try {
         if (initialData?._id) {
           await dispatch(updateGroup({ clubId, group: groupToSend })).unwrap();
-          dispatch(
-            setMessage({
-              message: "Grupo actualizado exitosamente",
-              type: "success",
-            })
-          );
+          toastr.success("Grupo actualizado exitosamente");
         } else {
           await dispatch(createGroup({ clubId, group: groupToSend })).unwrap();
-          dispatch(
-            setMessage({
-              message: "Grupo creado exitosamente",
-              type: "success",
-            })
-          );
+          toastr.success("Grupo creado exitosamente");
         }
         return true;
       } catch (error) {
-        dispatch(
-          setMessage({
-            message: "Ocurrió un error, inténtalo nuevamente",
-            type: "danger",
-          })
-        );
+        toastr.error("Error", "Ocurrió un error, inténtalo nuevamente");
         return false;
       }
     },

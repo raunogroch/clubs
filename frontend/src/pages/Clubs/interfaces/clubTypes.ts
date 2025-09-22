@@ -1,4 +1,4 @@
-import type { Group } from "../../Groups/interface/group.Interface";
+import type { IGroup } from "../../groups/interface/groupTypes";
 import type { Sport } from "../../Sports/interfaces";
 
 export interface Club {
@@ -8,7 +8,7 @@ export interface Club {
   place: string;
   sport: Sport;
   description: string;
-  groups: Group[];
+  groups: IGroup[];
   uniqueAthletesCount?: number;
   createdAt: string;
 }

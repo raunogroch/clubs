@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import React from "react";
-import { ImageWithFallback } from "../components";
+import { Image } from "../components";
 import { Role } from "../interfaces";
 import { roleRoutes } from "../routes";
 import { useDispatch, useSelector } from "react-redux";
@@ -121,7 +121,7 @@ export const SideNav = () => {
           <li className="nav-header">
             <div className="dropdown profile-element">
               {user.image ? (
-                <ImageWithFallback
+                <Image
                   src={user.image}
                   alt="image"
                   className="rounded-circle"

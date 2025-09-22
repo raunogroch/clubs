@@ -1,8 +1,8 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../services/api";
-import type { Group } from "../pages/Groups/interface/group.Interface";
+import type { IGroup } from "../pages/groups/interface/groupTypes";
 
-export const fetchGroups = createAsyncThunk<Group[], { clubId: string }>(
+export const fetchGroups = createAsyncThunk<IGroup[], { clubId: string }>(
   "groups/fetchGroups",
   async ({ clubId }, { rejectWithValue }) => {
     try {
@@ -15,8 +15,8 @@ export const fetchGroups = createAsyncThunk<Group[], { clubId: string }>(
 );
 
 export const createGroup = createAsyncThunk<
-  Group,
-  { clubId: string; group: Omit<Group, "_id"> }
+  IGroup,
+  { clubId: string; group: Omit<IGroup, "_id"> }
 >("groups/createGroup", async ({ clubId, group }, { rejectWithValue }) => {
   try {
     const response = await api.post(`/clubs/${clubId}/groups`, group);
@@ -27,8 +27,8 @@ export const createGroup = createAsyncThunk<
 });
 
 export const updateGroup = createAsyncThunk<
-  Group,
-  { clubId: string; group: Group }
+  IGroup,
+  { clubId: string; group: IGroup }
 >("groups/updateGroup", async ({ clubId, group }, { rejectWithValue }) => {
   try {
     const response = await api.patch(
@@ -54,7 +54,7 @@ export const deleteGroup = createAsyncThunk<
 });
 
 export const findGroupById = createAsyncThunk<
-  Group,
+  IGroup,
   { clubId: string; groupId: string }
 >("groups/findGroupById", async ({ clubId, groupId }, { rejectWithValue }) => {
   try {

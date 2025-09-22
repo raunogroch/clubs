@@ -1,4 +1,3 @@
-export * from "./ImageWithFallback";
 export * from "./Input";
 export * from "./PopUpMessage";
 export * from "./ImageCropperWithInput";
@@ -7,4 +6,5 @@ export * from "./Spinner";
 export * from "./SelectorList";
 export * from "./Image";
 export * from "./StaticMessage";
-export * from "./CheckboxList";
+export * from "./CheckBoxList";
+export * from "./Button";

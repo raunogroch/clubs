@@ -6,11 +6,11 @@ import {
   updateGroup,
   findGroupById,
 } from "./groupsThunks";
-import type { Group } from "../pages/Groups/interface/group.Interface";
+import type { IGroup } from "../pages/groups/interface/groupTypes";
 
 interface GroupsState {
-  selectedGroup: Group | null;
-  groups: Group[];
+  selectedGroup: IGroup | null;
+  groups: IGroup[];
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
 }

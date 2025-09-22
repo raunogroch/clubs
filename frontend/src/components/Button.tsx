@@ -9,7 +9,7 @@ interface ButtonProps {
   disabled?: boolean;
 }
 
-const Button: React.FC<ButtonProps> = ({
+export const Button: React.FC<ButtonProps> = ({
   type = "button",
   className = "btn",
   onClick,
@@ -27,5 +27,3 @@ const Button: React.FC<ButtonProps> = ({
     {name}
   </button>
 );
-
-export default Button;

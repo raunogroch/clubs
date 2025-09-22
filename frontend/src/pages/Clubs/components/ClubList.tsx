@@ -1,6 +1,6 @@
 import { useDispatch } from "react-redux";
 import swal from "sweetalert";
-import { ImageWithFallback } from "../../../components";
+import { Image } from "../../../components";
 import type { Club } from "../interfaces/clubTypes";
 import type { AppDispatch } from "../../../store/store";
 import { deleteClub } from "../../../store/clubsThunks";
@@ -41,7 +41,7 @@ export const ClubList = ({ clubs }: ClubProps) => {
           {clubs.map((club: Club, index: number) => (
             <tr key={index}>
               <td className="project-status">
-                <ImageWithFallback
+                <Image
                   src={club.image}
                   alt={club.name}
                   style={{ width: "50px", borderRadius: "50%" }}

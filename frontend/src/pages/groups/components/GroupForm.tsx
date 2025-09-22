@@ -1,19 +1,17 @@
 import React, { useEffect } from "react";
-import { CheckBoxList, Input, SelectorList } from "../../../components";
+import { CheckBoxList, Input, SelectorList, Button } from "../../../components";
 import { FormField } from "../../Clubs/components";
-import { useGroupForm } from "../hooks/useGroupForm";
-import { Turn, WeekDays } from "../interface/group.Interface";
-import type { Group } from "../interface/group.Interface";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch } from "../../../store";
 import { fetchEntities } from "../../../store/entitiesThunks";
-import Button from "../../../components/Button";
+import { Turn, WeekDays, type IGroup } from "../interface/groupTypes";
+import { useGroup } from "../hooks/useGroup";
 
 /**
  * Props para GroupForm
  */
 interface GroupFormProps {
-  initialData?: Group;
+  initialData?: IGroup;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
@@ -51,7 +49,34 @@ export const GroupForm: React.FC<GroupFormProps> = ({
     addSchedule,
     removeSchedule,
     handleScheduleChange,
-  } = useGroupForm(initialData);
+  } = useGroup(initialData);
+
+  // Ordenar dailySchedules para mostrar siempre en orden
+  const DAYS_ORDER = [
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Miercoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
+    "Sabado",
+    "Domingo",
+  ];
+  const getDayValue = (day: any) => {
+    if (typeof day === "string") return day;
+    if (day && typeof day === "object" && "value" in day) return day.value;
+    return "";
+  };
+  const sortedSchedules = [...formData.dailySchedules].sort((a, b) => {
+    const idxA = DAYS_ORDER.findIndex(
+      (d) => d.toLowerCase() === getDayValue(a.day).toLowerCase()
+    );
+    const idxB = DAYS_ORDER.findIndex(
+      (d) => d.toLowerCase() === getDayValue(b.day).toLowerCase()
+    );
+    return idxA - idxB;
+  });
 
   // Carga los entrenadores y atletas al montar el componente
   useEffect(() => {
@@ -84,7 +109,7 @@ export const GroupForm: React.FC<GroupFormProps> = ({
         </label>
         <div className="col-sm-10">
           <div className="mb-3">
-            {formData.dailySchedules.map((schedule, idx) => (
+            {sortedSchedules.map((schedule, idx) => (
               <div className="row mb-2" key={idx}>
                 <div className="col">
                   <SelectorList

@@ -1,7 +1,12 @@
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { PopUpMessage, NavHeader } from "../../../components";
+import {
+  PopUpMessage,
+  NavHeader,
+  StaticMessage,
+  Spinner,
+} from "../../../components";
 import type { pageParamProps } from "../../../interfaces";
 import type { AppDispatch, RootState } from "../../../store/store";
 import { GroupForm } from "./GroupForm";
@@ -34,31 +39,32 @@ export const GroupEdit = ({ name, sub, sub1 }: pageParamProps) => {
     <>
       <NavHeader name={name} sub={sub} sub1={sub1} />
       <PopUpMessage />
-      <div className="wrapper wrapper-content animated fadeInRight">
-        <div className="row">
-          <div className="col-12">
-            <div className="ibox ">
-              <div className="ibox-title">
-                <h5>Editar Club</h5>
-              </div>
-              <div className="ibox-content">
-                <div className="row">
-                  <div className="col-sm-12">
-                    {error && <div className="alert alert-danger">{error}</div>}
-                    {status === "succeeded" && (
+      {error && <StaticMessage message={error} type="danger" />}
+      {status === "loading" && <Spinner />}
+      {status === "succeeded" && (
+        <div className="wrapper wrapper-content animated fadeInRight">
+          <div className="row">
+            <div className="col-12">
+              <div className="ibox ">
+                <div className="ibox-title">
+                  <h5>Editar Club</h5>
+                </div>
+                <div className="ibox-content">
+                  <div className="row">
+                    <div className="col-sm-12">
                       <GroupForm
                         initialData={group}
                         onSuccess={handleSuccess}
                         onCancel={handleCancel}
                       />
-                    )}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   );
 };

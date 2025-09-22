@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import {
-  ImageWithFallback,
+  Image,
   PopUpMessage,
   Spinner,
   StaticMessage,
@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchGroups } from "../../../store/groupsThunks";
 import { Link, useParams } from "react-router-dom";
 import type { AppDispatch } from "../../../store/store";
-import type { IGroup } from "../interface/group.Interface";
+import type { IGroup } from "../interface/groupTypes";
 
 export const Groups = ({ name, sub }: pageParamProps) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -69,7 +69,7 @@ export const Groups = ({ name, sub }: pageParamProps) => {
                         </td>
                         <td className="project-people">
                           {group.athletes.map((a: any, index: number) => (
-                            <ImageWithFallback
+                            <Image
                               key={index}
                               alt="image"
                               className="rounded-circle"
