@@ -1,6 +1,6 @@
 import type { User } from "../../../interfaces";
 
-export interface Group {
+export interface IGroup {
   _id?: string;
   name: string;
   dailySchedules: DailySchedule[];
@@ -11,11 +11,11 @@ export interface Group {
 }
 
 export type GroupErrors = {
-  [key in keyof Group]?: string;
+  [key in keyof IGroup]?: string;
 };
 
 export interface GroupFormProps {
-  initialData?: Group;
+  initialData?: IGroup;
   onSuccess?: () => void;
   onCancel?: () => void;
 }

@@ -1,5 +1,10 @@
 import { useEffect } from "react";
-import { Image, PopUpMessage } from "../../../components";
+import {
+  ImageWithFallback,
+  PopUpMessage,
+  Spinner,
+  StaticMessage,
+} from "../../../components";
 import { NavHeader } from "../../../components/NavHeader";
 import type { pageParamProps } from "../../../interfaces/pageParamProps";
 import { useDispatch, useSelector } from "react-redux";
@@ -7,7 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchGroups } from "../../../store/groupsThunks";
 import { Link, useParams } from "react-router-dom";
 import type { AppDispatch } from "../../../store/store";
-import type { Group } from "../interface/group.Interface";
+import type { IGroup } from "../interface/group.Interface";
 
 export const Groups = ({ name, sub }: pageParamProps) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -21,11 +26,8 @@ export const Groups = ({ name, sub }: pageParamProps) => {
     <>
       <NavHeader name={name} sub={sub} pageCreate="Nuevo grupo" />
       <PopUpMessage />
-      {error && (
-        <div className="alert alert-danger text-center" role="alert">
-          {error}
-        </div>
-      )}
+      {error && <StaticMessage type="danger" message={error} />}
+      {status === "loading" && <Spinner />}
       {status === "succeeded" && groups.length === 0 ? (
         <div className="wrapper wrapper-content">
           <div className="middle-box text-center animated fadeInRightBig">
@@ -53,7 +55,7 @@ export const Groups = ({ name, sub }: pageParamProps) => {
               <div className="project-list">
                 <table className="table table-hover">
                   <tbody>
-                    {groups.map((group: Group, index: number) => (
+                    {groups.map((group: IGroup, index: number) => (
                       <tr key={index}>
                         <td className="project-status">
                           <span className="label label-primary">
@@ -66,14 +68,14 @@ export const Groups = ({ name, sub }: pageParamProps) => {
                           <small>Created 14.08.2014</small>
                         </td>
                         <td className="project-people">
-                          {group.athletes.map((a: any, i: number) => (
-                            <a key={i} href="">
-                              <Image
-                                alt="image"
-                                className="rounded-circle"
-                                src={a.image}
-                              />
-                            </a>
+                          {group.athletes.map((a: any, index: number) => (
+                            <ImageWithFallback
+                              key={index}
+                              alt="image"
+                              className="rounded-circle"
+                              src={a.image}
+                              style={{ marginRight: "5px" }}
+                            />
                           ))}
                         </td>
                         <td className="project-actions">

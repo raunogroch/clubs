@@ -1,4 +1,4 @@
-import type { Group } from "../../groups/interface/group.Interface";
+import type { Group } from "../../Groups/interface/group.Interface";
 import type { Sport } from "../../Sports/interfaces";
 
 export interface Club {

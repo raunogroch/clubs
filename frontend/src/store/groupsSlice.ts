@@ -6,7 +6,7 @@ import {
   updateGroup,
   findGroupById,
 } from "./groupsThunks";
-import type { Group } from "../pages/groups/interface/group.Interface";
+import type { Group } from "../pages/Groups/interface/group.Interface";
 
 interface GroupsState {
   selectedGroup: Group | null;

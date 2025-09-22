@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../services/api";
-import type { Group } from "../pages/groups/interface/group.Interface";
+import type { Group } from "../pages/Groups/interface/group.Interface";
 
 export const fetchGroups = createAsyncThunk<Group[], { clubId: string }>(
   "groups/fetchGroups",

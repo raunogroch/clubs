@@ -30,6 +30,8 @@ export const UserTable = ({ users }: UsersTableProps) => {
     return (page - 1) * limit + index + 1;
   };
 
+  const location = window.location.pathname.split("/")[2];
+
   return (
     <div className="table-responsive">
       <table className="table table-striped">
@@ -65,7 +67,7 @@ export const UserTable = ({ users }: UsersTableProps) => {
 
               <td className="text-center align-middle">
                 <Link
-                  to={`/users/edit/${user._id}`}
+                  to={`/users/${location}/edit/${user._id}`}
                   className="text-success m-2"
                 >
                   <i className="fa fa-edit"></i> Editar

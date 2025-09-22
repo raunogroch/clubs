@@ -7,6 +7,13 @@ interface NavHeaderProps {
   pageCreate?: string;
 }
 
+function getUserSection(pathname: string) {
+  if (pathname.includes("general")) return "/general";
+  if (pathname.includes("coaches")) return "/coaches";
+  if (pathname.includes("athletes")) return "/athletes";
+  return "";
+}
+
 export const NavHeader = ({ name, sub, sub1, pageCreate }: NavHeaderProps) => {
   const pageTitle = name || "Principal";
   const isPrincipalPage = pageTitle === "Principal";
@@ -20,7 +27,11 @@ export const NavHeader = ({ name, sub, sub1, pageCreate }: NavHeaderProps) => {
   if (name && !isPrincipalPage) {
     breadcrumbItems.push({
       label: name,
-      to: sub ? `/${location.pathname.split("/")[1]}` : undefined,
+      to: sub
+        ? `/${location.pathname.split("/")[1]}${getUserSection(
+            location.pathname
+          )}`
+        : undefined,
     });
   }
   if (sub) {

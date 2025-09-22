@@ -26,6 +26,8 @@ export const AthleteTable = ({ users }: UsersTableProps) => {
     }
   };
 
+  const location = window.location.pathname.split("/")[2];
+
   const getSequentialNumber = (index: number) => {
     return (page - 1) * limit + index + 1;
   };
@@ -55,7 +57,7 @@ export const AthleteTable = ({ users }: UsersTableProps) => {
 
               <td className="text-center align-middle">
                 <Link
-                  to={`/users/edit/${user._id}`}
+                  to={`/users/${location}/edit/${user._id}`}
                   className="text-success m-2"
                 >
                   <i className="fa fa-edit"></i> Editar

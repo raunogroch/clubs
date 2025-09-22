@@ -18,9 +18,9 @@ import {
   ProfileAdmin,
   ProfileCoach,
 } from "../pages";
-import { Groups } from "../pages/groups/components/Groups";
-import { GroupsNew } from "../pages/groups/components/GroupsNew";
-import { GroupEdit } from "../pages/groups/components/GroupEdit";
+import { Groups } from "../pages/Groups/components/Groups";
+import { GroupsNew } from "../pages/Groups/components/GroupsNew";
+import { GroupEdit } from "../pages/Groups/components/GroupEdit";
 import { AthleteEdit, AthleteNew, Athletes } from "../pages/Athletes";
 import { CoachEdit, Coaches, CoachNew } from "../pages/Coaches/components";
 

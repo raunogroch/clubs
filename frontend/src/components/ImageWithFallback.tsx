@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Image } from "./Image";
 
 interface ImageProps {
   src: string;
@@ -7,7 +8,6 @@ interface ImageProps {
   style?: React.CSSProperties;
 }
 
-const backendUri = import.meta.env.VITE_BACKEND_URI;
 export const ImageWithFallback = ({
   src,
   className,
@@ -29,19 +29,18 @@ export const ImageWithFallback = ({
 
   return (
     <>
-      {!isLoaded && !hasError && (
-        <p>Cargando...</p> // O un spinner
-      )}
+      {!isLoaded && !hasError && <p>Cargando...</p>}
       {hasError ? (
-        <img
+        <Image
           src="no-image.jpg"
           alt="no-image"
           className={className}
           style={style}
-        /> // O un mensaje de error
+          local
+        />
       ) : (
-        <img
-          src={`${backendUri}${src}`}
+        <Image
+          src={src}
           alt={alt}
           onLoad={handleLoad}
           onError={handleError}
