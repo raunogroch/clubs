@@ -1,21 +1,20 @@
 import { useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
+import { findGroupById } from "../../../store/groupsThunks";
+import { GroupForm } from "./GroupForm";
 import {
-  PopUpMessage,
   NavHeader,
+  PopUpMessage,
   StaticMessage,
   Spinner,
 } from "../../../components";
+import type { AppDispatch, RootState } from "../../../store";
 import type { pageParamProps } from "../../../interfaces";
-import type { AppDispatch, RootState } from "../../../store/store";
-import { GroupForm } from "./GroupForm";
-import { findGroupById } from "../../../store/groupsThunks";
 
 export const GroupEdit = ({ name, sub, sub1 }: pageParamProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-
   const { clubId, groupId } = useParams<{ clubId: string; groupId: string }>();
   const {
     selectedGroup: group,
@@ -25,22 +24,18 @@ export const GroupEdit = ({ name, sub, sub1 }: pageParamProps) => {
 
   useEffect(() => {
     dispatch(findGroupById({ clubId, groupId }));
-  }, [groupId, dispatch]);
+  }, [dispatch, clubId, groupId]);
 
-  const handleSuccess = () => {
-    navigate(`/clubs/${clubId}/groups`);
-  };
+  const handleSuccess = () => navigate(`/clubs/${clubId}/groups`);
+  const handleCancel = () => navigate(`/clubs/${clubId}/groups`);
 
-  const handleCancel = () => {
-    navigate(`/clubs/${clubId}/groups`);
-  };
+  if (status === "loading") return <Spinner />;
 
   return (
     <>
       <NavHeader name={name} sub={sub} sub1={sub1} />
       <PopUpMessage />
       {error && <StaticMessage message={error} type="danger" />}
-      {status === "loading" && <Spinner />}
       {status === "succeeded" && (
         <div className="wrapper wrapper-content animated fadeInRight">
           <div className="row">

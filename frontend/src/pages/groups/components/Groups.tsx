@@ -1,18 +1,17 @@
 import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useParams } from "react-router-dom";
+import { fetchGroups } from "../../../store/groupsThunks";
+import { NavHeader } from "../../../components/NavHeader";
 import {
   Image,
   PopUpMessage,
   Spinner,
   StaticMessage,
 } from "../../../components";
-import { NavHeader } from "../../../components/NavHeader";
-import type { pageParamProps } from "../../../interfaces/pageParamProps";
-import { useDispatch, useSelector } from "react-redux";
-
-import { fetchGroups } from "../../../store/groupsThunks";
-import { Link, useParams } from "react-router-dom";
 import type { AppDispatch } from "../../../store/store";
 import type { IGroup } from "../interface/groupTypes";
+import type { pageParamProps } from "../../../interfaces/pageParamProps";
 
 export const Groups = ({ name, sub }: pageParamProps) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -20,15 +19,19 @@ export const Groups = ({ name, sub }: pageParamProps) => {
   const { clubId } = useParams();
 
   useEffect(() => {
-    dispatch(fetchGroups({ clubId })).unwrap();
-  }, [dispatch]);
+    if (clubId) dispatch(fetchGroups({ clubId })).unwrap();
+  }, [dispatch, clubId]);
+
+  const sortedGroups = [...groups].sort((a, b) => a.name.localeCompare(b.name));
+
+  if (status === "loading") return <Spinner />;
+
   return (
     <>
       <NavHeader name={name} sub={sub} pageCreate="Nuevo grupo" />
       <PopUpMessage />
       {error && <StaticMessage type="danger" message={error} />}
-      {status === "loading" && <Spinner />}
-      {status === "succeeded" && groups.length === 0 ? (
+      {status === "succeeded" && sortedGroups.length === 0 ? (
         <div className="wrapper wrapper-content">
           <div className="middle-box text-center animated fadeInRightBig">
             <h3 className="font-bold">No existen grupos</h3>
@@ -55,10 +58,14 @@ export const Groups = ({ name, sub }: pageParamProps) => {
               <div className="project-list">
                 <table className="table table-hover">
                   <tbody>
-                    {groups.map((group: IGroup, index: number) => (
+                    {sortedGroups.map((group: IGroup, index: number) => (
                       <tr key={index}>
                         <td className="project-status">
-                          <span className="label label-primary">
+                          <span
+                            className={`label label-${
+                              group.active ? "primary" : "danger"
+                            }`}
+                          >
                             {group.active ? "Activo" : "Inactivo"}
                           </span>
                         </td>
@@ -68,9 +75,9 @@ export const Groups = ({ name, sub }: pageParamProps) => {
                           <small>Created 14.08.2014</small>
                         </td>
                         <td className="project-people">
-                          {group.athletes.map((a: any, index: number) => (
+                          {group.athletes.map((a: any, idx: number) => (
                             <Image
-                              key={index}
+                              key={idx}
                               alt="image"
                               className="rounded-circle"
                               src={a.image}

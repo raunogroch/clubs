@@ -8,6 +8,15 @@ import { AuthProvider, PrivateRoute } from "./auth";
 import { Login, NotFound } from "./pages";
 import { roleRoutes } from "./routes";
 import { useSelector } from "react-redux";
+import toastr from "toastr";
+import "toastr/build/toastr.min.css";
+
+toastr.options = {
+  closeButton: true,
+  progressBar: true,
+  positionClass: "toast-top-right",
+  timeOut: 3000,
+};
 
 export const App = () => {
   return (

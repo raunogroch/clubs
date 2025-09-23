@@ -1,11 +1,11 @@
-import { useNavigate } from "react-router-dom";
-import { NavHeader, PopUpMessage } from "../../../components";
-import { GroupForm } from "./GroupForm";
-import type { pageParamProps } from "../../../interfaces";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
 import { fetchEntities } from "../../../store/entitiesThunks";
-import type { AppDispatch } from "../../../store/store";
+import { NavHeader, PopUpMessage } from "../../../components";
+import { GroupForm } from "./GroupForm";
+import type { AppDispatch } from "../../../store";
+import type { pageParamProps } from "../../../interfaces";
 
 export const GroupsNew = ({
   name,
@@ -14,18 +14,14 @@ export const GroupsNew = ({
 }: pageParamProps & { sub1?: string }) => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-
-  const handleSuccess = () => {
-    navigate("/clubs");
-  };
-
-  const handleCancel = () => {
-    navigate("/clubs");
-  };
+  const { clubId } = useParams();
 
   useEffect(() => {
     dispatch(fetchEntities());
   }, [dispatch]);
+
+  const handleSuccess = () => navigate(`/clubs/${clubId}/groups`);
+  const handleCancel = () => navigate(`/clubs/${clubId}/groups`);
 
   return (
     <>
