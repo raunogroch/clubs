@@ -5,19 +5,11 @@ export * from "./Clubs/components/Clubs";
 export * from "./Clubs/components/ClubEdit";
 export * from "./Clubs/components/ClubForm";
 export * from "./Clubs/components/ClubNew";
-// export * from "./Clubs/components/ClubTable";
 export * from "./Clubs/components/FormField";
 
 export * from "./Profile/components/ProfileAthlete";
 export * from "./Profile/components/ProfileAdmin";
 export * from "./Profile/components/ProfileCoach";
-
-export * from "./Schedule/components/Schedule";
-export * from "./Schedule/components/ScheduleEdit";
-export * from "./Schedule/components/ScheduleForm";
-export * from "./Schedule/components/ScheduleNew";
-export * from "./Schedule/components/ScheduleSelector";
-export * from "./Schedule/components/ScheduleTable";
 
 export * from "./Sports/components/Sports";
 export * from "./Sports/components/SportEdit";

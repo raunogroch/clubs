@@ -4,9 +4,6 @@ import {
   ClubNew,
   Clubs,
   Dashboard,
-  Schedule,
-  ScheduleEdit,
-  ScheduleNew,
   SportEdit,
   SportNew,
   Sports,
@@ -80,20 +77,6 @@ export const roleRoutes: RoleRoutes = {
     {
       path: "/sports/edit/:id",
       element: <SportEdit name="Registros" sub="Actualizar" />,
-    },
-    {
-      path: "/schedules",
-      icon: "fa-clock-o",
-      label: "Horarios",
-      element: <Schedule name="Horarios" />,
-    },
-    {
-      path: "/schedules/create",
-      element: <ScheduleNew name="Horarios" sub="Crear" />,
-    },
-    {
-      path: "/schedules/edit/:id",
-      element: <ScheduleEdit name="Horarios" sub="Actualizar" />,
     },
     {
       path: "/users",
@@ -181,20 +164,6 @@ export const roleRoutes: RoleRoutes = {
       element: <SportEdit name="Registros" sub="Actualizar" />,
     },
     {
-      path: "/schedules",
-      icon: "fa-clock-o",
-      label: "Horarios",
-      element: <Schedule name="Horarios" />,
-    },
-    {
-      path: "/schedules/create",
-      element: <ScheduleNew name="Horarios" sub="Crear" />,
-    },
-    {
-      path: "/schedules/edit/:id",
-      element: <ScheduleEdit name="Horarios" sub="Actualizar" />,
-    },
-    {
       path: "/users",
       icon: "fa-user-circle",
       label: "Gestion de usuarios",
@@ -274,12 +243,6 @@ export const roleRoutes: RoleRoutes = {
       label: "Disciplina",
       element: <Sports name="Disciplinas" />,
     },
-    {
-      path: "/schedules",
-      icon: "fa-clock-o",
-      label: "Horarios",
-      element: <Schedule name="Horarios" />,
-    },
   ],
   athlete: [
     {
@@ -317,12 +280,6 @@ export const roleRoutes: RoleRoutes = {
       icon: "fa-soccer-ball-o",
       label: "Disciplina",
       element: <Sports name="Disciplinas" />,
-    },
-    {
-      path: "/schedules",
-      icon: "fa-clock-o",
-      label: "Horarios",
-      element: <Schedule name="Horarios" />,
     },
   ],
 };

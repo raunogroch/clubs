@@ -8,12 +8,11 @@ export const useClubCatalogs = () => {
 
   const coaches = useSelector((state: RootState) => state.entities.coaches);
   const athletes = useSelector((state: RootState) => state.entities.athletes);
-  const schedules = useSelector((state: RootState) => state.entities.schedules);
   const sports = useSelector((state: RootState) => state.entities.sports);
 
   useEffect(() => {
     dispatch(fetchEntities() as any);
   }, [dispatch]);
 
-  return { sports, coaches, athletes, schedules };
+  return { sports, coaches, athletes };
 };
