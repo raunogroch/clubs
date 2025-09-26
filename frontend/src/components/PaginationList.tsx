@@ -1,10 +1,21 @@
 import { useDispatch } from "react-redux";
 import { setPage } from "../store/filterSlice";
 
+/* 
+  En filter tiene que ir el objeto con pafinacion 
+  
+  const { users, status, error } = useSelector(
+    (state: RootState) => state.users
+  );
+
+  usar la variable users asi:
+  <PaginationList filter={users} />
+*/
+
 export const PaginationList = ({ filter }) => {
   const dispatch = useDispatch();
 
-  const totalPages = Math.ceil(filter.total / filter.limit);
+  const totalPages = Math.max(1, Math.ceil(filter.total / filter.limit));
 
   const handlePageChange = (page: number) => {
     dispatch(setPage(page));
@@ -33,6 +44,8 @@ export const PaginationList = ({ filter }) => {
 
     return pages;
   };
+
+  if (totalPages <= 1) return null; // No mostrar paginación si solo hay una página
 
   return (
     <div className="pagination d-flex justify-content-center mt-3">

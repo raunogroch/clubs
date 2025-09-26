@@ -63,7 +63,7 @@ export const UserListGeneric = ({
                 {status === "succeeded" && <TableComponent users={userList} />}
                 {status === "loading" && <div>Cargando...</div>}
                 {status === "failed" && <div>Error: {error}</div>}
-                <PaginationList filter={filter} />
+                <PaginationList filter={users} />
               </div>
             </div>
           </div>
