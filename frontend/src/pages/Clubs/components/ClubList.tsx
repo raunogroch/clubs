@@ -1,17 +1,18 @@
 import { useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
 import swal from "sweetalert";
 import { Image } from "../../../components";
-import type { Club } from "../interfaces/clubTypes";
-import type { AppDispatch } from "../../../store/store";
 import { deleteClub } from "../../../store/clubsThunks";
-import { setMessage } from "../../../store/messageSlice";
-import { Link } from "react-router-dom";
+import type { AppDispatch } from "../../../store/store";
+import type { Club } from "../interfaces/clubTypes";
 
 interface ClubProps {
   clubs: Club[];
 }
+
 export const ClubList = ({ clubs }: ClubProps) => {
   const dispatch = useDispatch<AppDispatch>();
+
   const handleDelete = async (id?: string) => {
     if (!id) return;
     swal({
@@ -24,12 +25,6 @@ export const ClubList = ({ clubs }: ClubProps) => {
       if (willDelete) {
         dispatch(deleteClub(id)).unwrap();
         swal("Eliminado!", "El club ha sido eliminado.", "success");
-        dispatch(
-          setMessage({
-            message: "Club eliminado exitosamente",
-            type: "warning",
-          })
-        );
       }
     });
   };
@@ -62,7 +57,10 @@ export const ClubList = ({ clubs }: ClubProps) => {
                 </small>
               </td>
               <td className="project-people">
-                Grupos: {club.groups?.length || 0}
+                Grupos activos:
+                {Array.isArray(club.groups)
+                  ? club.groups.filter((g: any) => g.active).length
+                  : 0}
               </td>
               <td className="project-people">
                 Deportistas: {club.uniqueAthletesCount}

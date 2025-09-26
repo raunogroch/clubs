@@ -1,15 +1,12 @@
-import type { pageParamProps } from "../../../interfaces";
-import {
-  PopUpMessage,
-  NavHeader,
-  Spinner,
-  StaticMessage,
-} from "../../../components";
-import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { PopUpMessage, NavHeader, Spinner } from "../../../components";
 import { fetchClubs } from "../../../store/clubsThunks";
-import type { AppDispatch } from "../../../store/store";
 import { ClubList } from "./ClubList";
+import toastr from "toastr";
+import "toastr/build/toastr.min.css";
+import type { AppDispatch } from "../../../store";
+import type { pageParamProps } from "../../../interfaces";
 
 export const Clubs = ({ name }: pageParamProps) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -19,13 +16,13 @@ export const Clubs = ({ name }: pageParamProps) => {
     dispatch(fetchClubs());
   }, [dispatch]);
 
+  if (status === "loading") return <Spinner />;
+  if (error) toastr.error(error);
+
   return (
     <>
       <NavHeader name={name} pageCreate="Nuevo club" />
       <PopUpMessage />
-      {status === "loading" && <Spinner />}
-      {error && <StaticMessage message={error} type="danger" />}
-
       {status === "succeeded" && (
         <div className="wrapper wrapper-content animated fadeInRight">
           <div className="row">

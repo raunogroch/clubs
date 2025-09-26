@@ -1,21 +1,17 @@
 import { useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  PopUpMessage,
-  NavHeader,
-  Spinner,
-  StaticMessage,
-} from "../../../components";
-import { ClubForm } from ".";
-import type { pageParamProps } from "../../../interfaces";
+import { useNavigate, useParams } from "react-router-dom";
 import { findClubById } from "../../../store/clubsThunks";
+import { PopUpMessage, NavHeader, Spinner } from "../../../components";
+import { ClubForm } from ".";
+import toastr from "toastr";
+import "toastr/build/toastr.min.css";
 import type { AppDispatch, RootState } from "../../../store/store";
+import type { pageParamProps } from "../../../interfaces";
 
 export const ClubEdit = ({ name, sub }: pageParamProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-
   const { id } = useParams<{ id: string }>();
   const {
     selectedClub: club,
@@ -25,22 +21,18 @@ export const ClubEdit = ({ name, sub }: pageParamProps) => {
 
   useEffect(() => {
     dispatch(findClubById(id));
-  }, [id, dispatch]);
+  }, [dispatch, id]);
 
-  const handleSuccess = () => {
-    navigate("/clubs");
-  };
+  const handleSuccess = () => navigate("/clubs");
+  const handleCancel = () => navigate("/clubs");
 
-  const handleCancel = () => {
-    navigate("/clubs");
-  };
+  if (status === "loading") return <Spinner />;
+  if (error) toastr.error(error);
 
   return (
     <>
       <NavHeader name={name} sub={sub} />
       <PopUpMessage />
-      {status === "loading" && <Spinner />}
-      {error && <StaticMessage message={error} type="danger" />}
       {status === "succeeded" && (
         <div className="wrapper wrapper-content animated fadeInRight">
           <div className="row">

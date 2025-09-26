@@ -1,21 +1,25 @@
 import { useState } from "react";
 import type { ClubErrors, Club } from "../interfaces";
 import { useDispatch } from "react-redux";
-import { setMessage, type AppDispatch } from "../../../store";
+import { type AppDispatch } from "../../../store";
 import { createClub, updateClub } from "../../../store/clubsThunks";
-import type { Sport } from "../../Sports/interfaces";
+import toastr from "toastr";
+import "toastr/build/toastr.min.css";
+
+const emptyClub: Club = {
+  name: "",
+  place: "",
+  sport: "" as any,
+  description: "",
+  groups: [],
+  createdAt: "",
+  image: "",
+  uniqueAthletesCount: 0,
+};
 
 export const useClubForm = (initialData?: Club) => {
   const dispatch = useDispatch<AppDispatch>();
-  const [formData, setFormData] = useState<Club>(
-    initialData || {
-      image: "",
-      name: "",
-      place: "",
-      sport: "" as unknown as Sport,
-      description: "",
-    }
-  );
+  const [formData, setFormData] = useState<Club>(initialData ?? emptyClub);
 
   const [errors, setErrors] = useState<ClubErrors>({});
 
@@ -51,17 +55,14 @@ export const useClubForm = (initialData?: Club) => {
     try {
       if (initialData?._id) {
         await dispatch(updateClub(formData)).unwrap();
+        toastr.success("Club actualizado con exito");
       } else {
         await dispatch(createClub(formData)).unwrap();
+        toastr.success("Club creado con exito");
       }
       return true;
     } catch (error) {
-      dispatch(
-        setMessage({
-          message: "Ocurrió un error, inténtalo nuevamente",
-          type: "danger",
-        })
-      );
+      toastr.error("Error al guardar el club");
     }
     return false;
   };
