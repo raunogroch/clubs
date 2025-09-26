@@ -20,6 +20,7 @@ import { GroupsNew } from "../pages/groups/components/GroupsNew";
 import { GroupEdit } from "../pages/groups/components/GroupEdit";
 import { AthleteEdit, AthleteNew, Athletes } from "../pages/Athletes";
 import { CoachEdit, Coaches, CoachNew } from "../pages/Coaches/components";
+import { DashboardCoach } from "../pages/dashboardCoaches/DashboardCoach";
 
 export type MenuRoute = {
   path: string;
@@ -224,24 +225,7 @@ export const roleRoutes: RoleRoutes = {
       path: "/",
       icon: "fa-home",
       label: "Principal",
-      element: <Dashboard />,
-    },
-    {
-      path: "/profile",
-      label: "Perfil",
-      element: <ProfileCoach name="Perfil" />,
-    },
-    {
-      path: "/clubs",
-      icon: "fa-diamond",
-      label: "Clubs",
-      element: <Clubs name="Clubs" />,
-    },
-    {
-      path: "/sports",
-      icon: "fa-soccer-ball-o",
-      label: "Disciplina",
-      element: <Sports name="Disciplinas" />,
+      element: <DashboardCoach />,
     },
   ],
   athlete: [
