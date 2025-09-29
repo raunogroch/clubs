@@ -8,11 +8,13 @@ import { UserRepository } from './repository/user.repository';
 import { UserValidatorService } from './user-validator.service';
 import { ImageService } from '../utils';
 import { UserPasswordService } from './user-password.service';
+import { GroupsModule } from 'src/clubs/groups/groups.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     ClubsModule,
+    GroupsModule,
   ],
   controllers: [UsersController],
   providers: [

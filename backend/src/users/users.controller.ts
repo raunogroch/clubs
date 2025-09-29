@@ -35,11 +35,9 @@ export class UsersController {
   /**
    * Endpoint para obtener los clubes donde el usuario atleta está inscrito
    */
-  @Get(':id/clubs')
-  @Roles(Role.ATHLETE)
-  async getAthleteClubs(@Param('id') id: string) {
-    //return this.clubsService.findClubsByUserId(id);
-    return;
+  @Get(':id/clubs-groups')
+  async getClubsAndGroupsByUser(@Param('id') id: string) {
+    return this.usersService.getClubsAndGroupsByUser(id);
   }
 
   /**

@@ -8,6 +8,7 @@ import { Inject } from '@nestjs/common';
 import { UserValidatorService } from './user-validator.service';
 import { UserPasswordService } from './user-password.service';
 import { ImageService } from 'src/utils';
+import { GroupsUserHelperService } from '../clubs/groups/groups-user-helper.service';
 
 interface currentAuth {
   sub: string;
@@ -21,7 +22,27 @@ export class UsersService {
     private readonly userValidator: UserValidatorService,
     private readonly userImageService: ImageService,
     private readonly userPasswordService: UserPasswordService,
+    private readonly groupsUserHelperService: GroupsUserHelperService,
   ) {}
+  /**
+   * Obtiene los clubes y grupos en los que el usuario está agregado
+   */
+  async getClubsAndGroupsByUser(userId: string) {
+    // Busca los grupos donde el usuario es coach o athlete
+    const groups = await this.groupsUserHelperService.findGroupsByUser(userId);
+    // Agrupa los grupos por club
+    const clubsMap = new Map();
+    groups.forEach((group: any) => {
+      const club = group.clubId;
+      if (!club) return;
+      if (!clubsMap.has(club._id.toString())) {
+        clubsMap.set(club._id.toString(), { club, groups: [] });
+      }
+      clubsMap.get(club._id.toString()).groups.push(group);
+    });
+    // Devuelve un array de clubes con sus grupos correspondientes
+    return Array.from(clubsMap.values());
+  }
 
   folder = 'profile'; // Define la carpeta donde se guardaran las fotos de perfil
 
