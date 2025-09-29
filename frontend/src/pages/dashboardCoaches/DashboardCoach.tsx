@@ -1,70 +1,96 @@
-import { Link } from "react-router-dom";
 import { NavHeader } from "../../components/NavHeader";
 import type { pageParamProps } from "../../interfaces/pageParamProps";
-import { useUserClubs } from "./hooks";
-import { Image } from "../../components";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch } from "../../store";
+import { useEffect } from "react";
+import { fetchUser } from "../../store/coachThunks";
+import { Image, Spinner } from "../../components";
 
 export const DashboardCoach = ({ name }: pageParamProps) => {
-  const { clubs } = useUserClubs();
+  const dispatch = useDispatch<AppDispatch>();
+  const userId = JSON.parse(localStorage.getItem("user")).code;
+  const { selectedUser, status, error } = useSelector(
+    (state: any) => state.coach
+  );
+
+  useEffect(() => {
+    dispatch(fetchUser({ userId }));
+  }, [dispatch]);
+
+  console.log("selectedUser", selectedUser);
+  if (status === "loading") <Spinner />;
+
+  if (error) return <div>Error: {error}</div>;
+
+  if (!selectedUser) return <div>No user data available.</div>;
 
   return (
     <>
       <NavHeader name={name} />
       <div className="wrapper wrapper-content animated fadeInRight">
-        <div className="row ">
-          {clubs?.map((club) => (
-            <div key={club._id} className="col-lg-4">
-              <div className="contact-box">
-                <Link className="row" to="profile.html">
-                  <div className="col-4">
-                    <div className="text-center">
-                      {club.image ? (
+        {Array.isArray(selectedUser) &&
+          selectedUser.map((data) => (
+            <div className="row" key={data.club._id}>
+              <div className="col-lg-12">
+                <div className="ibox">
+                  <div className="ibox-title">
+                    <strong className="m-l-xs">Club: {data.club.name}</strong>
+                    <span className="badge badge-info m-l-sm">
+                      {data.groups.length} grupos
+                    </span>
+                  </div>
+                  <div className="ibox-content" style={{ display: "block" }}>
+                    <div className="row">
+                      <div className="col-md-2 text-center">
                         <Image
-                          src={club.image}
-                          alt={club._id}
-                          className="img-fluid rounded-circle"
-                          style={{ width: "100%" }}
+                          src={data.club.image}
+                          alt={data.club.name}
+                          className="rounded-circle"
+                          width="70%"
                         />
-                      ) : (
-                        "Sin logo"
-                      )}
-
-                      <div className="m-t-xs font-bold">
-                        {club.discipline.name.toUpperCase()}
+                      </div>
+                      <div className="col-md-10">
+                        {data.groups.map((group: any) => (
+                          <div className="panel panel-default" key={group._id}>
+                            <div
+                              className="panel-heading"
+                              style={{ cursor: "pointer" }}
+                              data-toggle="collapse"
+                              data-target={`#grupo-${group._id}`}
+                            >
+                              <h5 className="m-t-sm">
+                                <i className="fa fa-group text-info"></i>
+                                &nbsp;
+                                {group.name} &nbsp;
+                                <span className="badge badge-primary">
+                                  {group.athletes.length} atletas
+                                </span>
+                                <i className="fa fa-chevron-down pull-right"></i>
+                              </h5>
+                            </div>
+                            <div
+                              id={`grupo-${group._id}`}
+                              className="panel-collapse collapse"
+                            >
+                              <div className="panel-body">
+                                <div className="row">
+                                  {group.athletes.map((athleteId) => (
+                                    <div className="col-md-4" key={athleteId}>
+                                      <span>{athleteId}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
-                  <div className="col-8">
-                    <h3>
-                      <strong>Club&nbsp;{club.name}</strong>
-                    </h3>
-                    <p>
-                      <i className="fa fa-map-marker"></i> {club.place}
-                      <br />
-                      <i className="fa fa-clock-o"></i>
-                      {club.schedule.startTime} Hrs - {club.schedule.endTime}
-                      Hrs
-                    </p>
-                    <div>
-                      <strong>Entrenador</strong>
-                      <br />
-                      {club.coaches
-                        .map((coach: any) => `${coach.name} ${coach.lastname}`)
-                        .join(", ")}
-                      <br />
-                      {/*San Francisco, CA 94107*/}
-                      <br />
-                      <abbr title="Phone">
-                        <i className="fa fa-phone"></i>
-                      </abbr>
-                      &nbsp; (591) 456-7890
-                    </div>
-                  </div>
-                </Link>
+                </div>
               </div>
             </div>
           ))}
-        </div>
       </div>
     </>
   );

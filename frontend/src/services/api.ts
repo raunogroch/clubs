@@ -5,7 +5,7 @@ import axios from "axios";
  * Incluye interceptor para agregar el token de autenticación.
  */
 const api = axios.create({
-  baseURL: "http://localhost:3000/",
+  baseURL: "http://192.168.100.71:3000/",
   headers: {
     "Content-Type": "application/json",
   },
