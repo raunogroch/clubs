@@ -11,11 +11,18 @@ export class GroupsUserHelperService {
 
   async findGroupsByUser(userId: string) {
     // Busca grupos donde el usuario es coach o athlete
-    return this.groupModel.find({
-      $or: [
-        { coaches: userId },
-        { athletes: userId },
-      ],
-    }).populate('clubId');
+    return (
+      this.groupModel
+        .find({ $or: [{ coaches: userId }, { athletes: userId }] })
+        // populate club and its sport name
+        .populate({
+          path: 'clubId',
+          populate: { path: 'sport', select: 'name' },
+        })
+        // populate athletes with only name, lastname and image
+        .populate({ path: 'athletes', select: 'name lastname image' })
+        // also populate coaches with minimal fields (useful in UI)
+        .populate({ path: 'coaches', select: 'name lastname image' })
+    );
   }
 }
