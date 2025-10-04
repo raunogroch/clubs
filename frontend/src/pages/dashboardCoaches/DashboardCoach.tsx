@@ -17,7 +17,6 @@ export const DashboardCoach = ({ name }: pageParamProps) => {
     dispatch(fetchUser({ userId }));
   }, [dispatch]);
 
-  console.log("selectedUser", selectedUser);
   if (status === "loading") <Spinner />;
 
   if (error) return <div>Error: {error}</div>;
@@ -48,6 +47,10 @@ export const DashboardCoach = ({ name }: pageParamProps) => {
                           className="rounded-circle"
                           width="70%"
                         />
+                        <div>
+                          <br />
+                          Disciplina: <strong>{data.club.sport.name}</strong>
+                        </div>
                       </div>
                       <div className="col-md-10">
                         {data.groups.map((group: any) => (
@@ -74,9 +77,25 @@ export const DashboardCoach = ({ name }: pageParamProps) => {
                             >
                               <div className="panel-body">
                                 <div className="row">
-                                  {group.athletes.map((athleteId) => (
-                                    <div className="col-md-4" key={athleteId}>
-                                      <span>{athleteId}</span>
+                                  {group.athletes.map((athlete) => (
+                                    <div
+                                      className="col-md-4"
+                                      key={athlete._id || athlete.id || athlete}
+                                    >
+                                      <div className="d-flex align-items-center">
+                                        <Image
+                                          src={
+                                            athlete.image ||
+                                            "/public/no-image.jpg"
+                                          }
+                                          alt={athlete.name}
+                                          className="rounded-circle mr-2"
+                                          width="40px"
+                                        />
+                                        <span>
+                                          {athlete.name} {athlete.lastname}
+                                        </span>
+                                      </div>
                                     </div>
                                   ))}
                                 </div>
