@@ -1,8 +1,7 @@
 import { Link } from "react-router-dom";
 import type { Sport } from "../interfaces/sportTypes";
 import { useDispatch } from "react-redux";
-import { setMessage } from "../../../store/messageSlice";
-import { deleteSport } from "../../../store/sportsThunks";
+import { deleteSport, restoreSport } from "../../../store/sportsThunks";
 import type { AppDispatch } from "../../../store";
 
 interface SportTableProps {
@@ -12,15 +11,35 @@ interface SportTableProps {
 export const SportTable = ({ sports }: SportTableProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const handleDelete = async (id: string) => {
-    if (window.confirm("¿Está seguro de eliminar esta disciplina?")) {
-      dispatch(deleteSport(id)).unwrap();
-      dispatch(
-        setMessage({
-          message: "Disciplina eliminada exitosamente",
-          type: "success",
-        })
-      );
-    }
+    if (!id) return;
+    swal({
+      title: "¿Estás seguro?",
+      text: "¡No podrás recuperar este deporte!",
+      icon: "warning",
+      buttons: ["Cancelar", "Sí, eliminar!"],
+      dangerMode: true,
+    }).then((willDelete) => {
+      if (willDelete) {
+        dispatch(deleteSport(id)).unwrap();
+        swal("Eliminado!", "El deporte ha sido eliminado.", "success");
+      }
+    });
+  };
+
+  const handleRestore = async (id: string) => {
+    if (!id) return;
+    swal({
+      title: "¿Estás seguro?",
+      text: "¡La disciplina será reactivado!",
+      icon: "warning",
+      buttons: ["Cancelar", "Sí, reactivar!"],
+      dangerMode: true,
+    }).then((willRestore) => {
+      if (willRestore) {
+        dispatch(restoreSport(id)).unwrap();
+        swal("Restaurado!", "La disciplina ha sido reactivado.", "success");
+      }
+    });
   };
 
   return (
@@ -39,22 +58,37 @@ export const SportTable = ({ sports }: SportTableProps) => {
               <td className="align-middle text-center">{index + 1}</td>
               <td className="align-middle">{sport.name}</td>
               <td className="text-center">
-                <Link
-                  to={`/sports/edit/${sport._id}`}
-                  className="text-success m-2"
-                >
-                  <i className="fa fa-edit"></i> Editar
-                </Link>
-                <Link
-                  to={"#"}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleDelete(sport._id!);
-                  }}
-                  className="text-danger m-2"
-                >
-                  <i className="fa fa-trash"></i> Eliminar
-                </Link>
+                {sport.active ? (
+                  <>
+                    <Link
+                      to={`/sports/edit/${sport._id}`}
+                      className="text-success m-2"
+                    >
+                      <i className="fa fa-edit"></i> Editar
+                    </Link>
+                    <Link
+                      to="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleDelete(sport._id!);
+                      }}
+                      className="text-danger m-2"
+                    >
+                      <i className="fa fa-trash"></i> Eliminar
+                    </Link>
+                  </>
+                ) : (
+                  <Link
+                    to="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleRestore(sport._id!);
+                    }}
+                    className="text-warning m-2"
+                  >
+                    <i className="fa fa-new"></i> Restaurar
+                  </Link>
+                )}
               </td>
             </tr>
           ))}

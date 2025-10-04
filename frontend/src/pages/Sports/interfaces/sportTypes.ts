@@ -1,6 +1,7 @@
 export interface Sport {
   _id?: string;
   name: string;
+  active?: boolean;
 }
 
 export type SportErrors = {

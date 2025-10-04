@@ -56,6 +56,20 @@ export const deleteSport = createAsyncThunk<string, string>(
   }
 );
 
+export const restoreSport = createAsyncThunk<Sport, string>(
+  "sports/restoreSport",
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await api.patch(`/sports/${id}/restore`);
+      return response.data as Sport;
+    } catch (err: any) {
+      return rejectWithValue(
+        err.response?.data || "Error al restaurar usuario"
+      );
+    }
+  }
+);
+
 export const findSportById = createAsyncThunk<string, string>(
   "sports/findSportById",
   async (id, { rejectWithValue }) => {

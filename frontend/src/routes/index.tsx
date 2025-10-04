@@ -52,6 +52,21 @@ export const roleRoutes: RoleRoutes = {
       element: <Dashboard />,
     },
     {
+      path: "/sports",
+      icon: "fa-soccer-ball-o",
+      label: "Disciplina",
+      element: <Sports name="Disciplinas" />,
+    },
+    {
+      path: "/sports/create",
+      element: <SportNew name="Registros" sub="Crear" />,
+    },
+    {
+      path: "/sports/edit/:id",
+      element: <SportEdit name="Registros" sub="Actualizar" />,
+    },
+
+    {
       path: "/users",
       icon: "fa-user-circle",
       label: "Gestion de usuarios",
