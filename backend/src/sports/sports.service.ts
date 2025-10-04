@@ -9,6 +9,7 @@ import { Sport } from './schemas/sport.schemas';
 import type { ISportRepository } from './repository/sport.repository.interface';
 import { Inject } from '@nestjs/common';
 import { SportValidatorService } from './sport-validator.service';
+import { Roles } from 'src/users/enum/roles.enum';
 
 @Injectable()
 export class SportsService {
@@ -33,7 +34,7 @@ export class SportsService {
   async findAll(requestingUser?: { sub: string; role: string }) {
     let sports = await this.sportRepository.findAll();
 
-    if (!requestingUser || requestingUser.role !== 'superadmin') {
+    if (!requestingUser || requestingUser.role !== Roles.SUPERADMIN) {
       sports = sports.filter((s) => s.active === true);
     }
 
