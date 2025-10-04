@@ -3,7 +3,8 @@ import type { User, UserErrors } from "../interfaces/userTypes";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../../store/store";
 import { createUser, updateUser } from "../../../store/usersThunks";
-import { setMessage } from "../../../store";
+import toastr from "toastr";
+import "toastr/build/toastr.min.css";
 
 export const useUserForm = (initialData?: User) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -89,25 +90,15 @@ export const useUserForm = (initialData?: User) => {
         }
 
         await dispatch(updateUser(updateData)).unwrap();
-        dispatch(
-          setMessage({
-            message: "Usuario actualizado correctamente",
-            type: "success",
-          })
-        );
+        toastr.success("Usuario actualizado correctamente");
       } else {
         await dispatch(createUser(formData)).unwrap();
-        dispatch(
-          setMessage({
-            message: "Usuario creado correctamente",
-            type: "success",
-          })
-        );
+        toastr.success("Usuario creado correctamente");
       }
       return true;
     } catch (error: any) {
       const errorMessage = error.message || "Error de conexión";
-      dispatch(setMessage({ message: errorMessage, type: "danger" }));
+      toastr.error(errorMessage);
       return false;
     }
   };
