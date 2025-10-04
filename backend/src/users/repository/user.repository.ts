@@ -84,6 +84,11 @@ export class UserRepository implements IUserRepository {
    * Elimina un usuario por su ID
    */
   async deleteById(id: string): Promise<User | null> {
-    return this.userModel.findByIdAndDelete(id);
+    // Soft delete: marcar active = false
+    return this.userModel.findByIdAndUpdate(
+      id,
+      { active: false },
+      { new: true },
+    );
   }
 }

@@ -43,6 +43,6 @@ export class CompetencyRepository implements ICompetencyRepository {
   }
 
   async deleteById(id: string): Promise<Competency | null> {
-    return this.competencyModel.findByIdAndDelete(id);
+    return this.competencyModel.findByIdAndUpdate(id, { active: false }, { new: true });
   }
 }

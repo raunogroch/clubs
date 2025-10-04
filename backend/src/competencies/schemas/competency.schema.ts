@@ -42,6 +42,10 @@ export class Competency extends Document {
     coaches: mongoose.Types.ObjectId[];
     competitors: Competitor[];
   };
+
+  /** Bandera para soft-delete */
+  @Prop({ type: Boolean, default: true })
+  active: boolean;
 }
 
 export const CompetencySchema = SchemaFactory.createForClass(Competency);

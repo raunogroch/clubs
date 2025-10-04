@@ -43,16 +43,16 @@ export class GroupsService {
   }
 
   async removeByClub(clubId: string, id: string) {
-    // Eliminar el grupo
-    const group = await this.groupModel.findOneAndDelete({ _id: id, clubId });
+    // Soft-delete: marcar active = false
+    const group = await this.groupModel.findOneAndUpdate(
+      { _id: id, clubId },
+      { active: false },
+      { new: true },
+    );
     // Eliminar la referencia del grupo en el club
     if (group) {
       const ClubModel = this.groupModel.db.model('Club');
-      await ClubModel.findByIdAndUpdate(
-        clubId,
-        { $pull: { groups: group._id } },
-        { new: true },
-      );
+      await ClubModel.findByIdAndUpdate(clubId, { $pull: { groups: group._id } }, { new: true });
     }
     return group;
   }

@@ -49,6 +49,6 @@ export class SportRepository implements ISportRepository {
   }
 
   async deleteById(id: string): Promise<Sport | null> {
-    return this.sportModel.findByIdAndDelete(id);
+    return this.sportModel.findByIdAndUpdate(id, { active: false }, { new: true });
   }
 }

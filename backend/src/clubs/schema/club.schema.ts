@@ -38,6 +38,10 @@ export class Club extends Document {
     default: [],
   })
   groups: Group[];
+
+  /** Bandera para soft-delete */
+  @Prop({ type: Boolean, default: true })
+  active: boolean;
 }
 
 export const ClubSchema = SchemaFactory.createForClass(Club);
