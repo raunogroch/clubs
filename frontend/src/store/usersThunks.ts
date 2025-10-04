@@ -53,12 +53,24 @@ export const deleteUser = createAsyncThunk<string, string>(
   }
 );
 
-export const findUserById = createAsyncThunk<string, string>(
+export const restoreUser = createAsyncThunk<User, string>(
+  "users/restoreUser",
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await api.patch(`/users/${id}/restore`);
+      return response.data as User;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data || "Error al restaurar usuario");
+    }
+  }
+);
+
+export const findUserById = createAsyncThunk<User, string>(
   "users/findUserById",
   async (id, { rejectWithValue }) => {
     try {
       const response = await api.get(`/users/${id}`);
-      return response.data;
+      return response.data as User;
     } catch (err: any) {
       return rejectWithValue(
         err.response?.data || "Error al buscar al usuario"

@@ -9,6 +9,7 @@ export interface User {
   birth_date: string;
   username: string;
   password?: string;
+  active: boolean;
 }
 
 export type UserErrors = {

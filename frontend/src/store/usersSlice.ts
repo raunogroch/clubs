@@ -6,6 +6,7 @@ import {
   deleteUser,
   updateUser,
   findUserById,
+  restoreUser,
 } from "./usersThunks";
 
 export interface UsersResponse {
@@ -98,6 +99,22 @@ const usersSlice = createSlice({
       state.users.total -= 1;
     });
     builder.addCase(deleteUser.rejected, (state, action) => {
+      state.status = "failed";
+      state.error = action.payload as string;
+    });
+
+    // RESTORE
+    builder.addCase(restoreUser.pending, (state) => {
+      state.status = "loading";
+    });
+    builder.addCase(restoreUser.fulfilled, (state, action) => {
+      state.status = "succeeded";
+      const index = state.users.data.findIndex(
+        (u) => u._id === action.payload._id
+      );
+      if (index >= 0) state.users.data[index] = action.payload as User;
+    });
+    builder.addCase(restoreUser.rejected, (state, action) => {
       state.status = "failed";
       state.error = action.payload as string;
     });

@@ -1,9 +1,8 @@
 import { Link } from "react-router-dom";
 import type { User } from "../interfaces";
 import { useDispatch, useSelector } from "react-redux";
-import { setMessage } from "../../../store/messageSlice";
 import type { AppDispatch, RootState } from "../../../store";
-import { deleteUser } from "../../../store/usersThunks";
+import { deleteUser, restoreUser } from "../../../store/usersThunks";
 
 interface UsersTableProps {
   users: User[];
@@ -15,15 +14,35 @@ export const CoachTable = ({ users }: UsersTableProps) => {
   const { page, limit } = filter;
 
   const handleDelete = async (id: string) => {
-    if (window.confirm("¿Está seguro de eliminar este usuario?")) {
-      dispatch(deleteUser(id)).unwrap();
-      dispatch(
-        setMessage({
-          message: "Usuario eliminado exitosamente",
-          type: "warning",
-        })
-      );
-    }
+    if (!id) return;
+    swal({
+      title: "¿Estás seguro?",
+      text: "¡No podrás recuperar este usuario!",
+      icon: "warning",
+      buttons: ["Cancelar", "Sí, eliminar!"],
+      dangerMode: true,
+    }).then((willDelete) => {
+      if (willDelete) {
+        dispatch(deleteUser(id)).unwrap();
+        swal("Eliminado!", "El usuario ha sido eliminado.", "success");
+      }
+    });
+  };
+
+  const handleRestore = async (id: string) => {
+    if (!id) return;
+    swal({
+      title: "¿Estás seguro?",
+      text: "¡El usuario será reactivado!",
+      icon: "warning",
+      buttons: ["Cancelar", "Sí, reactivar!"],
+      dangerMode: true,
+    }).then((willRestore) => {
+      if (willRestore) {
+        dispatch(restoreUser(id)).unwrap();
+        swal("Restaurado!", "El usuario ha sido reactivado.", "success");
+      }
+    });
   };
 
   const location = window.location.pathname.split("/")[2];
@@ -56,22 +75,37 @@ export const CoachTable = ({ users }: UsersTableProps) => {
               <td className="align-middle">{user.email}</td>
 
               <td className="text-center align-middle">
-                <Link
-                  to={`/users/${location}/edit/${user._id}`}
-                  className="text-success m-2"
-                >
-                  <i className="fa fa-edit"></i> Editar
-                </Link>
-                <Link
-                  to="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleDelete(user._id!);
-                  }}
-                  className="text-danger m-2"
-                >
-                  <i className="fa fa-trash"></i> Eliminar
-                </Link>
+                {user.active ? (
+                  <>
+                    <Link
+                      to={`/users/${location}/edit/${user._id}`}
+                      className="text-success m-2"
+                    >
+                      <i className="fa fa-edit"></i> Editar
+                    </Link>
+                    <Link
+                      to="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleDelete(user._id!);
+                      }}
+                      className="text-danger m-2"
+                    >
+                      <i className="fa fa-trash"></i> Eliminar
+                    </Link>
+                  </>
+                ) : (
+                  <Link
+                    to="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleRestore(user._id!);
+                    }}
+                    className="text-warning m-2"
+                  >
+                    <i className="fa fa-new"></i> Restaurar
+                  </Link>
+                )}
               </td>
             </tr>
           ))}

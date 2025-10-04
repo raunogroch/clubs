@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import type { User } from "../interfaces";
 import { useDispatch, useSelector } from "react-redux";
-import { setMessage } from "../../../store/messageSlice";
 import type { AppDispatch, RootState } from "../../../store";
 import { deleteUser } from "../../../store/usersThunks";
 
@@ -15,15 +14,19 @@ export const UserTable = ({ users }: UsersTableProps) => {
   const { page, limit } = filter;
 
   const handleDelete = async (id: string) => {
-    if (window.confirm("¿Está seguro de eliminar este usuario?")) {
-      dispatch(deleteUser(id)).unwrap();
-      dispatch(
-        setMessage({
-          message: "Usuario eliminado exitosamente",
-          type: "warning",
-        })
-      );
-    }
+    if (!id) return;
+    swal({
+      title: "¿Estás seguro?",
+      text: "¡No podrás recuperar este usuario!",
+      icon: "warning",
+      buttons: ["Cancelar", "Sí, eliminar!"],
+      dangerMode: true,
+    }).then((willDelete) => {
+      if (willDelete) {
+        dispatch(deleteUser(id)).unwrap();
+        swal("Eliminado!", "El usuario ha sido eliminado.", "success");
+      }
+    });
   };
 
   const getSequentialNumber = (index: number) => {
@@ -52,7 +55,7 @@ export const UserTable = ({ users }: UsersTableProps) => {
               <td className="text-center">{getSequentialNumber(index)}</td>
               <td className="text-center align-middle">
                 <div className="text-success text-left">
-                  {user.role === "athlete" && "Deportista"}
+                  {user.role === "athlete" && "Atleta"}
                   {user.role === "parent" && "Responsable"}
                   {user.role === "coach" && "Entrenador"}
                   {user.role === "admin" && "Administrador"}
