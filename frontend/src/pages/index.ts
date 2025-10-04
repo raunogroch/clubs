@@ -9,6 +9,7 @@ export * from "./Clubs/components/FormField";
 
 export * from "./Profile/components/ProfileAthlete";
 export * from "./Profile/components/ProfileAdmin";
+export * from "./Profile/components/ProfileSuperAdmin";
 export * from "./Profile/components/ProfileCoach";
 
 export * from "./Sports/components/Sports";

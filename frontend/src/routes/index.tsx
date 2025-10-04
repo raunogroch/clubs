@@ -13,7 +13,7 @@ import {
   DashboardAthlete,
   ProfileAthlete,
   ProfileAdmin,
-  ProfileCoach,
+  ProfileSuperAdmin,
 } from "../pages";
 import { Groups } from "../pages/groups/components/Groups";
 import { GroupsNew } from "../pages/groups/components/GroupsNew";
@@ -21,6 +21,8 @@ import { GroupEdit } from "../pages/groups/components/GroupEdit";
 import { AthleteEdit, AthleteNew, Athletes } from "../pages/Athletes";
 import { CoachEdit, Coaches, CoachNew } from "../pages/Coaches/components";
 import { DashboardCoach } from "../pages/dashboardCoaches/DashboardCoach";
+import { Admins } from "../pages/Admins";
+import { Superadmins } from "../pages/SuperAdmins";
 
 export type MenuRoute = {
   path: string;
@@ -39,76 +41,76 @@ export const roleRoutes: RoleRoutes = {
       element: <GroupsNew name="Clubs" sub="Grupos" sub1="Editar" />,
     },
     {
+      path: "/profile",
+      label: "Perfil",
+      element: <ProfileSuperAdmin name="Perfil" />,
+    },
+    {
       path: "/",
       icon: "fa-home",
       label: "Principal",
       element: <Dashboard />,
     },
     {
-      path: "/profile",
-      label: "Perfil",
-      element: <ProfileAthlete name="Perfil" />,
-    },
-    {
-      path: "/clubs",
-      icon: "fa-diamond",
-      label: "Clubs",
-      element: <Clubs name="Clubs" />,
-    },
-    { path: "/clubs/edit/:id", element: <ClubEdit name="Clubs" sub="new" /> },
-    { path: "/clubs/create", element: <ClubNew name="Clubs" sub="Crear" /> },
-    {
-      path: "/clubs/:id/groups",
-      element: <Groups name="Clubs" sub="Grupos" />,
-    },
-    {
-      path: "/clubs/:id/groups/create",
-      element: <GroupsNew name="Clubs" sub="Grupos" sub1="Crear" />,
-    },
-    {
-      path: "/sports",
-      icon: "fa-soccer-ball-o",
-      label: "Disciplina",
-      element: <Sports name="Disciplinas" />,
-    },
-    {
-      path: "/sports/create",
-      element: <SportNew name="Registros" sub="Crear" />,
-    },
-    {
-      path: "/sports/edit/:id",
-      element: <SportEdit name="Registros" sub="Actualizar" />,
-    },
-    {
       path: "/users",
-      icon: "fa-users",
-      label: "Usuarios",
+      icon: "fa-user-circle",
+      label: "Gestion de usuarios",
       children: [
         {
-          path: "/users/general",
-          icon: "fa-list",
-          label: "General",
-          element: <ProfileAdmin name="Registros" />,
+          path: "/users/superadmins",
+          icon: "fa-users",
+          label: "Super Admins",
+          element: <Superadmins name="Todos los registros" />,
+        },
+        {
+          path: "/users/admins",
+          icon: "fa-users",
+          label: "Administradores",
+          element: <Admins name="Administradores" />,
         },
         {
           path: "/users/coaches",
-          icon: "fa-list",
+          icon: "fa-users",
           label: "Entrenadores",
-          element: <ProfileCoach name="Registros" />,
+          element: <Coaches name="Entrenadores" />,
         },
         {
           path: "/users/athletes",
-          icon: "fa-list",
+          icon: "fa-users",
           label: "Deportistas",
-          element: <ProfileAthlete name="Registros" />,
-        },
-        {
-          path: "/users",
-          icon: "fa-list",
-          label: "Registros",
-          element: <Users name="Registros" />,
+          element: <Athletes name="Deportistas" />,
         },
       ],
+    },
+    {
+      path: "/users/general/create",
+      element: <UserNew name="Registros" sub="Crear" />,
+    },
+    {
+      path: "/users/general/edit/:id",
+      element: <UserEdit name="Registros" sub="Actualizar" />,
+    },
+
+    // coaches
+
+    {
+      path: "/users/coaches/create",
+      element: <CoachNew name="Registros" sub="Crear" />,
+    },
+    {
+      path: "/users/coaches/edit/:id",
+      element: <CoachEdit name="Registros" sub="Actualizar" />,
+    },
+
+    // athletes
+
+    {
+      path: "/users/athletes/create",
+      element: <AthleteNew name="Registros" sub="Crear" />,
+    },
+    {
+      path: "/users/athletes/edit/:id",
+      element: <AthleteEdit name="Registros" sub="Actualizar" />,
     },
   ],
   admin: [
