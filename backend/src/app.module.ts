@@ -5,7 +5,6 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ClubsModule } from './clubs/clubs.module';
 import { SportsModule } from './sports/sports.module';
-import { CompetenciesModule } from './competencies/competencies.module';
 import { GroupsModule } from './clubs/groups/groups.module';
 
 @Module({
@@ -23,7 +22,6 @@ import { GroupsModule } from './clubs/groups/groups.module';
     UsersModule,
     ClubsModule,
     SportsModule,
-    CompetenciesModule,
     GroupsModule,
   ],
 })

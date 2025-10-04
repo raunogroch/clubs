@@ -30,8 +30,14 @@ export class SportsService {
   /**
    * Obtiene todos los deportes
    */
-  async findAll() {
-    return await this.sportRepository.findAll();
+  async findAll(requestingUser?: { sub: string; role: string }) {
+    let sports = await this.sportRepository.findAll();
+
+    if (!requestingUser || requestingUser.role !== 'superadmin') {
+      sports = sports.filter((s) => s.active === true);
+    }
+
+    return sports;
   }
 
   /**
@@ -74,5 +80,12 @@ export class SportsService {
   async remove(id: string): Promise<Sport | null> {
     await this.sportValidator.validateExistence(id);
     return this.sportRepository.deleteById(id);
+  }
+
+  /**
+   * Restaurar (reactivar) un deporte previamente desactivado
+   */
+  async restore(id: string): Promise<Sport | null> {
+    return this.sportRepository.updateById(id, { active: true } as Sport);
   }
 }

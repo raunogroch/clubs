@@ -92,15 +92,22 @@ export class UsersController {
    * Endpoint para eliminar un usuario
    */
   @Delete(':id')
-  @Roles(Role.SUPERADMIN)
+  @Roles(Role.SUPERADMIN, Role.ADMIN)
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);
+  }
+  /**
+   * Endpoint para restaurar (reactivar) un usuario
+   */
+  @Patch(':id/restore')
+  @Roles(Role.SUPERADMIN)
+  restore(@Param('id') id: string) {
+    return this.usersService.restore(id);
   }
   /**
    * Endpoint para obtener el perfil de un usuario
    */
   @Get(':id/profile')
-  @Roles(Role.SUPERADMIN)
   profile(@Param('id') id: string) {
     return this.usersService.profile(id);
   }

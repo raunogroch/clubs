@@ -12,6 +12,14 @@ import { SportsService } from './sports.service';
 import { CreateSportDto } from './dto/create-sport.dto';
 import { UpdateSportDto } from './dto/update-sport.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { Roles as Role } from 'src/users/enum/roles.enum';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+
+interface currentAuth {
+  sub: string;
+  role: string;
+}
 
 // Controlador para la gestión de deportes
 @Controller('sports')
@@ -31,8 +39,8 @@ export class SportsController {
    * Endpoint para obtener todos los deportes
    */
   @Get()
-  findAll() {
-    return this.sportsService.findAll();
+  findAll(@CurrentUser() user: currentAuth) {
+    return this.sportsService.findAll(user);
   }
 
   /**
@@ -57,5 +65,14 @@ export class SportsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.sportsService.remove(id);
+  }
+
+  /**
+   * Restaurar (reactivar) un deporte
+   */
+  @Patch(':id/restore')
+  @Roles(Role.SUPERADMIN)
+  restore(@Param('id') id: string) {
+    return this.sportsService.restore(id);
   }
 }

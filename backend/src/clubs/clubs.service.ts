@@ -1,5 +1,6 @@
 // Servicio para la gestión de clubes
 import { Injectable } from '@nestjs/common';
+import { Roles } from 'src/users/enum/roles.enum';
 import { CreateClubDto, UpdateClubDto } from './dto';
 import { Club } from './schema/club.schema';
 import { Inject } from '@nestjs/common';
@@ -32,8 +33,18 @@ export class ClubsService {
   /**
    * Obtiene todos los clubes con sus relaciones pobladas
    */
-  async findAll(): Promise<Club[]> {
-    return this.clubRepository.findAllPopulated();
+  async findAll(requestingUser?: {
+    sub: string;
+    role: string;
+  }): Promise<Club[]> {
+    let clubs: Club[] = await this.clubRepository.findAllPopulated();
+
+    // Si el solicitante no es superadmin, devolver sólo clubes activos
+    if (!requestingUser || requestingUser.role !== Roles.SUPERADMIN) {
+      clubs = clubs.filter((c) => c.active === true);
+    }
+
+    return clubs;
   }
 
   /**
@@ -70,5 +81,12 @@ export class ClubsService {
       await this.clubImageService.deleteImage(this.folder, club.image);
     }
     return deleted;
+  }
+
+  /**
+   * Restaurar (reactivar) un club previamente desactivado
+   */
+  async restore(id: string): Promise<Club | null> {
+    return this.clubRepository.updateById(id, { active: true } as Club);
   }
 }

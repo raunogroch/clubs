@@ -186,6 +186,14 @@ export class UsersService {
   }
 
   /**
+   * Restaurar (reactivar) un usuario previamente desactivado
+   */
+  async restore(id: string): Promise<User | null> {
+    await this.userValidator.validateExistence(id);
+    return this.userRepository.updateById(id, { active: true } as User);
+  }
+
+  /**
    * Obtiene el perfil de un usuario por su ID
    */
   async profile(id: string): Promise<User> {
@@ -198,18 +206,24 @@ export class UsersService {
    * Filtra usuarios según el rol del usuario solicitante
    */
   private filterByRole(users: User[], requestingUser: currentAuth): User[] {
+    // Excluir al propio usuario
     const filtered = users.filter((user) => user.id !== requestingUser.sub);
+
+    // Si es SUPERADMIN, devolver todos (sin filtrar por active)
+    if (requestingUser.role === Roles.SUPERADMIN) return filtered;
+
+    // Para los demás roles, sólo devolver usuarios activos
+    const activeOnly = filtered.filter((user) => user.active === true);
+
     switch (requestingUser.role) {
-      case Roles.SUPERADMIN:
-        return filtered;
       case Roles.ADMIN:
-        return filtered.filter((user) => user.role !== Roles.SUPERADMIN);
+        return activeOnly.filter((user) => user.role !== Roles.SUPERADMIN);
       case Roles.COACH:
-        return filtered.filter((user) =>
+        return activeOnly.filter((user) =>
           [Roles.PARENT, Roles.ATHLETE].includes(user.role as Roles),
         );
       case Roles.PARENT:
-        return filtered.filter((user) => user.role === Roles.ATHLETE);
+        return activeOnly.filter((user) => user.role === Roles.ATHLETE);
       default:
         return [];
     }
