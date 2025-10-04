@@ -1,11 +1,12 @@
 import axios from "axios";
+const backendUri = import.meta.env.VITE_BACKEND_URI;
 
 /**
  * Instancia de Axios configurada para la API principal.
  * Incluye interceptor para agregar el token de autenticación.
  */
 const api = axios.create({
-  baseURL: "http://192.168.100.71:3000/",
+  baseURL: backendUri,
   headers: {
     "Content-Type": "application/json",
   },
