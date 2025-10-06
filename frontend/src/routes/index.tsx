@@ -98,11 +98,20 @@ export const roleRoutes: RoleRoutes = {
       ],
     },
     {
-      path: "/users/general/create",
+      path: "/users/superadmins/create",
       element: <UserNew name="Registros" sub="Crear" />,
     },
     {
-      path: "/users/general/edit/:id",
+      path: "/users/superadmins/edit/:id",
+      element: <UserEdit name="Registros" sub="Actualizar" />,
+    },
+
+    {
+      path: "/users/admins/create",
+      element: <UserNew name="Registros" sub="Crear" />,
+    },
+    {
+      path: "/users/admins/edit/:id",
       element: <UserEdit name="Registros" sub="Actualizar" />,
     },
 

@@ -14,7 +14,7 @@ export const useAdminForm = (initialData?: User) => {
   const [formData, setFormData] = useState<User>(
     initialData || {
       image: "",
-      role: "coach",
+      role: "admin",
       ci: "",
       name: "",
       lastname: "",
@@ -22,6 +22,7 @@ export const useAdminForm = (initialData?: User) => {
       birth_date: "",
       username: "",
       password: "",
+      active: true,
     }
   );
 
@@ -53,7 +54,6 @@ export const useAdminForm = (initialData?: User) => {
     const newErrors: UserErrors = {};
 
     if (!formData.image) newErrors.image = "Carga una imagen";
-    if (!formData.role) newErrors.role = "Seleccione un rol";
     if (!formData.ci) newErrors.ci = "La cédula es requerida";
     if (!formData.name) newErrors.name = "El nombre es requerido";
     if (!formData.lastname) newErrors.lastname = "El apellido es requerido";

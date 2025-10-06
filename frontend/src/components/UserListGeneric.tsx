@@ -1,10 +1,12 @@
 import type { User, UsersPageProps } from "../pages/Users/interfaces";
-import { PopUpMessage, NavHeader } from "../components";
+import { NavHeader, Spinner } from "../components";
 import { useDispatch, useSelector } from "react-redux";
 import { setLimit, setPage, type AppDispatch, type RootState } from "../store";
 import { useEffect } from "react";
 import { fetchUsers } from "../store/usersThunks";
 import { PaginationList } from "../components/PaginationList";
+import toastr from "toastr";
+import "toastr/build/toastr.min.css";
 
 interface UserListGenericProps extends UsersPageProps {
   role?: string;
@@ -35,40 +37,52 @@ export const UserListGeneric = ({
     dispatch(setPage(1));
   };
 
+  if (error) toastr.error(error);
+
   return (
     <>
       <NavHeader name={nameTitle} pageCreate={pageCreateLabel} />
-      <PopUpMessage />
-      <div className="wrapper wrapper-content animated fadeInRight">
-        <div className="row">
-          <div className="col-12">
-            <div className="ibox">
-              <div className="ibox-title d-flex justify-content-between">
-                <h5>Lista</h5>
-                <div className="btn-group">
-                  {[5, 10, 15].map((level, index) => (
-                    <button
-                      key={index}
-                      className={`btn btn-white ${
-                        limit === level ? "active" : ""
-                      }`}
-                      onClick={() => handleLimitChange(level)}
-                    >
-                      {level}
-                    </button>
-                  ))}
+      {status === "loading" && <Spinner />}
+      {status === "succeeded" && userList.length === 0 && (
+        <div className="wrapper wrapper-content">
+          <div className="middle-box text-center animated fadeInRightBig">
+            <h3 className="font-bold">No hay usuarios para mostrar</h3>
+            <div className="error-desc">
+              Actualmente no tienes informacion en esta seccion.
+            </div>
+          </div>
+        </div>
+      )}
+      {status === "succeeded" && userList.length > 0 && (
+        <div className="wrapper wrapper-content animated fadeInRight">
+          <div className="row">
+            <div className="col-12">
+              <div className="ibox">
+                <div className="ibox-title d-flex justify-content-between">
+                  <h5>Lista</h5>
+                  <div className="btn-group">
+                    {[5, 10, 15].map((level, index) => (
+                      <button
+                        key={index}
+                        className={`btn btn-white ${
+                          limit === level ? "active" : ""
+                        }`}
+                        onClick={() => handleLimitChange(level)}
+                      >
+                        {level}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <div className="ibox-content">
-                {status === "succeeded" && <TableComponent users={userList} />}
-                {status === "loading" && <div>Cargando...</div>}
-                {status === "failed" && <div>Error: {error}</div>}
-                <PaginationList filter={users} />
+                <div className="ibox-content">
+                  <TableComponent users={userList} />
+                  <PaginationList filter={users} />
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   );
 };

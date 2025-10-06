@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { createSport, updateSport } from "../../../store/sportsThunks";
-import { setMessage, type AppDispatch } from "../../../store";
+import { type AppDispatch } from "../../../store";
+import toastr from "toastr";
+import "toastr/build/toastr.min.css";
 
 export const useSportForm = (initialData?: { _id?: string; name: string }) => {
   const [formData, setFormData] = useState<{ name: string }>(
@@ -36,29 +38,14 @@ export const useSportForm = (initialData?: { _id?: string; name: string }) => {
     try {
       if (initialData?._id) {
         await dispatch(updateSport(formData)).unwrap();
-        dispatch(
-          setMessage({
-            message: "Disciplina actualizada exitosamente",
-            type: "success",
-          })
-        );
+        toastr.success("Disciplina actualizada exitosamente");
       } else {
         await dispatch(createSport(formData)).unwrap();
-        dispatch(
-          setMessage({
-            message: "Disciplina creada exitosamente",
-            type: "success",
-          })
-        );
+        toastr.success("Disciplina creada exitosamente");
       }
       return true;
     } catch (error) {
-      dispatch(
-        setMessage({
-          message: "Error de conexión",
-          type: "danger",
-        })
-      );
+      toastr.error("Error al guardar la disciplina");
     }
     return false;
   };

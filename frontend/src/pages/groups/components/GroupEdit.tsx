@@ -3,14 +3,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { findGroupById } from "../../../store/groupsThunks";
 import { GroupForm } from "./GroupForm";
-import {
-  NavHeader,
-  PopUpMessage,
-  StaticMessage,
-  Spinner,
-} from "../../../components";
+import { NavHeader, Spinner } from "../../../components";
 import type { AppDispatch, RootState } from "../../../store";
 import type { pageParamProps } from "../../../interfaces";
+import toastr from "toastr";
+import "toastr/build/toastr.min.css";
 
 export const GroupEdit = ({ name, sub, sub1 }: pageParamProps) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -29,13 +26,12 @@ export const GroupEdit = ({ name, sub, sub1 }: pageParamProps) => {
   const handleSuccess = () => navigate(`/clubs/${clubId}/groups`);
   const handleCancel = () => navigate(`/clubs/${clubId}/groups`);
 
-  if (status === "loading") return <Spinner />;
+  if (error) toastr.error(error);
 
   return (
     <>
       <NavHeader name={name} sub={sub} sub1={sub1} />
-      <PopUpMessage />
-      {error && <StaticMessage message={error} type="danger" />}
+      {status === "loading" && <Spinner />}
       {status === "succeeded" && (
         <div className="wrapper wrapper-content animated fadeInRight">
           <div className="row">

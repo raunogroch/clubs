@@ -1,12 +1,14 @@
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { PopUpMessage, NavHeader } from "../../../components";
+import { NavHeader, Spinner } from "../../../components";
 import { SportForm } from ".";
 import type { pageParamProps } from "../../../interfaces";
 import { useDispatch, useSelector } from "react-redux";
 import { setMessage } from "../../../store/messageSlice";
 import { findSportById } from "../../../store/sportsThunks";
 import type { AppDispatch } from "../../../store/store";
+import toastr from "toastr";
+import "toastr/build/toastr.min.css";
 
 export const SportEdit = ({ name, sub }: pageParamProps) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -37,39 +39,36 @@ export const SportEdit = ({ name, sub }: pageParamProps) => {
     navigate("/sports");
   };
 
+  if (error) toastr.error(error);
+
   return (
     <>
       <NavHeader name={name} sub={sub} />
-      <PopUpMessage />
-      <div className="wrapper wrapper-content animated fadeInRight">
-        <div className="row justify-content-center">
-          <div className="col-6">
-            <div className="ibox ">
-              <div className="ibox-title">
-                <h5>Editar la disciplina</h5>
-              </div>
-              <div className="ibox-content">
-                <div className="row">
-                  <div className="col-sm-12">
-                    {error && (
-                      <div className="alert alert-danger" role="alert">
-                        {error}
-                      </div>
-                    )}
-                    {status === "succeeded" && (
+      {status === "loading" && <Spinner />}
+      {status === "succeeded" && (
+        <div className="wrapper wrapper-content animated fadeInRight">
+          <div className="row justify-content-center">
+            <div className="col-6">
+              <div className="ibox ">
+                <div className="ibox-title">
+                  <h5>Editar la disciplina</h5>
+                </div>
+                <div className="ibox-content">
+                  <div className="row">
+                    <div className="col-sm-12">
                       <SportForm
                         initialData={sport}
                         onSuccess={handleSuccess}
                         onCancel={handleCancel}
                       />
-                    )}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   );
 };

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { PopUpMessage, NavHeader, Spinner } from "../../../components";
+import { NavHeader, Spinner } from "../../../components";
 import { fetchClubs } from "../../../store/clubsThunks";
 import { ClubList } from "./ClubList";
 import toastr from "toastr";
@@ -16,14 +16,23 @@ export const Clubs = ({ name }: pageParamProps) => {
     dispatch(fetchClubs());
   }, [dispatch]);
 
-  if (status === "loading") return <Spinner />;
   if (error) toastr.error(error);
 
   return (
     <>
       <NavHeader name={name} pageCreate="Nuevo club" />
-      <PopUpMessage />
-      {status === "succeeded" && (
+      {status === "loading" && <Spinner />}
+      {status === "succeeded" && clubs.length === 0 && (
+        <div className="wrapper wrapper-content">
+          <div className="middle-box text-center animated fadeInRightBig">
+            <h3 className="font-bold">No hay clubes para mostrar</h3>
+            <div className="error-desc">
+              Actualmente no tienes informacion en esta seccion.
+            </div>
+          </div>
+        </div>
+      )}
+      {status === "succeeded" && clubs.length > 0 && (
         <div className="wrapper wrapper-content animated fadeInRight">
           <div className="row">
             <div className="col-12">

@@ -1,9 +1,11 @@
-import { NavHeader, PopUpMessage, Image } from "../../../components";
+import { NavHeader, Image, Spinner } from "../../../components";
 import { useDispatch, useSelector } from "react-redux";
 import { type pageParamProps } from "../../../interfaces";
 import { useEffect } from "react";
 import { findUserById } from "../../../store/usersThunks";
 import type { AppDispatch, RootState } from "../../../store";
+import toastr from "toastr";
+import "toastr/build/toastr.min.css";
 
 export const ProfileAdmin = ({ name }: pageParamProps) => {
   const adminStats = {
@@ -25,11 +27,12 @@ export const ProfileAdmin = ({ name }: pageParamProps) => {
     dispatch(findUserById(code));
   }, [dispatch, code]);
 
+  if (error) toastr.error(error);
+
   return (
     <>
       <NavHeader name={name} />
-      <PopUpMessage />
-      {error && <div className="alert alert-danger">{error}</div>}
+      {status === "loading" && <Spinner />}
       {status === "succeeded" && (
         <div className="wrapper wrapper-content animated fadeInRight">
           <div className="row m-b-lg m-t-lg">

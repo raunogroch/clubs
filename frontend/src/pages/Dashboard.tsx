@@ -1,4 +1,3 @@
-import { PopUpMessage } from "../components";
 import { NavHeader } from "../components/NavHeader";
 import type { pageParamProps } from "../interfaces/pageParamProps";
 
@@ -6,7 +5,6 @@ export const Dashboard = ({ name }: pageParamProps) => {
   return (
     <>
       <NavHeader name={name} />
-      <PopUpMessage />
       <div className="wrapper wrapper-content">
         <div className="middle-box text-center animated fadeInRightBig">
           <h3 className="font-bold">Página en construcción</h3>

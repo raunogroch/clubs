@@ -3,15 +3,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useParams } from "react-router-dom";
 import { fetchGroups } from "../../../store/groupsThunks";
 import { NavHeader } from "../../../components/NavHeader";
-import {
-  Image,
-  PopUpMessage,
-  Spinner,
-  StaticMessage,
-} from "../../../components";
+import { Image, Spinner } from "../../../components";
 import type { AppDispatch } from "../../../store/store";
 import type { IGroup } from "../interface/groupTypes";
 import type { pageParamProps } from "../../../interfaces/pageParamProps";
+import toastr from "toastr";
+import "toastr/build/toastr.min.css";
 
 export const Groups = ({ name, sub }: pageParamProps) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -24,13 +21,12 @@ export const Groups = ({ name, sub }: pageParamProps) => {
 
   const sortedGroups = [...groups].sort((a, b) => a.name.localeCompare(b.name));
 
-  if (status === "loading") return <Spinner />;
+  if (error) toastr.error(error);
 
   return (
     <>
       <NavHeader name={name} sub={sub} pageCreate="Nuevo grupo" />
-      <PopUpMessage />
-      {error && <StaticMessage type="danger" message={error} />}
+      {status === "loading" && <Spinner />}
       {status === "succeeded" && sortedGroups.length === 0 ? (
         <div className="wrapper wrapper-content">
           <div className="middle-box text-center animated fadeInRightBig">
