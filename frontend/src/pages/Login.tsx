@@ -18,18 +18,19 @@ export const Login = () => {
     username: "",
     password: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
-
   const isAuthenticated = useSelector(
     (state: RootState) => state.auth.isAuthenticated
   );
+  const status = useSelector((state: RootState) => state.auth.status);
+  const error = useSelector((state: RootState) => state.auth.error);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    isAuthenticated && navigate("/", { replace: true });
-    setIsSubmitting(false);
+    if (isAuthenticated) {
+      navigate("/", { replace: true });
+    }
   }, [isAuthenticated, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,13 +43,13 @@ export const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(loginThunk(formData));
-    setIsSubmitting(true);
+    await dispatch(loginThunk(formData));
   };
 
   return (
     <div className="middle-box text-center loginscreen animated fadeInDown">
       <div>
+        {error && <div className="alert alert-danger mb-2">{error}</div>}
         <PopUpMessage />
         <div>
           <h1 className="logo-name">CS</h1>
@@ -84,9 +85,9 @@ export const Login = () => {
           <button
             type="submit"
             className="btn btn-primary block full-width m-b"
-            disabled={isSubmitting}
+            disabled={status === "loading"}
           >
-            {isSubmitting ? "Ingresando ..." : "Ingresar"}
+            {status === "loading" ? "Ingresando ..." : "Ingresar"}
           </button>
         </form>
 

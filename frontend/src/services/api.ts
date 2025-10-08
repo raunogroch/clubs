@@ -29,10 +29,7 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
-      // Token inválido o expirado
-      window.location.href = "/login"; // Redirige al login
-    }
+    // No redirigir automáticamente en error 401 para evitar refresco
     return Promise.reject(error);
   }
 );

@@ -14,7 +14,9 @@ export const loginThunk = createAsyncThunk(
       dispatch(login({ user: user, token: authorization }));
     } catch (error: any) {
       if (error.response && error.response.status === 401) {
-        toastr.error("Credenciales incorrectas");
+        toastr.error(
+          "<strong>Error de autenticación</strong><br/><small>Verifica tus credenciales e intenta nuevamente</small>"
+        );
       } else {
         toastr.error("Error de conexión o inesperado");
       }
