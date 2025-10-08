@@ -1,15 +1,14 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import React from "react";
 import { Image } from "../components";
 import { Role } from "../interfaces";
 import { roleRoutes } from "../routes";
 import { useDispatch, useSelector } from "react-redux";
 import { logout as logoutAction } from "../store/authSlice";
-import type { RootState } from "../store/store";
+import type { AppDispatch, RootState } from "../store/store";
 
 export const SideNav = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
   const location = useLocation();
 
   const user = useSelector((state: RootState) => state.auth.user);
@@ -17,7 +16,6 @@ export const SideNav = () => {
   const handleLogout = async (e: any) => {
     e.preventDefault();
     dispatch(logoutAction());
-    navigate("/login", { replace: true });
   };
 
   const isActive = (path: string) => {
