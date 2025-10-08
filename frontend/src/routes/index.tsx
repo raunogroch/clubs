@@ -21,8 +21,12 @@ import { GroupEdit } from "../pages/groups/components/GroupEdit";
 import { AthleteEdit, AthleteNew, Athletes } from "../pages/Athletes";
 import { CoachEdit, Coaches, CoachNew } from "../pages/Coaches/components";
 import { DashboardCoach } from "../pages/dashboardCoaches/DashboardCoach";
-import { Admins } from "../pages/Admins";
-import { Superadmins } from "../pages/SuperAdmins";
+import { AdminEdit, AdminNew, Admins } from "../pages/Admins";
+import {
+  SuperadminEdit,
+  SuperadminNew,
+  Superadmins,
+} from "../pages/SuperAdmins";
 
 export type MenuRoute = {
   path: string;
@@ -99,20 +103,20 @@ export const roleRoutes: RoleRoutes = {
     },
     {
       path: "/users/superadmins/create",
-      element: <UserNew name="Registros" sub="Crear" />,
+      element: <SuperadminNew name="Registros" sub="Crear" />,
     },
     {
       path: "/users/superadmins/edit/:id",
-      element: <UserEdit name="Registros" sub="Actualizar" />,
+      element: <SuperadminEdit name="Registros" sub="Actualizar" />,
     },
 
     {
       path: "/users/admins/create",
-      element: <UserNew name="Registros" sub="Crear" />,
+      element: <AdminNew name="Registros" sub="Crear" />,
     },
     {
       path: "/users/admins/edit/:id",
-      element: <UserEdit name="Registros" sub="Actualizar" />,
+      element: <AdminEdit name="Registros" sub="Actualizar" />,
     },
 
     // coaches

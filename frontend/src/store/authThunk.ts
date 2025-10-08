@@ -2,6 +2,8 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { login, logout } from "./authSlice";
 import api from "../services/api";
 import { setMessage } from "./messageSlice";
+import toastr from "toastr";
+import "toastr/build/toastr.min.css";
 
 // Login thunk
 export const loginThunk = createAsyncThunk(
@@ -38,12 +40,7 @@ export const logoutThunk = createAsyncThunk(
     try {
       await api.post("/auth/logout");
     } catch (error) {
-      dispatch(
-        setMessage({
-          message: "Vuelve pronto!",
-          type: "warning",
-        })
-      );
+      toastr.error("Error during logout");
     } finally {
       dispatch(logout());
     }

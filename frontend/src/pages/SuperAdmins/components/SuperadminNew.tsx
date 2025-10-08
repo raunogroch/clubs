@@ -7,11 +7,11 @@ export const SuperadminNew = ({ name, sub }: UsersPageProps) => {
   const navigate = useNavigate();
 
   const handleSuccess = () => {
-    navigate("/users/coaches");
+    navigate("/users/superadmins");
   };
 
   const handleCancel = () => {
-    navigate("/users/coaches");
+    navigate("/users/superadmins");
   };
 
   return (
