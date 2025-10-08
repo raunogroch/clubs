@@ -11,6 +11,7 @@ export interface Club {
   groups: IGroup[];
   uniqueAthletesCount?: number;
   createdAt: string;
+  active: boolean;
 }
 
 export type ClubErrors = {

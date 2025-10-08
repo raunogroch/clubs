@@ -2,7 +2,7 @@ import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import swal from "sweetalert";
 import { Image } from "../../../components";
-import { deleteClub } from "../../../store/clubsThunks";
+import { deleteClub, restoreClub } from "../../../store/clubsThunks";
 import type { AppDispatch } from "../../../store/store";
 import type { Club } from "../interfaces/clubTypes";
 
@@ -25,6 +25,22 @@ export const ClubList = ({ clubs }: ClubProps) => {
       if (willDelete) {
         dispatch(deleteClub(id)).unwrap();
         swal("Eliminado!", "El club ha sido eliminado.", "success");
+      }
+    });
+  };
+
+  const handleRestore = async (id: string) => {
+    if (!id) return;
+    swal({
+      title: "¿Estás seguro?",
+      text: "¡El club será reactivado!",
+      icon: "warning",
+      buttons: ["Cancelar", "Sí, reactivar!"],
+      dangerMode: true,
+    }).then((willRestore) => {
+      if (willRestore) {
+        dispatch(restoreClub(id)).unwrap();
+        swal("Restaurado!", "El club ha sido reactivado.", "success");
       }
     });
   };
@@ -66,22 +82,37 @@ export const ClubList = ({ clubs }: ClubProps) => {
                 Deportistas: {club.uniqueAthletesCount}
               </td>
               <td className="project-actions align-middle">
-                <Link
-                  to={`/clubs/edit/${club._id}`}
-                  className=" text-success mx-2"
-                >
-                  <i className="fa fa-edit"></i> Editar
-                </Link>
-                <Link
-                  to={"#"}
-                  className=" text-danger mx-2"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleDelete(club._id);
-                  }}
-                >
-                  <i className="fa fa-trash"></i> Eliminar
-                </Link>
+                {club.active ? (
+                  <>
+                    <Link
+                      to={`/clubs/edit/${club._id}`}
+                      className="text-success m-2"
+                    >
+                      <i className="fa fa-edit"></i> Editar
+                    </Link>
+                    <Link
+                      to="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleDelete(club._id!);
+                      }}
+                      className="text-danger m-2"
+                    >
+                      <i className="fa fa-trash"></i> Eliminar
+                    </Link>
+                  </>
+                ) : (
+                  <Link
+                    to="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleRestore(club._id!);
+                    }}
+                    className="text-warning m-2"
+                  >
+                    <i className="fa fa-new"></i> Restaurar
+                  </Link>
+                )}
               </td>
             </tr>
           ))}

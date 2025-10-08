@@ -1,7 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { login, logout } from "./authSlice";
 import api from "../services/api";
-import { setMessage } from "./messageSlice";
 import toastr from "toastr";
 import "toastr/build/toastr.min.css";
 
@@ -15,19 +14,9 @@ export const loginThunk = createAsyncThunk(
       dispatch(login({ user: user, token: authorization }));
     } catch (error: any) {
       if (error.response && error.response.status === 401) {
-        dispatch(
-          setMessage({
-            message: "Credenciales incorrectas",
-            type: "danger",
-          })
-        );
+        toastr.error("Credenciales incorrectas");
       } else {
-        dispatch(
-          setMessage({
-            message: "Error de conexión o inesperado",
-            type: "danger",
-          })
-        );
+        toastr.error("Error de conexión o inesperado");
       }
     }
   }

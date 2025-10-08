@@ -52,6 +52,18 @@ export const deleteClub = createAsyncThunk<string, string>(
   }
 );
 
+export const restoreClub = createAsyncThunk<Club, string>(
+  "clubs/restoreClub",
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await api.patch(`/clubs/${id}/restore`);
+      return response.data as Club;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data || "Error al restaurar club");
+    }
+  }
+);
+
 export const findClubById = createAsyncThunk<string, string>(
   "clubs/findClubById",
   async (id, { rejectWithValue }) => {

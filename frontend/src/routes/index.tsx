@@ -56,6 +56,12 @@ export const roleRoutes: RoleRoutes = {
       element: <Dashboard />,
     },
     {
+      path: "/clubs",
+      icon: "fa-diamond",
+      label: "Clubs",
+      element: <Clubs name="Clubs" />,
+    },
+    {
       path: "/sports",
       icon: "fa-soccer-ball-o",
       label: "Disciplina",
