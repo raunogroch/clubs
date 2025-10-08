@@ -1,12 +1,16 @@
 // Estrategia JWT para autenticación
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
+import { RevokedTokensService } from '../revoked-tokens.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private revokedTokensService: RevokedTokensService,
+  ) {
     const secret = configService.get<string>('JWT_SECRET');
     if (!secret) {
       throw new Error('JWT_SECRET is not defined in configuration');
@@ -23,6 +27,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
    * Valida el payload del JWT
    */
   async validate(payload: any) {
+    // si el token tiene un jti o identificador único, úsalo; si no, usa el propio token id
+    const jti = payload.jti || payload.sub || null;
+    if (jti) {
+      const revoked = await this.revokedTokensService.isRevoked(String(jti));
+      if (revoked) throw new UnauthorizedException('Token revoked');
+    }
     return {
       sub: payload.sub,
       username: payload.username,

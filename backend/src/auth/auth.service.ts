@@ -6,6 +6,7 @@ import { User } from '../users/schemas/user.schema';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
 import { Roles } from 'src/users/enum/roles.enum';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -38,10 +39,13 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
+    // Generar un jti único para permitir revocación de tokens
+    const jti = randomBytes(16).toString('hex');
     const payload = {
       username: user.username,
       sub: user._id,
       role: user.role,
+      jti,
     };
     return {
       access: {
