@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import React from "react";
 import { Image } from "../components";
 import { Role } from "../interfaces";
@@ -10,12 +10,19 @@ import type { AppDispatch, RootState } from "../store/store";
 export const SideNav = () => {
   const dispatch = useDispatch<AppDispatch>();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const user = useSelector((state: RootState) => state.auth.user);
 
-  const handleLogout = async (e: any) => {
+  // Logout eficiente y seguro
+  const handleLogout = async (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    dispatch(logoutAction());
+    try {
+      await dispatch(logoutAction());
+      navigate("/login", { replace: true });
+    } catch {
+      navigate("/login", { replace: true });
+    }
   };
 
   const isActive = (path: string) => {

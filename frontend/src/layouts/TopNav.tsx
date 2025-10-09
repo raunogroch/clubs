@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { SmoothlyMenu } from "../scripts/coder-softScripts";
 import { Input } from "../components";
 import { useDispatch } from "react-redux";
@@ -18,6 +18,7 @@ const WELCOME_MESSAGE = "BIENVENIDO AL SISTEMA DE CLUBES";
 export const TopNav = () => {
   const dispatch = useDispatch<AppDispatch>();
   const location = useLocation();
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
 
   // Memoizar cálculo de rutas
@@ -34,13 +35,19 @@ export const TopNav = () => {
     }
   }, [debouncedSearch, dispatch, isSearchVisible]);
 
-  // Manejo de logout memoizado
+  // Logout sencillo y eficiente, con buenas prácticas
   const handleLogout = useCallback(
-    (e: React.MouseEvent<HTMLAnchorElement>) => {
+    async (e: React.MouseEvent<HTMLAnchorElement>) => {
       e.preventDefault();
-      dispatch(logoutThunk()).unwrap();
+      try {
+        await dispatch(logoutThunk()).unwrap();
+        navigate("/login", { replace: true });
+      } catch {
+        // Si falla, redirige igual para evitar quedarse en estado inconsistente
+        navigate("/login", { replace: true });
+      }
     },
-    [dispatch]
+    [dispatch, navigate]
   );
 
   // Manejo de toggle menú memoizado
