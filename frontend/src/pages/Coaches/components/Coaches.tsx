@@ -1,4 +1,4 @@
-import type { UsersPageProps } from "../interfaces";
+import type { UsersPageProps } from "../../../interfaces";
 import { CoachTable } from ".";
 import { UserListGeneric } from "../../../components/UserListGeneric";
 

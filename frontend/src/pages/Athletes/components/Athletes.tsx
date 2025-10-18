@@ -1,4 +1,4 @@
-import type { UsersPageProps } from "../interfaces";
+import type { UsersPageProps } from "../../../interfaces";
 import { AthleteTable } from ".";
 import { UserListGeneric } from "../../../components/UserListGeneric";
 

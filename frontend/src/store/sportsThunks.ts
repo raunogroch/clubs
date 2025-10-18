@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../services/api";
-import type { Sport } from "../pages/Sports/interfaces";
+import type { Sport } from "../interfaces";
 
 export const fetchSports = createAsyncThunk<Sport[]>(
   "sports/fetchSports",

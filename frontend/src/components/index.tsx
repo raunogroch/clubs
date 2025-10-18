@@ -6,5 +6,5 @@ export * from "./Spinner";
 export * from "./SelectorList";
 export * from "./Image";
 export * from "./StaticMessage";
-export * from "./CheckBoxList";
+export * from "./CheckboxList";
 export * from "./Button";

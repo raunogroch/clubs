@@ -1,4 +1,4 @@
-import type { UsersPageProps } from "../interfaces";
+import type { UsersPageProps } from "../../../interfaces";
 import { UserListGeneric } from "../../../components/UserListGeneric";
 import { AdminTable } from ".";
 
