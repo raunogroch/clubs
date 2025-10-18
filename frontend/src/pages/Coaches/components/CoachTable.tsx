@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import type { User } from "../interfaces";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../../store";
 import { deleteUser, restoreUser } from "../../../store/usersThunks";
+import type { User } from "../../../interfaces";
 
 interface UsersTableProps {
   users: User[];
@@ -60,7 +60,7 @@ export const CoachTable = ({ users }: UsersTableProps) => {
             <th>Cedula de Identidad</th>
             <th>Nombres</th>
             <th>Apellidos</th>
-            <th>Email</th>
+            {/* Email column removed */}
             <th className="text-center">Acciones</th>
           </tr>
         </thead>
@@ -72,7 +72,7 @@ export const CoachTable = ({ users }: UsersTableProps) => {
               <td className="align-middle">{user.ci}</td>
               <td className="align-middle">{user.name}</td>
               <td className="align-middle">{user.lastname}</td>
-              <td className="align-middle">{user.email}</td>
+              {/* Email removed */}
 
               <td className="text-center align-middle">
                 {user.active ? (

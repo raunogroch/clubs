@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { User, UserErrors } from "../interfaces/userTypes";
+import type { User, UserErrors } from "../../../interfaces";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../../store/store";
 import { createUser, updateUser } from "../../../store/usersThunks";
@@ -18,8 +18,8 @@ export const useUserForm = (initialData?: User) => {
       ci: "",
       name: "",
       lastname: "",
-      email: "",
       birth_date: "",
+      active: true,
       username: "",
       password: "",
     }
@@ -60,12 +60,7 @@ export const useUserForm = (initialData?: User) => {
     if (!formData.birth_date)
       newErrors.birth_date = "La fecha de nacimiento es requerida";
 
-    if (!formData.email) {
-      newErrors.email = "El email es requerido";
-    } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
-      newErrors.email = "Email inválido";
-    }
-
+    // email field removed
     if (!formData.username)
       newErrors.username = "El nombre de usuario es requerido";
 

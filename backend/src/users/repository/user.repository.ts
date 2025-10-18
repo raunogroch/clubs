@@ -36,7 +36,7 @@ export class UserRepository implements IUserRepository {
   }
 
   /**
-   * Devuelve usuarios paginados y filtrados por nombre, username, email, etc.
+   * Devuelve usuarios paginados y filtrados por nombre, username, cédula, etc.
    */
   async findAllPaginated(
     skip = 0,
@@ -51,7 +51,6 @@ export class UserRepository implements IUserRepository {
           { name: regex },
           { lastname: regex },
           { username: regex },
-          { email: regex },
           { ci: regex },
         ],
       };

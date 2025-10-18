@@ -2,10 +2,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect } from "react";
 import { NavHeader, Spinner } from "../../../components";
 import { useDispatch, useSelector } from "react-redux";
-import type { User, UsersPageProps } from "../interfaces/userTypes";
 import { CoachForm } from "./CoachForm";
 import { findUserById } from "../../../store/usersThunks";
 import type { AppDispatch, RootState } from "../../../store";
+import type { User, UsersPageProps } from "../../../interfaces";
 
 export const CoachEdit = ({ name: namePage, sub }: UsersPageProps) => {
   const { id } = useParams();

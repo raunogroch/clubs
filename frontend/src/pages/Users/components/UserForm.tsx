@@ -1,7 +1,7 @@
 import { UserRoleSelector } from ".";
 import { useUserForm } from "../hooks";
-import type { UserFormProps } from "../interfaces";
 import { Input, ImageCropperWithInput } from "../../../components";
+import type { UserFormProps } from "../../../interfaces";
 export const UserForm = ({ user, onCancel, onSuccess }: UserFormProps) => {
   const { formData, errors, handleChange, handleSubmit } = useUserForm(user);
 
@@ -70,25 +70,6 @@ export const UserForm = ({ user, onCancel, onSuccess }: UserFormProps) => {
             />
             {errors.lastname && (
               <div className="invalid-feedback">{errors.lastname}</div>
-            )}
-          </div>
-        </div>
-
-        <div className="form-group row">
-          <label htmlFor="email" className="col-sm-2 col-form-label">
-            Correo electronico
-          </label>
-          <div className="col-sm-10">
-            <Input
-              type="text"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className={`form-control ${errors.email ? "is-invalid" : ""}`}
-            />
-            {errors.email && (
-              <div className="invalid-feedback">{errors.email}</div>
             )}
           </div>
         </div>

@@ -5,7 +5,6 @@ interface FormFieldProps {
   type:
     | "number"
     | "text"
-    | "email"
     | "password"
     | "checkbox"
     | "hidden"

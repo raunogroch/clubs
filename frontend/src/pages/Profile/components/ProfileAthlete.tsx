@@ -119,10 +119,7 @@ export const ProfileAthlete = ({ name }: pageParamProps) => {
                   <h5>Contacto</h5>
                 </div>
                 <div className="ibox-content">
-                  <p>
-                    <i className="fa fa-envelope"></i>{" "}
-                    {user?.email || "Sin email"}
-                  </p>
+                  {/* Email removed from UI */}
                   <p>
                     <i className="fa fa-phone"></i>{" "}
                     {user?.phone || "Sin teléfono"}

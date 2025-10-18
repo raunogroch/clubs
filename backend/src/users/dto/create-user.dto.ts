@@ -1,7 +1,6 @@
 // DTO para la creación de usuarios
 import {
   IsDate,
-  IsEmail,
   IsNotEmpty,
   IsNumber,
   IsString,
@@ -34,9 +33,8 @@ export class CreateUserDto {
   @IsString()
   lastname?: string;
 
-  /** Correo electrónico */
-  @IsEmail()
-  email?: string;
+  /** Correo electrónico (omitted from DTO) */
+  // email is intentionally omitted from DTO to disable input/validation
 
   /** Cédula de identidad */
   @IsString()

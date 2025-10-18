@@ -110,7 +110,6 @@ export class UsersService {
         (u) =>
           u.name?.toLowerCase().includes(term) ||
           u.lastname?.toLowerCase().includes(term) ||
-          u.email?.toLowerCase().includes(term) ||
           u.ci?.toLowerCase().includes(term),
       );
     }

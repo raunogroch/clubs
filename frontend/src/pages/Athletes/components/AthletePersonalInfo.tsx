@@ -1,5 +1,5 @@
 import { Input } from "../../../components";
-import type { UserErrors, User } from "../interfaces/userTypes";
+import type { User, UserErrors } from "../../../interfaces";
 
 interface UserPersonalInfoProps {
   formData: User;
@@ -70,27 +70,6 @@ export const AthletePersonalInfo = ({
             required
           />
           {errors.ci && <div className="invalid-feedback">{errors.ci}</div>}
-        </div>
-      </div>
-
-      <div className="form-group row">
-        <label htmlFor="email" className="col-sm-2 col-form-label">
-          Correo Electrónico
-        </label>
-        <div className="col-sm-10">
-          <Input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={onChange}
-            className={`form-control ${errors.email ? "is-invalid" : ""}`}
-            placeholder="email@ejemplo.com"
-            required
-          />
-          {errors.email && (
-            <div className="invalid-feedback">{errors.email}</div>
-          )}
         </div>
       </div>
 

@@ -18,7 +18,6 @@ export const useSuperadminForm = (initialData?: User) => {
       ci: "",
       name: "",
       lastname: "",
-      email: "",
       birth_date: "",
       username: "",
       password: "",
@@ -60,11 +59,7 @@ export const useSuperadminForm = (initialData?: User) => {
     if (!formData.birth_date)
       newErrors.birth_date = "La fecha de nacimiento es requerida";
 
-    if (!formData.email) {
-      newErrors.email = "El email es requerido";
-    } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
-      newErrors.email = "Email inválido";
-    }
+    // email removed
 
     if (!formData.username)
       newErrors.username = "El nombre de usuario es requerido";

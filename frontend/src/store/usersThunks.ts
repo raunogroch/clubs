@@ -1,7 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../services/api";
 import type { UsersResponse } from "./usersSlice";
-import type { User } from "../pages/Users/interfaces/userTypes";
+import type { User } from "../interfaces/user";
 
 export const fetchUsers = createAsyncThunk<
   UsersResponse,
@@ -60,7 +60,9 @@ export const restoreUser = createAsyncThunk<User, string>(
       const response = await api.patch(`/users/${id}/restore`);
       return response.data as User;
     } catch (err: any) {
-      return rejectWithValue(err.response?.data || "Error al restaurar usuario");
+      return rejectWithValue(
+        err.response?.data || "Error al restaurar usuario"
+      );
     }
   }
 );

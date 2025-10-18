@@ -3,7 +3,7 @@ import type { ChangeEvent } from "react";
 interface InputProps {
   type?:
     | "text"
-    | "email"
+    // email type removed — prefer plain text or tel for contact fields
     | "password"
     | "checkbox"
     | "file"
