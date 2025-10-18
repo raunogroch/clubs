@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { User, UserErrors } from "../interfaces/adminTypes";
+import type { User, UserErrors } from "../../../interfaces";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../../store/store";
 import { createUser, updateUser } from "../../../store/usersThunks";

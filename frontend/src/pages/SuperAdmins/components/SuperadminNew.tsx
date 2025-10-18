@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { NavHeader } from "../../../components/NavHeader";
-import type { UsersPageProps } from "../interfaces/superadminTypes";
+import type { UsersPageProps } from "../../../interfaces";
 import { SuperadminForm } from ".";
 
 export const SuperadminNew = ({ name, sub }: UsersPageProps) => {

@@ -2,7 +2,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect } from "react";
 import { NavHeader, Spinner } from "../../../components";
 import { useDispatch, useSelector } from "react-redux";
-import type { User, UsersPageProps } from "../interfaces/superadminTypes";
+import type { User, UsersPageProps } from "../../../interfaces";
 import { findUserById } from "../../../store/usersThunks";
 import type { AppDispatch, RootState } from "../../../store";
 import { SuperadminForm } from ".";

@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { Sport } from "../pages/Sports/interfaces/sportTypes";
-import type { User } from "../interfaces/user";
+import type { User } from "../interfaces";
 import { fetchEntities } from "./entitiesThunks";
 
 interface EntitiesState {

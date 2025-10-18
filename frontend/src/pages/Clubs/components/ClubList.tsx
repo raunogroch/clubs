@@ -4,7 +4,7 @@ import swal from "sweetalert";
 import { Image } from "../../../components";
 import { deleteClub, restoreClub } from "../../../store/clubsThunks";
 import type { AppDispatch } from "../../../store/store";
-import type { Club } from "../interfaces/clubTypes";
+import type { Club } from "../interfaces";
 
 interface ClubProps {
   clubs: Club[];

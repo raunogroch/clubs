@@ -1,5 +1,5 @@
 // Interfaz para el servicio de usuarios
-import type { User } from "../../interfaces/user";
+import type { User } from "../../interfaces";
 import type { ApiResponse } from "../../utils/apiUtils";
 
 export interface IUserService {

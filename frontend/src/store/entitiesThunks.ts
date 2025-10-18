@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import type { User } from "../interfaces/user";
+import type { User } from "../interfaces";
 import type { Sport } from "../pages/Sports/interfaces/sportTypes";
 import api from "../services/api";
 

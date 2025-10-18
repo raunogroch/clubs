@@ -1,7 +1,14 @@
 export interface User {
   _id?: string;
   image?: string;
-  role?: "coach" | "athlete" | "parent" | "admin" | "superadmin" | string;
+  role?:
+    | "coach"
+    | "athlete"
+    | "parent"
+    | "assistant"
+    | "admin"
+    | "superadmin"
+    | string;
   ci?: string;
   name?: string;
   lastname?: string;
@@ -16,7 +23,6 @@ export interface User {
   groups?: any[];
   coaches?: any[];
   athletes?: any[];
-  // legacy fields may remain in DB but are optional here
 }
 
 export type UserErrors = {

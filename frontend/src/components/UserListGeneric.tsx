@@ -1,4 +1,4 @@
-import type { User, UsersPageProps } from "../interfaces/user";
+import type { User, UsersPageProps } from "../interfaces";
 import { NavHeader, Spinner } from "../components";
 import { useDispatch, useSelector } from "react-redux";
 import { setLimit, setPage, type AppDispatch, type RootState } from "../store";

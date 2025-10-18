@@ -25,10 +25,6 @@ export class User extends mongoose.Document {
   @Prop()
   lastname: string;
 
-  /** Correo electrónico */
-  // correo electrónico was removed from schema to deprecate input usage.
-  // Keep in database as legacy field if present; do not expose in new DTOs.
-
   /** Cédula de identidad */
   @Prop()
   ci: string;

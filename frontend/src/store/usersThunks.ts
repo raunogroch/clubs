@@ -1,7 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../services/api";
 import type { UsersResponse } from "./usersSlice";
-import type { User } from "../interfaces/user";
+import type { User } from "../interfaces";
 
 export const fetchUsers = createAsyncThunk<
   UsersResponse,

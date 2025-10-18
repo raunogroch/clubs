@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import type { User } from "../interfaces/user";
+import type { User } from "../interfaces";
 import {
   fetchUsers,
   createUser,
