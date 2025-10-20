@@ -13,11 +13,9 @@ export interface SportFormProps {
   onSuccess?: () => void;
   onCancel?: () => void;
   onError?: (
-    err:
-      | {
-          message: string;
-          type: "danger" | "warning" | "info" | "success";
-        }
-      | null
+    err: {
+      message: string;
+      type: "danger" | "warning" | "info" | "success";
+    } | null
   ) => void;
 }

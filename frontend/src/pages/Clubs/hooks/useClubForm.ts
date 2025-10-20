@@ -15,6 +15,7 @@ const emptyClub: Club = {
   createdAt: "",
   image: "",
   uniqueAthletesCount: 0,
+  active: true,
 };
 
 export const useClubForm = (initialData?: Club) => {
