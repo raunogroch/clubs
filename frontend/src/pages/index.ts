@@ -28,3 +28,4 @@ export * from "./Users/components/UserTable";
 export * from "./Login";
 export * from "./NotFound";
 export * from "./Navigation";
+export * from "./Payments/RegisterPayment";

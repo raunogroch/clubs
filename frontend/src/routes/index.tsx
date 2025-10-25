@@ -27,6 +27,7 @@ import {
   SuperadminNew,
   Superadmins,
 } from "../pages/SuperAdmins";
+import { RegisterPayment } from "../pages";
 
 export type MenuRoute = {
   path: string;
@@ -146,6 +147,12 @@ export const roleRoutes: RoleRoutes = {
       path: "/users/athletes/edit/:id",
       element: <AthleteEdit name="Registros" sub="Actualizar" />,
     },
+    {
+      path: "/payments/register",
+      icon: "fa-credit-card",
+      label: "Registrar pago",
+      element: <RegisterPayment />,
+    },
   ],
   admin: [
     {
@@ -254,6 +261,12 @@ export const roleRoutes: RoleRoutes = {
     {
       path: "/users/athletes/edit/:id",
       element: <AthleteEdit name="Registros" sub="Actualizar" />,
+    },
+    {
+      path: "/payments/register",
+      icon: "fa-credit-card",
+      label: "Registrar pago",
+      element: <RegisterPayment />,
     },
   ],
   coach: [

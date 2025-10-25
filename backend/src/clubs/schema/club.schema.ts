@@ -31,6 +31,11 @@ export class Club extends Document {
   description: string;
 
   /** Horario asociado al club */
+  /** Monto mensual (en la moneda local) que cobra el club por atleta */
+  @Prop({ type: Number, default: 0 })
+  monthly_pay: number;
+
+  /** Horario asociado al club */
   /** Grupos asociados al club */
   @Prop({
     type: [mongoose.Schema.Types.ObjectId],

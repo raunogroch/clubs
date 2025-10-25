@@ -11,6 +11,7 @@ export interface Club {
   groups: IGroup[];
   uniqueAthletesCount?: number;
   createdAt: string;
+  monthly_pay: number;
   active: boolean;
 }
 

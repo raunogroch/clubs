@@ -13,6 +13,7 @@ const emptyClub: Club = {
   description: "",
   groups: [],
   createdAt: "",
+  monthly_pay: 200,
   image: "",
   uniqueAthletesCount: 0,
   active: true,
@@ -43,8 +44,6 @@ export const useClubForm = (initialData?: Club) => {
     if (!formData.sport)
       newErrors.sport = "La disciplina deportiva es requerida";
     if (!formData.place) newErrors.place = "La ubicacion es requerida";
-    if (!formData.description)
-      newErrors.description = "La descripcion es requerida";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;

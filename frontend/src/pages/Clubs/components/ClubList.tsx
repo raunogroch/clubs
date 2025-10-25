@@ -51,39 +51,42 @@ export const ClubList = ({ clubs }: ClubProps) => {
         <tbody>
           {clubs.map((club: Club, index: number) => (
             <tr key={index}>
-              <td className="project-status">
-                <Image
-                  src={club.image}
-                  alt={club.name}
-                  style={{ width: "50px", borderRadius: "50%" }}
-                />
+              <td className="project-status text-center align-middle">
+                {club.image ? (
+                  <Image
+                    src={club.image}
+                    alt={club.name}
+                    style={{ width: "50px", borderRadius: "50%" }}
+                  />
+                ) : (
+                  "sin logo"
+                )}
               </td>
-              <td className="project-title">
-                <Link to={`/clubs/${club._id}/groups`}>
-                  <i className="fa fa-eye"></i> &nbsp; {club.name}
-                </Link>
-                <br />
-                <small>
-                  Creado:&nbsp;
-                  {new Date(club.createdAt).toLocaleDateString("es-ES", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </small>
+              <td className="project-title text-center align-middle">
+                {club.name.toUpperCase()}
               </td>
-              <td className="project-people">
-                Grupos activos:
+              <td className="project-people text-center align-middle">
+                Grupos activos: &nbsp;
                 {Array.isArray(club.groups)
                   ? club.groups.filter((g: any) => g.active).length
                   : 0}
               </td>
-              <td className="project-people">
-                Deportistas: {club.uniqueAthletesCount}
+              <td className="project-people text-center align-middle">
+                Deportistas: &nbsp;{club.uniqueAthletesCount}
               </td>
-              <td className="project-actions align-middle">
+
+              <td className="project-payment text-center align-middle">
+                Mensualidad: &nbsp;{club.monthly_pay} Bs
+              </td>
+              <td className="project-actions text-center align-middle">
                 {club.active ? (
                   <>
+                    <Link
+                      to={`/clubs/${club._id}/groups`}
+                      className="text-primary m-2"
+                    >
+                      <i className="fa fa-eye"></i> Ver
+                    </Link>
                     <Link
                       to={`/clubs/edit/${club._id}`}
                       className="text-success m-2"

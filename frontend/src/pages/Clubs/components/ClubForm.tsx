@@ -68,6 +68,16 @@ export const ClubForm = ({
           placeholder="Direccion..."
         />
 
+        <FormField
+          title="Mensualidad"
+          type="number"
+          name="monthly_pay"
+          value={String(formData.monthly_pay)}
+          error={errors.monthly_pay}
+          handleChange={handleChange}
+          placeholder="Monto en Bs."
+        />
+
         <TextAreaField
           title="Descripcion del Club"
           name="description"
