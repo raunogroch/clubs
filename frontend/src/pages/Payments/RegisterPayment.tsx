@@ -6,14 +6,16 @@ import { MonthsStatus } from "./components/MonthsStatus";
 import { PaymentForm } from "./components/PaymentForm";
 import api from "../../services/api";
 import toastr from "toastr";
+import type { Athlete, Club, Payment } from "./IPayments";
+import type { ApiResponse } from "../../utils/apiUtils";
 
 export const RegisterPayment: React.FC = () => {
-  const [selectedAthlete, setSelectedAthlete] = useState<any | null>(null);
-  const [clubs, setClubs] = useState<any[]>([]);
-  const [selectedClub, setSelectedClub] = useState<any | null>(null);
+  const [selectedAthlete, setSelectedAthlete] = useState<Athlete | null>(null);
+  const [clubs, setClubs] = useState<Club[]>([]);
+  const [selectedClub, setSelectedClub] = useState<Club | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
 
-  const handleSelectAthlete = async (athlete: any) => {
+  const handleSelectAthlete = async (athlete: Athlete) => {
     setSelectedAthlete(athlete);
     setSelectedClub(null);
     try {
@@ -31,7 +33,7 @@ export const RegisterPayment: React.FC = () => {
     }
   };
 
-  const handlePaymentDone = (res?: any) => {
+  const handlePaymentDone = (res?: ApiResponse<Payment>) => {
     if (res && res.code && res.code >= 200 && res.code < 300) {
       toastr.success("Pago registrado correctamente");
       // reset

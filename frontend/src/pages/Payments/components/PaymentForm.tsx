@@ -1,28 +1,36 @@
-import React, { useState, useEffect } from "react";
-import { paymentService } from "../paymentService";
+import { useState, useEffect } from "react";
 import toastr from "toastr";
+import type { Athlete, Club, Payment, CreatePaymentDto } from "../IPayments";
+import type { ApiResponse } from "../../../utils/apiUtils";
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "../../../store/store";
+import { createPayment } from "../../../store/paymentThunks";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../../store/store";
 
 interface Props {
-  athlete: any;
-  club: any;
-  onDone: (res?: any) => void;
+  athlete: Athlete;
+  club: Club;
+  onDone: (res?: ApiResponse<Payment>) => void;
   selectedMonth?: string;
   onMonthChange?: (m: string) => void;
 }
 
-export const PaymentForm: React.FC<Props> = ({
+export const PaymentForm = ({
   athlete,
   club,
   onDone,
   selectedMonth,
   onMonthChange,
-}) => {
+}: Props) => {
   console.log(club);
   const now = new Date();
   const defaultMonth = `${now.getFullYear()}-${String(
     now.getMonth() + 1
   ).padStart(2, "0")}`;
-  const [amount, setAmount] = useState<any>(club?.monthly_pay ?? "");
+  const [amount, setAmount] = useState<number | string>(
+    club?.monthly_pay ?? ""
+  );
   const [month, setMonth] = useState<string>(selectedMonth ?? defaultMonth);
   const [loading, setLoading] = useState(false);
   const [note, setNote] = useState<string>("");
@@ -38,6 +46,9 @@ export const PaymentForm: React.FC<Props> = ({
       setMonth(selectedMonth);
     }
   }, [selectedMonth]);
+  const dispatch = useDispatch<AppDispatch>();
+  const paidMonthsMap = useSelector((s: RootState) => s.payments?.paidMonthsMap || {});
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!athlete || !club) return;
@@ -50,15 +61,44 @@ export const PaymentForm: React.FC<Props> = ({
       setLoading(false);
       return;
     }
+    // Cliente: si ya está pagado según el store, evitar llamar al backend
+    if (paidMonthsMap && paidMonthsMap[month]) {
+      toastr.error("El mes ya fue pagado");
+      setLoading(false);
+      return;
+    }
     try {
-      const res = await paymentService.create({
+      const dto: CreatePaymentDto = {
         athleteId: athlete._id,
-        clubId: club._id,
+        clubId: club._id!,
         amount: Number(amount),
         month,
         note: note?.trim() || undefined,
-      });
-      onDone(res);
+      };
+      const action = await dispatch(createPayment(dto));
+      // RTK returned action: check status
+      if ((action as any).meta?.requestStatus === "fulfilled") {
+        const payload = (action as any).payload;
+        toastr.success("Pago registrado correctamente");
+        onDone({ code: 200, message: "Pago registrado", data: payload });
+      } else {
+        // rejected: try to extract meaningful message
+        const payload = (action as any).payload;
+        const errMsg =
+          (payload && (payload.message || payload.error || payload.msg)) ||
+          (action as any).error?.message ||
+          "Error al registrar pago";
+        // Prefer a clear duplicate-month message when backend indicates it
+        if (typeof errMsg === "string" && errMsg.includes("Ya existe")) {
+          toastr.error("El mes ya fue pagado");
+        } else if (typeof errMsg === "string" && errMsg.includes("anterior")) {
+          // month-in-the-past validation message
+          toastr.error(errMsg);
+        } else {
+          toastr.error(errMsg);
+        }
+        onDone(undefined);
+      }
     } catch (err) {
       onDone(undefined);
     } finally {

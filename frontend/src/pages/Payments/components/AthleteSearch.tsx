@@ -1,13 +1,14 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import api from "../../../services/api";
+import type { Athlete } from "../IPayments";
 
 interface Props {
-  onSelect: (athlete: any) => void;
+  onSelect: (athlete: Athlete) => void;
 }
 
-export const AthleteSearch: React.FC<Props> = ({ onSelect }) => {
+export const AthleteSearch = ({ onSelect }: Props) => {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<Athlete[]>([]);
   const [loading, setLoading] = useState(false);
 
   const handleSearch = async () => {

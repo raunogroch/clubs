@@ -1,13 +1,21 @@
-export const ClubsList = ({ clubs, onSelect }: any) => {
+import type { Club } from "../IPayments";
+
+interface Props {
+  clubs: Array<Club | { club: Club }>;
+  onSelect: (c: Club) => void;
+}
+
+export const ClubsList = ({ clubs, onSelect }: Props) => {
   if (!clubs || clubs.length === 0)
     return <div>No inscrito en ningun club</div>;
 
   return (
     <div className="list-group">
-      {clubs.map((c: any) => {
+      {clubs.map((c) => {
         // soporta dos formas: { club, groups } que devuelve el backend,
         // o directamente el objeto club
-        const club = c?.club || c;
+        const clubObj = c as { club?: Club };
+        const club: Club = clubObj?.club || (c as Club);
         const id = club?._id || club?.id || Math.random();
         const name = club?.name || club?.title || "Sin nombre";
 
@@ -29,24 +37,4 @@ export const ClubsList = ({ clubs, onSelect }: any) => {
   );
 };
 
-{
-  /*
-    
-    <div className="list-group">
-      {clubs.map((c: any) => (
-        <button
-          key={c._id}
-          className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-          onClick={() => onSelect(c)}
-        >
-          <div>
-            <strong>{c._id} </strong>
-            <div className="small text-muted">{c.name}</div>
-          </div>
-          <span className="badge badge-primary badge-pill">Seleccionar</span>
-        </button>
-      ))}
-    </div>
-
-    */
-}
+// (old example markup removed)

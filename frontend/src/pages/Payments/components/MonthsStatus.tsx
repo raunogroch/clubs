@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
-import { paymentService } from "../paymentService";
+import type { Athlete, Club } from "../IPayments";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../../../store/store";
+import { getPaidMonths } from "../../../store/paymentThunks";
 
 interface Props {
-  athlete: any;
-  club: any;
+  athlete: Athlete;
+  club: Club;
   onSelectMonth?: (m: string) => void;
 }
 
@@ -13,18 +16,12 @@ const formatYm = (ym: string) => {
   return `${d.toLocaleString("es-ES", { month: "short" })} ${d.getFullYear()}`;
 };
 
-const inferYmFromDate = (dateStr: string) => {
-  try {
-    const d = new Date(dateStr);
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-  } catch (e) {
-    return undefined;
-  }
-};
-
 export const MonthsStatus = ({ athlete, club, onSelectMonth }: Props) => {
   const [monthsWindow, setMonthsWindow] = useState<string[]>([]);
-  const [paidMonths, setPaidMonths] = useState<Record<string, any>>({});
+  // we'll read paid months from the store
+
+  const dispatch = useDispatch<AppDispatch>();
+  const paidMonthsMap = useSelector((s: RootState) => s.payments.paidMonthsMap);
 
   useEffect(() => {
     if (!athlete || !club) return;
@@ -58,36 +55,24 @@ export const MonthsStatus = ({ athlete, club, onSelectMonth }: Props) => {
 
     (async () => {
       try {
-        const res = await paymentService.getPaidMonths(
-          athlete._id,
-          club._id,
-          all
+        await dispatch(
+          getPaidMonths({
+            athleteId: athlete._id,
+            clubId: club._id!,
+            months: all,
+          })
         );
-        if (res && res.code >= 200 && res.code < 300) {
-          const map: Record<string, any> = {};
-          (res.data || []).forEach((p: any) => {
-            let key = p.month;
-            if (!key && p.createdAt) {
-              const inferred = inferYmFromDate(p.createdAt);
-              if (inferred) key = inferred;
-            }
-            if (key) map[key] = p;
-          });
-          setPaidMonths(map);
-        } else {
-          setPaidMonths({});
-        }
       } catch (e) {
-        setPaidMonths({});
+        // ignore - handled by slice
       }
     })();
   }, [athlete, club]);
 
   if (!athlete) return null;
 
-  const paidList = monthsWindow.filter((m) => Boolean(paidMonths[m]));
+  const paidList = monthsWindow.filter((m) => Boolean(paidMonthsMap[m]));
   const pendingList = monthsWindow.filter((m) => {
-    if (paidMonths[m]) return false;
+    if (paidMonthsMap[m]) return false;
     const [yStr, mStr] = m.split("-");
     const y = Number(yStr);
     const mo = Number(mStr) - 1;
@@ -103,12 +88,12 @@ export const MonthsStatus = ({ athlete, club, onSelectMonth }: Props) => {
         <div className="col-md-12">
           {paidList.length === 0 ? (
             <div className="text-muted">
-              No hay meses pagados en la ventana seleccionada.
+              No hay meses pagados en el club seleccionado.
             </div>
           ) : (
             <ul className="list-group mb-2">
               {paidList.map((m) => {
-                const payment = paidMonths[m];
+                const payment = paidMonthsMap[m];
                 const title = `Pagado: ${payment?.amount ?? "-"} | Nota: ${
                   payment?.note ?? "-"
                 } | Fecha: ${
@@ -127,7 +112,7 @@ export const MonthsStatus = ({ athlete, club, onSelectMonth }: Props) => {
                       if (idx >= 0) {
                         const nextPending = monthsWindow
                           .slice(idx + 1)
-                          .find((mm) => !paidMonths[mm]);
+                          .find((mm) => !paidMonthsMap[mm]);
                         if (nextPending) {
                           if (typeof onSelectMonth === "function")
                             onSelectMonth(nextPending);
