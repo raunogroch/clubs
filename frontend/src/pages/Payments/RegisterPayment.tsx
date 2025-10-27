@@ -77,24 +77,20 @@ export const RegisterPayment: React.FC = () => {
                 )}
               </div>
             </div>
-            <div className="ibox">
-              <div className="ibox-title">
-                <h5>Meses pagados</h5>
+            {selectedClub && (
+              <div className="ibox">
+                <div className="ibox-title">
+                  <h5>Meses pagados</h5>
+                </div>
+                <div className="ibox-content">
+                  <MonthsStatus
+                    athlete={selectedAthlete}
+                    club={selectedClub}
+                    onSelectMonth={(m: string) => setSelectedMonth(m)}
+                  />
+                </div>
               </div>
-              <div className="ibox-content">
-                {selectedAthlete ? (
-                  <>
-                    <MonthsStatus
-                      athlete={selectedAthlete}
-                      club={selectedClub}
-                      onSelectMonth={(m: string) => setSelectedMonth(m)}
-                    />
-                  </>
-                ) : (
-                  <div>Selecciona un atleta para ver sus clubes</div>
-                )}
-              </div>
-            </div>
+            )}
           </div>
 
           <div className="col-md-4">
