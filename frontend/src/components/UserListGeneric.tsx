@@ -18,7 +18,6 @@ export const UserListGeneric = ({
   name: nameTitle,
   role,
   TableComponent,
-  pageCreateLabel = "Nuevo usuario",
 }: UserListGenericProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const { users, status, error } = useSelector(
@@ -41,7 +40,7 @@ export const UserListGeneric = ({
 
   return (
     <>
-      <NavHeader name={nameTitle} pageCreate={pageCreateLabel} />
+      <NavHeader name={nameTitle} />
       {status === "loading" && <Spinner />}
       {status === "succeeded" && userList.length === 0 && (
         <div className="wrapper wrapper-content">

@@ -47,7 +47,9 @@ export const PaymentForm = ({
     }
   }, [selectedMonth]);
   const dispatch = useDispatch<AppDispatch>();
-  const paidMonthsMap = useSelector((s: RootState) => s.payments?.paidMonthsMap || {});
+  const paidMonthsMap = useSelector(
+    (s: RootState) => s.payments?.paidMonthsMap || {}
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

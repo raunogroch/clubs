@@ -5,8 +5,10 @@ interface UsersTableProps {
   users: User[];
 }
 
-export const AthleteTable = ({ users }: UsersTableProps) => {
+export const AssistantTable = ({ users }: UsersTableProps) => {
   return (
     <GenericUserTable users={users} showRole={false} allowRestore={false} />
   );
 };
+
+export default AssistantTable;

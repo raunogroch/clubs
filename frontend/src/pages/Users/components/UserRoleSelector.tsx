@@ -26,6 +26,7 @@ export const UserRoleSelector = ({
             <option value="athlete">Deportista</option>
             <option value="parent">Responsable</option>
             <option value="coach">Entrenador</option>
+            <option value="assistant">Asistente</option>
             <option value="admin">Administrador</option>
             <option value="superadmin">Super Administrador</option>
           </select>

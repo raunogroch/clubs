@@ -77,6 +77,7 @@ export const GenericUserTable = ({
                     {user.role === "athlete" && "Atleta"}
                     {user.role === "parent" && "Responsable"}
                     {user.role === "coach" && "Entrenador"}
+                    {user.role === "assistant" && "Asistente"}
                     {user.role === "admin" && "Administrador"}
                     {user.role === "superadmin" && "Super Administrador"}
                   </div>

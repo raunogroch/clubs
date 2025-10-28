@@ -9,7 +9,6 @@ import {
   Sports,
   UserEdit,
   UserNew,
-  Users,
   DashboardAthlete,
   ProfileAthlete,
   ProfileAdmin,
@@ -28,6 +27,8 @@ import {
   Superadmins,
 } from "../pages/SuperAdmins";
 import { RegisterPayment } from "../pages";
+import { Assistants } from "../pages/Assistants";
+import { Parents } from "../pages/Parents";
 
 export type MenuRoute = {
   path: string;
@@ -83,6 +84,12 @@ export const roleRoutes: RoleRoutes = {
       label: "Gestion de usuarios",
       children: [
         {
+          path: "/users/create",
+          icon: "fa-plus-circle",
+          label: "Crear usuario",
+          element: <UserNew name="Registros" sub="Crear" />,
+        },
+        {
           path: "/users/superadmins",
           icon: "fa-users",
           label: "Super Admins",
@@ -99,6 +106,12 @@ export const roleRoutes: RoleRoutes = {
           icon: "fa-users",
           label: "Entrenadores",
           element: <Coaches name="Entrenadores" />,
+        },
+        {
+          path: "/users/parents",
+          icon: "fa-users",
+          label: "Tutores",
+          element: <Parents name="Tutores" />,
         },
         {
           path: "/users/athletes",
@@ -213,50 +226,54 @@ export const roleRoutes: RoleRoutes = {
       label: "Gestion de usuarios",
       children: [
         {
-          path: "/users/general",
-          icon: "fa-users",
-          label: "General",
-          element: <Users name="Todos los registros" />,
+          path: "/users/create",
+          icon: "fa-plus-circle",
+          label: "Crear usuario",
+          element: <UserNew name="Registros" sub="Crear" />,
+        },
+        {
+          path: "/users/admins",
+          icon: "fa-user-circle-o",
+          label: "Administradores",
+          element: <Admins name="Administradores" />,
+        },
+        {
+          path: "/users/assistants",
+          icon: "fa-user-circle-o",
+          label: "Asistentes",
+          element: <Assistants name="Asistentes" />,
         },
         {
           path: "/users/coaches",
-          icon: "fa-vcard-o",
+          icon: "fa-user-circle-o",
           label: "Entrenadores",
           element: <Coaches name="Entrenadores" />,
         },
         {
+          path: "/users/parents",
+          icon: "fa-user-circle-o",
+          label: "Tutores",
+          element: <Parents name="Tutores" />,
+        },
+        {
           path: "/users/athletes",
-          icon: "fa-vcard-o",
+          icon: "fa-user-circle-o",
           label: "Deportistas",
           element: <Athletes name="Deportistas" />,
         },
       ],
     },
     {
-      path: "/users/general/create",
-      element: <UserNew name="Registros" sub="Crear" />,
-    },
-    {
       path: "/users/general/edit/:id",
       element: <UserEdit name="Registros" sub="Actualizar" />,
     },
-
-    // coaches
-
     {
-      path: "/users/coaches/create",
-      element: <CoachNew name="Registros" sub="Crear" />,
+      path: "/users/admins/edit/:id",
+      element: <AdminEdit name="Registros" sub="Actualizar" />,
     },
     {
       path: "/users/coaches/edit/:id",
       element: <CoachEdit name="Registros" sub="Actualizar" />,
-    },
-
-    // athletes
-
-    {
-      path: "/users/athletes/create",
-      element: <AthleteNew name="Registros" sub="Crear" />,
     },
     {
       path: "/users/athletes/edit/:id",
