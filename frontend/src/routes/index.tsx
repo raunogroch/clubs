@@ -350,7 +350,7 @@ export const roleRoutes: RoleRoutes = {
     {
       path: "/clubs",
       icon: "fa-diamond",
-      label: "Clubs",
+      label: "Asignaciones",
       element: <Clubs name="Clubs" />,
     },
     {
