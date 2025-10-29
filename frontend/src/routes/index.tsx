@@ -358,7 +358,7 @@ export const roleRoutes: RoleRoutes = {
       element: <Groups name="Clubs" sub="Grupos" registerAthlete />,
     },
     {
-      path: "/clubs/:clubId/groups/:groupId/register-athlete",
+      path: "/clubs/:clubId/groups/register-athlete/:groupId",
       element: <GroupAthletes name="Clubs" sub="Registro" />,
     },
     {

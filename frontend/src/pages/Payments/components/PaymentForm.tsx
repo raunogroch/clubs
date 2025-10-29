@@ -23,7 +23,6 @@ export const PaymentForm = ({
   selectedMonth,
   onMonthChange,
 }: Props) => {
-  console.log(club);
   const now = new Date();
   const defaultMonth = `${now.getFullYear()}-${String(
     now.getMonth() + 1

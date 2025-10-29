@@ -107,7 +107,6 @@ export const useGroup = (initialData?: IGroup) => {
       errors.place = "El lugar es requerido";
     }
     setGroupFormErrors(errors);
-    console.log("Validation errors:", errors);
     return Object.keys(errors).length === 0;
   }
 
