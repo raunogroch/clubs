@@ -54,25 +54,7 @@ export const useGroup = (initialData?: IGroup) => {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    const { name, value, type, checked } = e.target as HTMLInputElement;
-
-    if (type === "checkbox" && (name === "coaches" || name === "athletes")) {
-      setGroupFormState((prev) => {
-        const arr = Array.isArray(prev[name as keyof IGroup])
-          ? [...(prev as any)[name]]
-          : [];
-        if (checked) {
-          if (!arr.includes(value)) arr.push(value);
-        } else {
-          return { ...prev, [name]: arr.filter((v: any) => v !== value) };
-        }
-        return { ...prev, [name]: arr };
-      });
-      if (groupFormErrors[name as keyof GroupErrors]) {
-        setGroupFormErrors((prev) => ({ ...prev, [name]: undefined }));
-      }
-      return;
-    }
+    const { name, value } = e.target as HTMLInputElement;
 
     setGroupFormState((prev) => ({ ...prev, [name]: value }));
     if (groupFormErrors[name as keyof GroupErrors]) {
@@ -124,13 +106,8 @@ export const useGroup = (initialData?: IGroup) => {
     if (!groupFormState.place || groupFormState.place.trim() === "") {
       errors.place = "El lugar es requerido";
     }
-    if (!groupFormState.coaches || groupFormState.coaches.length === 0) {
-      errors.coaches = "Debe asignar al menos un entrenador";
-    }
-    if (!groupFormState.athletes || groupFormState.athletes.length === 0) {
-      errors.athletes = "Debe asignar al menos un atleta";
-    }
     setGroupFormErrors(errors);
+    console.log("Validation errors:", errors);
     return Object.keys(errors).length === 0;
   }
 

@@ -8,12 +8,16 @@ interface Props {
   users: User[];
   showRole?: boolean;
   allowRestore?: boolean;
+  allowEdit?: boolean;
+  allowDelete?: boolean;
 }
 
 export const GenericUserTable = ({
   users,
   showRole = true,
   allowRestore = false,
+  allowEdit = true,
+  allowDelete = false,
 }: Props) => {
   const dispatch = useDispatch<AppDispatch>();
   const filter = useSelector((state: RootState) => state.filters);
@@ -89,22 +93,26 @@ export const GenericUserTable = ({
               <td className="text-center align-middle">
                 {user.active ? (
                   <>
-                    <Link
-                      to={`/users/${location}/edit/${user._id}`}
-                      className="text-success m-2"
-                    >
-                      <i className="fa fa-edit"></i> Editar
-                    </Link>
-                    <Link
-                      to="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleDelete(user._id!);
-                      }}
-                      className="text-danger m-2"
-                    >
-                      <i className="fa fa-trash"></i> Eliminar
-                    </Link>
+                    {allowEdit && (
+                      <Link
+                        to={`/users/${location}/edit/${user._id}`}
+                        className="text-success m-2"
+                      >
+                        <i className="fa fa-edit"></i> Editar
+                      </Link>
+                    )}
+                    {allowDelete && (
+                      <Link
+                        to="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleDelete(user._id!);
+                        }}
+                        className="text-danger m-2"
+                      >
+                        <i className="fa fa-trash"></i> Eliminar
+                      </Link>
+                    )}
                   </>
                 ) : allowRestore ? (
                   <Link

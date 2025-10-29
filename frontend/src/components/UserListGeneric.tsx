@@ -10,7 +10,12 @@ import "toastr/build/toastr.min.css";
 
 interface UserListGenericProps extends UsersPageProps {
   role?: string;
-  TableComponent: React.ComponentType<{ users: User[] }>;
+  // TableComponent may accept extra optional flags like edit/delete
+  TableComponent: React.ComponentType<{
+    users: User[];
+    edit?: boolean;
+    delete?: boolean;
+  }>;
   pageCreateLabel?: string;
 }
 
@@ -18,6 +23,9 @@ export const UserListGeneric = ({
   name: nameTitle,
   role,
   TableComponent,
+  pageCreateLabel,
+  edit,
+  delete: canDelete,
 }: UserListGenericProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const { users, status, error } = useSelector(
@@ -40,7 +48,7 @@ export const UserListGeneric = ({
 
   return (
     <>
-      <NavHeader name={nameTitle} />
+      <NavHeader name={nameTitle} pageCreate={pageCreateLabel} />
       {status === "loading" && <Spinner />}
       {status === "succeeded" && userList.length === 0 && (
         <div className="wrapper wrapper-content">
@@ -74,7 +82,11 @@ export const UserListGeneric = ({
                   </div>
                 </div>
                 <div className="ibox-content">
-                  <TableComponent users={userList} />
+                  <TableComponent
+                    users={userList}
+                    edit={edit}
+                    delete={canDelete}
+                  />
                   <PaginationList filter={users} />
                 </div>
               </div>

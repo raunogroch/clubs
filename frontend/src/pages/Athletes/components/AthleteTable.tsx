@@ -5,8 +5,18 @@ interface UsersTableProps {
   users: User[];
 }
 
-export const AthleteTable = ({ users }: UsersTableProps) => {
+export const AthleteTable = ({
+  users,
+  edit,
+  delete: canDelete,
+}: UsersTableProps & { edit?: boolean; delete?: boolean }) => {
   return (
-    <GenericUserTable users={users} showRole={false} allowRestore={false} />
+    <GenericUserTable
+      users={users}
+      showRole={false}
+      allowRestore={false}
+      allowEdit={edit}
+      allowDelete={canDelete}
+    />
   );
 };

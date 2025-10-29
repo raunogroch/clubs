@@ -44,7 +44,7 @@ export class UsersController {
    * Endpoint para crear un usuario
    */
   @Post()
-  @Roles(Role.SUPERADMIN, Role.ADMIN)
+  @Roles(Role.SUPERADMIN, Role.ADMIN, Role.ASSISTANT)
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }

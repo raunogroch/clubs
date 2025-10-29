@@ -31,6 +31,7 @@ import { Assistants } from "../pages/Assistants";
 import { Parents } from "../pages/Parents";
 import { DashboardAssistant } from "../pages/dashboardAssistants/DashboardAssistant";
 import { GroupAthletes } from "../pages/groups/components/GroupAthletes";
+import { GroupCoaches } from "../pages/groups/components/GroupCoaches";
 
 export type MenuRoute = {
   path: string;
@@ -113,7 +114,7 @@ export const roleRoutes: RoleRoutes = {
           path: "/users/parents",
           icon: "fa-users",
           label: "Tutores",
-          element: <Parents name="Tutores" />,
+          element: <Parents name="Tutores" edit delete />,
         },
         {
           path: "/users/athletes",
@@ -198,7 +199,25 @@ export const roleRoutes: RoleRoutes = {
     { path: "/clubs/create", element: <ClubNew name="Clubs" sub="Crear" /> },
     {
       path: "/clubs/:clubId/groups",
-      element: <Groups name="Clubs" sub="Grupos" create edit delete />,
+      element: (
+        <Groups
+          name="Clubs"
+          sub="Grupos"
+          create
+          edit
+          delete
+          registerAthlete
+          registerCoach
+        />
+      ),
+    },
+    {
+      path: "/clubs/:clubId/groups/register-athlete/:groupId",
+      element: <GroupAthletes name="Clubs" sub="Registro" />,
+    },
+    {
+      path: "/clubs/:clubId/groups/register-coach/:groupId",
+      element: <GroupCoaches name="Clubs" sub="Registro" />,
     },
     {
       path: "/clubs/:clubId/groups/create",
@@ -255,7 +274,7 @@ export const roleRoutes: RoleRoutes = {
           path: "/users/parents",
           icon: "fa-user-circle-o",
           label: "Tutores",
-          element: <Parents name="Tutores" />,
+          element: <Parents name="Tutores" edit delete />,
         },
         {
           path: "/users/athletes",
@@ -296,6 +315,39 @@ export const roleRoutes: RoleRoutes = {
       element: <DashboardAssistant />,
     },
     {
+      path: "/users",
+      icon: "fa-user-circle",
+      label: "Usuarios",
+      children: [
+        {
+          path: "/users/create",
+          icon: "fa-plus-circle",
+          label: "Crear",
+          element: <UserNew name="Registros" sub="Crear" />,
+        },
+        {
+          path: "/users/parents",
+          icon: "fa-user-circle-o",
+          label: "Apoderados",
+          element: <Parents name="Tutores" edit delete />,
+        },
+        {
+          path: "/users/athletes",
+          icon: "fa-user-circle-o",
+          label: "Deportistas",
+          element: <Athletes name="Deportistas" edit />,
+        },
+      ],
+    },
+    {
+      path: "/users/coaches/edit/:id",
+      element: <CoachEdit name="Registros" sub="Actualizar" />,
+    },
+    {
+      path: "/users/athletes/edit/:id",
+      element: <AthleteEdit name="Registros" sub="Actualizar" />,
+    },
+    {
       path: "/clubs",
       icon: "fa-diamond",
       label: "Clubs",
@@ -303,11 +355,11 @@ export const roleRoutes: RoleRoutes = {
     },
     {
       path: "/clubs/:clubId/groups",
-      element: <Groups name="Clubs" sub="Grupos" register />,
+      element: <Groups name="Clubs" sub="Grupos" registerAthlete />,
     },
     {
-      path: "/clubs/:clubId/groups/:groupId/register",
-      element: <GroupAthletes name="Registrar athletas" />,
+      path: "/clubs/:clubId/groups/:groupId/register-athlete",
+      element: <GroupAthletes name="Clubs" sub="Registro" />,
     },
     {
       path: "/payments/register",

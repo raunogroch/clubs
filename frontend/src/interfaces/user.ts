@@ -38,4 +38,8 @@ export interface UserFormProps {
 export interface UsersPageProps {
   name: string;
   sub?: string;
+  // optional flags used by list pages to enable actions/UI
+  create?: boolean;
+  edit?: boolean;
+  delete?: boolean;
 }

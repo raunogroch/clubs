@@ -15,12 +15,12 @@ interface Props {
   sub1?: string;
 }
 
-export const GroupAthletes = ({ name, sub, sub1 }: Props) => {
+export const GroupCoaches = ({ name, sub, sub1 }: Props) => {
   const dispatch = useDispatch<AppDispatch>();
   const { clubId, groupId } = useParams<{ clubId: string; groupId?: string }>();
 
   const group = useSelector((s: RootState) => s.groups.selectedGroup);
-  const allAthletes = useSelector((s: RootState) => s.entities.athletes || []);
+  const allCoaches = useSelector((s: RootState) => s.entities.coaches || []);
 
   // Local optimistic state so UI updates instantly while server call completes
   const [localGroup, setLocalGroup] = useState<any | null>(group ?? null);
@@ -35,44 +35,44 @@ export const GroupAthletes = ({ name, sub, sub1 }: Props) => {
     if (clubId && groupId) dispatch(findGroupById({ clubId, groupId }));
   }, [dispatch, clubId, groupId]);
 
-  // Ensure athletes are loaded
+  // Ensure coaches are loaded
   useEffect(() => {
-    if (!allAthletes || allAthletes.length === 0) dispatch(fetchEntities());
-  }, [dispatch, allAthletes]);
+    if (!allCoaches || allCoaches.length === 0) dispatch(fetchEntities());
+  }, [dispatch, allCoaches]);
 
   const idOf = (item: any) =>
     typeof item === "string" ? item : item?._id || "";
 
-  // IDs of athletes currently in the (local) group
-  const groupAthleteIds: string[] = useMemo(() => {
-    return (localGroup?.athletes || []).map(idOf).filter(Boolean) as string[];
+  // IDs of coaches currently in the (local) group
+  const groupCoachIds: string[] = useMemo(() => {
+    return (localGroup?.coaches || []).map(idOf).filter(Boolean) as string[];
   }, [localGroup]);
 
-  // Normalized athlete objects for the group's left column
-  const groupAthletesNormalized: User[] = useMemo(() => {
-    return groupAthleteIds.map(
+  // Normalized coach objects for the group's left column
+  const groupCoachesNormalized: User[] = useMemo(() => {
+    return groupCoachIds.map(
       (id) =>
-        allAthletes.find((a) => a._id === id) || {
+        allCoaches.find((a) => a._id === id) || {
           _id: id,
           name: "",
           lastname: "",
           username: "",
         }
     );
-  }, [groupAthleteIds, allAthletes]);
+  }, [groupCoachIds, allCoaches]);
 
-  // Right column: show all athletes but disable add when already in group
-  const availableToAdd: User[] = allAthletes;
+  // Right column: show all coaches but disable add when already in group
+  const availableToAdd: User[] = allCoaches;
 
   // Optimistic add
-  const handleAdd = async (athlete: User) => {
-    if (!clubId || !localGroup || !athlete._id) return;
+  const handleAdd = async (coach: User) => {
+    if (!clubId || !localGroup || !coach._id) return;
     const previous = localGroup;
-    const ids = [...groupAthleteIds, athlete._id];
-    setLocalGroup({ ...localGroup, athletes: ids });
+    const ids = [...groupCoachIds, coach._id];
+    setLocalGroup({ ...localGroup, coaches: ids });
 
     try {
-      const updatedGroup: any = { ...localGroup, athletes: ids };
+      const updatedGroup: any = { ...localGroup, coaches: ids };
       await dispatch(updateGroup({ clubId, group: updatedGroup })).unwrap();
       toastr.success("Atleta añadido al grupo");
     } catch (err) {
@@ -82,14 +82,14 @@ export const GroupAthletes = ({ name, sub, sub1 }: Props) => {
   };
 
   // Optimistic remove
-  const handleRemove = async (athleteId?: string) => {
-    if (!clubId || !localGroup || !athleteId) return;
+  const handleRemove = async (coachId?: string) => {
+    if (!clubId || !localGroup || !coachId) return;
     const previous = localGroup;
-    const ids = groupAthleteIds.filter((id) => id !== athleteId);
-    setLocalGroup({ ...localGroup, athletes: ids });
+    const ids = groupCoachIds.filter((id) => id !== coachId);
+    setLocalGroup({ ...localGroup, coaches: ids });
 
     try {
-      const updatedGroup: any = { ...localGroup, athletes: ids };
+      const updatedGroup: any = { ...localGroup, coaches: ids };
       await dispatch(updateGroup({ clubId, group: updatedGroup })).unwrap();
       toastr.success("Atleta removido del grupo");
     } catch (err) {
@@ -105,15 +105,15 @@ export const GroupAthletes = ({ name, sub, sub1 }: Props) => {
         <div className="row">
           <div className="col-md-6">
             <div className="ibox-title">
-              Atletas en el grupo ({groupAthletesNormalized.length})
+              Atletas en el grupo ({groupCoachesNormalized.length})
             </div>
             <div className="ibox-content">
               <ul className="list-group">
-                {groupAthletesNormalized.length === 0 && (
+                {groupCoachesNormalized.length === 0 && (
                   <li className="list-group-item">Sin atletas asignados</li>
                 )}
 
-                {groupAthletesNormalized.map((a) => (
+                {groupCoachesNormalized.map((a) => (
                   <li
                     key={a._id}
                     className="list-group-item d-flex justify-content-between align-items-center"
@@ -149,7 +149,7 @@ export const GroupAthletes = ({ name, sub, sub1 }: Props) => {
                 )}
 
                 {availableToAdd.map((a) => {
-                  const inGroup = groupAthleteIds.includes(a._id);
+                  const inGroup = groupCoachIds.includes(a._id);
                   return (
                     <li
                       key={a._id}

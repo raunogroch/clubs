@@ -87,7 +87,7 @@ export const ClubList = ({ clubs, edit, delete: canDelete }: ClubProps) => {
                       to={`/clubs/${club._id}/groups`}
                       className="text-primary m-2"
                     >
-                      <i className="fa fa-eye"></i> Ver
+                      <i className="fa fa-eye"></i> Grupos
                     </Link>
                     {edit && (
                       <Link
