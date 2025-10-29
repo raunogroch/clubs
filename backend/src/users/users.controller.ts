@@ -53,7 +53,7 @@ export class UsersController {
    * Endpoint para obtener todos los usuarios
    */
   @Get()
-  @Roles(Role.SUPERADMIN, Role.ADMIN, Role.COACH)
+  @Roles(Role.SUPERADMIN, Role.ADMIN, Role.ASSISTANT, Role.COACH)
   findAll(
     @CurrentUser() user: currentAuth,
     @Query('page') page?: number,
@@ -74,7 +74,7 @@ export class UsersController {
    * Endpoint para obtener un usuario por ID
    */
   @Get(':id')
-  @Roles(Role.SUPERADMIN, Role.ADMIN, Role.COACH, Role.ATHLETE)
+  @Roles(Role.SUPERADMIN, Role.ADMIN, Role.ASSISTANT, Role.COACH, Role.ATHLETE)
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }
@@ -83,7 +83,7 @@ export class UsersController {
    * Endpoint para actualizar un usuario
    */
   @Patch(':id')
-  @Roles(Role.SUPERADMIN, Role.ADMIN)
+  @Roles(Role.SUPERADMIN, Role.ADMIN, Role.ASSISTANT)
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(id, updateUserDto);
   }

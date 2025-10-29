@@ -6,9 +6,20 @@ import { ClubList } from "./ClubList";
 import toastr from "toastr";
 import "toastr/build/toastr.min.css";
 import type { AppDispatch } from "../../../store";
-import type { pageParamProps } from "../../../interfaces";
 
-export const Clubs = ({ name }: pageParamProps) => {
+interface ClubsProps {
+  name?: string;
+  create?: boolean;
+  edit?: boolean;
+  delete?: boolean;
+}
+
+export const Clubs = ({
+  name,
+  create,
+  edit,
+  delete: canDelete,
+}: ClubsProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const { clubs, error, status } = useSelector((state: any) => state.clubs);
 
@@ -20,7 +31,7 @@ export const Clubs = ({ name }: pageParamProps) => {
 
   return (
     <>
-      <NavHeader name={name} pageCreate="Nuevo club" />
+      <NavHeader name={name} pageCreate={create ? "Nuevo club" : undefined} />
       {status === "loading" && <Spinner />}
       {status === "succeeded" && clubs.length === 0 && (
         <div className="wrapper wrapper-content">
@@ -41,7 +52,7 @@ export const Clubs = ({ name }: pageParamProps) => {
                   <h5>Lista de clubs</h5>
                 </div>
                 <div className="ibox-content">
-                  <ClubList clubs={clubs} />
+                  <ClubList clubs={clubs} edit={edit} delete={canDelete} />
                 </div>
               </div>
             </div>

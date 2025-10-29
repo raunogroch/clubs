@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useParams } from "react-router-dom";
-import { fetchGroups } from "../../../store/groupsThunks";
+import { fetchGroups, deleteGroup } from "../../../store/groupsThunks";
+import swal from "sweetalert";
 import { NavHeader } from "../../../components/NavHeader";
 import { Image, Spinner } from "../../../components";
 import type { AppDispatch } from "../../../store/store";
@@ -10,7 +11,21 @@ import type { pageParamProps } from "../../../interfaces/pageParamProps";
 import toastr from "toastr";
 import "toastr/build/toastr.min.css";
 
-export const Groups = ({ name, sub }: pageParamProps) => {
+interface GroupsProps extends pageParamProps {
+  create?: boolean;
+  edit?: boolean;
+  delete?: boolean;
+  register?: boolean;
+}
+
+export const Groups = ({
+  name,
+  sub,
+  create,
+  edit,
+  delete: canDelete,
+  register,
+}: GroupsProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const { groups, error, status } = useSelector((state: any) => state.groups);
   const { clubId } = useParams();
@@ -19,13 +34,33 @@ export const Groups = ({ name, sub }: pageParamProps) => {
     if (clubId) dispatch(fetchGroups({ clubId })).unwrap();
   }, [dispatch, clubId]);
 
+  const handleDelete = async (groupId?: string) => {
+    if (!groupId || !clubId) return;
+    swal({
+      title: "¿Estás seguro?",
+      text: "¡No podrás recuperar este grupo!",
+      icon: "warning",
+      buttons: ["Cancelar", "Sí, eliminar!"],
+      dangerMode: true,
+    }).then((willDelete) => {
+      if (willDelete) {
+        dispatch(deleteGroup({ clubId, groupId })).unwrap();
+        swal("Eliminado!", "El grupo ha sido eliminado.", "success");
+      }
+    });
+  };
+
   const sortedGroups = [...groups].sort((a, b) => a.name.localeCompare(b.name));
 
   if (error) toastr.error(error);
 
   return (
     <>
-      <NavHeader name={name} sub={sub} pageCreate="Nuevo grupo" />
+      <NavHeader
+        name={name}
+        sub={sub}
+        pageCreate={create ? "Nuevo grupo" : undefined}
+      />
       {status === "loading" && <Spinner />}
       {status === "succeeded" && sortedGroups.length === 0 ? (
         <div className="wrapper wrapper-content">
@@ -35,12 +70,14 @@ export const Groups = ({ name, sub }: pageParamProps) => {
               Actualmente no tienes grupos creados. Puedes crear uno nuevo para
               empezar a organizar y gestionar tu información.
               <br />
-              <Link
-                to={`/clubs/${clubId}/groups/create`}
-                className="btn btn-primary m-t"
-              >
-                Crear nuevo grupo
-              </Link>
+              {create && (
+                <Link
+                  to={`/clubs/${clubId}/groups/create`}
+                  className="btn btn-primary m-t"
+                >
+                  Crear nuevo grupo
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -82,12 +119,30 @@ export const Groups = ({ name, sub }: pageParamProps) => {
                           ))}
                         </td>
                         <td className="project-actions">
-                          <Link
-                            to={`/clubs/${clubId}/groups/${group._id}`}
-                            className="btn btn-white btn-sm"
-                          >
-                            <i className="fa fa-pencil"></i> Edit
-                          </Link>
+                          {edit && (
+                            <Link
+                              to={`/clubs/${clubId}/groups/${group._id}`}
+                              className="btn btn-white btn-sm m-r-sm"
+                            >
+                              <i className="fa fa-pencil"></i> Edit
+                            </Link>
+                          )}
+                          {canDelete && group.active && (
+                            <button
+                              className="btn btn-danger btn-sm"
+                              onClick={() => handleDelete(group._id)}
+                            >
+                              <i className="fa fa-trash"></i> Eliminar
+                            </button>
+                          )}
+                          {register && group.active && (
+                            <Link
+                              to={`/clubs/${clubId}/groups/${group._id}/register`}
+                              className="btn btn-white btn-sm m-r-sm"
+                            >
+                              <i className="fa fa-list"></i> Registrar atletas
+                            </Link>
+                          )}
                         </td>
                       </tr>
                     ))}

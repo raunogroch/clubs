@@ -36,30 +36,30 @@ export class GroupsService {
       { $push: { groups: group._id } },
       { new: true },
     );
+    // Populate coaches and athletes before returning
+    await group.populate('coaches athletes');
     return group;
   }
 
   findOneByClub(clubId: string, id: string) {
-    return this.groupModel.findOne({ _id: id, clubId });
+    return this.groupModel
+      .findOne({ _id: id, clubId })
+      .populate('coaches athletes');
   }
 
   updateByClub(clubId: string, id: string, updateGroupDto: UpdateGroupDto) {
-    return this.groupModel.findOneAndUpdate(
-      { _id: id, clubId },
-      updateGroupDto,
-      {
+    return this.groupModel
+      .findOneAndUpdate({ _id: id, clubId }, updateGroupDto, {
         new: true,
-      },
-    );
+      })
+      .populate('coaches athletes');
   }
 
   async removeByClub(clubId: string, id: string) {
     // Soft-delete: marcar active = false
-    const group = await this.groupModel.findOneAndUpdate(
-      { _id: id, clubId },
-      { active: false },
-      { new: true },
-    );
+    const group = await this.groupModel
+      .findOneAndUpdate({ _id: id, clubId }, { active: false }, { new: true })
+      .populate('coaches athletes');
     // Eliminar la referencia del grupo en el club
     if (group) {
       const ClubModel = this.groupModel.db.model('Club');
@@ -78,11 +78,9 @@ export class GroupsService {
    */
   async restoreByClub(clubId: string, id: string) {
     // Reactivar el grupo
-    const group = await this.groupModel.findOneAndUpdate(
-      { _id: id, clubId },
-      { active: true },
-      { new: true },
-    );
+    const group = await this.groupModel
+      .findOneAndUpdate({ _id: id, clubId }, { active: true }, { new: true })
+      .populate('coaches athletes');
 
     // Volver a agregar la referencia en el club (usar $addToSet para evitar duplicados)
     if (group) {

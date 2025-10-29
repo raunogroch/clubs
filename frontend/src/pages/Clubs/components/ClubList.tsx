@@ -8,9 +8,11 @@ import type { Club } from "../interfaces";
 
 interface ClubProps {
   clubs: Club[];
+  edit?: boolean;
+  delete?: boolean;
 }
 
-export const ClubList = ({ clubs }: ClubProps) => {
+export const ClubList = ({ clubs, edit, delete: canDelete }: ClubProps) => {
   const dispatch = useDispatch<AppDispatch>();
 
   const handleDelete = async (id?: string) => {
@@ -87,22 +89,26 @@ export const ClubList = ({ clubs }: ClubProps) => {
                     >
                       <i className="fa fa-eye"></i> Ver
                     </Link>
-                    <Link
-                      to={`/clubs/edit/${club._id}`}
-                      className="text-success m-2"
-                    >
-                      <i className="fa fa-edit"></i> Editar
-                    </Link>
-                    <Link
-                      to="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleDelete(club._id!);
-                      }}
-                      className="text-danger m-2"
-                    >
-                      <i className="fa fa-trash"></i> Eliminar
-                    </Link>
+                    {edit && (
+                      <Link
+                        to={`/clubs/edit/${club._id}`}
+                        className="text-success m-2"
+                      >
+                        <i className="fa fa-edit"></i> Editar
+                      </Link>
+                    )}
+                    {canDelete && (
+                      <Link
+                        to="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleDelete(club._id!);
+                        }}
+                        className="text-danger m-2"
+                      >
+                        <i className="fa fa-trash"></i> Eliminar
+                      </Link>
+                    )}
                   </>
                 ) : (
                   <Link

@@ -29,6 +29,8 @@ import {
 import { RegisterPayment } from "../pages";
 import { Assistants } from "../pages/Assistants";
 import { Parents } from "../pages/Parents";
+import { DashboardAssistant } from "../pages/dashboardAssistants/DashboardAssistant";
+import { GroupAthletes } from "../pages/groups/components/GroupAthletes";
 
 export type MenuRoute = {
   path: string;
@@ -163,7 +165,7 @@ export const roleRoutes: RoleRoutes = {
     {
       path: "/payments/register",
       icon: "fa-credit-card",
-      label: "Registrar pago",
+      label: "Mensualidades",
       element: <RegisterPayment />,
     },
   ],
@@ -187,7 +189,7 @@ export const roleRoutes: RoleRoutes = {
       path: "/clubs",
       icon: "fa-diamond",
       label: "Clubs",
-      element: <Clubs name="Clubs" />,
+      element: <Clubs name="Clubs" create edit delete />,
     },
     {
       path: "/clubs/edit/:id",
@@ -196,7 +198,7 @@ export const roleRoutes: RoleRoutes = {
     { path: "/clubs/create", element: <ClubNew name="Clubs" sub="Crear" /> },
     {
       path: "/clubs/:clubId/groups",
-      element: <Groups name="Clubs" sub="Grupos" />,
+      element: <Groups name="Clubs" sub="Grupos" create edit delete />,
     },
     {
       path: "/clubs/:clubId/groups/create",
@@ -282,7 +284,35 @@ export const roleRoutes: RoleRoutes = {
     {
       path: "/payments/register",
       icon: "fa-credit-card",
-      label: "Registrar pago",
+      label: "Mensualidades",
+      element: <RegisterPayment />,
+    },
+  ],
+  assistant: [
+    {
+      path: "/",
+      icon: "fa-home",
+      label: "Principal",
+      element: <DashboardAssistant />,
+    },
+    {
+      path: "/clubs",
+      icon: "fa-diamond",
+      label: "Clubs",
+      element: <Clubs name="Clubs" />,
+    },
+    {
+      path: "/clubs/:clubId/groups",
+      element: <Groups name="Clubs" sub="Grupos" register />,
+    },
+    {
+      path: "/clubs/:clubId/groups/:groupId/register",
+      element: <GroupAthletes name="Registrar athletas" />,
+    },
+    {
+      path: "/payments/register",
+      icon: "fa-credit-card",
+      label: "Mensualidades",
       element: <RegisterPayment />,
     },
   ],

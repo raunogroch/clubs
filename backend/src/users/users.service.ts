@@ -217,6 +217,8 @@ export class UsersService {
     switch (requestingUser.role) {
       case Roles.ADMIN:
         return activeOnly.filter((user) => user.role !== Roles.SUPERADMIN);
+      case Roles.ASSISTANT:
+        return activeOnly.filter((user) => user.role !== Roles.SUPERADMIN);
       case Roles.COACH:
         return activeOnly.filter((user) =>
           [Roles.PARENT, Roles.ATHLETE].includes(user.role as Roles),

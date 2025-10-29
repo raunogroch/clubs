@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { findGroupById } from "../../../store/groupsThunks";
 import { GroupForm } from "./GroupForm";
+import { GroupAthletes } from "./GroupAthletes";
 import { NavHeader, Spinner } from "../../../components";
 import type { AppDispatch, RootState } from "../../../store";
 import type { pageParamProps } from "../../../interfaces";
@@ -48,6 +49,9 @@ export const GroupEdit = ({ name, sub, sub1 }: pageParamProps) => {
                         onSuccess={handleSuccess}
                         onCancel={handleCancel}
                       />
+                      <div className="m-t-md">
+                        <GroupAthletes name="Administrar atletas" />
+                      </div>
                     </div>
                   </div>
                 </div>
