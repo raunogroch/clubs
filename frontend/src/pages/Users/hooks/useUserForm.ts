@@ -52,7 +52,6 @@ export const useUserForm = (initialData?: User) => {
   const validateForm = (): boolean => {
     const newErrors: UserErrors = {};
 
-    if (!formData.image) newErrors.image = "Carga una imagen";
     if (!formData.role) newErrors.role = "Seleccione un rol";
     if (!formData.ci) newErrors.ci = "La cédula es requerida";
     if (!formData.name) newErrors.name = "El nombre es requerido";

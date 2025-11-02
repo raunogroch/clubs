@@ -1,4 +1,4 @@
-import { Input, ImageCropperWithInput } from ".";
+import { Input } from ".";
 import type { UserFormProps } from "../interfaces";
 import { UserRoleSelector } from "../pages/Users/components";
 import { useUserForm } from "../pages/Users/hooks";
@@ -19,7 +19,8 @@ export const GenericUserForm = ({
   return (
     <div>
       <form onSubmit={onSubmit}>
-        <div className="form-group row">
+        {/*
+          <div className="form-group row">
           <label htmlFor="image" className="col-sm-2 col-form-label">
             Foto
           </label>
@@ -30,6 +31,8 @@ export const GenericUserForm = ({
             />
           </div>
         </div>
+          
+          */}
 
         <UserRoleSelector
           selectedRole={formData.role}
