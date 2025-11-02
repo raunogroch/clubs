@@ -93,7 +93,7 @@ export const roleRoutes: RoleRoutes = {
       children: [
         {
           path: "/users/create",
-          icon: "fa-plus-circle",
+          icon: "fa-user-plus",
           label: "Crear usuario",
           element: <UserNew name="Registros" sub="Crear" />,
         },
@@ -137,7 +137,6 @@ export const roleRoutes: RoleRoutes = {
       path: "/users/superadmins/edit/:id",
       element: <SuperadminEdit name="Registros" sub="Actualizar" />,
     },
-
     {
       path: "/users/admins/create",
       element: <AdminNew name="Registros" sub="Crear" />,
@@ -257,7 +256,7 @@ export const roleRoutes: RoleRoutes = {
       children: [
         {
           path: "/users/create",
-          icon: "fa-plus-circle",
+          icon: "fa-user-plus",
           label: "Crear usuario",
           element: <UserNew name="Registros" sub="Crear" />,
         },
@@ -330,7 +329,7 @@ export const roleRoutes: RoleRoutes = {
       children: [
         {
           path: "/users/create",
-          icon: "fa-plus-circle",
+          icon: "fa-user-plus",
           label: "Crear",
           element: <UserNew name="Registros" sub="Crear" />,
         },
