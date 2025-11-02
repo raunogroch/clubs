@@ -37,6 +37,7 @@ export class ClubRepository implements IClubRepository {
             },
           ],
         },
+        { path: 'assistants', select: '_id name lastname role' },
       ])
       .lean()
       .then((clubs) =>
@@ -58,6 +59,8 @@ export class ClubRepository implements IClubRepository {
               })) || [],
             uniqueAthletes: uniqueAthleteIds,
             uniqueAthletesCount: uniqueAthleteIds.length,
+            assistants: club.assistants || [],
+            assistantsCount: (club.assistants || []).length,
           };
         }),
       );

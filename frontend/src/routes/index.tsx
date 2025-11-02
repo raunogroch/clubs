@@ -15,6 +15,7 @@ import {
   ProfileSuperAdmin,
 } from "../pages";
 import { Groups } from "../pages/groups/components/Groups";
+import ClubAssignAssistants from "../pages/Clubs/components/ClubAssignAssistants";
 import { GroupsNew } from "../pages/groups/components/GroupsNew";
 import { GroupEdit } from "../pages/groups/components/GroupEdit";
 import { AthleteEdit, AthleteNew, Athletes } from "../pages/Athletes";
@@ -65,6 +66,10 @@ export const roleRoutes: RoleRoutes = {
       icon: "fa-diamond",
       label: "Clubs",
       element: <Clubs name="Clubs" />,
+    },
+    {
+      path: "/clubs/:id/assign-assistants",
+      element: <ClubAssignAssistants />,
     },
     {
       path: "/sports",
@@ -191,6 +196,10 @@ export const roleRoutes: RoleRoutes = {
       icon: "fa-diamond",
       label: "Clubs",
       element: <Clubs name="Clubs" create edit delete />,
+    },
+    {
+      path: "/clubs/:id/assign-assistants",
+      element: <ClubAssignAssistants />,
     },
     {
       path: "/clubs/edit/:id",

@@ -6,6 +6,7 @@ import {
   deleteClub,
   updateClub,
   findClubById,
+  assignAssistants,
 } from "./clubsThunks";
 
 interface ClubsState {
@@ -99,6 +100,25 @@ const clubsSlice = createSlice({
       state.selectedClub = action.payload;
     });
     builder.addCase(findClubById.rejected, (state, action) => {
+      state.status = "failed";
+      state.error = action.payload as string;
+    });
+
+    // ASSIGN ASSISTANTS
+    builder.addCase(assignAssistants.pending, (state) => {
+      state.status = "loading";
+    });
+    builder.addCase(assignAssistants.fulfilled, (state, action) => {
+      state.status = "succeeded";
+      const updated = action.payload as Club;
+      const index = state.clubs.findIndex((c) => c._id === updated._id);
+      if (index >= 0) state.clubs[index] = updated;
+      // update selectedClub if currently open
+      if (state.selectedClub && state.selectedClub._id === updated._id) {
+        state.selectedClub = updated;
+      }
+    });
+    builder.addCase(assignAssistants.rejected, (state, action) => {
       state.status = "failed";
       state.error = action.payload as string;
     });

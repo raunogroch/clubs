@@ -97,6 +97,14 @@ export const ClubList = ({ clubs, edit, delete: canDelete }: ClubProps) => {
                         <i className="fa fa-edit"></i> Editar
                       </Link>
                     )}
+                    {edit && (
+                      <Link
+                        to={`/clubs/${club._id}/assign-assistants`}
+                        className="text-info m-2"
+                      >
+                        <i className="fa fa-user-plus"></i> Asignar
+                      </Link>
+                    )}
                     {canDelete && (
                       <Link
                         to="#"

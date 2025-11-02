@@ -11,6 +11,7 @@ import {
 import { ClubsService } from './clubs.service';
 import { CreateClubDto, UpdateClubDto } from './dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
 import { Roles as Role } from 'src/users/enum/roles.enum';
 import { Roles } from 'src/auth/decorators/roles.decorator';
@@ -22,7 +23,7 @@ interface currentAuth {
 
 // Controlador para la gestión de clubes
 @Controller('clubs')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class ClubsController {
   constructor(private readonly clubsService: ClubsService) {}
 
@@ -64,6 +65,15 @@ export class ClubsController {
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return this.clubsService.remove(id);
+  }
+
+  /**
+   * Asignar asistentes a un club (reemplaza la lista actual)
+   */
+  @Patch(':id/assign-assistants')
+  @Roles(Role.SUPERADMIN, Role.ADMIN)
+  async assignAssistants(@Param('id') id: string, @Body() body: { assistants: string[] }) {
+    return this.clubsService.assignAssistants(id, body.assistants || []);
   }
 
   /**

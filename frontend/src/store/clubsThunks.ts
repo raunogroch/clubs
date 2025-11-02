@@ -77,3 +77,15 @@ export const findClubById = createAsyncThunk<string, string>(
     }
   }
 );
+
+export const assignAssistants = createAsyncThunk<Club, { clubId: string; assistants: string[] }>(
+  "clubs/assignAssistants",
+  async ({ clubId, assistants }, { rejectWithValue }) => {
+    try {
+      const response = await api.patch(`/clubs/${clubId}/assign-assistants`, { assistants });
+      return response.data as Club;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data || "Error al asignar asistentes");
+    }
+  }
+);

@@ -1,5 +1,5 @@
 // DTO para la creación de clubes
-import { IsMongoId, IsNotEmpty, IsString } from 'class-validator';
+import { IsMongoId, IsNotEmpty, IsString, IsOptional } from 'class-validator';
 import { Types } from 'mongoose';
 
 export class CreateClubDto {
@@ -30,4 +30,9 @@ export class CreateClubDto {
   /** Grupo de entrenamiento asociado */
   @IsMongoId({ each: true })
   group: Types.ObjectId;
+
+  /** IDs de asistentes asignados al club */
+  @IsOptional()
+  @IsMongoId({ each: true })
+  assistants?: Types.ObjectId[];
 }

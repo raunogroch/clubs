@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document } from 'mongoose';
 import { Sport } from 'src/sports/schemas/sport.schemas';
 import { Group } from '../groups/schema/group.schema';
+import { User } from 'src/users/schemas/user.schema';
 
 // Esquema de Club para Mongoose
 @Schema({ timestamps: true })
@@ -43,6 +44,14 @@ export class Club extends Document {
     default: [],
   })
   groups: Group[];
+
+  /** Asistentes responsables de este club */
+  @Prop({
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'User',
+    default: [],
+  })
+  assistants: User[];
 
   /** Bandera para soft-delete */
   @Prop({ type: Boolean, default: true })

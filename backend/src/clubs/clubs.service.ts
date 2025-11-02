@@ -1,11 +1,14 @@
 // Servicio para la gestión de clubes
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Roles } from 'src/users/enum/roles.enum';
 import { CreateClubDto, UpdateClubDto } from './dto';
 import { Club } from './schema/club.schema';
 import { Inject } from '@nestjs/common';
 import { ClubValidatorService } from './club-validator.service';
 import { ImageService } from 'src/utils';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { User } from 'src/users/schemas/user.schema';
 
 @Injectable()
 export class ClubsService {
@@ -13,6 +16,7 @@ export class ClubsService {
     @Inject('ClubRepository') private readonly clubRepository,
     private readonly clubValidator: ClubValidatorService,
     private readonly clubImageService: ImageService,
+    @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {}
 
   folder = 'clubs';
@@ -44,7 +48,34 @@ export class ClubsService {
       clubs = clubs.filter((c) => c.active === true);
     }
 
+    // Si el solicitante es ASSISTANT, devolver sólo los clubes donde esté asignado
+    if (requestingUser && requestingUser.role === Roles.ASSISTANT) {
+      const userId = requestingUser.sub;
+      clubs = clubs.filter((c: any) => {
+        if (!c.assistants || c.assistants.length === 0) return false;
+        return c.assistants.some((a: any) => {
+          const aid = a?._id ? a._id.toString() : a?.toString();
+          return aid === userId;
+        });
+      });
+    }
+
     return clubs;
+  }
+
+  /**
+   * Asigna una lista de asistentes a un club (reemplaza la lista actual)
+   */
+  async assignAssistants(clubId: string, assistantIds: string[]): Promise<Club | null> {
+    // Validar que los usuarios existan y sean assistants
+    const validUsers = await this.userModel.find({
+      _id: { $in: assistantIds },
+      role: Roles.ASSISTANT,
+    });
+    if (validUsers.length !== assistantIds.length) {
+      throw new NotFoundException('Algunos asistentes no existen o no tienen rol assistant');
+    }
+    return this.clubRepository.updateById(clubId, { assistants: assistantIds } as any);
   }
 
   /**
