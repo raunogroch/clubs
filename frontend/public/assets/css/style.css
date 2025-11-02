@@ -9657,3 +9657,49 @@ body.md-skin {
     margin: 0;
   }
 }
+
+/* Styles to make the three payment columns (Buscar atleta, Clubs inscritos, Registrar pago)
+   use a consistent height. The tallest column (typically Buscar atleta) will set the
+   height and the others will stretch to match. */
+.register-payment-row {
+  display: flex;
+  align-items: stretch; /* make columns equal height */
+  margin-left: -15px; /* mirror bootstrap .row negative gutter */
+  margin-right: -15px;
+}
+.register-payment-row > .col-md-4 {
+  display: flex;
+  flex-direction: column;
+  padding-left: 15px; /* mirror bootstrap gutter */
+  padding-right: 15px;
+}
+.register-payment-row .ibox {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto; /* make each ibox stretch to column height */
+  margin-bottom: 0; /* spacing handled by the column */
+}
+.register-payment-row .ibox + .ibox {
+  margin-top: 15px; /* preserve vertical spacing for stacked iboxes inside the same column */
+}
+.register-payment-row .ibox .ibox-content {
+  flex: 1 1 auto; /* let content fill remaining space */
+  overflow: auto; /* scroll if content is taller than the box */
+}
+
+/* Small screens: fall back to stacked behavior */
+@media (max-width: 767px) {
+  .register-payment-row {
+    display: block;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  .register-payment-row > .col-md-4 {
+    padding-left: 0;
+    padding-right: 0;
+    margin-bottom: 15px;
+  }
+  .register-payment-row .ibox {
+    margin-bottom: 15px;
+  }
+}

@@ -6,6 +6,7 @@ import { MonthsStatus } from "./components/MonthsStatus";
 import { PaymentForm } from "./components/PaymentForm";
 import api from "../../services/api";
 import toastr from "toastr";
+import "./payments.css";
 import type { Athlete, Club, Payment } from "./IPayments";
 import type { ApiResponse } from "../../utils/apiUtils";
 
@@ -49,7 +50,7 @@ export const RegisterPayment: React.FC = () => {
     <div>
       <NavHeader name="Registrar pago" />
       <div className="wrapper wrapper-content animated fadeInRight">
-        <div className="row">
+        <div className="row register-payment-row">
           <div className="col-md-4">
             <div className="ibox">
               <div className="ibox-title">

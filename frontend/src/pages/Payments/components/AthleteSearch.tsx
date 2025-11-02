@@ -1,6 +1,9 @@
-import { useState } from "react";
-import api from "../../../services/api";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchUsers } from "../../../store/usersThunks";
+import { clearUsers } from "../../../store/usersSlice";
 import type { Athlete } from "../IPayments";
+import type { AppDispatch, RootState } from "../../../store";
 
 interface Props {
   onSelect: (athlete: Athlete) => void;
@@ -8,23 +11,34 @@ interface Props {
 
 export const AthleteSearch = ({ onSelect }: Props) => {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<Athlete[]>([]);
-  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch<AppDispatch>();
+  const usersState = useSelector((s: RootState) => s.users);
+  const results = usersState.users.data as Athlete[];
+  const [searching, setSearching] = useState(false);
 
-  const handleSearch = async () => {
-    if (!query) return;
-    setLoading(true);
-    try {
-      const res = await api.get(
-        `/users?page=1&limit=10&name=${encodeURIComponent(query)}`
-      );
-      setResults(res.data?.data || res.data || []);
-    } catch (err) {
-      setResults([]);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    const delay = 1000;
+    if (!query || query.trim() === "") {
+      dispatch(clearUsers());
+      setSearching(false);
+      return;
     }
-  };
+
+    const timer = setTimeout(() => {
+      dispatch(
+        fetchUsers({
+          page: 1,
+          limit: 1000,
+          name: query.trim(),
+          role: "athlete",
+        })
+      )
+        .catch(() => {})
+        .finally(() => setSearching(false));
+    }, delay);
+
+    return () => clearTimeout(timer);
+  }, [query, dispatch]);
 
   return (
     <div>
@@ -33,18 +47,18 @@ export const AthleteSearch = ({ onSelect }: Props) => {
           className="form-control"
           placeholder="Buscar atleta por nombre"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setSearching(true);
+          }}
         />
-        <span className="input-group-append">
-          <button
-            className="btn btn-primary"
-            onClick={handleSearch}
-            disabled={loading}
-          >
-            {loading ? "Buscando..." : "Buscar"}
-          </button>
-        </span>
       </div>
+
+      {searching && <div className="text-muted small mb-2">Buscando...</div>}
+
+      {!searching && query.trim() !== "" && results.length === 0 && (
+        <div className="text-muted mb-2">No se encontraron coincidencias</div>
+      )}
 
       <ul className="list-group">
         {results.map((r) => (
@@ -59,7 +73,7 @@ export const AthleteSearch = ({ onSelect }: Props) => {
               <div className="text-muted small">{r.email}</div>
             </div>
             <button
-              className="btn btn-sm btn-outline-primary"
+              className="btn btn-xs btn-outline-primary"
               onClick={() => onSelect(r)}
             >
               Seleccionar

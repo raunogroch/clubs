@@ -150,7 +150,6 @@ export const PaymentForm = ({
         />
       </div>
 
-      {/* Mostrar textarea de justificativo si el monto difiere del mensual del club */}
       {club && Number(amount) !== Number(club?.monthly_pay) && (
         <div className="form-group">
           <label>
@@ -166,7 +165,7 @@ export const PaymentForm = ({
         </div>
       )}
 
-      <div className="form-group">
+      <div className="form-group text-center">
         <button className="btn btn-success" type="submit" disabled={loading}>
           {loading ? "Registrando..." : "Registrar pago"}
         </button>

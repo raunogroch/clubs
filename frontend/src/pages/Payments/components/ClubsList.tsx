@@ -12,8 +12,6 @@ export const ClubsList = ({ clubs, onSelect }: Props) => {
   return (
     <div className="list-group">
       {clubs.map((c) => {
-        // soporta dos formas: { club, groups } que devuelve el backend,
-        // o directamente el objeto club
         const clubObj = c as { club?: Club };
         const club: Club = clubObj?.club || (c as Club);
         const id = club?._id || club?.id || Math.random();
@@ -29,12 +27,10 @@ export const ClubsList = ({ clubs, onSelect }: Props) => {
               <strong>{name}</strong>
               <div className="small text-muted">{club?.city ?? ""}</div>
             </div>
-            <span className="btn btn-outline-primary">Seleccionar</span>
+            <span className="btn btn-xs btn-outline-primary">Seleccionar</span>
           </button>
         );
       })}
     </div>
   );
 };
-
-// (old example markup removed)
