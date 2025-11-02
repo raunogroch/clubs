@@ -72,7 +72,10 @@ export class ClubsController {
    */
   @Patch(':id/assign-assistants')
   @Roles(Role.SUPERADMIN, Role.ADMIN)
-  async assignAssistants(@Param('id') id: string, @Body() body: { assistants: string[] }) {
+  async assignAssistants(
+    @Param('id') id: string,
+    @Body() body: { assistants: string[] },
+  ) {
     return this.clubsService.assignAssistants(id, body.assistants || []);
   }
 

@@ -78,6 +78,8 @@ export class ClubRepository implements IClubRepository {
   }
 
   async deleteById(id: string): Promise<Club | null> {
-    return this.clubModel.findByIdAndUpdate(id, { active: false }, { new: true }).exec();
+    return this.clubModel
+      .findByIdAndUpdate(id, { active: false }, { new: true })
+      .exec();
   }
 }

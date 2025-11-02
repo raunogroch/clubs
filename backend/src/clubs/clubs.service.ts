@@ -66,16 +66,23 @@ export class ClubsService {
   /**
    * Asigna una lista de asistentes a un club (reemplaza la lista actual)
    */
-  async assignAssistants(clubId: string, assistantIds: string[]): Promise<Club | null> {
+  async assignAssistants(
+    clubId: string,
+    assistantIds: string[],
+  ): Promise<Club | null> {
     // Validar que los usuarios existan y sean assistants
     const validUsers = await this.userModel.find({
       _id: { $in: assistantIds },
       role: Roles.ASSISTANT,
     });
     if (validUsers.length !== assistantIds.length) {
-      throw new NotFoundException('Algunos asistentes no existen o no tienen rol assistant');
+      throw new NotFoundException(
+        'Algunos asistentes no existen o no tienen rol assistant',
+      );
     }
-    return this.clubRepository.updateById(clubId, { assistants: assistantIds } as any);
+    return this.clubRepository.updateById(clubId, {
+      assistants: assistantIds,
+    } as any);
   }
 
   /**

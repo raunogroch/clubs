@@ -40,7 +40,8 @@ export const ClubAssignAssistants: React.FC = () => {
       .getAssistants(500)
       .then((res) => {
         if (!mounted) return;
-        if (res.code && res.code >= 400) setError(res.message || "Error al cargar asistentes");
+        if (res.code && res.code >= 400)
+          setError(res.message || "Error al cargar asistentes");
         else setAllAssistants(res.data || []);
       })
       .catch(() => setError("Error al cargar asistentes"))
@@ -50,14 +51,23 @@ export const ClubAssignAssistants: React.FC = () => {
     };
   }, []);
 
-  const idOf = (item: any) => (typeof item === "string" ? item : item?._id || "");
+  const idOf = (item: any) =>
+    typeof item === "string" ? item : item?._id || "";
 
   const assignedIds: string[] = useMemo(() => {
     return (localClub?.assistants || []).map(idOf).filter(Boolean) as string[];
   }, [localClub]);
 
   const assignedNormalized: User[] = useMemo(() => {
-    return assignedIds.map((aid) => allAssistants.find((a) => a._id === aid) || { _id: aid, name: "", lastname: "", username: "" });
+    return assignedIds.map(
+      (aid) =>
+        allAssistants.find((a) => a._id === aid) || {
+          _id: aid,
+          name: "",
+          lastname: "",
+          username: "",
+        }
+    );
   }, [assignedIds, allAssistants]);
 
   const availableToAdd: User[] = allAssistants;
@@ -71,7 +81,9 @@ export const ClubAssignAssistants: React.FC = () => {
 
     try {
       const updatedClub: any = { ...localClub, assistants: ids };
-      await dispatch(assignAssistants({ clubId: id, assistants: ids })).unwrap();
+      await dispatch(
+        assignAssistants({ clubId: id, assistants: ids })
+      ).unwrap();
       toastr.success("Asistente asignado al club");
     } catch (err) {
       setLocalClub(previous);
@@ -88,7 +100,9 @@ export const ClubAssignAssistants: React.FC = () => {
 
     try {
       const updatedClub: any = { ...localClub, assistants: ids };
-      await dispatch(assignAssistants({ clubId: id, assistants: ids })).unwrap();
+      await dispatch(
+        assignAssistants({ clubId: id, assistants: ids })
+      ).unwrap();
       toastr.success("Asistente removido del club");
     } catch (err) {
       setLocalClub(previous);
@@ -102,18 +116,29 @@ export const ClubAssignAssistants: React.FC = () => {
       <div className="wrapper wrapper-content animated fadeInRight">
         <div className="row">
           <div className="col-md-6">
-            <div className="ibox-title">Asistentes asignados ({assignedNormalized.length})</div>
+            <div className="ibox-title">
+              Asistentes asignados ({assignedNormalized.length})
+            </div>
             <div className="ibox-content">
               <ul className="list-group">
-                {assignedNormalized.length === 0 && <li className="list-group-item">Sin asistentes asignados</li>}
+                {assignedNormalized.length === 0 && (
+                  <li className="list-group-item">Sin asistentes asignados</li>
+                )}
 
                 {assignedNormalized.map((a) => (
-                  <li key={a._id} className="list-group-item d-flex justify-content-between align-items-center">
+                  <li
+                    key={a._id}
+                    className="list-group-item d-flex justify-content-between align-items-center"
+                  >
                     <div>
                       {a.name || "-"} {a.lastname || ""}
                     </div>
                     <div>
-                      <button type="button" className="btn btn-xs btn-danger" onClick={() => handleRemove(a._id)}>
+                      <button
+                        type="button"
+                        className="btn btn-xs btn-danger"
+                        onClick={() => handleRemove(a._id)}
+                      >
                         <i className="fa fa-trash"></i>
                       </button>
                     </div>
@@ -124,15 +149,24 @@ export const ClubAssignAssistants: React.FC = () => {
           </div>
 
           <div className="col-md-6">
-            <div className="ibox-title">Asistentes disponibles ({availableToAdd.length})</div>
+            <div className="ibox-title">
+              Asistentes disponibles ({availableToAdd.length})
+            </div>
             <div className="ibox-content">
               <ul className="list-group">
-                {availableToAdd.length === 0 && <li className="list-group-item">No hay asistentes disponibles</li>}
+                {availableToAdd.length === 0 && (
+                  <li className="list-group-item">
+                    No hay asistentes disponibles
+                  </li>
+                )}
 
                 {availableToAdd.map((a) => {
                   const inClub = assignedIds.includes(a._id);
                   return (
-                    <li key={a._id} className="list-group-item d-flex justify-content-between align-items-center">
+                    <li
+                      key={a._id}
+                      className="list-group-item d-flex justify-content-between align-items-center"
+                    >
                       <div>
                         {a.name || "-"} {a.lastname || ""}
                       </div>
@@ -140,7 +174,11 @@ export const ClubAssignAssistants: React.FC = () => {
                         {inClub ? (
                           ""
                         ) : (
-                          <button type="button" className="btn btn-xs btn-success" onClick={() => handleAdd(a)}>
+                          <button
+                            type="button"
+                            className="btn btn-xs btn-success"
+                            onClick={() => handleAdd(a)}
+                          >
                             <i className="fa fa-plus"></i>
                           </button>
                         )}
