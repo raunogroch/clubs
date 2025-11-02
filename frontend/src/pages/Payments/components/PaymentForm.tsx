@@ -33,6 +33,7 @@ export const PaymentForm = ({
   const [month, setMonth] = useState<string>(selectedMonth ?? defaultMonth);
   const [loading, setLoading] = useState(false);
   const [note, setNote] = useState<string>("");
+  // Note: receipt/print functionality moved to MonthsStatus; keep form focused on registering
 
   // Cuando cambia el club seleccionado, actualizar el monto por defecto
   useEffect(() => {
@@ -166,9 +167,11 @@ export const PaymentForm = ({
       )}
 
       <div className="form-group text-center">
-        <button className="btn btn-success" type="submit" disabled={loading}>
-          {loading ? "Registrando..." : "Registrar pago"}
-        </button>
+        <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+          <button className="btn btn-success" type="submit" disabled={loading}>
+            {loading ? "Registrando..." : "Registrar pago"}
+          </button>
+        </div>
       </div>
     </form>
   );

@@ -3,6 +3,7 @@ import type { Athlete, Club } from "../IPayments";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../../store/store";
 import { getPaidMonths } from "../../../store/paymentThunks";
+import ReceiptModal from "./ReceiptModal";
 
 interface Props {
   athlete: Athlete;
@@ -18,10 +19,18 @@ const formatYm = (ym: string) => {
 
 export const MonthsStatus = ({ athlete, club, onSelectMonth }: Props) => {
   const [monthsWindow, setMonthsWindow] = useState<string[]>([]);
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [receiptMonth, setReceiptMonth] = useState<string | null>(null);
+  const [receiptAmount, setReceiptAmount] = useState<number | string>("");
+  const [receiptNote, setReceiptNote] = useState<string | undefined>(undefined);
+  const [receiptId, setReceiptId] = useState<string | null>(null);
   // we'll read paid months from the store
 
   const dispatch = useDispatch<AppDispatch>();
-  const paidMonthsMap = useSelector((s: RootState) => s.payments.paidMonthsMap);
+  // be defensive: payments slice may be undefined during initial render
+  const paidMonthsMap = useSelector(
+    (s: RootState) => (s.payments && s.payments.paidMonthsMap) || {}
+  );
 
   useEffect(() => {
     if (!athlete || !club) return;
@@ -66,7 +75,7 @@ export const MonthsStatus = ({ athlete, club, onSelectMonth }: Props) => {
         // ignore - handled by slice
       }
     })();
-  }, [athlete, club]);
+  }, [athlete, club, dispatch]);
 
   if (!athlete) return null;
 
@@ -106,36 +115,34 @@ export const MonthsStatus = ({ athlete, club, onSelectMonth }: Props) => {
                     key={m}
                     className="list-group-item d-flex justify-content-between align-items-center"
                     title={title}
-                    style={{ cursor: "pointer" }}
-                    onClick={() => {
-                      const idx = monthsWindow.indexOf(m);
-                      if (idx >= 0) {
-                        const nextPending = monthsWindow
-                          .slice(idx + 1)
-                          .find((mm) => !paidMonthsMap[mm]);
-                        if (nextPending) {
-                          if (typeof onSelectMonth === "function")
-                            onSelectMonth(nextPending);
-                          return;
-                        }
-                      }
-                      const [yStr, mStr] = m.split("-");
-                      const y = Number(yStr);
-                      const mm = Number(mStr) - 1;
-                      const d = new Date(y, mm + 1, 1);
-                      const nextYm = `${d.getFullYear()}-${String(
-                        d.getMonth() + 1
-                      ).padStart(2, "0")}`;
-                      if (typeof onSelectMonth === "function")
-                        onSelectMonth(nextYm);
-                    }}
+                    aria-disabled={"true"}
+                    style={{ cursor: "default", opacity: 0.9 }}
                   >
                     <span>
                       <span className="me-2">✅</span> &nbsp;
                       {formatYm(m)}
                     </span>
-                    <span className="small text-muted">
-                      {payment?.amount ?? "-"} Bs.
+                    <span
+                      style={{ display: "flex", gap: 8, alignItems: "center" }}
+                    >
+                      <span className="small text-muted">
+                        {payment?.amount ?? "-"} Bs.
+                      </span>
+                      <button
+                        className="btn btn-sm btn-outline-secondary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // open receipt modal with this payment data
+                          setReceiptMonth(m);
+                          setReceiptAmount(payment?.amount ?? "");
+                          setReceiptNote(payment?.note);
+                          setReceiptId(payment?._id ?? null);
+                          setShowReceipt(true);
+                        }}
+                        aria-label={`Ver recibo ${formatYm(m)}`}
+                      >
+                        Recibo
+                      </button>
                     </span>
                   </li>
                 );
@@ -160,6 +167,65 @@ export const MonthsStatus = ({ athlete, club, onSelectMonth }: Props) => {
           )}
         </div>
       </div>
+
+      <ReceiptModal
+        visible={showReceipt}
+        onClose={() => setShowReceipt(false)}
+        onPrint={() => {
+          // Print exactly what is shown in the modal: copy the modal DOM (#receipt-root)
+          const root = document.getElementById("receipt-root");
+          if (!root) {
+            // fallback: notify and close modal
+            setShowReceipt(false);
+            return;
+          }
+
+          const html = `
+            <html>
+              <head>
+                <title>Recibo</title>
+                <meta name="viewport" content="width=device-width,initial-scale=1" />
+                <style>
+                  /* basic reset and print-friendly styles */
+                  body { font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 20px; }
+                  .receipt-root { box-shadow: none; max-width: 700px; margin: 0 auto; }
+                  .receipt-root * { box-sizing: border-box; }
+                  .row{ display:flex; justify-content:space-between; margin:8px 0 }
+                  .small{ color:#666; font-size:12px }
+                  /* hide UI controls marked no-print */
+                  .no-print { display: none !important; }
+                  @media print {
+                    body { padding: 0; }
+                    .no-print { display: none !important; }
+                  }
+                </style>
+              </head>
+              <body>
+                ${root.outerHTML}
+              </body>
+            </html>
+          `;
+
+          const w = window.open("", "_blank");
+          if (!w) {
+            // could not open window (popup blocked)
+            setShowReceipt(false);
+            return;
+          }
+          w.document.open();
+          w.document.write(html);
+          w.document.close();
+          // allow rendering then trigger print
+          setTimeout(() => w.print(), 300);
+          setShowReceipt(false);
+        }}
+        athlete={athlete}
+        club={club}
+        amount={receiptAmount}
+        month={receiptMonth ?? ""}
+        note={receiptNote}
+        paymentId={receiptId}
+      />
     </div>
   );
 };
