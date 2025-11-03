@@ -18,11 +18,11 @@ import { Groups } from "../pages/groups/components/Groups";
 import ClubAssignAssistants from "../pages/Clubs/components/ClubAssignAssistants";
 import { GroupsNew } from "../pages/groups/components/GroupsNew";
 import { GroupEdit } from "../pages/groups/components/GroupEdit";
-import { AthleteEdit, Athletes } from "../pages/Athletes";
-import { CoachEdit, Coaches } from "../pages/Coaches/components";
+import { Athletes } from "../pages/Athletes";
+import { Coaches } from "../pages/Coaches/components";
 import { DashboardCoach } from "../pages/dashboardCoaches/DashboardCoach";
-import { AdminEdit, Admins } from "../pages/Admins";
-import { SuperadminEdit, Superadmins } from "../pages/SuperAdmins";
+import { Admins } from "../pages/Admins";
+import { Superadmins } from "../pages/SuperAdmins";
 import { RegisterPayment } from "../pages";
 import { Assistants } from "../pages/Assistants";
 import { Parents } from "../pages/Parents";
@@ -166,25 +166,25 @@ export const roleRoutes: RoleRoutes = {
     },
     {
       path: "/users/superadmin/edit/:id",
-      element: <SuperadminEdit name="Registros" sub="Actualizar" />,
+      element: <UserEdit name="Registros" sub="Actualizar" />,
     },
     {
       path: "/users/admin/edit/:id",
-      element: <AdminEdit name="Registros" sub="Actualizar" />,
+      element: <UserEdit name="Registros" sub="Actualizar" />,
     },
 
     // coaches
 
     {
       path: "/users/coach/edit/:id",
-      element: <CoachEdit name="Registros" sub="Actualizar" />,
+      element: <UserEdit name="Registros" sub="Actualizar" />,
     },
 
     // athletes
 
     {
       path: "/users/athlete/edit/:id",
-      element: <AthleteEdit name="Registros" sub="Actualizar" />,
+      element: <UserEdit name="Registros" sub="Actualizar" />,
     },
     {
       path: "/payments/register",
@@ -317,15 +317,15 @@ export const roleRoutes: RoleRoutes = {
     },
     {
       path: "/users/admin/edit/:id",
-      element: <AdminEdit name="Registros" sub="Actualizar" />,
+      element: <UserEdit name="Registros" sub="Actualizar" />,
     },
     {
       path: "/users/coach/edit/:id",
-      element: <CoachEdit name="Registros" sub="Actualizar" />,
+      element: <UserEdit name="Registros" sub="Actualizar" />,
     },
     {
       path: "/users/athlete/edit/:id",
-      element: <AthleteEdit name="Registros" sub="Actualizar" />,
+      element: <UserEdit name="Registros" sub="Actualizar" />,
     },
     {
       path: "/payments/register",
@@ -368,11 +368,11 @@ export const roleRoutes: RoleRoutes = {
     },
     {
       path: "/users/coach/edit/:id",
-      element: <CoachEdit name="Registros" sub="Actualizar" />,
+      element: <UserEdit name="Registros" sub="Actualizar" />,
     },
     {
       path: "/users/athlete/edit/:id",
-      element: <AthleteEdit name="Registros" sub="Actualizar" />,
+      element: <UserEdit name="Registros" sub="Actualizar" />,
     },
     {
       path: "/clubs",

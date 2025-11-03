@@ -1,5 +1,5 @@
-import type { UsersPageProps } from "../../../interfaces";
 import { UserListGeneric } from "../../../components/UserListGeneric";
+import type { UsersPageProps } from "../../../interfaces";
 import AssistantTable from "./AssistantTable";
 
 export const Assistants = ({ name }: UsersPageProps) => (
