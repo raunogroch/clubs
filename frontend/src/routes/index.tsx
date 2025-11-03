@@ -65,7 +65,46 @@ export const roleRoutes: RoleRoutes = {
       path: "/clubs",
       icon: "fa-diamond",
       label: "Clubs",
-      element: <Clubs name="Clubs" />,
+      element: <Clubs name="Clubs" create edit delete />,
+    },
+    {
+      path: "/clubs/:id/assign-assistants",
+      element: <ClubAssignAssistants />,
+    },
+    {
+      path: "/clubs/edit/:id",
+      element: <ClubEdit name="Clubs" sub="editar" />,
+    },
+    { path: "/clubs/create", element: <ClubNew name="Clubs" sub="Crear" /> },
+    {
+      path: "/clubs/:clubId/groups",
+      element: (
+        <Groups
+          name="Clubs"
+          sub="Grupos"
+          create
+          edit
+          delete
+          registerAthlete
+          registerCoach
+        />
+      ),
+    },
+    {
+      path: "/clubs/:clubId/groups/register-athlete/:groupId",
+      element: <GroupAthletes name="Clubs" sub="Registro" />,
+    },
+    {
+      path: "/clubs/:clubId/groups/register-coach/:groupId",
+      element: <GroupCoaches name="Clubs" sub="Registro" />,
+    },
+    {
+      path: "/clubs/:clubId/groups/create",
+      element: <GroupsNew name="Clubs" sub="Groups" sub1="Crear" />,
+    },
+    {
+      path: "/clubs/:clubId/groups/:groupId",
+      element: <GroupEdit name="Clubs" sub="Groups" sub1="Editar" />,
     },
     {
       path: "/clubs/:id/assign-assistants",

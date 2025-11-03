@@ -54,9 +54,9 @@ export const ClubList = ({ clubs, edit, delete: canDelete }: ClubProps) => {
           {clubs.map((club: Club, index: number) => (
             <tr key={index}>
               <td className="project-status text-center align-middle">
-                {club.image ? (
+                {club.images ? (
                   <Image
-                    src={club.image}
+                    src={club.images.small}
                     alt={club.name}
                     style={{ width: "50px", borderRadius: "50%" }}
                   />

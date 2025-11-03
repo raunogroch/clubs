@@ -3,7 +3,11 @@ import type { Sport } from "../../Sports/interfaces";
 
 export interface Club {
   _id?: string;
-  image?: string;
+  images?: {
+    small: string;
+    medium: string;
+    large: string;
+  };
   name: string;
   place: string;
   sport: Sport;

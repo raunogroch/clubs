@@ -9,7 +9,8 @@ frontend/.vite
 frontend/.env
 frontend/dist/
 
-selenium/node_modules/
-selenium/chromedriver/
+image-processor/node_modules/
+image-processor/dist/
+image-processor/images/
 
 template

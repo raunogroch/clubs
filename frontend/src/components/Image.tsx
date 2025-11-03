@@ -1,4 +1,4 @@
-const backendUri = import.meta.env.VITE_BACKEND_URI;
+const backendUri = import.meta.env.VITE_IMAGE_PROCESSOR_API;
 
 interface ImageProp {
   src: string;
@@ -15,12 +15,14 @@ export const Image = ({
   className,
   style,
   ...props
-}: ImageProp & React.ImgHTMLAttributes<HTMLImageElement>) => (
-  <img
-    src={local ? src : backendUri + src}
-    alt={alt}
-    className={className}
-    style={style}
-    {...props}
-  />
-);
+}: ImageProp) => {
+  return (
+    <img
+      src={local ? src : backendUri + src}
+      alt={alt}
+      className={className}
+      style={style}
+      {...props}
+    />
+  );
+};
