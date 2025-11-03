@@ -23,11 +23,11 @@ export const SuperadminEdit = ({ name: namePage, sub }: UsersPageProps) => {
   }, [dispatch, id]);
 
   const handleSuccess = () => {
-    navigate("/users/superadmins");
+    navigate("/users/superadmin");
   };
 
   const handleCancel = () => {
-    navigate("/users/superadmins");
+    navigate("/users/superadmin");
   };
 
   if (error) toastr.error(error);

@@ -23,11 +23,11 @@ export const CoachEdit = ({ name: namePage, sub }: UsersPageProps) => {
   }, [dispatch, id]);
 
   const handleSuccess = () => {
-    navigate("/users/coaches");
+    navigate("/users/coach");
   };
 
   const handleCancel = () => {
-    navigate("/users/coaches");
+    navigate("/users/coach");
   };
 
   if (error) toastr.error(error);

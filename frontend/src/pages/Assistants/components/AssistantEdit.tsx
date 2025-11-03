@@ -25,11 +25,11 @@ export const AssistantEdit = ({ name: namePage, sub }: UsersPageProps) => {
   }, [dispatch, id]);
 
   const handleSuccess = () => {
-    navigate("/users/assistants");
+    navigate("/users/assistant");
   };
 
   const handleCancel = () => {
-    navigate("/users/assistants");
+    navigate("/users/assistant");
   };
 
   if (error) toastr.error(error);

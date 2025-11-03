@@ -10,8 +10,8 @@ import { logoutThunk } from "../store/authThunk";
 // Constantes para rutas y mensajes
 const SEARCH_PATHS: string[] = [
   "/users/general",
-  "/users/coaches",
-  "/users/athletes",
+  "/users/coach",
+  "/users/athlete",
 ];
 const WELCOME_MESSAGE = "BIENVENIDO AL SISTEMA DE CLUBES";
 

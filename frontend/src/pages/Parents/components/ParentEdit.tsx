@@ -25,11 +25,11 @@ export const ParentEdit = ({ name: namePage, sub }: UsersPageProps) => {
   }, [dispatch, id]);
 
   const handleSuccess = () => {
-    navigate("/users/parents");
+    navigate("/users/parent");
   };
 
   const handleCancel = () => {
-    navigate("/users/parents");
+    navigate("/users/parent");
   };
 
   if (error) toastr.error(error);

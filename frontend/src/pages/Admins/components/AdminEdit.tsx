@@ -25,11 +25,11 @@ export const AdminEdit = ({ name: namePage, sub }: UsersPageProps) => {
   }, [dispatch, id]);
 
   const handleSuccess = () => {
-    navigate("/users/admins");
+    navigate("/users/admin");
   };
 
   const handleCancel = () => {
-    navigate("/users/admins");
+    navigate("/users/admin");
   };
 
   if (error) toastr.error(error);
