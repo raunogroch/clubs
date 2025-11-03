@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../store";
-import { deleteUser, restoreUser } from "../store/usersThunks";
+import { deleteUser, restoreUser, softDeleteUser } from "../store/usersThunks";
 import type { User } from "../interfaces";
 
 interface Props {
@@ -10,7 +10,17 @@ interface Props {
   allowRestore?: boolean;
   allowEdit?: boolean;
   allowDelete?: boolean;
+  allowRemove?: boolean;
 }
+
+const Roles = {
+  athlete: "Atleta",
+  parent: "Responsable",
+  coach: "Entrenador",
+  assistant: "Asistente",
+  admin: "Administrador",
+  superadmin: "Super Administrador",
+};
 
 export const GenericUserTable = ({
   users,
@@ -18,6 +28,7 @@ export const GenericUserTable = ({
   allowRestore = false,
   allowEdit = true,
   allowDelete = false,
+  allowRemove = false,
 }: Props) => {
   const dispatch = useDispatch<AppDispatch>();
   const filter = useSelector((state: RootState) => state.filters);
@@ -55,6 +66,22 @@ export const GenericUserTable = ({
     });
   };
 
+  const handleRemove = async (id: string) => {
+    if (!id) return;
+    swal({
+      title: "¿Estás seguro?",
+      text: "¡El usuario se quitara de la lista!",
+      icon: "warning",
+      buttons: ["Cancelar", "Sí, eliminar!"],
+      dangerMode: true,
+    }).then((willRemove) => {
+      if (willRemove) {
+        dispatch(softDeleteUser(id)).unwrap();
+        swal("Eliminado!", "El usuario ha quitado de la lista.", "success");
+      }
+    });
+  };
+
   const getSequentialNumber = (index: number) => (page - 1) * limit + index + 1;
   const location = window.location.pathname.split("/")[2];
 
@@ -78,12 +105,7 @@ export const GenericUserTable = ({
               {showRole && (
                 <td className="text-center align-middle">
                   <div className="text-success text-left">
-                    {user.role === "athlete" && "Atleta"}
-                    {user.role === "parent" && "Responsable"}
-                    {user.role === "coach" && "Entrenador"}
-                    {user.role === "assistant" && "Asistente"}
-                    {user.role === "admin" && "Administrador"}
-                    {user.role === "superadmin" && "Super Administrador"}
+                    {Roles[user.role]}
                   </div>
                 </td>
               )}
@@ -99,6 +121,18 @@ export const GenericUserTable = ({
                         className="text-success m-2"
                       >
                         <i className="fa fa-edit"></i> Editar
+                      </Link>
+                    )}
+                    {allowRemove && (
+                      <Link
+                        to="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleRemove(user._id!);
+                        }}
+                        className="text-warning m-2"
+                      >
+                        <i className="fa fa-trash-o"></i> Remover
                       </Link>
                     )}
                     {allowDelete && (
@@ -123,7 +157,7 @@ export const GenericUserTable = ({
                     }}
                     className="text-warning m-2"
                   >
-                    <i className="fa fa-new"></i> Restaurar
+                    <i className="fa fa-reply"></i> Restaurar
                   </Link>
                 ) : null}
               </td>

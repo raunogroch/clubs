@@ -41,5 +41,6 @@ export interface UsersPageProps {
   // optional flags used by list pages to enable actions/UI
   create?: boolean;
   edit?: boolean;
+  remove?: boolean;
   delete?: boolean;
 }

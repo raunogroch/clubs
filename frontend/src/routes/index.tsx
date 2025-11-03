@@ -22,11 +22,7 @@ import { AthleteEdit, AthleteNew, Athletes } from "../pages/Athletes";
 import { CoachEdit, Coaches, CoachNew } from "../pages/Coaches/components";
 import { DashboardCoach } from "../pages/dashboardCoaches/DashboardCoach";
 import { AdminEdit, AdminNew, Admins } from "../pages/Admins";
-import {
-  SuperadminEdit,
-  SuperadminNew,
-  Superadmins,
-} from "../pages/SuperAdmins";
+import { SuperadminEdit, Superadmins } from "../pages/SuperAdmins";
 import { RegisterPayment } from "../pages";
 import { Assistants } from "../pages/Assistants";
 import { Parents } from "../pages/Parents";
@@ -139,8 +135,8 @@ export const roleRoutes: RoleRoutes = {
         {
           path: "/users/superadmins",
           icon: "fa-users",
-          label: "Super Admins",
-          element: <Superadmins name="Todos los registros" />,
+          label: "Super admins",
+          element: <Superadmins name="Super" edit remove delete />,
         },
         {
           path: "/users/admins",
@@ -158,7 +154,7 @@ export const roleRoutes: RoleRoutes = {
           path: "/users/parents",
           icon: "fa-users",
           label: "Tutores",
-          element: <Parents name="Tutores" edit delete />,
+          element: <Parents name="Tutores" />,
         },
         {
           path: "/users/athletes",
@@ -167,10 +163,6 @@ export const roleRoutes: RoleRoutes = {
           element: <Athletes name="Deportistas" />,
         },
       ],
-    },
-    {
-      path: "/users/superadmins/create",
-      element: <SuperadminNew name="Registros" sub="Crear" />,
     },
     {
       path: "/users/superadmins/edit/:id",

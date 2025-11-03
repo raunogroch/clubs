@@ -41,10 +41,26 @@ export const updateUser = createAsyncThunk<User, User>(
   }
 );
 
+export const softDeleteUser = createAsyncThunk<string, string>(
+  "users/softDeleteUser",
+  async (id, { rejectWithValue }) => {
+    try {
+      // Soft delete: mark user as inactive
+      await api.patch(`/users/${id}/remove`);
+      return id;
+    } catch (err: any) {
+      return rejectWithValue(
+        err.response?.data || "Error al desactivar usuario"
+      );
+    }
+  }
+);
+
 export const deleteUser = createAsyncThunk<string, string>(
   "users/deleteUser",
   async (id, { rejectWithValue }) => {
     try {
+      // Hard delete: remove user permanently
       await api.delete(`/users/${id}`);
       return id;
     } catch (err: any) {

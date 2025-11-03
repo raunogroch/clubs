@@ -185,6 +185,14 @@ export class UsersService {
   }
 
   /**
+   * Marca un usuario como inactivo (soft delete)
+   */
+  async softRemove(id: string): Promise<User | null> {
+    await this.userValidator.validateExistence(id);
+    return this.userRepository.updateById(id, { active: false } as User);
+  }
+
+  /**
    * Restaurar (reactivar) un usuario previamente desactivado
    */
   async restore(id: string): Promise<User | null> {

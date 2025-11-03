@@ -80,14 +80,9 @@ export class UserRepository implements IUserRepository {
   }
 
   /**
-   * Elimina un usuario por su ID
+   * Elimina un usuario por su ID (Hard Delete)
    */
   async deleteById(id: string): Promise<User | null> {
-    // Soft delete: marcar active = false
-    return this.userModel.findByIdAndUpdate(
-      id,
-      { active: false },
-      { new: true },
-    );
+    return this.userModel.findByIdAndDelete(id);
   }
 }

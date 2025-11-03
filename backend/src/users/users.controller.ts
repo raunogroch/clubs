@@ -97,6 +97,14 @@ export class UsersController {
     return this.usersService.remove(id);
   }
   /**
+   * Endpoint para marcar un usuario como inactivo (soft delete)
+   */
+  @Patch(':id/remove')
+  @Roles(Role.SUPERADMIN, Role.ADMIN)
+  softRemove(@Param('id') id: string) {
+    return this.usersService.softRemove(id);
+  }
+  /**
    * Endpoint para restaurar (reactivar) un usuario
    */
   @Patch(':id/restore')

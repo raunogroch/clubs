@@ -1,4 +1,4 @@
-import type { User, UsersPageProps } from "../interfaces";
+import type { User } from "../interfaces";
 import { NavHeader, Spinner } from "../components";
 import { useDispatch, useSelector } from "react-redux";
 import { setLimit, setPage, type AppDispatch, type RootState } from "../store";
@@ -8,25 +8,15 @@ import { PaginationList } from "../components/PaginationList";
 import toastr from "toastr";
 import "toastr/build/toastr.min.css";
 
-interface UserListGenericProps extends UsersPageProps {
-  role?: string;
-  // TableComponent may accept extra optional flags like edit/delete
-  TableComponent: React.ComponentType<{
-    users: User[];
-    edit?: boolean;
-    delete?: boolean;
-  }>;
-  pageCreateLabel?: string;
-}
-
 export const UserListGeneric = ({
   name: nameTitle,
   role,
   TableComponent,
   pageCreateLabel,
   edit,
+  remove: canRemove,
   delete: canDelete,
-}: UserListGenericProps) => {
+}) => {
   const dispatch = useDispatch<AppDispatch>();
   const { users, status, error } = useSelector(
     (state: RootState) => state.users
@@ -85,6 +75,7 @@ export const UserListGeneric = ({
                   <TableComponent
                     users={userList}
                     edit={edit}
+                    remove={canRemove}
                     delete={canDelete}
                   />
                   <PaginationList filter={users} />

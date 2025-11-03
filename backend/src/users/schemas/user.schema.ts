@@ -41,10 +41,6 @@ export class User extends mongoose.Document {
   @Prop()
   weight: number;
 
-  /** Imagen de perfil en base64 */
-  @Prop()
-  image: string;
-
   /** Bandera para soft-delete */
   @Prop({ type: Boolean, default: true })
   active: boolean;

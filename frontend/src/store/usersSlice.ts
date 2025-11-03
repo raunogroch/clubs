@@ -7,6 +7,7 @@ import {
   updateUser,
   findUserById,
   restoreUser,
+  softDeleteUser,
 } from "./usersThunks";
 
 export interface UsersResponse {
@@ -95,8 +96,8 @@ const usersSlice = createSlice({
       state.status = "succeeded";
       state.users.data = state.users.data.filter(
         (u) => u._id !== action.payload
-      );
-      state.users.total -= 1;
+      ); // Remove user from the list
+      state.users.total -= 1; // Decrease total count
     });
     builder.addCase(deleteUser.rejected, (state, action) => {
       state.status = "failed";
@@ -129,6 +130,22 @@ const usersSlice = createSlice({
       state.selectedUser = action.payload;
     });
     builder.addCase(findUserById.rejected, (state, action) => {
+      state.status = "failed";
+      state.error = action.payload as string;
+    });
+
+    // SOFT DELETE
+    builder.addCase(softDeleteUser.pending, (state) => {
+      state.status = "loading";
+    });
+    builder.addCase(softDeleteUser.fulfilled, (state, action) => {
+      state.status = "succeeded";
+      const index = state.users.data.findIndex((u) => u._id === action.payload);
+      if (index >= 0) {
+        state.users.data[index].active = false; // Mark user as inactive
+      }
+    });
+    builder.addCase(softDeleteUser.rejected, (state, action) => {
       state.status = "failed";
       state.error = action.payload as string;
     });
