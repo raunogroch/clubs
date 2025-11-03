@@ -7,6 +7,7 @@ import { ClubsModule } from './clubs/clubs.module';
 import { SportsModule } from './sports/sports.module';
 import { GroupsModule } from './clubs/groups/groups.module';
 import { PaymentsModule } from './payments/payments.module';
+import { HttpModule } from './common/http/http.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { PaymentsModule } from './payments/payments.module';
         uri: process.env.MONGODB_URI,
       }),
     }),
+    HttpModule,
     AuthModule,
     UsersModule,
     ClubsModule,

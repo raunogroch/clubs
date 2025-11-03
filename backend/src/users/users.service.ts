@@ -52,10 +52,10 @@ export class UsersService {
    */
   async create(createUserDto: CreateUserDto): Promise<User> {
     await this.userValidator.validateUniqueUsername(createUserDto.username);
-    createUserDto.image = this.userImageService.processImage(
+    createUserDto.images = (await this.userImageService.processImage(
       this.folder,
       createUserDto.image,
-    );
+    )) as { small: string; medium: string; large: string };
     createUserDto.password = await this.userPasswordService.hashPassword(
       createUserDto.password,
     );
@@ -169,7 +169,7 @@ export class UsersService {
         updateUserDto.password,
       );
     }
-    updateUserDto.image = this.userImageService.processImage(
+    updateUserDto.images = await this.userImageService.processImage(
       this.folder,
       updateUserDto.image,
     );

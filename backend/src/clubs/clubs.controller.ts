@@ -9,7 +9,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ClubsService } from './clubs.service';
-import { CreateClubDto, UpdateClubDto } from './dto';
+import { CreateClubDto } from './dto/create-club.dto';
+import { UpdateClubDto } from './dto/update-club.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';

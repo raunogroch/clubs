@@ -48,5 +48,20 @@ export class User extends mongoose.Document {
   /** Bandera para soft-delete */
   @Prop({ type: Boolean, default: true })
   active: boolean;
+
+  /** Imágenes de perfil en diferentes resoluciones */
+  @Prop({
+    type: {
+      small: { type: String },
+      medium: { type: String },
+      large: { type: String },
+    },
+    required: false,
+  })
+  images?: {
+    small: string;
+    medium: string;
+    large: string;
+  };
 }
 export const UserSchema = SchemaFactory.createForClass(User);

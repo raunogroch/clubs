@@ -8,8 +8,19 @@ import { User } from 'src/users/schemas/user.schema';
 @Schema({ timestamps: true })
 export class Club extends Document {
   /** Imagen de club en base64 */
-  @Prop()
-  image: string;
+  @Prop({
+    type: {
+      small: { type: String },
+      medium: { type: String },
+      large: { type: String },
+    },
+    required: false,
+  })
+  images?: {
+    small: string;
+    medium: string;
+    large: string;
+  };
 
   /** Nombre del club */
   @Prop({ type: String, required: true })

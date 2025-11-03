@@ -1,24 +1,48 @@
 // Servicio para procesamiento de imágenes de usuario
 import { Injectable } from '@nestjs/common';
-import { saveProfileImage } from '.';
-import * as fs from 'fs';
-import * as path from 'path';
+import { HttpService } from '../common/http/http.service';
+
+const IMAGE_PROCESSOR_API =
+  process.env.IMAGE_PROCESSOR_API || 'http://localhost:4000';
 
 @Injectable()
 export class ImageService {
-  processImage(folder: string, imageBase64?: string): string | undefined {
+  constructor(private readonly httpService: HttpService) {}
+
+  async processImage(
+    folder: string,
+    imageBase64?: string,
+  ): Promise<{ small: string; medium: string; large: string } | undefined> {
     if (imageBase64 && imageBase64.startsWith('data:image')) {
-      return saveProfileImage(folder, imageBase64);
+      try {
+        const response = await this.httpService.post<{
+          small: string;
+          medium: string;
+          large: string;
+        }>(`${IMAGE_PROCESSOR_API}/process/save`, {
+          folder,
+          image: imageBase64,
+        });
+        return response.data; // Return all resolutions
+      } catch (error) {
+        console.error('Error delegating image processing:', error);
+        throw new Error('Image processing failed');
+      }
     }
-    return imageBase64;
+    return undefined;
   }
+
   async deleteImage(folder: string, imagePath: string): Promise<void> {
-    // imagePath puede ser '/images/profile/uuid.jpg' o similar
     const filename = imagePath.split('/').pop();
     if (!filename) return;
-    const filePath = path.join(__dirname, '../../images', folder, filename);
-    if (fs.existsSync(filePath)) {
-      await fs.promises.unlink(filePath);
+    try {
+      await this.httpService.post(`${IMAGE_PROCESSOR_API}/process/delete`, {
+        folder,
+        imagePath,
+      });
+    } catch (error) {
+      console.error('Error delegating image deletion:', error);
+      throw new Error('Image deletion failed');
     }
   }
 }

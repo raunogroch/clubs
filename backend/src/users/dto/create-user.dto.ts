@@ -55,4 +55,11 @@ export class CreateUserDto {
   /** Imagen de perfil en base64 */
   @IsString()
   image?: string;
+
+  /** Rutas de imágenes procesadas */
+  images?: {
+    small: string;
+    medium: string;
+    large: string;
+  };
 }

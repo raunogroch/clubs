@@ -9,8 +9,12 @@ export class CreateClubDto {
   name: string;
 
   /** Imagen de perfil en base64 */
-  @IsString()
-  image?: string;
+  /** Rutas de las imágenes procesadas */
+  images?: {
+    small: string;
+    medium: string;
+    large: string;
+  };
 
   /** Disciplina deportiva asociada */
   @IsNotEmpty()
