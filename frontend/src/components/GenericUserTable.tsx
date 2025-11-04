@@ -24,11 +24,11 @@ const Roles = {
 
 export const GenericUserTable = ({
   users,
-  showRole = true,
-  allowRestore = false,
-  allowEdit = true,
-  allowDelete = false,
-  allowRemove = false,
+  showRole,
+  allowRestore,
+  allowEdit,
+  allowDelete,
+  allowRemove,
 }: Props) => {
   const dispatch = useDispatch<AppDispatch>();
   const filter = useSelector((state: RootState) => state.filters);
@@ -168,5 +168,3 @@ export const GenericUserTable = ({
     </div>
   );
 };
-
-export default GenericUserTable;

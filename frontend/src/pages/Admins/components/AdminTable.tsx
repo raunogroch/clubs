@@ -1,12 +1,20 @@
-import GenericUserTable from "../../../components/GenericUserTable";
-import type { User } from "../../../interfaces";
+import { GenericUserTable } from "../../../components/GenericUserTable";
 
-interface UsersTableProps {
-  users: User[];
-}
-
-export const AdminTable = ({ users }: UsersTableProps) => {
+export const AdminTable = ({
+  users,
+  edit,
+  restore: res,
+  delete: del,
+  remove,
+}) => {
   return (
-    <GenericUserTable users={users} showRole={false} allowRestore={true} />
+    <GenericUserTable
+      users={users}
+      showRole={false}
+      allowRestore={res}
+      allowEdit={edit}
+      allowDelete={del}
+      allowRemove={remove}
+    />
   );
 };

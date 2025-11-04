@@ -6,12 +6,12 @@ import type { UsersPageProps } from "../../../interfaces";
 export const UserNew = ({ name, sub }: UsersPageProps) => {
   const navigate = useNavigate();
 
-  const handleSuccess = () => {
-    navigate("/users/general");
+  const handleSuccess = (role: string) => {
+    navigate(`/users/${role}`); // Redirect based on the role
   };
 
   const handleCancel = () => {
-    navigate("/users/general");
+    navigate(`/`);
   };
 
   return (
@@ -28,7 +28,7 @@ export const UserNew = ({ name, sub }: UsersPageProps) => {
                 <div className="row">
                   <div className="col-sm-12">
                     <UserForm
-                      onSuccess={handleSuccess}
+                      onSuccess={(role) => handleSuccess(role)} // Pass a function reference
                       onCancel={handleCancel}
                     />
                   </div>

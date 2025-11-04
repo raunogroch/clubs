@@ -1,11 +1,21 @@
 import type { UsersPageProps } from "../../../interfaces";
-import { UserTable } from ".";
 import { UserListGeneric } from "../../../components/UserListGeneric";
+import { UserTable } from "./UserTable";
 
-export const Users = ({ name }: UsersPageProps) => (
+export const Users = ({
+  name,
+  edit,
+  restore,
+  delete: del, // Renamed to avoid reserved keyword conflict
+  remove,
+}: UsersPageProps & { remove?: boolean }) => (
   <UserListGeneric
     name={name}
     TableComponent={UserTable}
-    pageCreateLabel="Nuevo usuario"
+    role="users"
+    edit={edit}
+    restore={restore}
+    delete={del}
+    remove={remove}
   />
 );

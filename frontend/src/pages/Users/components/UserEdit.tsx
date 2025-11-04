@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useEffect } from "react";
 import { NavHeader, Spinner } from "../../../components";
 import { useDispatch, useSelector } from "react-redux";
@@ -17,17 +17,19 @@ export const UserEdit = ({ name: namePage, sub }: UsersPageProps) => {
   } = useSelector((state: RootState) => state.users);
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const roleLocation = location.pathname.split("/")[2];
 
   useEffect(() => {
     dispatch(findUserById(id));
   }, [dispatch, id]);
 
   const handleSuccess = () => {
-    navigate("/users/general");
+    navigate(`/users/${roleLocation}`);
   };
 
   const handleCancel = () => {
-    navigate("/users/general");
+    navigate(`/users/${roleLocation}`);
   };
 
   if (error) toastr.error(error);

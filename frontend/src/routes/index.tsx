@@ -58,10 +58,59 @@ export const roleRoutes: RoleRoutes = {
       element: <Dashboard />,
     },
     {
+      path: "/users",
+      icon: "fa-user-circle",
+      label: "Gestion de usuarios",
+      children: [
+        {
+          path: "/users/create",
+          icon: "fa-user-plus",
+          label: "Crear usuario",
+          element: <UserNew name="Registros" sub="Crear" />,
+        },
+        {
+          path: "/users/superadmin",
+          icon: "fa-users",
+          label: "Super admins",
+          element: <Superadmins name="Super" edit restore remove delete />,
+        },
+        {
+          path: "/users/admin",
+          icon: "fa-users",
+          label: "Administradores",
+          element: <Admins name="Administradores" edit restore remove delete />,
+        },
+        {
+          path: "/users/assistant",
+          icon: "fa-users",
+          label: "Asistentes",
+          element: <Assistants name="Asistentes" edit restore remove delete />,
+        },
+        {
+          path: "/users/coach",
+          icon: "fa-users",
+          label: "Entrenadores",
+          element: <Coaches name="Entrenadores" edit restore remove delete />,
+        },
+        {
+          path: "/users/parent",
+          icon: "fa-users",
+          label: "Tutores",
+          element: <Parents name="Tutores" edit restore remove delete />,
+        },
+        {
+          path: "/users/athlete",
+          icon: "fa-users",
+          label: "Atletas",
+          element: <Athletes name="Atletas" edit restore remove delete />,
+        },
+      ],
+    },
+    {
       path: "/clubs",
       icon: "fa-diamond",
-      label: "Clubs",
-      element: <Clubs name="Clubs" create edit delete />,
+      label: "Clubes",
+      element: <Clubs name="Clubes" create edit delete />,
     },
     {
       path: "/clubs/:id/assign-assistants",
@@ -109,8 +158,8 @@ export const roleRoutes: RoleRoutes = {
     {
       path: "/sports",
       icon: "fa-soccer-ball-o",
-      label: "Disciplina",
-      element: <Sports name="Disciplinas" />,
+      label: "Deportes",
+      element: <Sports name="Deportes" />,
     },
     {
       path: "/sports/create",
@@ -121,49 +170,6 @@ export const roleRoutes: RoleRoutes = {
       element: <SportEdit name="Registros" sub="Actualizar" />,
     },
 
-    {
-      path: "/users",
-      icon: "fa-user-circle",
-      label: "Gestion de usuarios",
-      children: [
-        {
-          path: "/users/create",
-          icon: "fa-user-plus",
-          label: "Crear usuario",
-          element: <UserNew name="Registros" sub="Crear" />,
-        },
-        {
-          path: "/users/superadmin",
-          icon: "fa-users",
-          label: "Super admins",
-          element: <Superadmins name="Super" edit remove delete />,
-        },
-        {
-          path: "/users/admin",
-          icon: "fa-users",
-          label: "Administradores",
-          element: <Admins name="Administradores" />,
-        },
-        {
-          path: "/users/coach",
-          icon: "fa-users",
-          label: "Entrenadores",
-          element: <Coaches name="Entrenadores" />,
-        },
-        {
-          path: "/users/parent",
-          icon: "fa-users",
-          label: "Tutores",
-          element: <Parents name="Tutores" />,
-        },
-        {
-          path: "/users/athlete",
-          icon: "fa-users",
-          label: "Deportistas",
-          element: <Athletes name="Deportistas" />,
-        },
-      ],
-    },
     {
       path: "/users/superadmin/edit/:id",
       element: <UserEdit name="Registros" sub="Actualizar" />,
@@ -177,6 +183,13 @@ export const roleRoutes: RoleRoutes = {
 
     {
       path: "/users/coach/edit/:id",
+      element: <UserEdit name="Registros" sub="Actualizar" />,
+    },
+
+    // ASSISTANT
+
+    {
+      path: "/users/assistant/edit/:id",
       element: <UserEdit name="Registros" sub="Actualizar" />,
     },
 
@@ -199,21 +212,64 @@ export const roleRoutes: RoleRoutes = {
       element: <GroupsNew name="Clubs" sub="Grupos" sub1="Editar" />,
     },
     {
+      path: "/profile",
+      label: "Perfil",
+      element: <ProfileAdmin name="Perfil" />,
+    },
+    {
       path: "/",
       icon: "fa-home",
       label: "Principal",
       element: <Dashboard />,
     },
     {
-      path: "/profile",
-      label: "Perfil",
-      element: <ProfileAdmin name="Perfil" />,
+      path: "/users",
+      icon: "fa-user-circle",
+      label: "Gestion de usuarios",
+      children: [
+        {
+          path: "/users/create",
+          icon: "fa-user-plus",
+          label: "Crear usuario",
+          element: <UserNew name="Registros" sub="Crear" />,
+        },
+        {
+          path: "/users/admin",
+          icon: "fa-users",
+          label: "Administradores",
+          element: <Admins name="Administradores" edit remove />,
+        },
+        {
+          path: "/users/assistant",
+          icon: "fa-users",
+          label: "Asistentes",
+          element: <Assistants name="Asistentes" edit remove />,
+        },
+        {
+          path: "/users/coach",
+          icon: "fa-users",
+          label: "Entrenadores",
+          element: <Coaches name="Entrenadores" edit remove />,
+        },
+        {
+          path: "/users/parent",
+          icon: "fa-users",
+          label: "Tutores",
+          element: <Parents name="Tutores" edit remove />,
+        },
+        {
+          path: "/users/athlete",
+          icon: "fa-users",
+          label: "Atletas",
+          element: <Athletes name="Atletas" edit remove />,
+        },
+      ],
     },
     {
       path: "/clubs",
       icon: "fa-diamond",
-      label: "Clubs",
-      element: <Clubs name="Clubs" create edit delete />,
+      label: "Clubes",
+      element: <Clubs name="Clubes" create edit />,
     },
     {
       path: "/clubs/:id/assign-assistants",
@@ -255,10 +311,14 @@ export const roleRoutes: RoleRoutes = {
       element: <GroupEdit name="Clubs" sub="Groups" sub1="Editar" />,
     },
     {
+      path: "/clubs/:id/assign-assistants",
+      element: <ClubAssignAssistants />,
+    },
+    {
       path: "/sports",
       icon: "fa-soccer-ball-o",
-      label: "Disciplina",
-      element: <Sports name="Disciplinas" />,
+      label: "Deportes",
+      element: <Sports name="Deportes" />,
     },
     {
       path: "/sports/create",
@@ -269,60 +329,26 @@ export const roleRoutes: RoleRoutes = {
       element: <SportEdit name="Registros" sub="Actualizar" />,
     },
     {
-      path: "/users",
-      icon: "fa-user-circle",
-      label: "Gestion de usuarios",
-      children: [
-        {
-          path: "/users/create",
-          icon: "fa-user-plus",
-          label: "Crear usuario",
-          element: <UserNew name="Registros" sub="Crear" />,
-        },
-        {
-          path: "/users/admin",
-          icon: "fa-user-circle-o",
-          label: "Administradores",
-          element: <Admins name="Administradores" />,
-        },
-        {
-          path: "/users/assistant",
-          icon: "fa-user-circle-o",
-          label: "Asistentes",
-          element: <Assistants name="Asistentes" />,
-        },
-        {
-          path: "/users/coach",
-          icon: "fa-user-circle-o",
-          label: "Entrenadores",
-          element: <Coaches name="Entrenadores" />,
-        },
-        {
-          path: "/users/parent",
-          icon: "fa-user-circle-o",
-          label: "Tutores",
-          element: <Parents name="Tutores" edit delete />,
-        },
-        {
-          path: "/users/athlete",
-          icon: "fa-user-circle-o",
-          label: "Deportistas",
-          element: <Athletes name="Deportistas" />,
-        },
-      ],
-    },
-    {
-      path: "/users/general/edit/:id",
-      element: <UserEdit name="Registros" sub="Actualizar" />,
-    },
-    {
       path: "/users/admin/edit/:id",
       element: <UserEdit name="Registros" sub="Actualizar" />,
     },
+
+    // coaches
+
     {
       path: "/users/coach/edit/:id",
       element: <UserEdit name="Registros" sub="Actualizar" />,
     },
+
+    // ASSISTANT
+
+    {
+      path: "/users/assistant/edit/:id",
+      element: <UserEdit name="Registros" sub="Actualizar" />,
+    },
+
+    // athletes
+
     {
       path: "/users/athlete/edit/:id",
       element: <UserEdit name="Registros" sub="Actualizar" />,

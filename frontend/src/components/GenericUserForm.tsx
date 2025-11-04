@@ -1,5 +1,5 @@
 import { Input } from ".";
-import type { UserFormProps } from "../interfaces";
+import { Role, type UserFormProps } from "../interfaces";
 import { UserRoleSelector } from "../pages/Users/components";
 import { useUserForm } from "../pages/Users/hooks";
 
@@ -13,7 +13,7 @@ export const GenericUserForm = ({
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const success = await handleSubmit();
-    if (success && onSuccess) onSuccess();
+    if (success && onSuccess) onSuccess(formData.role); // Pass role to onSuccess
   };
 
   return (
@@ -35,9 +35,11 @@ export const GenericUserForm = ({
           */}
 
         <UserRoleSelector
-          selectedRole={formData.role}
+          selectedRole={formData.role as Role}
           onRoleChange={(role) =>
-            handleChange({ target: { name: "role", value: role } } as any)
+            handleChange({
+              target: { name: "role", value: role },
+            } as unknown as React.ChangeEvent<HTMLInputElement | HTMLSelectElement>)
           }
           onError={errors.role}
         />

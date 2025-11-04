@@ -1,4 +1,4 @@
-import GenericUserTable from "../../../components/GenericUserTable";
+import { GenericUserTable } from "../../../components/GenericUserTable";
 import type { User } from "../../../interfaces";
 
 interface UsersTableProps {

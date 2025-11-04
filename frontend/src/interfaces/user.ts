@@ -31,7 +31,7 @@ export type UserErrors = {
 
 export interface UserFormProps {
   user?: User;
-  onSuccess?: () => void;
+  onSuccess?: (role?: string) => void; // Updated to accept a role parameter
   onCancel?: () => void;
 }
 
@@ -39,8 +39,8 @@ export interface UsersPageProps {
   name: string;
   sub?: string;
   // optional flags used by list pages to enable actions/UI
-  create?: boolean;
   edit?: boolean;
+  restore?: boolean;
   remove?: boolean;
   delete?: boolean;
 }

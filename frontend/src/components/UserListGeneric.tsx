@@ -12,8 +12,8 @@ export const UserListGeneric = ({
   name: nameTitle,
   role,
   TableComponent,
-  pageCreateLabel,
   edit,
+  restore: res,
   remove: canRemove,
   delete: canDelete,
 }) => {
@@ -38,7 +38,7 @@ export const UserListGeneric = ({
 
   return (
     <>
-      <NavHeader name={nameTitle} pageCreate={pageCreateLabel} />
+      <NavHeader name={nameTitle} />
       {status === "loading" && <Spinner />}
       {status === "succeeded" && userList.length === 0 && (
         <div className="wrapper wrapper-content">
@@ -75,6 +75,7 @@ export const UserListGeneric = ({
                   <TableComponent
                     users={userList}
                     edit={edit}
+                    restore={res}
                     remove={canRemove}
                     delete={canDelete}
                   />

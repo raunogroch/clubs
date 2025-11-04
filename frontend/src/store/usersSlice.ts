@@ -143,6 +143,15 @@ const usersSlice = createSlice({
       const index = state.users.data.findIndex((u) => u._id === action.payload);
       if (index >= 0) {
         state.users.data[index].active = false; // Mark user as inactive
+
+        // Check current user's role
+        const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+        if (currentUser.role !== "superadmin") {
+          // Remove inactive user from the list if not superadmin
+          state.users.data = state.users.data.filter(
+            (u) => u._id !== action.payload
+          );
+        }
       }
     });
     builder.addCase(softDeleteUser.rejected, (state, action) => {

@@ -1,16 +1,22 @@
 import type { UsersPageProps } from "../../../interfaces";
 import { UserListGeneric } from "../../../components/UserListGeneric";
-import { ParentTable } from ".";
+import { ParentTable } from "./ParentTable";
 
-export const Parents = ({ name, edit, delete: canDelete, create }: UsersPageProps) => (
+export const Parents = ({
+  name,
+  edit,
+  restore,
+  delete: del, // Renamed to avoid reserved keyword conflict
+  remove,
+}: UsersPageProps & { remove?: boolean }) => (
   <UserListGeneric
     name={name}
     TableComponent={ParentTable}
     role="parent"
-    pageCreateLabel={create ? "Nuevo padre" : undefined}
-    // pass action flags so the table can enable/disable edit/delete links
     edit={edit}
-    delete={canDelete}
+    restore={restore}
+    delete={del}
+    remove={remove}
   />
 );
 
