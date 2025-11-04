@@ -7,6 +7,11 @@ export interface IGroup {
   place: string;
   coaches: User[];
   athletes: User[];
+  images: {
+    small: string;
+    medium: string;
+    large: string;
+  };
   active: boolean;
 }
 

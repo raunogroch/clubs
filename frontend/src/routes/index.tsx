@@ -65,7 +65,7 @@ export const roleRoutes: RoleRoutes = {
         {
           path: "/users/create",
           icon: "fa-user-plus",
-          label: "Crear usuario",
+          label: "Nuevo usuario",
           element: <UserNew name="Registros" sub="Crear" />,
         },
         {
@@ -230,7 +230,7 @@ export const roleRoutes: RoleRoutes = {
         {
           path: "/users/create",
           icon: "fa-user-plus",
-          label: "Crear usuario",
+          label: "Nuevo usuario",
           element: <UserNew name="Registros" sub="Crear" />,
         },
         {
@@ -375,7 +375,7 @@ export const roleRoutes: RoleRoutes = {
         {
           path: "/users/create",
           icon: "fa-user-plus",
-          label: "Crear",
+          label: "Nuevo usuario",
           element: <UserNew name="Registros" sub="Crear" />,
         },
         {
@@ -387,8 +387,8 @@ export const roleRoutes: RoleRoutes = {
         {
           path: "/users/athlete",
           icon: "fa-user-circle-o",
-          label: "Deportistas",
-          element: <Athletes name="Deportistas" edit />,
+          label: "Atletas",
+          element: <Athletes name="Atletas" edit />,
         },
       ],
     },

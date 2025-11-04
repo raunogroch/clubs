@@ -110,15 +110,19 @@ export const Groups = ({
                           <small>Created 14.08.2014</small>
                         </td>
                         <td className="project-people">
-                          {group.athletes.map((a: any, idx: number) => (
-                            <Image
-                              key={idx}
-                              alt="image"
-                              className="rounded-circle"
-                              src={a.image}
-                              style={{ marginRight: "5px" }}
-                            />
-                          ))}
+                          {group.athletes.map((a: any, idx: number) =>
+                            a.images?.small ? (
+                              <Image
+                                key={idx}
+                                alt="image"
+                                className="rounded-circle"
+                                src={a.images.small}
+                                style={{ marginRight: "5px" }}
+                              />
+                            ) : (
+                              "sin imagen"
+                            )
+                          )}
                         </td>
                         <td className="project-actions">
                           {registerAthlete && group.active && (
