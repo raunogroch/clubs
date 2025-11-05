@@ -92,7 +92,7 @@ export const GenericUserTable = ({
           <tr>
             <th className="text-center">ID</th>
             {showRole && <th>Roles</th>}
-            <th>Cedula de Identidad</th>
+            <th>Carnet</th>
             <th>Nombres</th>
             <th>Apellidos</th>
             <th className="text-center">Acciones</th>

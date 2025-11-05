@@ -36,7 +36,8 @@ export const Groups = ({
     if (clubId) dispatch(fetchGroups({ clubId })).unwrap();
   }, [dispatch, clubId]);
 
-  const handleDelete = async (groupId?: string) => {
+  const handleDelete = async (e, groupId?: string) => {
+    e.preventDefault();
     if (!groupId || !clubId) return;
     swal({
       title: "¿Estás seguro?",
@@ -125,10 +126,27 @@ export const Groups = ({
                           )}
                         </td>
                         <td className="project-actions">
+                          {edit && (
+                            <Link
+                              to={`/clubs/${clubId}/groups/${group._id}`}
+                              className="text-warning m-r-sm"
+                            >
+                              <i className="fa fa-pencil"></i> Edit
+                            </Link>
+                          )}
+                          {canDelete && group.active && (
+                            <Link
+                              to="#"
+                              className="text-danger  m-r-sm"
+                              onClick={() => handleDelete(group._id)}
+                            >
+                              <i className="fa fa-trash"></i> Eliminar
+                            </Link>
+                          )}
                           {registerAthlete && group.active && (
                             <Link
                               to={`/clubs/${clubId}/groups/register-athlete/${group._id}`}
-                              className="btn btn-success btn-sm m-r-sm"
+                              className="text-primary m-r-sm"
                             >
                               <i className="fa fa-list"></i> Atletas
                             </Link>
@@ -136,26 +154,10 @@ export const Groups = ({
                           {registerCoach && group.active && (
                             <Link
                               to={`/clubs/${clubId}/groups/register-coach/${group._id}`}
-                              className="btn btn-outline-success btn-sm m-r-sm"
+                              className="text-success m-r-sm"
                             >
                               <i className="fa fa-list"></i> Entrenadores
                             </Link>
-                          )}
-                          {edit && (
-                            <Link
-                              to={`/clubs/${clubId}/groups/${group._id}`}
-                              className="btn btn-white btn-sm m-r-sm"
-                            >
-                              <i className="fa fa-pencil"></i> Edit
-                            </Link>
-                          )}
-                          {canDelete && group.active && (
-                            <button
-                              className="btn btn-outline-danger btn-sm  m-r-sm"
-                              onClick={() => handleDelete(group._id)}
-                            >
-                              <i className="fa fa-trash"></i> Eliminar
-                            </button>
                           )}
                         </td>
                       </tr>

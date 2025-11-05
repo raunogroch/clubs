@@ -83,26 +83,12 @@ export const ClubList = ({ clubs, edit, delete: canDelete }: ClubProps) => {
               <td className="project-actions text-center align-middle">
                 {club.active ? (
                   <>
-                    <Link
-                      to={`/clubs/${club._id}/groups`}
-                      className="text-primary m-2"
-                    >
-                      <i className="fa fa-eye"></i> Grupos
-                    </Link>
                     {edit && (
                       <Link
                         to={`/clubs/edit/${club._id}`}
                         className="text-success m-2"
                       >
                         <i className="fa fa-edit"></i> Editar
-                      </Link>
-                    )}
-                    {edit && (
-                      <Link
-                        to={`/clubs/${club._id}/assign-assistants`}
-                        className="text-info m-2"
-                      >
-                        <i className="fa fa-user-plus"></i> Asignar
                       </Link>
                     )}
                     {canDelete && (
@@ -115,6 +101,20 @@ export const ClubList = ({ clubs, edit, delete: canDelete }: ClubProps) => {
                         className="text-danger m-2"
                       >
                         <i className="fa fa-trash"></i> Eliminar
+                      </Link>
+                    )}
+                    <Link
+                      to={`/clubs/${club._id}/groups`}
+                      className="text-primary m-2"
+                    >
+                      <i className="fa fa-eye"></i> Grupos
+                    </Link>
+                    {edit && (
+                      <Link
+                        to={`/clubs/${club._id}/assign-assistants`}
+                        className="text-info m-2"
+                      >
+                        <i className="fa fa-user-plus"></i> Entrenadores
                       </Link>
                     )}
                   </>

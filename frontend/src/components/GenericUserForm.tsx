@@ -122,7 +122,7 @@ export const GenericUserForm = ({
 
         <div className="form-group row">
           <label htmlFor="ci" className="col-sm-2 col-form-label">
-            Cedula de identidad
+            Carnet
           </label>
           <div className="col-sm-10">
             <Input
