@@ -96,3 +96,16 @@ export const assignAssistants = createAsyncThunk<
     }
   }
 );
+
+export const softDeleteClub = createAsyncThunk<string, string>(
+  "clubs/softDeleteClub",
+  async (id, { rejectWithValue }) => {
+    try {
+      // Soft delete: mark Club as inactive
+      await api.patch(`/clubs/${id}/remove`);
+      return id;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data || "Error al desactivar club");
+    }
+  }
+);

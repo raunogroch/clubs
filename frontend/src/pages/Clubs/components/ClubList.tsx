@@ -2,7 +2,11 @@ import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import swal from "sweetalert";
 import { Image } from "../../../components";
-import { deleteClub, restoreClub } from "../../../store/clubsThunks";
+import {
+  deleteClub,
+  restoreClub,
+  softDeleteClub,
+} from "../../../store/clubsThunks";
 import type { AppDispatch } from "../../../store/store";
 import type { Club } from "../interfaces";
 
@@ -10,23 +14,49 @@ interface ClubProps {
   clubs: Club[];
   edit?: boolean;
   delete?: boolean;
+  remove?: boolean;
 }
 
-export const ClubList = ({ clubs, edit, delete: canDelete }: ClubProps) => {
+export const ClubList = ({
+  clubs,
+  edit,
+  remove: canRemove,
+  delete: canDelete,
+}: ClubProps) => {
   const dispatch = useDispatch<AppDispatch>();
+
+  const handleRemove = async (id?: string) => {
+    if (!id) return;
+    swal({
+      title: "¿Estás seguro?",
+      text: "¡El club será desactivado y no estará disponible!",
+      icon: "warning",
+      buttons: ["Cancelar", "Sí, desactivar!"],
+      dangerMode: true,
+    }).then((willRemove) => {
+      if (willRemove) {
+        dispatch(softDeleteClub(id)).unwrap();
+        swal("Desactivado!", "El club ha sido desactivado.", "success");
+      }
+    });
+  };
 
   const handleDelete = async (id?: string) => {
     if (!id) return;
     swal({
       title: "¿Estás seguro?",
-      text: "¡No podrás recuperar este club!",
+      text: "¡El club será eliminado permanentemente de la base de datos!",
       icon: "warning",
       buttons: ["Cancelar", "Sí, eliminar!"],
       dangerMode: true,
     }).then((willDelete) => {
       if (willDelete) {
         dispatch(deleteClub(id)).unwrap();
-        swal("Eliminado!", "El club ha sido eliminado.", "success");
+        swal(
+          "Eliminado!",
+          "El club ha sido eliminado permanentemente.",
+          "success"
+        );
       }
     });
   };
@@ -91,6 +121,18 @@ export const ClubList = ({ clubs, edit, delete: canDelete }: ClubProps) => {
                         <i className="fa fa-edit"></i> Editar
                       </Link>
                     )}
+                    {canRemove && (
+                      <Link
+                        to="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleRemove(club._id!);
+                        }}
+                        className="text-danger m-2"
+                      >
+                        <i className="fa fa-trash-o"></i> Remover
+                      </Link>
+                    )}
                     {canDelete && (
                       <Link
                         to="#"
@@ -109,14 +151,6 @@ export const ClubList = ({ clubs, edit, delete: canDelete }: ClubProps) => {
                     >
                       <i className="fa fa-eye"></i> Grupos
                     </Link>
-                    {edit && (
-                      <Link
-                        to={`/clubs/${club._id}/assign-assistants`}
-                        className="text-info m-2"
-                      >
-                        <i className="fa fa-user-plus"></i> Entrenadores
-                      </Link>
-                    )}
                   </>
                 ) : (
                   <Link

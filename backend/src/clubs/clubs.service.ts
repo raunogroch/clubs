@@ -89,13 +89,37 @@ export class ClubsService {
 
   async remove(id: string): Promise<Club | null> {
     await this.clubValidator.validateExistence(id);
+
+    await this.deleteAssociatedGroups(id);
+
     const club = await this.clubRepository.findById(id);
     if (!club) return null;
-    const deleted = await this.clubRepository.deleteById(id);
-    return deleted;
+
+    await this.deleteClubImages(club);
+
+    return await this.clubRepository.deleteById(id);
+  }
+
+  private async deleteAssociatedGroups(clubId: string): Promise<void> {
+    const groupsService = this.userModel.db.model('Group');
+    await groupsService.deleteMany({ clubId });
+  }
+
+  private async deleteClubImages(club: Club): Promise<void> {
+    if (!club.images || !club.images.small) return;
+
+    const folder = this.folder;
+    const imagePath = club.images.small.replace('/images/clubs/', '');
+
+    await this.clubImageService.deleteImage(folder, imagePath);
   }
 
   async restore(id: string): Promise<Club | null> {
     return this.clubRepository.updateById(id, { active: true } as Club);
+  }
+
+  async softRemove(id: string): Promise<Club | null> {
+    await this.clubValidator.validateExistence(id);
+    return this.clubRepository.updateById(id, { active: false } as Club);
   }
 }

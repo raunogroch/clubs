@@ -11,6 +11,7 @@ interface ClubsProps {
   name?: string;
   create?: boolean;
   edit?: boolean;
+  remove?: boolean;
   delete?: boolean;
 }
 
@@ -18,6 +19,7 @@ export const Clubs = ({
   name,
   create,
   edit,
+  remove: canRemove,
   delete: canDelete,
 }: ClubsProps) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -52,7 +54,12 @@ export const Clubs = ({
                   <h5>Lista de clubs</h5>
                 </div>
                 <div className="ibox-content">
-                  <ClubList clubs={clubs} edit={edit} delete={canDelete} />
+                  <ClubList
+                    clubs={clubs}
+                    edit={edit}
+                    remove={canRemove}
+                    delete={canDelete}
+                  />
                 </div>
               </div>
             </div>

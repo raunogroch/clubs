@@ -7,6 +7,8 @@ import {
   updateClub,
   findClubById,
   assignAssistants,
+  softDeleteClub,
+  restoreClub,
 } from "./clubsThunks";
 
 interface ClubsState {
@@ -83,7 +85,7 @@ const clubsSlice = createSlice({
     });
     builder.addCase(deleteClub.fulfilled, (state, action) => {
       state.status = "succeeded";
-      state.clubs = state.clubs.filter((u) => u._id !== action.payload);
+      state.clubs = state.clubs.filter((u) => u._id !== action.payload); // Remove club from the list
     });
     builder.addCase(deleteClub.rejected, (state, action) => {
       state.status = "failed";
@@ -119,6 +121,43 @@ const clubsSlice = createSlice({
       }
     });
     builder.addCase(assignAssistants.rejected, (state, action) => {
+      state.status = "failed";
+      state.error = action.payload as string;
+    });
+
+    // SOFT DELETE
+    builder.addCase(softDeleteClub.pending, (state) => {
+      state.status = "loading";
+    });
+    builder.addCase(softDeleteClub.fulfilled, (state, action) => {
+      state.status = "succeeded";
+      const index = state.clubs.findIndex((u) => u._id === action.payload);
+      if (index >= 0) {
+        state.clubs[index].active = false; // Mark club as inactive
+
+        // Check current user's role
+        const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+        if (currentUser.role !== "superadmin") {
+          // Remove inactive club from the list if not superadmin
+          state.clubs.splice(index, 1);
+        }
+      }
+    });
+    builder.addCase(softDeleteClub.rejected, (state, action) => {
+      state.status = "failed";
+      state.error = action.payload as string;
+    });
+
+    // RESTORE
+    builder.addCase(restoreClub.pending, (state) => {
+      state.status = "loading";
+    });
+    builder.addCase(restoreClub.fulfilled, (state, action) => {
+      state.status = "succeeded";
+      const index = state.clubs.findIndex((u) => u._id === action.payload._id);
+      if (index >= 0) state.clubs[index] = action.payload as Club;
+    });
+    builder.addCase(restoreClub.rejected, (state, action) => {
       state.status = "failed";
       state.error = action.payload as string;
     });

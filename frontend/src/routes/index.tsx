@@ -110,7 +110,7 @@ export const roleRoutes: RoleRoutes = {
       path: "/clubs",
       icon: "fa-diamond",
       label: "Clubes",
-      element: <Clubs name="Clubes" create edit delete />,
+      element: <Clubs name="Clubes" create edit remove delete />,
     },
     {
       path: "/clubs/:id/assign-assistants",

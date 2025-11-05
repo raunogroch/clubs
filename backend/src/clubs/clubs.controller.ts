@@ -88,4 +88,13 @@ export class ClubsController {
   async restore(@Param('id') id: string) {
     return this.clubsService.restore(id);
   }
+
+  /**
+   * Endpoint para desactivar un club (soft delete)
+   */
+  @Patch(':id/remove')
+  @Roles(Role.SUPERADMIN)
+  async softRemove(@Param('id') id: string) {
+    return this.clubsService.softRemove(id);
+  }
 }
