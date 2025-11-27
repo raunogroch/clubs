@@ -1,5 +1,9 @@
 // Servicio para procesamiento de imágenes de usuario
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  ServiceUnavailableException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { HttpService } from '../common/http/http.service';
 
 const IMAGE_PROCESSOR_API =
@@ -24,9 +28,15 @@ export class ImageService {
           image: imageBase64,
         });
         return response.data; // Return all resolutions
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error delegating image processing:', error);
-        throw new Error('Image processing failed');
+        // If the image-processor (external service) is not available, return a clear 503
+        if (error?.code === 'ECONNREFUSED') {
+          throw new ServiceUnavailableException(
+            `Image processor service unavailable: ${IMAGE_PROCESSOR_API}`,
+          );
+        }
+        throw new InternalServerErrorException('Image processing failed');
       }
     }
     return undefined;
@@ -40,9 +50,14 @@ export class ImageService {
         folder,
         imagePath,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error delegating image deletion:', error);
-      throw new Error('Image deletion failed');
+      if (error?.code === 'ECONNREFUSED') {
+        throw new ServiceUnavailableException(
+          `Image processor service unavailable: ${IMAGE_PROCESSOR_API}`,
+        );
+      }
+      throw new InternalServerErrorException('Image deletion failed');
     }
   }
 }

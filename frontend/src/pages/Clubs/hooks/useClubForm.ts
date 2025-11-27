@@ -54,11 +54,23 @@ export const useClubForm = (initialData?: Club) => {
     if (!validateForm()) return false;
     try {
       if (initialData?._id) {
-        await dispatch(updateClub(formData)).unwrap();
-        toastr.success("Club actualizado con exito");
+        const result: any = await dispatch(updateClub(formData)).unwrap();
+        if (result && result.imageProcessingSkipped) {
+          toastr.warning(
+            "Club actualizado, pero la imagen no pudo procesarse (servicio de imágenes no disponible)"
+          );
+        } else {
+          toastr.success("Club actualizado con exito");
+        }
       } else {
-        await dispatch(createClub(formData)).unwrap();
-        toastr.success("Club creado con exito");
+        const result: any = await dispatch(createClub(formData)).unwrap();
+        if (result && result.imageProcessingSkipped) {
+          toastr.warning(
+            "Club creado, pero la imagen no pudo procesarse (servicio de imágenes no disponible)"
+          );
+        } else {
+          toastr.success("Club creado con exito");
+        }
       }
       return true;
     } catch (error) {

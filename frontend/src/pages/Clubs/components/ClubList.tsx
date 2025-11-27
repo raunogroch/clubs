@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import swal from "sweetalert";
 import { Image } from "../../../components";
+import ClubImageModal from "./ClubImageModal";
 import {
   deleteClub,
   restoreClub,
@@ -24,6 +26,8 @@ export const ClubList = ({
   delete: canDelete,
 }: ClubProps) => {
   const dispatch = useDispatch<AppDispatch>();
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [selectedClub, setSelectedClub] = useState<Club | null>(null);
 
   const handleRemove = async (id?: string) => {
     if (!id) return;
@@ -85,13 +89,43 @@ export const ClubList = ({
             <tr key={index}>
               <td className="project-status text-center align-middle">
                 {club.images ? (
-                  <Image
-                    src={club.images.small}
-                    alt={club.name}
-                    style={{ width: "50px", borderRadius: "50%" }}
-                  />
+                  <div
+                    style={{ position: "relative", display: "inline-block" }}
+                  >
+                    <div
+                      onClick={() => {
+                        setSelectedClub(club);
+                        setImageModalOpen(true);
+                      }}
+                      style={{ cursor: "pointer", display: "inline-block" }}
+                    >
+                      <Image
+                        src={club.images.small}
+                        alt={club.name}
+                        style={{ width: "50px", borderRadius: "50%" }}
+                      />
+                    </div>
+                    <button
+                      className="btn btn-xs btn-rounded btn-danger"
+                      style={{ position: "absolute", right: -8, bottom: -8 }}
+                      onClick={() => {
+                        setSelectedClub(club);
+                        setImageModalOpen(true);
+                      }}
+                    >
+                      <i className="fa fa-edit"></i>
+                    </button>
+                  </div>
                 ) : (
-                  "sin logo"
+                  <span
+                    className="btn btn-outline-danger btn-rounded"
+                    onClick={() => {
+                      setSelectedClub(club);
+                      setImageModalOpen(true);
+                    }}
+                  >
+                    sin logo
+                  </span>
                 )}
               </td>
               <td className="project-title text-center align-middle">
@@ -169,6 +203,17 @@ export const ClubList = ({
           ))}
         </tbody>
       </table>
+
+      <ClubImageModal
+        open={imageModalOpen}
+        club={selectedClub}
+        onClose={() => {
+          setImageModalOpen(false);
+          setSelectedClub(null);
+        }}
+      />
     </div>
   );
 };
+
+export default ClubList;

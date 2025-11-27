@@ -1,5 +1,9 @@
 // Servicio para la gestión de usuarios
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { User } from './schemas/user.schema';
 import { Roles } from './enum/roles.enum';
 import { CreateUserDto, UpdateUserDto } from './dto';
@@ -50,16 +54,35 @@ export class UsersService {
    * Crea un nuevo usuario si el username no existe previamente
    * SRP: validación, imagen y password delegados a servicios
    */
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: CreateUserDto): Promise<any> {
     await this.userValidator.validateUniqueUsername(createUserDto.username);
-    createUserDto.images = (await this.userImageService.processImage(
-      this.folder,
-      createUserDto.image,
-    )) as { small: string; medium: string; large: string };
+    let imageProcessingSkipped = false;
+    try {
+      createUserDto.images = (await this.userImageService.processImage(
+        this.folder,
+        createUserDto.image,
+      )) as { small: string; medium: string; large: string };
+    } catch (error: any) {
+      if (error && error.getStatus && error.getStatus() === 503) {
+        console.warn(
+          'Image processor service unavailable; creating user without images',
+        );
+        imageProcessingSkipped = true;
+      } else {
+        throw error;
+      }
+    }
     createUserDto.password = await this.userPasswordService.hashPassword(
       createUserDto.password,
     );
-    return this.userRepository.create(createUserDto);
+    const created = await this.userRepository.create(createUserDto);
+    if (imageProcessingSkipped) {
+      return {
+        ...((created as any).toObject?.() ?? created),
+        imageProcessingSkipped: true,
+      };
+    }
+    return created;
   }
 
   /**
@@ -163,17 +186,37 @@ export class UsersService {
    * Actualiza los datos de un usuario
    * SRP: imagen y password delegados a servicios
    */
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User | null> {
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<any | null> {
     if (updateUserDto.password) {
       updateUserDto.password = await this.userPasswordService.hashPassword(
         updateUserDto.password,
       );
     }
-    updateUserDto.images = await this.userImageService.processImage(
-      this.folder,
-      updateUserDto.image,
-    );
-    return this.userRepository.updateById(id, updateUserDto);
+    let imageProcessingSkipped = false;
+    try {
+      updateUserDto.images = await this.userImageService.processImage(
+        this.folder,
+        updateUserDto.image,
+      );
+    } catch (error: any) {
+      if (error && error.getStatus && error.getStatus() === 503) {
+        console.warn(
+          'Image processor service unavailable; updating user without changing images',
+        );
+        imageProcessingSkipped = true;
+      } else {
+        throw error;
+      }
+    }
+    const updated = await this.userRepository.updateById(id, updateUserDto);
+    if (!updated) return null;
+    if (imageProcessingSkipped) {
+      return {
+        ...((updated as any).toObject?.() ?? updated),
+        imageProcessingSkipped: true,
+      };
+    }
+    return updated;
   }
 
   /**

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { Roles } from 'src/users/enum/roles.enum';
 import { CreateClubDto } from './dto/create-club.dto';
 import { UpdateClubDto } from './dto/update-club.dto';
@@ -21,13 +25,33 @@ export class ClubsService {
 
   folder = 'clubs';
 
-  async create(createClubDto: CreateClubDto): Promise<Club> {
-    createClubDto.images = await this.clubImageService.processImage(
-      this.folder,
-      (createClubDto as any).image,
-    );
+  async create(createClubDto: CreateClubDto): Promise<any> {
+    let imageProcessingSkipped = false;
+    try {
+      createClubDto.images = await this.clubImageService.processImage(
+        this.folder,
+        (createClubDto as any).image,
+      );
+    } catch (error: any) {
+      // If the image-processor service is unavailable, log and continue without images
+      if (error && error.getStatus && error.getStatus() === 503) {
+        console.warn(
+          'Image processor service unavailable; creating club without images',
+        );
+      } else {
+        throw error;
+      }
+    }
     await this.clubValidator.validateUniqueName(createClubDto.name);
-    return this.clubRepository.create(createClubDto);
+    const created = await this.clubRepository.create(createClubDto);
+    if (imageProcessingSkipped) {
+      // Return object with extra flag to indicate image processing was skipped
+      return {
+        ...((created as any).toObject?.() ?? created),
+        imageProcessingSkipped: true,
+      };
+    }
+    return created;
   }
 
   async findAll(requestingUser?: {
@@ -76,15 +100,35 @@ export class ClubsService {
     return this.clubRepository.findById(id);
   }
 
-  async update(id: string, updateClubDto: UpdateClubDto): Promise<Club | null> {
+  async update(id: string, updateClubDto: UpdateClubDto): Promise<any | null> {
+    let imageProcessingSkipped = false;
     if ((updateClubDto as any).image) {
-      updateClubDto.images = await this.clubImageService.processImage(
-        this.folder,
-        (updateClubDto as any).image,
-      );
+      try {
+        updateClubDto.images = await this.clubImageService.processImage(
+          this.folder,
+          (updateClubDto as any).image,
+        );
+      } catch (error: any) {
+        if (error && error.getStatus && error.getStatus() === 503) {
+          console.warn(
+            'Image processor service unavailable; updating club without changing images',
+          );
+          imageProcessingSkipped = true;
+        } else {
+          throw error;
+        }
+      }
     }
     await this.clubValidator.validateExistence(id);
-    return this.clubRepository.updateById(id, updateClubDto);
+    const updated = await this.clubRepository.updateById(id, updateClubDto);
+    if (!updated) return null;
+    if (imageProcessingSkipped) {
+      return {
+        ...((updated as any).toObject?.() ?? updated),
+        imageProcessingSkipped: true,
+      };
+    }
+    return updated;
   }
 
   async remove(id: string): Promise<Club | null> {
