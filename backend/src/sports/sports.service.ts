@@ -3,13 +3,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { Roles } from 'src/users/enum/roles.enum';
 import { CreateSportDto } from './dto/create-sport.dto';
 import { UpdateSportDto } from './dto/update-sport.dto';
 import { Sport } from './schemas/sport.schemas';
 import type { ISportRepository } from './repository/sport.repository.interface';
 import { Inject } from '@nestjs/common';
 import { SportValidatorService } from './sport-validator.service';
-import { Roles } from 'src/users/enum/roles.enum';
 
 @Injectable()
 export class SportsService {
@@ -35,7 +35,7 @@ export class SportsService {
     let sports = await this.sportRepository.findAll();
 
     if (!requestingUser || requestingUser.role !== Roles.SUPERADMIN) {
-      sports = sports.filter((s) => s.active === true);
+      sports = sports.filter((s) => (s as any).active === true);
     }
 
     return sports;
@@ -75,10 +75,21 @@ export class SportsService {
     // 3. Actualizar el deporte
     return this.sportRepository.updateById(id, updateSportDto);
   }
+
   /**
    * Elimina un deporte por su ID
+   * Lanza una excepción si el deporte está vinculado a algún club
    */
   async remove(id: string): Promise<Sport | null> {
+    // Verificar si el deporte está vinculado a algún club
+    const isLinked = await this.sportRepository.isLinkedToAnyClub(id);
+    if (isLinked) {
+      throw new ConflictException(
+        'No se puede eliminar un deporte vinculado a un club',
+      );
+    }
+
+    // Validar existencia y eliminar
     await this.sportValidator.validateExistence(id);
     return this.sportRepository.deleteById(id);
   }
@@ -87,6 +98,16 @@ export class SportsService {
    * Restaurar (reactivar) un deporte previamente desactivado
    */
   async restore(id: string): Promise<Sport | null> {
-    return this.sportRepository.updateById(id, { active: true } as Sport);
+    await this.sportValidator.validateExistence(id);
+    // Use updateById to mark the sport as active again
+    return this.sportRepository.updateById(id, { active: true } as any);
+  }
+
+  /**
+   * Marca un deporte como inactivo (soft delete)
+   */
+  async softRemove(id: string): Promise<Sport | null> {
+    await this.sportValidator.validateExistence(id);
+    return this.sportRepository.updateById(id, { active: false } as any);
   }
 }

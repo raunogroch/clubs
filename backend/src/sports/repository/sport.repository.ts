@@ -49,6 +49,16 @@ export class SportRepository implements ISportRepository {
   }
 
   async deleteById(id: string): Promise<Sport | null> {
-    return this.sportModel.findByIdAndUpdate(id, { active: false }, { new: true });
+    return this.sportModel.findByIdAndDelete(id, { new: true });
+  }
+
+  /**
+   * Verifica si un deporte está vinculado a algún club
+   */
+  async isLinkedToAnyClub(sportId: string): Promise<boolean> {
+    const linkedClub = await this.sportModel.db
+      .collection('clubs')
+      .findOne({ sport: sportId });
+    return !!linkedClub;
   }
 }

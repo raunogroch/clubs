@@ -18,10 +18,14 @@ export const SportTable = ({ sports }: SportTableProps) => {
       icon: "warning",
       buttons: ["Cancelar", "Sí, eliminar!"],
       dangerMode: true,
-    }).then((willDelete) => {
+    }).then(async (willDelete) => {
       if (willDelete) {
-        dispatch(deleteSport(id)).unwrap();
-        swal("Eliminado!", "El deporte ha sido eliminado.", "success");
+        try {
+          await dispatch(deleteSport(id)).unwrap();
+          swal("Eliminado!", "El deporte ha sido eliminado.", "success");
+        } catch (error: any) {
+          swal("Error!", error || "No se pudo eliminar el deporte.", "error");
+        }
       }
     });
   };

@@ -5,7 +5,6 @@ import {
   deleteSport,
   updateSport,
   findSportById,
-  restoreSport,
 } from "./sportsThunks";
 import type { Sport } from "../pages/Sports/interfaces";
 
@@ -86,20 +85,6 @@ const sportsSlice = createSlice({
       state.sports = state.sports.filter((u) => u._id !== action.payload);
     });
     builder.addCase(deleteSport.rejected, (state, action) => {
-      state.status = "failed";
-      state.error = action.payload as string;
-    });
-
-    // RESTORE
-    builder.addCase(restoreSport.pending, (state) => {
-      state.status = "loading";
-    });
-    builder.addCase(restoreSport.fulfilled, (state, action) => {
-      state.status = "succeeded";
-      const index = state.sports.findIndex((u) => u._id === action.payload._id);
-      if (index >= 0) state.sports[index] = action.payload as Sport;
-    });
-    builder.addCase(restoreSport.rejected, (state, action) => {
       state.status = "failed";
       state.error = action.payload as string;
     });

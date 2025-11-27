@@ -49,9 +49,9 @@ export const deleteSport = createAsyncThunk<string, string>(
       await api.delete(`/sports/${id}`);
       return id;
     } catch (err: any) {
-      return rejectWithValue(
-        err.response?.data || "Error al eliminar disciplina"
-      );
+      const errorMessage =
+        err.response?.data?.message || "Error al eliminar disciplina";
+      return rejectWithValue(errorMessage);
     }
   }
 );

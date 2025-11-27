@@ -10,4 +10,8 @@ export interface ISportRepository {
   findById(id: string): Promise<Sport | null>;
   updateById(id: string, updateSportDto: UpdateSportDto): Promise<Sport | null>;
   deleteById(id: string): Promise<Sport | null>;
+  /**
+   * Verifica si un deporte está vinculado a algún club
+   */
+  isLinkedToAnyClub(sportId: string): Promise<boolean>;
 }
