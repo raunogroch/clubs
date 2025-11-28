@@ -18,9 +18,9 @@ export const DashboardAthlete = ({ name }: pageParamProps) => {
                 <Link className="row" to="profile.html">
                   <div className="col-4">
                     <div className="text-center">
-                      {club.image ? (
+                      {(club as any)?.images?.small || club.image ? (
                         <Image
-                          src={club.image}
+                          src={(club as any)?.images?.small || club.image}
                           alt={club._id}
                           className="img-fluid rounded-circle"
                           style={{ width: "100%" }}

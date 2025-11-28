@@ -55,7 +55,8 @@ export class AuthService {
           name: user.name,
           lastname: user.lastname,
           role: user.role,
-          image: user.image,
+          // Return the images object (preferred) - keep backward compatibility by including image? not included
+          images: (user as any)?.images || undefined,
         },
       },
     };

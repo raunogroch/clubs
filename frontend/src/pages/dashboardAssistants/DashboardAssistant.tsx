@@ -42,7 +42,9 @@ export const DashboardAssistant = ({ name }: pageParamProps) => {
                     <div className="row">
                       <div className="col-md-2 text-center">
                         <Image
-                          src={data.club.image}
+                          src={
+                            (data.club as any)?.images?.small || data.club.image
+                          }
                           alt={data.club.name}
                           className="rounded-circle"
                           width="70%"
@@ -85,6 +87,7 @@ export const DashboardAssistant = ({ name }: pageParamProps) => {
                                       <div className="d-flex align-items-center">
                                         <Image
                                           src={
+                                            (athlete as any)?.images?.small ||
                                             athlete.image ||
                                             "/public/no-image.jpg"
                                           }

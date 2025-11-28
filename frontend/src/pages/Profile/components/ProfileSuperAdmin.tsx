@@ -38,9 +38,9 @@ export const ProfileSuperAdmin = ({ name }: pageParamProps) => {
           <div className="row m-b-lg m-t-lg">
             <div className="col-md-4 text-center">
               <div className="profile-image mb-3">
-                {user?.image ? (
+                {(user as any)?.images?.small || user?.image ? (
                   <Image
-                    src={user.image}
+                    src={(user as any)?.images?.small || user?.image}
                     className="rounded-circle circle-border m-b-md"
                     alt="profile"
                     style={{

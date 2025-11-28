@@ -1,23 +1,18 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import React, { useState } from "react";
+import React from "react";
 import { Image } from "../components";
 import { Role } from "../interfaces";
 import { roleRoutes } from "../routes";
 import { useDispatch, useSelector } from "react-redux";
-import { logout as logoutAction, setUser } from "../store/authSlice";
+import { logout as logoutAction } from "../store/authSlice";
 import type { AppDispatch, RootState } from "../store/store";
-import ImageUploadModal from "../components/ImageUploadModal";
-import { updateUser } from "../store/usersThunks";
 
 export const SideNav = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const [imageModalOpen, setImageModalOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-
   const user = useSelector((state: RootState) => state.auth.user);
 
-  // Logout eficiente y seguro
   const handleLogout = async (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     try {
@@ -36,7 +31,6 @@ export const SideNav = () => {
 
   const role = user?.role || "";
   const menuItems = roleRoutes[role] || [];
-
   const [openMenus, setOpenMenus] = React.useState<{ [key: string]: boolean }>(
     {}
   );
@@ -73,7 +67,6 @@ export const SideNav = () => {
     setOpenMenus((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Renderizado recursivo de los items del menú
   function renderMenuItems(
     items: Array<(typeof menuItems)[0]>,
     parentKey = ""
@@ -110,7 +103,6 @@ export const SideNav = () => {
             </li>
           );
         }
-
         return (
           <li key={key} className={isActive(item.path) ? "active" : ""}>
             <Link to={item.path}>
@@ -134,13 +126,12 @@ export const SideNav = () => {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      setImageModalOpen(true);
                     }}
                     style={{ cursor: "pointer" }}
                   >
-                    {user.image ? (
+                    {(user as any)?.images?.small ? (
                       <Image
-                        src={user.image}
+                        src={(user as any)?.images?.small}
                         alt="image"
                         className="rounded-circle"
                         style={{ width: 48, height: 48 }}
@@ -158,11 +149,11 @@ export const SideNav = () => {
               <Link data-toggle="dropdown" className="dropdown-toggle" to="#">
                 <span className="block m-t-xs font-bold">
                   {user
-                    ? `${user.name} ${user.lastname}`
+                    ? `${(user as any).name} ${(user as any).lastname}`
                     : "Superadministrador"}
                 </span>
                 <span className="text-muted text-xs block">
-                  {Role[user.role]} <b className="caret"></b>
+                  {Role[(user as any)?.role]} <b className="caret"></b>
                 </span>
               </Link>
               <ul className="dropdown-menu animated fadeInRight m-t-xs">
@@ -184,30 +175,8 @@ export const SideNav = () => {
           {renderMenuItems(menuItems)}
         </ul>
       </div>
-      <ImageUploadModal
-        open={imageModalOpen}
-        title="Actualizar imagen"
-        entityName={user ? `${user.name} ${user.lastname}` : ""}
-        currentImage={
-          (user as any)?.image || (user as any)?.images?.small || ""
-        }
-        onClose={() => setImageModalOpen(false)}
-        onSave={async (imageBase64?: string) => {
-          if (!user) return null;
-          const payload: any = { ...(user as any) };
-          if (imageBase64) payload.image = imageBase64;
-          else delete payload.image;
-          // Solo enviar password si fue modificada manualmente
-          if (!payload.password || payload.password === "") {
-            delete payload.password;
-          }
-          const res: any = await dispatch(updateUser(payload)).unwrap();
-          if (res && (res as any)._id === (user as any)._id) {
-            dispatch(setUser(res));
-          }
-          return res;
-        }}
-      />
     </nav>
   );
 };
+
+export default SideNav;
