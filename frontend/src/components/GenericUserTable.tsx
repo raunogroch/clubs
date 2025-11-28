@@ -1,8 +1,12 @@
 import { Link } from "react-router-dom";
+import { Image } from ".";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../store";
 import { deleteUser, restoreUser, softDeleteUser } from "../store/usersThunks";
 import type { User } from "../interfaces";
+import ImageUploadModal from "./ImageUploadModal";
+import { updateUser } from "../store/usersThunks";
 
 interface Props {
   users: User[];
@@ -31,6 +35,8 @@ export const GenericUserTable = ({
   allowRemove,
 }: Props) => {
   const dispatch = useDispatch<AppDispatch>();
+  const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const filter = useSelector((state: RootState) => state.filters);
   const { page, limit } = filter;
 
@@ -91,6 +97,7 @@ export const GenericUserTable = ({
         <thead>
           <tr>
             <th className="text-center">ID</th>
+            <th className="text-center">Imagen</th>
             {showRole && <th>Roles</th>}
             <th>Carnet</th>
             <th>Nombres</th>
@@ -101,6 +108,54 @@ export const GenericUserTable = ({
         <tbody>
           {users.map((user, index) => (
             <tr key={user._id}>
+              <td className="text-center align-middle">
+                {user.images ? (
+                  <div
+                    style={{ position: "relative", display: "inline-block" }}
+                  >
+                    <div
+                      style={{
+                        cursor: allowEdit ? "pointer" : "default",
+                        display: "inline-block",
+                      }}
+                      onClick={() => {
+                        if (!allowEdit) return;
+                        setSelectedUser(user);
+                        setImageModalOpen(true);
+                      }}
+                    >
+                      <Image
+                        src={user.images.small}
+                        alt={user.username || user.name}
+                        style={{ width: "50px", borderRadius: "50%" }}
+                      />
+                    </div>
+                    <button
+                      className="btn btn-xs btn-rounded btn-danger"
+                      style={{ position: "absolute", right: -8, bottom: -8 }}
+                      onClick={() => {
+                        if (!allowEdit) return;
+                        setSelectedUser(user);
+                        setImageModalOpen(true);
+                      }}
+                    >
+                      <i className="fa fa-edit"></i>
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    className="btn btn-outline-primary"
+                    disabled={!allowEdit}
+                    onClick={() => {
+                      if (!allowEdit) return;
+                      setSelectedUser(user);
+                      setImageModalOpen(true);
+                    }}
+                  >
+                    sin imagen
+                  </button>
+                )}
+              </td>
               <td className="text-center">{getSequentialNumber(index)}</td>
               {showRole && (
                 <td className="text-center align-middle">
@@ -165,6 +220,32 @@ export const GenericUserTable = ({
           ))}
         </tbody>
       </table>
+      <ImageUploadModal
+        open={imageModalOpen}
+        title="Actualizar imagen"
+        entityName={selectedUser?.name}
+        currentImage={selectedUser?.images?.small || ""}
+        onClose={() => {
+          setImageModalOpen(false);
+          setSelectedUser(null);
+        }}
+        onSave={async (imageBase64?: string) => {
+          if (!selectedUser) return null;
+          const payload: any = { ...selectedUser };
+          // Solo enviar la imagen si el usuario la cambió voluntariamente
+          if (imageBase64 && imageBase64.startsWith("data:")) {
+            payload.image = imageBase64;
+          } else {
+            delete payload.image;
+          }
+          // Nunca enviar ni modificar la contraseña desde el modal de imagen
+          if (payload.password !== undefined) {
+            delete payload.password;
+          }
+          const res: any = await dispatch(updateUser(payload)).unwrap();
+          return res;
+        }}
+      />
     </div>
   );
 };

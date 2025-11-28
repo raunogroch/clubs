@@ -3,11 +3,12 @@ import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import swal from "sweetalert";
 import { Image } from "../../../components";
-import ClubImageModal from "./ClubImageModal";
+import ImageUploadModal from "../../../components/ImageUploadModal";
 import {
   deleteClub,
   restoreClub,
   softDeleteClub,
+  updateClub,
 } from "../../../store/clubsThunks";
 import type { AppDispatch } from "../../../store/store";
 import type { Club } from "../interfaces";
@@ -94,6 +95,7 @@ export const ClubList = ({
                   >
                     <div
                       onClick={() => {
+                        if (!edit) return;
                         setSelectedClub(club);
                         setImageModalOpen(true);
                       }}
@@ -109,6 +111,7 @@ export const ClubList = ({
                       className="btn btn-xs btn-rounded btn-danger"
                       style={{ position: "absolute", right: -8, bottom: -8 }}
                       onClick={() => {
+                        if (!edit) return;
                         setSelectedClub(club);
                         setImageModalOpen(true);
                       }}
@@ -120,8 +123,13 @@ export const ClubList = ({
                   <span
                     className="btn btn-outline-danger btn-rounded"
                     onClick={() => {
+                      if (!edit) return;
                       setSelectedClub(club);
                       setImageModalOpen(true);
+                    }}
+                    style={{
+                      opacity: edit ? 1 : 0.6,
+                      cursor: edit ? "pointer" : "not-allowed",
                     }}
                   >
                     sin logo
@@ -204,12 +212,22 @@ export const ClubList = ({
         </tbody>
       </table>
 
-      <ClubImageModal
+      <ImageUploadModal
         open={imageModalOpen}
-        club={selectedClub}
+        title="Actualizar logo"
+        entityName={selectedClub?.name}
+        currentImage={selectedClub?.images?.small || ""}
         onClose={() => {
           setImageModalOpen(false);
           setSelectedClub(null);
+        }}
+        onSave={async (imageBase64?: string) => {
+          if (!selectedClub) return null;
+          const payload: any = { ...selectedClub };
+          if (imageBase64) payload.image = imageBase64;
+          else delete payload.image;
+          const res: any = await dispatch(updateClub(payload)).unwrap();
+          return res;
         }}
       />
     </div>

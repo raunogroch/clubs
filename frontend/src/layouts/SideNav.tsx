@@ -1,14 +1,17 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import React from "react";
+import React, { useState } from "react";
 import { Image } from "../components";
 import { Role } from "../interfaces";
 import { roleRoutes } from "../routes";
 import { useDispatch, useSelector } from "react-redux";
-import { logout as logoutAction } from "../store/authSlice";
+import { logout as logoutAction, setUser } from "../store/authSlice";
 import type { AppDispatch, RootState } from "../store/store";
+import ImageUploadModal from "../components/ImageUploadModal";
+import { updateUser } from "../store/usersThunks";
 
 export const SideNav = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const [imageModalOpen, setImageModalOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -125,13 +128,30 @@ export const SideNav = () => {
         <ul className="nav metismenu" id="side-menu">
           <li className="nav-header">
             <div className="dropdown profile-element">
-              {user.image ? (
-                <Image
-                  src={user.image}
-                  alt="image"
-                  className="rounded-circle"
-                  style={{ width: 48, height: 48 }}
-                />
+              {user ? (
+                <div style={{ display: "inline-block", position: "relative" }}>
+                  <div
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setImageModalOpen(true);
+                    }}
+                    style={{ cursor: "pointer" }}
+                  >
+                    {user.image ? (
+                      <Image
+                        src={user.image}
+                        alt="image"
+                        className="rounded-circle"
+                        style={{ width: 48, height: 48 }}
+                      />
+                    ) : (
+                      <span className="btn btn-outline-primary btn-sm">
+                        Sin Imagen
+                      </span>
+                    )}
+                  </div>
+                </div>
               ) : (
                 "Sin Imagen"
               )}
@@ -164,6 +184,30 @@ export const SideNav = () => {
           {renderMenuItems(menuItems)}
         </ul>
       </div>
+      <ImageUploadModal
+        open={imageModalOpen}
+        title="Actualizar imagen"
+        entityName={user ? `${user.name} ${user.lastname}` : ""}
+        currentImage={
+          (user as any)?.image || (user as any)?.images?.small || ""
+        }
+        onClose={() => setImageModalOpen(false)}
+        onSave={async (imageBase64?: string) => {
+          if (!user) return null;
+          const payload: any = { ...(user as any) };
+          if (imageBase64) payload.image = imageBase64;
+          else delete payload.image;
+          // Solo enviar password si fue modificada manualmente
+          if (!payload.password || payload.password === "") {
+            delete payload.password;
+          }
+          const res: any = await dispatch(updateUser(payload)).unwrap();
+          if (res && (res as any)._id === (user as any)._id) {
+            dispatch(setUser(res));
+          }
+          return res;
+        }}
+      />
     </nav>
   );
 };

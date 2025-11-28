@@ -1,6 +1,10 @@
 export interface User {
   _id?: string;
-  image?: string;
+  images?: {
+    small: string;
+    medium: string;
+    large: string;
+  };
   role?:
     | "coach"
     | "athlete"

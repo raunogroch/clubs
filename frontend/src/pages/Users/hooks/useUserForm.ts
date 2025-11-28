@@ -6,31 +6,40 @@ import { createUser, updateUser } from "../../../store/usersThunks";
 import toastr from "toastr";
 import "toastr/build/toastr.min.css";
 
+type UserFormModel = Partial<User> & { image?: string };
+
 export const useUserForm = (initialData?: User) => {
   const dispatch = useDispatch<AppDispatch>();
 
   const [isPasswordModified, setIsPasswordModified] = useState(false);
 
-  const [formData, setFormData] = useState<User>(
-    initialData || {
-      image: "",
-      role: "",
-      ci: "",
-      name: "",
-      lastname: "",
-      birth_date: "",
-      active: true,
-      username: "",
-      password: "",
-    }
-  );
+  const defaultData: UserFormModel = initialData
+    ? {
+        ...initialData,
+        image: (initialData.images as any)?.small || "",
+      }
+    : {
+        image: "",
+        role: "",
+        ci: "",
+        name: "",
+        lastname: "",
+        birth_date: "",
+        active: true,
+        username: "",
+        password: "",
+      };
+
+  const [formData, setFormData] = useState<UserFormModel>(defaultData);
 
   const [errors, setErrors] = useState<UserErrors>({});
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e:
+      | React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+      | { target: { name: string; value: any } }
   ) => {
-    const { name, value } = e.target;
+    const { name, value } = e.target as { name: string; value: any };
 
     setFormData((prevFormData) => ({
       ...prevFormData,
@@ -41,7 +50,7 @@ export const useUserForm = (initialData?: User) => {
       setIsPasswordModified(true);
     }
 
-    if (errors[name as keyof UserErrors]) {
+    if ((errors as any)[name as keyof UserErrors]) {
       setErrors({
         ...errors,
         [name]: undefined,
@@ -65,7 +74,7 @@ export const useUserForm = (initialData?: User) => {
 
     if (!initialData && !formData.password) {
       newErrors.password = "La contraseña es requerida";
-    } else if (isPasswordModified && formData.password.length < 6) {
+    } else if (isPasswordModified && (formData.password || "").length < 6) {
       newErrors.password = "La contraseña debe tener al menos 6 caracteres";
     }
 
@@ -77,17 +86,33 @@ export const useUserForm = (initialData?: User) => {
     if (!validateForm()) return;
     try {
       if (formData._id) {
-        const updateData = { ...formData };
+        const updateData: any = { ...formData };
 
         if (!isPasswordModified) {
           delete updateData.password;
         }
 
-        await dispatch(updateUser(updateData)).unwrap();
-        toastr.success("Usuario actualizado correctamente");
+        const result: any = await dispatch(
+          updateUser(updateData as any)
+        ).unwrap();
+        if (result && result.imageProcessingSkipped) {
+          toastr.warning(
+            "Usuario actualizado, pero la imagen no pudo procesarse (servicio de imágenes no disponible)"
+          );
+        } else {
+          toastr.success("Usuario actualizado correctamente");
+        }
       } else {
-        await dispatch(createUser(formData)).unwrap();
-        toastr.success("Usuario creado correctamente");
+        const result: any = await dispatch(
+          createUser(formData as any)
+        ).unwrap();
+        if (result && result.imageProcessingSkipped) {
+          toastr.warning(
+            "Usuario creado, pero la imagen no pudo procesarse (servicio de imágenes no disponible)"
+          );
+        } else {
+          toastr.success("Usuario creado correctamente");
+        }
       }
       return true;
     } catch (error: any) {
@@ -97,7 +122,7 @@ export const useUserForm = (initialData?: User) => {
     }
   };
 
-  const updateFormData = (newData: Partial<User>) => {
+  const updateFormData = (newData: Partial<UserFormModel>) => {
     setFormData((prev) => ({ ...prev, ...newData }));
 
     if (newData.password === initialData?.password) {

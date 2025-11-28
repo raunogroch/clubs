@@ -19,21 +19,6 @@ export const GenericUserForm = ({
   return (
     <div>
       <form onSubmit={onSubmit}>
-        {/*
-          <div className="form-group row">
-          <label htmlFor="image" className="col-sm-2 col-form-label">
-            Foto
-          </label>
-          <div className="col-sm-10">
-            <ImageCropperWithInput
-              value={formData.image}
-              onChange={handleChange}
-            />
-          </div>
-        </div>
-          
-          */}
-
         <UserRoleSelector
           selectedRole={formData.role as Role}
           onRoleChange={(role) =>

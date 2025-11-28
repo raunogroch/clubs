@@ -1,6 +1,6 @@
 import { FormField, TextAreaField } from ".";
 import { useClubForm } from "../hooks";
-import { ImageCropperWithInput, SelectorList } from "../../../components";
+import { SelectorList } from "../../../components";
 import type { ClubFormProps } from "../interfaces";
 import { useClubCatalogs } from "../../../hooks";
 
@@ -23,18 +23,6 @@ export const ClubForm = ({
   return (
     <div>
       <form onSubmit={onSubmit}>
-        <div className="form-group row">
-          <label htmlFor="imagen" className="col-sm-2 col-form-label">
-            Logo del club
-          </label>
-          <div className="col-sm-10">
-            <ImageCropperWithInput
-              value={formData.image}
-              onChange={handleChange}
-            />
-          </div>
-        </div>
-
         <FormField
           title="Nombre del Club"
           type="text"
