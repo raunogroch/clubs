@@ -7,6 +7,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { logout as logoutAction } from "../store/authSlice";
 import type { AppDispatch, RootState } from "../store/store";
 
+// SideNav uses `.nav-label` spans for menu labels so that CSS can hide them
+// when `body` has the `mini-navbar` class (see `public/assets/style.css`).
+// This avoids forcing a React re-render when toggling the minified sidebar.
 export const SideNav = () => {
   const dispatch = useDispatch<AppDispatch>();
   const location = useLocation();
@@ -90,10 +93,8 @@ export const SideNav = () => {
             >
               <a href="#" onClick={(e) => handleMenuClick(key, e)}>
                 {item.icon && <i className={`fa ${item.icon}`}></i>}{" "}
-                {typeof window !== "undefined" &&
-                document.body.classList.contains("mini-navbar")
-                  ? null
-                  : item.label}
+                {/* Wrap label with .nav-label so CSS can hide/show it when body has class "mini-navbar" */}
+                <span className="nav-label">{item.label}</span>
                 <span className="fa arrow"></span>
               </a>
               <ul
@@ -110,12 +111,7 @@ export const SideNav = () => {
           <li key={key} className={isActive(item.path) ? "active" : ""}>
             <Link to={item.path}>
               {item.icon && <i className={`fa ${item.icon}`}></i>}{" "}
-              <span className="nav-label">
-                {typeof window !== "undefined" &&
-                document.body.classList.contains("mini-navbar")
-                  ? null
-                  : item.label}
-              </span>
+              <span className="nav-label">{item.label}</span>
             </Link>
           </li>
         );
