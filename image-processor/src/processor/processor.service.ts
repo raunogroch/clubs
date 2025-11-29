@@ -63,7 +63,7 @@ export class ProcessorService {
 
     const baseDir = path.join(__dirname, "../../images", folder);
     const sizes: { [k: string]: number } = {
-      small: 128,
+      small: 50,
       medium: 512,
       large: 1024,
     };

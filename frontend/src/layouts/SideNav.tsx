@@ -1,15 +1,12 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import React from "react";
 import { Image } from "../components";
-import { Role } from "../interfaces";
+import { Role, type User } from "../interfaces";
 import { roleRoutes } from "../routes";
 import { useDispatch, useSelector } from "react-redux";
 import { logout as logoutAction } from "../store/authSlice";
 import type { AppDispatch, RootState } from "../store/store";
 
-// SideNav uses `.nav-label` spans for menu labels so that CSS can hide them
-// when `body` has the `mini-navbar` class (see `public/assets/style.css`).
-// This avoids forcing a React re-render when toggling the minified sidebar.
 export const SideNav = () => {
   const dispatch = useDispatch<AppDispatch>();
   const location = useLocation();
@@ -124,29 +121,13 @@ export const SideNav = () => {
         <ul className="nav metismenu" id="side-menu">
           <li className="nav-header">
             <div className="dropdown profile-element">
-              {user ? (
-                <div style={{ display: "inline-block", position: "relative" }}>
-                  <div
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
-                    style={{ cursor: "pointer" }}
-                  >
-                    {(user as any)?.images?.small ? (
-                      <Image
-                        src={(user as any)?.images?.small}
-                        alt="image"
-                        className="rounded-circle"
-                        style={{ width: 48, height: 48 }}
-                      />
-                    ) : (
-                      <span className="btn btn-outline-primary btn-sm">
-                        Sin Imagen
-                      </span>
-                    )}
-                  </div>
-                </div>
+              {(user as User)?.images?.small ? (
+                <Image
+                  src={(user as any)?.images?.small}
+                  alt="image"
+                  className="rounded-circle"
+                  style={{ width: 48, height: 48 }}
+                />
               ) : (
                 "Sin Imagen"
               )}

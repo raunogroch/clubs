@@ -1,6 +1,6 @@
 import { NavHeader, Image, Spinner } from "../../../components";
 import { useDispatch, useSelector } from "react-redux";
-import { type pageParamProps } from "../../../interfaces";
+import { type pageParamProps, type User } from "../../../interfaces";
 import { useEffect } from "react";
 import { findUserById } from "../../../store/usersThunks";
 import type { AppDispatch, RootState } from "../../../store";
@@ -38,9 +38,9 @@ export const ProfileAdmin = ({ name }: pageParamProps) => {
           <div className="row m-b-lg m-t-lg">
             <div className="col-md-4 text-center">
               <div className="profile-image mb-3">
-                {(user as any)?.images?.small || user.image ? (
+                {(user as User)?.images.medium ? (
                   <Image
-                    src={(user as any)?.images?.small || user.image}
+                    src={(user as any)?.images.medium}
                     className="rounded-circle circle-border m-b-md"
                     alt="profile"
                     style={{
