@@ -90,7 +90,10 @@ export const SideNav = () => {
             >
               <a href="#" onClick={(e) => handleMenuClick(key, e)}>
                 {item.icon && <i className={`fa ${item.icon}`}></i>}{" "}
-                {item.label}
+                {typeof window !== "undefined" &&
+                document.body.classList.contains("mini-navbar")
+                  ? null
+                  : item.label}
                 <span className="fa arrow"></span>
               </a>
               <ul
@@ -107,7 +110,12 @@ export const SideNav = () => {
           <li key={key} className={isActive(item.path) ? "active" : ""}>
             <Link to={item.path}>
               {item.icon && <i className={`fa ${item.icon}`}></i>}{" "}
-              <span className="nav-label">{item.label}</span>
+              <span className="nav-label">
+                {typeof window !== "undefined" &&
+                document.body.classList.contains("mini-navbar")
+                  ? null
+                  : item.label}
+              </span>
             </Link>
           </li>
         );
