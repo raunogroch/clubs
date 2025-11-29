@@ -1119,6 +1119,12 @@ ul.nav-second-level {
 .mini-navbar .nav-second-level.collapsing li a {
   min-width: 140px;
 }
+/* Allow second-level items to size to their content in collapsed state */
+.mini-navbar .nav-second-level.collapsing li a,
+.mini-navbar .nav-second-level li a {
+  min-width: 0 !important;
+  white-space: nowrap;
+}
 .nav-third-level li a,
 .fixed-sidebar.mini-navbar .nav-second-level li .nav-third-level li a {
   padding-left: 62px;
@@ -1133,7 +1139,8 @@ body:not(.fixed-sidebar):not(.canvas-menu).mini-navbar
 .mini-navbar .nav li:focus > .nav-second-level {
   display: block;
   border-radius: 0 2px 2px 0;
-  min-width: 160px;
+  /* Let overlay size be determined by content */
+  min-width: 0 !important;
   height: auto;
 }
 body.mini-navbar .navbar-default .nav > li > .nav-second-level li a {
@@ -1153,6 +1160,29 @@ body.mini-navbar .navbar-default .nav > li > .nav-second-level li a {
   background-color: #2f4050;
   padding: 10px 10px 10px 10px;
   font-size: 12px;
+}
+/* Make the floating submenu width adapt to content so it fits all labels */
+.mini-navbar .nav .nav-second-level,
+.fixed-sidebar.mini-navbar .nav .nav-second-level {
+  width: -moz-max-content; /* FF */
+  width: -webkit-max-content; /* WebKit */
+  width: max-content;
+  min-width: 0 !important;
+  white-space: nowrap; /* keep labels single-line */
+  /* avoid overflowing the viewport, adapt to content but limit width */
+  max-width: calc(100vw - 90px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Also adapt third-level overlays inside collapsed sidebar */
+.mini-navbar .nav .nav-third-level,
+.mini-navbar .nav .nav-second-level .nav-third-level,
+.fixed-sidebar.mini-navbar .nav .nav-third-level {
+  width: -moz-max-content;
+  width: -webkit-max-content;
+  width: max-content;
+  min-width: 0 !important;
+  white-space: nowrap;
 }
 .canvas-menu.mini-navbar .nav-second-level {
   background: #293846;
@@ -1282,6 +1312,13 @@ body.mini-navbar .profile-element,
 body.mini-navbar .nav-label,
 body.mini-navbar .navbar-default .nav li a span {
   display: none;
+}
+/* Keep submenus labels visible when the sidebar is collapsed (mini-navbar)
+   so users can read submenu items in the floating overlays. */
+body.mini-navbar .nav-second-level .nav-label,
+body.mini-navbar .nav-third-level .nav-label,
+body.mini-navbar .nav .nav-second-level .nav-label {
+  display: inline !important;
 }
 body.canvas-menu .profile-element {
   display: block;
