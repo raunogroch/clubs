@@ -1,5 +1,8 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { SmoothlyMenu } from "../scripts/coder-softScripts";
+import {
+  SmoothlyMenu,
+  initBodySmallListener,
+} from "../scripts/coder-softScripts";
 import { Input } from "../components";
 import { useDispatch } from "react-redux";
 import { type AppDispatch, setName, setPage } from "../store";
@@ -119,3 +122,17 @@ export const TopNav = () => {
     </div>
   );
 };
+
+// Inicializar el listener para body-small cuando se cargue el TopNav
+// (este efecto se ejecutará cuando el componente se importe/monte)
+(() => {
+  // Sólo añadir listener en runtime (evitar en SSR)
+  if (typeof window !== "undefined") {
+    // Inicializar y mantener la referencia de cleanup en window para debugging
+    const cleanup = initBodySmallListener();
+    // Guardar referencia en window para poder limpiar en pruebas si hace falta
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    window.__cleanupBodySmallListener = cleanup;
+  }
+})();
