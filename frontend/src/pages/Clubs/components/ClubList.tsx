@@ -154,13 +154,14 @@ export const ClubList = ({
               </td>
               <td className="project-actions text-center align-middle">
                 {club.active ? (
-                  <>
+                  <div className="d-flex flex-column flex-md-row align-items-center justify-content-center gap-2">
                     {edit && (
                       <Link
                         to={`/clubs/edit/${club._id}`}
-                        className="text-success m-2"
+                        className="text-success m-1 d-flex d-md-inline-flex justify-content-center align-items-center w-100"
                       >
-                        <i className="fa fa-edit"></i> Editar
+                        <i className="fa fa-edit" />
+                        <span className="d-none d-md-inline ms-2">Editar</span>
                       </Link>
                     )}
                     {canRemove && (
@@ -170,9 +171,10 @@ export const ClubList = ({
                           e.preventDefault();
                           handleRemove(club._id!);
                         }}
-                        className="text-danger m-2"
+                        className="text-danger m-1 d-flex d-md-inline-flex justify-content-center align-items-center w-100"
                       >
-                        <i className="fa fa-trash-o"></i> Remover
+                        <i className="fa fa-trash-o" />
+                        <span className="d-none d-md-inline ms-2">Remover</span>
                       </Link>
                     )}
                     {canDelete && (
@@ -182,18 +184,22 @@ export const ClubList = ({
                           e.preventDefault();
                           handleDelete(club._id!);
                         }}
-                        className="text-danger m-2"
+                        className="text-danger m-1 d-flex d-md-inline-flex justify-content-center align-items-center w-100"
                       >
-                        <i className="fa fa-trash"></i> Eliminar
+                        <i className="fa fa-trash" />
+                        <span className="d-none d-md-inline ms-2">
+                          Eliminar
+                        </span>
                       </Link>
                     )}
                     <Link
                       to={`/clubs/${club._id}/groups`}
-                      className="text-primary m-2"
+                      className="text-primary m-1 d-flex d-md-inline-flex justify-content-center align-items-center w-100"
                     >
-                      <i className="fa fa-eye"></i> Grupos
+                      <i className="fa fa-eye" />
+                      <span className="d-none d-md-inline ms-2">Grupos</span>
                     </Link>
-                  </>
+                  </div>
                 ) : (
                   <Link
                     to="#"
@@ -201,9 +207,10 @@ export const ClubList = ({
                       e.preventDefault();
                       handleRestore(club._id!);
                     }}
-                    className="text-warning m-2"
+                    className="text-warning m-1 d-flex d-md-inline-flex justify-content-center align-items-center w-100"
                   >
-                    <i className="fa fa-new"></i> Restaurar
+                    <i className="fa fa-new" />
+                    <span className="d-none d-md-inline ms-2">Restaurar</span>
                   </Link>
                 )}
               </td>

@@ -16,7 +16,6 @@ const SEARCH_PATHS: string[] = [
   "/users/coach",
   "/users/athlete",
 ];
-const WELCOME_MESSAGE = "BIENVENIDO AL SISTEMA DE CLUBES";
 
 export const TopNav = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -107,14 +106,18 @@ export const TopNav = () => {
         </div>
 
         <ul className="nav navbar-top-links navbar-right">
-          <li className="welcome-message">
-            <span className="m-r-sm text-muted">{WELCOME_MESSAGE}</span>
-          </li>
-
           <li>
-            <Link to="/" onClick={handleLogout} aria-label="Logout">
-              <i className="fa fa-sign-out" aria-hidden="true" />
-              <span className="logout-text">Cerrar Sesión</span>
+            <Link
+              to="/"
+              onClick={handleLogout}
+              aria-label="Logout"
+              className="d-flex align-items-center"
+            >
+              <i className="fa fa-power-off" aria-hidden="true" />
+              {/* Mostrar texto sólo en md+ y separar con margen desde el icono */}
+              <div className="logout-text d-none d-md-block ms-2">
+                Cerrar Sesión
+              </div>
             </Link>
           </li>
         </ul>

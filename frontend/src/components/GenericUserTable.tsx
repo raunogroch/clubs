@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import { Image } from ".";
 import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import type { AppDispatch, RootState } from "../store";
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "../store";
 import { deleteUser, restoreUser, softDeleteUser } from "../store/usersThunks";
 import type { User } from "../interfaces";
 import ImageUploadModal from "./ImageUploadModal";
@@ -37,8 +37,6 @@ export const GenericUserTable = ({
   const dispatch = useDispatch<AppDispatch>();
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const filter = useSelector((state: RootState) => state.filters);
-  const { page, limit } = filter;
 
   const handleDelete = async (id: string) => {
     if (!id) return;
@@ -88,7 +86,6 @@ export const GenericUserTable = ({
     });
   };
 
-  const getSequentialNumber = (index: number) => (page - 1) * limit + index + 1;
   const location = window.location.pathname.split("/")[2];
 
   return (
@@ -96,8 +93,7 @@ export const GenericUserTable = ({
       <table className="table table-striped">
         <thead>
           <tr>
-            <th className="text-center">ID</th>
-            <th className="text-center">Imagen</th>
+            <th className="text-center">Foto</th>
             {showRole && <th>Roles</th>}
             <th>Carnet</th>
             <th>Nombres</th>
@@ -106,7 +102,7 @@ export const GenericUserTable = ({
           </tr>
         </thead>
         <tbody>
-          {users.map((user, index) => (
+          {users.map((user) => (
             <tr key={user._id}>
               <td className="text-center align-middle">
                 {user.images ? (
@@ -156,7 +152,7 @@ export const GenericUserTable = ({
                   </button>
                 )}
               </td>
-              <td className="text-center">{getSequentialNumber(index)}</td>
+
               {showRole && (
                 <td className="text-center align-middle">
                   <div className="text-success text-left">
@@ -169,15 +165,18 @@ export const GenericUserTable = ({
               <td className="align-middle">{user.lastname}</td>
               <td className="text-center align-middle">
                 {user.active ? (
-                  <>
+                  // Contenedor responsive: columna en < md, fila en >= md
+                  <div className="d-flex flex-column flex-md-row align-items-center justify-content-center gap-2">
                     {allowEdit && (
                       <Link
                         to={`/users/${location}/edit/${user._id}`}
-                        className="text-success m-2"
+                        className="text-success m-1 d-flex d-md-inline-flex justify-content-center justify-content-md-center align-items-center w-100"
                       >
-                        <i className="fa fa-edit"></i> Editar
+                        <i className="fa fa-edit" />
+                        <span className="d-none d-md-inline ms-2">Editar</span>
                       </Link>
                     )}
+
                     {allowRemove && (
                       <Link
                         to="#"
@@ -185,11 +184,13 @@ export const GenericUserTable = ({
                           e.preventDefault();
                           handleRemove(user._id!);
                         }}
-                        className="text-warning m-2"
+                        className="text-warning m-1 d-flex d-md-inline-flex justify-content-center justify-content-md-center align-items-center w-100"
                       >
-                        <i className="fa fa-trash-o"></i> Remover
+                        <i className="fa fa-trash-o" />
+                        <span className="d-none d-md-inline ms-2">Remover</span>
                       </Link>
                     )}
+
                     {allowDelete && (
                       <Link
                         to="#"
@@ -197,12 +198,15 @@ export const GenericUserTable = ({
                           e.preventDefault();
                           handleDelete(user._id!);
                         }}
-                        className="text-danger m-2"
+                        className="text-danger m-1 d-flex d-md-inline-flex justify-content-center justify-content-md-center align-items-center w-100"
                       >
-                        <i className="fa fa-trash"></i> Eliminar
+                        <i className="fa fa-trash" />
+                        <span className="d-none d-md-inline ms-2">
+                          Eliminar
+                        </span>
                       </Link>
                     )}
-                  </>
+                  </div>
                 ) : allowRestore ? (
                   <Link
                     to="#"
@@ -210,9 +214,10 @@ export const GenericUserTable = ({
                       e.preventDefault();
                       handleRestore(user._id!);
                     }}
-                    className="text-warning m-2"
+                    className="text-warning m-1 d-flex d-md-inline-flex justify-content-center justify-content-md-center align-items-center w-100"
                   >
-                    <i className="fa fa-reply"></i> Restaurar
+                    <i className="fa fa-reply" />
+                    <span className="d-none d-md-inline ms-2">Restaurar</span>
                   </Link>
                 ) : null}
               </td>

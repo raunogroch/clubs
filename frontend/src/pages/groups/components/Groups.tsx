@@ -126,39 +126,53 @@ export const Groups = ({
                           )}
                         </td>
                         <td className="project-actions">
-                          {edit && (
-                            <Link
-                              to={`/clubs/${clubId}/groups/${group._id}`}
-                              className="text-warning m-r-sm"
-                            >
-                              <i className="fa fa-pencil"></i> Edit
-                            </Link>
-                          )}
-                          {canDelete && group.active && (
-                            <Link
-                              to="#"
-                              className="text-danger  m-r-sm"
-                              onClick={() => handleDelete(group._id)}
-                            >
-                              <i className="fa fa-trash"></i> Eliminar
-                            </Link>
-                          )}
-                          {registerAthlete && group.active && (
-                            <Link
-                              to={`/clubs/${clubId}/groups/register-athlete/${group._id}`}
-                              className="text-primary m-r-sm"
-                            >
-                              <i className="fa fa-list"></i> Atletas
-                            </Link>
-                          )}
-                          {registerCoach && group.active && (
-                            <Link
-                              to={`/clubs/${clubId}/groups/register-coach/${group._id}`}
-                              className="text-success m-r-sm"
-                            >
-                              <i className="fa fa-list"></i> Entrenadores
-                            </Link>
-                          )}
+                          <div className="d-flex flex-column flex-md-row align-items-center justify-content-center gap-2">
+                            {edit && (
+                              <Link
+                                to={`/clubs/${clubId}/groups/${group._id}`}
+                                className="text-warning m-1 d-flex d-md-inline-flex justify-content-center align-items-center w-100"
+                              >
+                                <i className="fa fa-pencil" />
+                                <span className="d-none d-md-inline ms-2">
+                                  Edit
+                                </span>
+                              </Link>
+                            )}
+                            {canDelete && group.active && (
+                              <Link
+                                to="#"
+                                className="text-danger m-1 d-flex d-md-inline-flex justify-content-center align-items-center w-100"
+                                onClick={() => handleDelete(group._id)}
+                              >
+                                <i className="fa fa-trash" />
+                                <span className="d-none d-md-inline ms-2">
+                                  Eliminar
+                                </span>
+                              </Link>
+                            )}
+                            {registerAthlete && group.active && (
+                              <Link
+                                to={`/clubs/${clubId}/groups/register-athlete/${group._id}`}
+                                className="text-primary m-1 d-flex d-md-inline-flex justify-content-center align-items-center w-100"
+                              >
+                                <i className="fa fa-list" />
+                                <span className="d-none d-md-inline ms-2">
+                                  Atletas
+                                </span>
+                              </Link>
+                            )}
+                            {registerCoach && group.active && (
+                              <Link
+                                to={`/clubs/${clubId}/groups/register-coach/${group._id}`}
+                                className="text-success m-1 d-flex d-md-inline-flex justify-content-center align-items-center w-100"
+                              >
+                                <i className="fa fa-list" />
+                                <span className="d-none d-md-inline ms-2">
+                                  Entrenadores
+                                </span>
+                              </Link>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}

@@ -63,24 +63,27 @@ export const SportTable = ({ sports }: SportTableProps) => {
               <td className="align-middle">{sport.name}</td>
               <td className="text-center">
                 {sport.active ? (
-                  <>
+                  <div className="d-flex flex-column flex-md-row align-items-center justify-content-center gap-2">
                     <Link
                       to={`/sports/edit/${sport._id}`}
-                      className="text-success m-2"
+                      className="text-success m-1 d-flex d-md-inline-flex justify-content-center align-items-center w-100"
                     >
-                      <i className="fa fa-edit"></i> Editar
+                      <i className="fa fa-edit" />
+                      <span className="d-none d-md-inline ms-2">Editar</span>
                     </Link>
+
                     <Link
                       to="#"
                       onClick={(e) => {
                         e.preventDefault();
                         handleDelete(sport._id!);
                       }}
-                      className="text-danger m-2"
+                      className="text-danger m-1 d-flex d-md-inline-flex justify-content-center align-items-center w-100"
                     >
-                      <i className="fa fa-trash"></i> Eliminar
+                      <i className="fa fa-trash" />
+                      <span className="d-none d-md-inline ms-2">Eliminar</span>
                     </Link>
-                  </>
+                  </div>
                 ) : (
                   <Link
                     to="#"
@@ -88,9 +91,10 @@ export const SportTable = ({ sports }: SportTableProps) => {
                       e.preventDefault();
                       handleRestore(sport._id!);
                     }}
-                    className="text-warning m-2"
+                    className="text-warning m-1 d-flex d-md-inline-flex justify-content-center align-items-center w-100"
                   >
-                    <i className="fa fa-new"></i> Restaurar
+                    <i className="fa fa-new" />
+                    <span className="d-none d-md-inline ms-2">Restaurar</span>
                   </Link>
                 )}
               </td>

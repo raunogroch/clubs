@@ -19,7 +19,7 @@ export const Sports = ({ name }: pageParamProps) => {
   if (error) toastr.error(error);
   return (
     <>
-      <NavHeader name={name} pageCreate="Nueva disciplina" />
+      <NavHeader name={name} pageCreate="Crear" />
       {status === "loading" && <Spinner />}
       {status === "succeeded" && sports.length === 0 && (
         <div className="wrapper wrapper-content">
@@ -34,7 +34,7 @@ export const Sports = ({ name }: pageParamProps) => {
       {status === "succeeded" && sports.length > 0 && (
         <div className="wrapper wrapper-content animated fadeInRight">
           <div className="row justify-content-center">
-            <div className="col-6">
+            <div className="col-md-12">
               <div className="ibox ">
                 <div className="ibox-title">
                   <h5>Lista de disciplinas</h5>
