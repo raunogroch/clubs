@@ -161,7 +161,7 @@ export const SideNav = () => {
           {renderMenuItems(menuItems)}
           <li className={styles.logoutButtonSidenav}>
             <Link
-              className="dropdown-item fixed-bottom"
+              className="dropdown-item text-center"
               to="/"
               onClick={handleLogout}
             >

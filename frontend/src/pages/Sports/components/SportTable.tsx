@@ -51,15 +51,13 @@ export const SportTable = ({ sports }: SportTableProps) => {
       <table className="table table-striped">
         <thead>
           <tr>
-            <th className="text-center">ID</th>
             <th>Disciplina</th>
             <th className="text-center">Acciones</th>
           </tr>
         </thead>
         <tbody>
-          {sports.map((sport, index) => (
+          {sports.map((sport) => (
             <tr key={sport._id}>
-              <td className="align-middle text-center">{index + 1}</td>
               <td className="align-middle">{sport.name}</td>
               <td className="text-center">
                 {sport.active ? (

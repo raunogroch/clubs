@@ -62,22 +62,24 @@ export const NavHeader = ({ name, sub, sub1, pageCreate }: NavHeaderProps) => {
 
   return (
     <div className="row wrapper border-bottom white-bg page-heading">
-      <div className="col-lg-4">
-        <h2>{pageTitle}</h2>
-        <ol className="breadcrumb">{breadcrumbs}</ol>
-      </div>
-      {pageCreate && (
-        <div className="col-sm-8">
-          <div className="title-action">
-            <Link
-              to={`${location.pathname}/create`}
-              className="btn btn-primary"
-            >
-              <i className="fa fa-plus"></i> {pageCreate}
-            </Link>
-          </div>
+      <div className="col-12">
+        <div className="d-flex align-items-center justify-content-between">
+          <h2 className="mb-0">{pageTitle}</h2>
+
+          {pageCreate && (
+            <div className="title-action">
+              <Link
+                to={`${location.pathname}/create`}
+                className="btn btn-primary"
+              >
+                <i className="fa fa-plus"></i> {pageCreate}
+              </Link>
+            </div>
+          )}
         </div>
-      )}
+
+        <ol className="breadcrumb mt-2">{breadcrumbs}</ol>
+      </div>
     </div>
   );
 };

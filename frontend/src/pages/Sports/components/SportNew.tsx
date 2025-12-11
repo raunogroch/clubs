@@ -31,7 +31,7 @@ export const SportNew = ({ name, sub }: UsersPageProps) => {
 
       <div className="wrapper wrapper-content animated fadeInRight">
         <div className="row justify-content-center">
-          <div className="col-6">
+          <div className="col-lg-6 col-12">
             <div className="ibox ">
               <div className="ibox-title">
                 <h5>Crear nueva disciplina</h5>

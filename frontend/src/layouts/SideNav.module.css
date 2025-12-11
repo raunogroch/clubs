@@ -1,14 +1,22 @@
-/* Local styles for SideNav component
-   - Keep global theme classes intact; add a local class to control visibility responsively.
-*/
 .logoutButtonSidenav {
-  /* Default: hidden on larger screens */
   display: none !important;
+  margin-top: auto;
 }
 
 @media (max-width: 768px) {
-  /* Show sidebar logout on small screens */
   .logoutButtonSidenav {
     display: block !important;
   }
+}
+
+:global(.sidebar-collapse) {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+:global(.nav.metismenu) {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
 }
