@@ -1,0 +1,14 @@
+/* Local styles for TopNav component
+   - Keep global theme classes intact; add a local class to control visibility responsively.
+*/
+.logoutButtonTopnav {
+  /* Default: visible on larger screens */
+  display: inline-block !important;
+}
+
+@media (max-width: 768px) {
+  /* Hide topnav logout on small screens */
+  .logoutButtonTopnav {
+    display: none !important;
+  }
+}

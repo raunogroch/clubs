@@ -6,6 +6,7 @@ import { roleRoutes } from "../routes";
 import { useDispatch, useSelector } from "react-redux";
 import { logout as logoutAction } from "../store/authSlice";
 import type { AppDispatch, RootState } from "../store/store";
+import styles from "./SideNav.module.css";
 
 export const SideNav = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -158,6 +159,15 @@ export const SideNav = () => {
             <div className="logo-element">CS</div>
           </li>
           {renderMenuItems(menuItems)}
+          <li className={styles.logoutButtonSidenav}>
+            <Link
+              className="dropdown-item fixed-bottom"
+              to="/"
+              onClick={handleLogout}
+            >
+              <i className="fa fa-power-off" />
+            </Link>
+          </li>
         </ul>
       </div>
     </nav>

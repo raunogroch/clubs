@@ -1,7 +1,6 @@
 export const Footer = () => {
   return (
-    <div className="footer fixed wrapper-footer">
-      <div className="float-right"></div>
+    <div className="footer wrapper-footer text-center">
       <div>
         <strong>Copyright</strong> Propiedad intelectual {`<coder-soft/>`}
       </div>

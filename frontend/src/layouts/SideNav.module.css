@@ -1,0 +1,14 @@
+/* Local styles for SideNav component
+   - Keep global theme classes intact; add a local class to control visibility responsively.
+*/
+.logoutButtonSidenav {
+  /* Default: hidden on larger screens */
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  /* Show sidebar logout on small screens */
+  .logoutButtonSidenav {
+    display: block !important;
+  }
+}

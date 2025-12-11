@@ -51,7 +51,7 @@ export const RegisterPayment: React.FC = () => {
       <NavHeader name="Registrar pago" />
       <div className="wrapper wrapper-content animated fadeInRight">
         <div className="row register-payment-row">
-          <div className="col-md-4">
+          <div className="col-lg-4 col-md-12 mb-2">
             <div className="ibox">
               <div className="ibox-title">
                 <h5>Buscar atleta</h5>
@@ -62,7 +62,7 @@ export const RegisterPayment: React.FC = () => {
             </div>
           </div>
 
-          <div className="col-md-4">
+          <div className="col-lg-4 col-md-6 col-sm-12 mb-2">
             <div className="ibox">
               <div className="ibox-title">
                 <h5>Clubs inscritos</h5>
@@ -96,7 +96,7 @@ export const RegisterPayment: React.FC = () => {
             )}
           </div>
 
-          <div className="col-md-4">
+          <div className="col-lg-4 col-md-6 col-sm-12 mb-2">
             <div className="ibox">
               <div className="ibox-title">
                 <h5>Registrar pago</h5>
@@ -111,7 +111,7 @@ export const RegisterPayment: React.FC = () => {
                     onMonthChange={(m: string) => setSelectedMonth(m)}
                   />
                 ) : (
-                  <div>Selecciona atleta y club para registrar un pago</div>
+                  <div>Selecciona atleta y club</div>
                 )}
               </div>
             </div>

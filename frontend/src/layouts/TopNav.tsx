@@ -3,6 +3,7 @@ import {
   SmoothlyMenu,
   initBodySmallListener,
 } from "../scripts/coder-softScripts";
+import styles from "./TopNav.module.css";
 import { Input } from "../components";
 import { useDispatch } from "react-redux";
 import { type AppDispatch, setName, setPage } from "../store";
@@ -106,7 +107,7 @@ export const TopNav = () => {
         </div>
 
         <ul className="nav navbar-top-links navbar-right">
-          <li>
+          <li className={styles.logoutButtonTopnav}>
             <Link
               to="/"
               onClick={handleLogout}
