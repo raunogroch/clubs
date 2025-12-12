@@ -85,8 +85,9 @@ export const GroupForm = ({
             <div className="col-sm-10">
               <div className="mb-3">
                 {formData.dailySchedules.map((schedule, idx) => (
-                  <div className="row mb-2" key={idx}>
-                    <div className="col">
+                  <div className="row mb-2 align-items-center" key={idx}>
+                    {/* Day selector: full width on xs, 3 cols on md */}
+                    <div className="col-12 col-md-3 mb-1 mb-md-0">
                       <SelectorList
                         name={`dia_${idx}`}
                         selected={getValue(schedule.day)}
@@ -100,7 +101,9 @@ export const GroupForm = ({
                         }))}
                       />
                     </div>
-                    <div className="col">
+
+                    {/* Turn selector: half width on xs, 2 cols on md */}
+                    <div className="col-12 col-md-3 mb-1 mb-md-0">
                       <SelectorList
                         name={`turno_${idx}`}
                         selected={getValue(schedule.turn)}
@@ -114,7 +117,9 @@ export const GroupForm = ({
                         }))}
                       />
                     </div>
-                    <div className="col">
+
+                    {/* Start time: half width on xs, 2 cols on md */}
+                    <div className="col-6 col-md-2 mb-1 mb-md-0">
                       <Input
                         type="time"
                         className="form-control"
@@ -130,7 +135,9 @@ export const GroupForm = ({
                         </div>
                       )}
                     </div>
-                    <div className="col">
+
+                    {/* End time: half width on xs, 2 cols on md */}
+                    <div className="col-6 col-md-2 mb-1 mb-md-0">
                       <Input
                         type="time"
                         className="form-control"
@@ -146,10 +153,12 @@ export const GroupForm = ({
                         </div>
                       )}
                     </div>
-                    <div className="col-auto">
+
+                    {/* Remove button: full width on xs (stacked), aligned right on md */}
+                    <div className="col-12 col-md-auto d-flex justify-content-start justify-content-md-end">
                       <Button
                         type="button"
-                        className="btn btn-danger"
+                        className="btn btn-danger btn-block btn-sm"
                         onClick={() => removeSchedule(idx)}
                         icon="trash"
                       />
