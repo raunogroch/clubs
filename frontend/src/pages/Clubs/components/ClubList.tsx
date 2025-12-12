@@ -84,140 +84,138 @@ export const ClubList = ({
 
   return (
     <div className="project-list">
-      <table className="table table-hover">
-        <tbody>
-          {clubs.map((club: Club, index: number) => (
-            <tr key={index}>
-              <td className="project-status text-center align-middle">
-                {club.images ? (
-                  <div
-                    style={{ position: "relative", display: "inline-block" }}
-                  >
-                    <div
-                      onClick={() => {
-                        if (!edit) return;
-                        setSelectedClub(club);
-                        setImageModalOpen(true);
-                      }}
-                      style={{ cursor: "pointer", display: "inline-block" }}
-                    >
-                      <Image
-                        src={club.images.small}
-                        alt={club.name}
-                        style={{ width: "50px", borderRadius: "50%" }}
-                      />
-                    </div>
-                    <button
-                      className="btn btn-xs btn-rounded btn-danger"
-                      style={{ position: "absolute", right: -8, bottom: -8 }}
-                      onClick={() => {
-                        if (!edit) return;
-                        setSelectedClub(club);
-                        setImageModalOpen(true);
-                      }}
-                    >
-                      <i className="fa fa-edit"></i>
-                    </button>
-                  </div>
-                ) : (
-                  <span
-                    className="btn btn-outline-danger btn-rounded"
-                    onClick={() => {
-                      if (!edit) return;
-                      setSelectedClub(club);
-                      setImageModalOpen(true);
-                    }}
-                    style={{
-                      opacity: edit ? 1 : 0.6,
-                      cursor: edit ? "pointer" : "not-allowed",
-                    }}
-                  >
-                    sin logo
-                  </span>
-                )}
-              </td>
-              <td className="project-title text-center align-middle">
-                {club.name.toUpperCase()}
-              </td>
-              <td className="project-people text-center align-middle">
-                Grupos activos: &nbsp;
-                {Array.isArray(club.groups)
-                  ? club.groups.filter((g: any) => g.active).length
-                  : 0}
-              </td>
-              <td className="project-people text-center align-middle">
-                Deportistas: &nbsp;{club.uniqueAthletesCount}
-              </td>
-
-              <td className="project-payment text-center align-middle">
-                Mensualidad: &nbsp;{club.monthly_pay} Bs
-              </td>
-              <td className="project-actions text-center align-middle">
-                {club.active ? (
-                  <div className="d-flex flex-column flex-md-row align-items-center justify-content-center gap-2">
-                    {edit && (
-                      <Link
-                        to={`/clubs/edit/${club._id}`}
-                        className="text-success m-1 d-flex d-md-inline-flex justify-content-center align-items-center w-100"
-                      >
-                        <i className="fa fa-edit" />
-                        <span className="d-none d-md-inline ms-2">Editar</span>
-                      </Link>
-                    )}
-                    {canRemove && (
-                      <Link
-                        to="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleRemove(club._id!);
-                        }}
-                        className="text-danger m-1 d-flex d-md-inline-flex justify-content-center align-items-center w-100"
-                      >
-                        <i className="fa fa-trash-o" />
-                        <span className="d-none d-md-inline ms-2">Remover</span>
-                      </Link>
-                    )}
-                    {canDelete && (
-                      <Link
-                        to="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleDelete(club._id!);
-                        }}
-                        className="text-danger m-1 d-flex d-md-inline-flex justify-content-center align-items-center w-100"
-                      >
-                        <i className="fa fa-trash" />
-                        <span className="d-none d-md-inline ms-2">
-                          Eliminar
-                        </span>
-                      </Link>
-                    )}
-                    <Link
-                      to={`/clubs/${club._id}/groups`}
-                      className="text-primary m-1 d-flex d-md-inline-flex justify-content-center align-items-center w-100"
-                    >
-                      <i className="fa fa-eye" />
-                      <span className="d-none d-md-inline ms-2">Grupos</span>
-                    </Link>
-                  </div>
-                ) : (
+      <div className="row">
+        {clubs.map((club: Club, index: number) => (
+          <div className="col-lg-4 col-md-6" key={index}>
+            <div
+              className={`widget-head-color-box ${
+                club.active ? "navy" : "red"
+              }-bg p-lg text-center`}
+            >
+              <div className="m-b-md">
+                <h2 className="font-bold no-margins">{club.name}</h2>
+              </div>
+              {club.images ? (
+                <div
+                  onClick={() => {
+                    if (!edit) return;
+                    setSelectedClub(club);
+                    setImageModalOpen(true);
+                  }}
+                  style={{
+                    cursor: edit ? "pointer" : "default",
+                    display: "inline-block",
+                  }}
+                  aria-hidden={!edit}
+                >
+                  <Image
+                    src={club.images.small}
+                    alt={club.name}
+                    className="rounded-circle circle-border m-b-md"
+                  />
+                </div>
+              ) : (
+                <div
+                  className="btn btn-outline-secondary btn-rounded"
+                  onClick={() => {
+                    if (!edit) return;
+                    setSelectedClub(club);
+                    setImageModalOpen(true);
+                  }}
+                  style={{
+                    width: 96,
+                    height: 96,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    borderRadius: "50%",
+                    opacity: edit ? 1 : 0.6,
+                    cursor: edit ? "pointer" : "not-allowed",
+                  }}
+                >
+                  sin logo
+                </div>
+              )}
+              <div>
+                <span>
+                  {Array.isArray(club.groups)
+                    ? club.groups.filter((g: any) => g.active).length
+                    : 0}{" "}
+                  Grupos
+                </span>
+                | <span>{club.uniqueAthletesCount ?? 0} atletas</span> |
+                <span>{club.monthly_pay ?? "-"} Bs mensualidad</span>
+              </div>
+            </div>
+            <div className="widget-text-box">
+              <h4 className="media-heading">Reseña</h4>
+              <p>{club.description}</p>
+              <hr />
+              <div
+                className="text-center"
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "8px",
+                  justifyContent: "center",
+                }}
+              >
+                {!club.active ? (
                   <Link
                     to="#"
                     onClick={(e) => {
                       e.preventDefault();
                       handleRestore(club._id!);
                     }}
-                    className="text-warning m-1 d-flex d-md-inline-flex justify-content-center align-items-center w-100"
+                    className="btn btn-xs btn-outline-warning m-1 d-flex d-md-inline-flex justify-content-center align-items-center w-100"
+                    style={{ minWidth: 110 }}
                   >
-                    <i className="fa fa-new" />
-                    <span className="d-none d-md-inline ms-2">Restaurar</span>
+                    <i className="fa fa-undo" />
+                    <span className="ms-2">Restaurar</span>
                   </Link>
+                ) : (
+                  <>
+                    {edit && (
+                      <Link
+                        to={`/clubs/edit/${club._id}`}
+                        className="btn btn-xs btn-outline-secondary"
+                        style={{ minWidth: 110 }}
+                      >
+                        <i className="fa fa-edit"></i>Editar
+                      </Link>
+                    )}
+                    <Link
+                      to={`/clubs/${club._id}/groups`}
+                      className="btn btn-xs btn-outline-primary"
+                      style={{ minWidth: 110 }}
+                    >
+                      <i className="fa fa-eye"></i>Grupos
+                    </Link>
+                    {canRemove && (
+                      <button
+                        className="btn btn-xs btn-outline-danger"
+                        onClick={() => handleRemove(club._id)}
+                        style={{ minWidth: 110 }}
+                      >
+                        <i className="fa fa-trash-o"></i>Remover
+                      </button>
+                    )}
+                    {canDelete && (
+                      <button
+                        className="btn btn-xs btn-danger"
+                        onClick={() => handleDelete(club._id)}
+                        style={{ minWidth: 110 }}
+                      >
+                        <i className="fa fa-trash"></i>Eliminar
+                      </button>
+                    )}
+                  </>
                 )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
 
       <ImageUploadModal
         open={imageModalOpen}
