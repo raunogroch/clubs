@@ -9,9 +9,18 @@ export const ClubsList = ({ clubs, onSelect }: Props) => {
   if (!clubs || clubs.length === 0)
     return <div>No inscrito en ningun club</div>;
 
+  // Mostrar únicamente clubes activos
+  const activeClubs = clubs.filter((c) => {
+    const clubObj = c as { club?: Club };
+    const club: Club = clubObj?.club || (c as Club);
+    return (club as any)?.active === true;
+  });
+
+  if (activeClubs.length === 0) return <div>No hay clubes activos</div>;
+
   return (
     <div className="list-group">
-      {clubs.map((c) => {
+      {activeClubs.map((c) => {
         const clubObj = c as { club?: Club };
         const club: Club = clubObj?.club || (c as Club);
         const id = club?._id || club?.id || Math.random();

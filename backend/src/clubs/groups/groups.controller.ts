@@ -24,6 +24,7 @@ export class GroupsController {
   constructor(private readonly groupsService: GroupsService) {}
 
   @Post()
+  @Roles(Role.SUPERADMIN, Role.ADMIN)
   create(
     @Param('clubId') clubId: string,
     @Body() createGroupDto: CreateGroupDto,

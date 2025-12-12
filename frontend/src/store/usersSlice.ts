@@ -11,6 +11,7 @@ import {
 } from "./usersThunks";
 
 export interface UsersResponse {
+  clubs?: UsersResponse;
   data: User[];
   total: number;
   page: number;
@@ -27,7 +28,14 @@ interface UsersState {
 
 const initialState: UsersState = {
   selectedUser: null,
-  users: { data: [], total: 0, page: 1, limit: 10, name: "" },
+  users: {
+    data: [],
+    total: 0,
+    page: 1,
+    limit: 10,
+    name: "",
+    clubs: undefined,
+  },
   status: "idle",
   error: null,
 };

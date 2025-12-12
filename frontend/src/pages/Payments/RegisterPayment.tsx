@@ -4,7 +4,9 @@ import { AthleteSearch } from "./components/AthleteSearch";
 import { ClubsList } from "./components/ClubsList";
 import { MonthsStatus } from "./components/MonthsStatus";
 import { PaymentForm } from "./components/PaymentForm";
-import api from "../../services/api";
+import { useDispatch } from "react-redux";
+import { fetchUser } from "../../store/coachThunks";
+import type { AppDispatch } from "../../store/store";
 import toastr from "toastr";
 import "./payments.css";
 import type { Athlete, Club, Payment } from "./IPayments";
@@ -15,17 +17,26 @@ export const RegisterPayment: React.FC = () => {
   const [clubs, setClubs] = useState<Club[]>([]);
   const [selectedClub, setSelectedClub] = useState<Club | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+  const dispatch = useDispatch<AppDispatch>();
 
   const handleSelectAthlete = async (athlete: Athlete) => {
     setSelectedAthlete(athlete);
     setSelectedClub(null);
     try {
-      const res = await api.get(`/users/${athlete._id}/clubs-groups`);
-      const data = res.data;
-      // backend returns clubs with groups; try to extract clubs array
-      const clubsList = data?.clubs || data || [];
+      const result = await dispatch(
+        fetchUser({ userId: athlete._id })
+      ).unwrap();
+      // backend may return either an array of clubs or an object with a 'clubs' array — normalize to Club[]
+      let clubsList: Club[] = [];
+      if (Array.isArray(result)) {
+        clubsList = result as Club[];
+      } else if (result && Array.isArray((result as any).clubs)) {
+        clubsList = (result as any).clubs as Club[];
+      } else {
+        clubsList = [];
+      }
       setClubs(clubsList);
-      if (!clubsList || clubsList.length === 0) {
+      if (clubsList.length === 0) {
         toastr.info("El atleta no está inscrito en ningún club");
       }
     } catch (err) {

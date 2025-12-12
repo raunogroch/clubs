@@ -30,6 +30,8 @@ export const Groups = ({
 }: GroupsProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const { groups, error, status } = useSelector((state: any) => state.groups);
+  const { user } = useSelector((state: any) => state.auth);
+  const isSuperAdmin = user?.role === "superadmin";
   const { clubId } = useParams();
 
   useEffect(() => {
@@ -107,8 +109,6 @@ export const Groups = ({
                         </td>
                         <td className="project-title">
                           <a href="project_detail.html">{group.name}</a>
-                          <br />
-                          <small>Created 14.08.2014</small>
                         </td>
                         <td className="project-people">
                           {group.athletes.map((a: any, idx: number) =>
@@ -127,51 +127,46 @@ export const Groups = ({
                         </td>
                         <td className="project-actions">
                           <div className="d-flex flex-column flex-md-row align-items-center justify-content-center gap-2">
-                            {edit && (
+                            {(edit || isSuperAdmin) && (
                               <Link
                                 to={`/clubs/${clubId}/groups/${group._id}`}
-                                className="text-warning m-1 d-flex d-md-inline-flex justify-content-center align-items-center w-100"
+                                className="btn-xs btn-warning m-1 d-flex d-md-inline-flex justify-content-center align-items-center w-100"
                               >
                                 <i className="fa fa-pencil" />
-                                <span className="d-none d-md-inline ms-2">
-                                  Edit
-                                </span>
+                                <span>&nbsp;Edit</span>
                               </Link>
                             )}
-                            {canDelete && group.active && (
-                              <Link
-                                to="#"
-                                className="text-danger m-1 d-flex d-md-inline-flex justify-content-center align-items-center w-100"
-                                onClick={() => handleDelete(group._id)}
-                              >
-                                <i className="fa fa-trash" />
-                                <span className="d-none d-md-inline ms-2">
-                                  Eliminar
-                                </span>
-                              </Link>
-                            )}
-                            {registerAthlete && group.active && (
-                              <Link
-                                to={`/clubs/${clubId}/groups/register-athlete/${group._id}`}
-                                className="text-primary m-1 d-flex d-md-inline-flex justify-content-center align-items-center w-100"
-                              >
-                                <i className="fa fa-list" />
-                                <span className="d-none d-md-inline ms-2">
-                                  Atletas
-                                </span>
-                              </Link>
-                            )}
-                            {registerCoach && group.active && (
-                              <Link
-                                to={`/clubs/${clubId}/groups/register-coach/${group._id}`}
-                                className="text-success m-1 d-flex d-md-inline-flex justify-content-center align-items-center w-100"
-                              >
-                                <i className="fa fa-list" />
-                                <span className="d-none d-md-inline ms-2">
-                                  Entrenadores
-                                </span>
-                              </Link>
-                            )}
+                            {(canDelete || isSuperAdmin) &&
+                              (group.active || isSuperAdmin) && (
+                                <Link
+                                  to="#"
+                                  className="btn-xs btn-danger m-1 d-flex d-md-inline-flex justify-content-center align-items-center w-100"
+                                  onClick={() => handleDelete(group._id)}
+                                >
+                                  <i className="fa fa-trash" />
+                                  <span>&nbsp;Eliminar</span>
+                                </Link>
+                              )}
+                            {(registerAthlete || isSuperAdmin) &&
+                              (group.active || isSuperAdmin) && (
+                                <Link
+                                  to={`/clubs/${clubId}/groups/register-athlete/${group._id}`}
+                                  className="btn-xs btn-primary m-1 d-flex d-md-inline-flex justify-content-center align-items-center w-100"
+                                >
+                                  <i className="fa fa-list" />
+                                  <span>&nbsp;Atletas</span>
+                                </Link>
+                              )}
+                            {(registerCoach || isSuperAdmin) &&
+                              (group.active || isSuperAdmin) && (
+                                <Link
+                                  to={`/clubs/${clubId}/groups/register-coach/${group._id}`}
+                                  className="btn-xs btn-success m-1 d-flex d-md-inline-flex justify-content-center align-items-center w-100"
+                                >
+                                  <i className="fa fa-list" />
+                                  <span>&nbsp;Entrenadores</span>
+                                </Link>
+                              )}
                           </div>
                         </td>
                       </tr>
