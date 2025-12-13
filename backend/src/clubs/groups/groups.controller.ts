@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { GroupsService } from './groups.service';
 import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
@@ -18,8 +19,10 @@ import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { Roles as Role } from 'src/users/enum/roles.enum';
 import { Roles } from 'src/auth/decorators/roles.decorator';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('clubs/:clubId/groups')
+@UseGuards(JwtAuthGuard)
 export class GroupsController {
   constructor(private readonly groupsService: GroupsService) {}
 
