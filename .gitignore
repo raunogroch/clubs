@@ -13,4 +13,8 @@ image-processor/node_modules/
 image-processor/dist/
 image-processor/images/
 
+images-data/
+mongo-data/
+.env
+
 template

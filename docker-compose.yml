@@ -1,0 +1,57 @@
+services:
+  mongo:
+    image: mongo:4.4
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    volumes:
+      - ./mongo-data:/data/db
+    ports:
+      - "${MONGODB_PORT}:27017"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - MONGODB_URI=${MONGODB_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - PORT=${BACKEND_PORT}
+      - IMAGE_PROCESSOR_API=http://image-processor:${IMAGE_PROCESSOR_PORT}
+    ports:
+      - "${BACKEND_PORT}:3000"
+    depends_on:
+      - mongo
+
+  image-processor:
+    build:
+      context: ./image-processor
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - PORT=${IMAGE_PROCESSOR_PORT}
+    ports:
+      - "${IMAGE_PROCESSOR_PORT}:4000"
+    volumes:
+      - ./images-data:/usr/src/app/images
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_BACKEND_URI: ${VITE_BACKEND_URI}
+        VITE_IMAGE_PROCESSOR_API: ${VITE_IMAGE_PROCESSOR_API}
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - VITE_BACKEND_URI=${VITE_BACKEND_URI}
+      - VITE_IMAGE_PROCESSOR_API=${VITE_IMAGE_PROCESSOR_API}
+    ports:
+      - "${FRONTEND_PORT}:80"
+    depends_on:
+      - backend

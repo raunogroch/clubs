@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
 import toastr from "toastr";
 import "toastr/build/toastr.min.css";
 import { assignAssistants, findClubById } from "../../../store/clubsThunks";
@@ -12,15 +11,12 @@ import { NavHeader } from "../../../components";
 
 export const ClubAssignAssistants: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
   const club = useSelector((s: RootState) => s.clubs.selectedClub);
 
   const [allAssistants, setAllAssistants] = useState<User[]>([]);
   const [localClub, setLocalClub] = useState<any | null>(club ?? null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   // Keep localClub in sync with store updates
   useEffect(() => {
@@ -35,17 +31,17 @@ export const ClubAssignAssistants: React.FC = () => {
   // Load assistants list separately (do not mutate global users slice)
   useEffect(() => {
     let mounted = true;
-    setLoading(true);
     userService
       .getAssistants(500)
       .then((res) => {
         if (!mounted) return;
-        if (res.code && res.code >= 400)
-          setError(res.message || "Error al cargar asistentes");
-        else setAllAssistants(res.data || []);
+        if (res.code && res.code >= 400) {
+          // Error handled silently
+        } else setAllAssistants(res.data || []);
       })
-      .catch(() => setError("Error al cargar asistentes"))
-      .finally(() => mounted && setLoading(false));
+      .catch(() => {
+        // Error handled silently
+      });
     return () => {
       mounted = false;
     };
@@ -80,7 +76,6 @@ export const ClubAssignAssistants: React.FC = () => {
     setLocalClub({ ...localClub, assistants: ids });
 
     try {
-      const updatedClub: any = { ...localClub, assistants: ids };
       await dispatch(
         assignAssistants({ clubId: id, assistants: ids })
       ).unwrap();
@@ -99,7 +94,6 @@ export const ClubAssignAssistants: React.FC = () => {
     setLocalClub({ ...localClub, assistants: ids });
 
     try {
-      const updatedClub: any = { ...localClub, assistants: ids };
       await dispatch(
         assignAssistants({ clubId: id, assistants: ids })
       ).unwrap();

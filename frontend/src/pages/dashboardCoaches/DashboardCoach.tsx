@@ -47,7 +47,6 @@ export const DashboardCoach = ({ name }: pageParamProps) => {
                           }
                           alt={data.club.name}
                           className="rounded-circle"
-                          width="70%"
                         />
                         <div>
                           <br />
@@ -93,7 +92,6 @@ export const DashboardCoach = ({ name }: pageParamProps) => {
                                           }
                                           alt={athlete.name}
                                           className="rounded-circle mr-2"
-                                          width="40px"
                                         />
                                         <span>
                                           {athlete.name} {athlete.lastname}

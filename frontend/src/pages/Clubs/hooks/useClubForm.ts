@@ -14,7 +14,6 @@ const emptyClub: Club = {
   groups: [],
   createdAt: "",
   monthly_pay: 200,
-  image: "",
   uniqueAthletesCount: 0,
   active: true,
 };

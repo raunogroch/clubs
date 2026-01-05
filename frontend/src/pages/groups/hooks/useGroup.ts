@@ -13,6 +13,11 @@ export const initialGroupData: IGroup = {
   place: "",
   coaches: [],
   athletes: [],
+  images: {
+    small: "",
+    medium: "",
+    large: "",
+  },
   active: true,
 };
 
