@@ -18,6 +18,7 @@ export const UserListGeneric = ({
   delete: canDelete,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
+  const currentUser = useSelector((state: RootState) => state.auth.user);
   const { users, status, error } = useSelector(
     (state: RootState) => state.users
   );
@@ -25,9 +26,26 @@ export const UserListGeneric = ({
   const { page, limit, name } = filter;
   const userList = users.data as User[];
 
+  // Define role-based access control
+  const roleAccessMap: Record<string, string[]> = {
+    athlete: ["admin", "superadmin"], // Athletes can only be viewed by admins
+    parent: ["admin", "superadmin"], // Parents can only be viewed by admins
+    coach: ["coach", "assistant", "admin", "superadmin"], // Coaches can view each other and assistants can view them
+    assistant: ["admin", "superadmin"], // Assistants only viewed by admins
+    admin: ["admin", "superadmin"], // Admins only viewed by admins/superadmins
+    superadmin: ["superadmin"], // Only superadmins can view other superadmins
+    users: ["admin", "superadmin"], // Users list only for admins
+  };
+
+  const userRole = currentUser?.role;
+  const allowedRoles = roleAccessMap[role] || [];
+  const hasAccess = userRole && allowedRoles.includes(userRole);
+
   useEffect(() => {
-    dispatch(fetchUsers({ page, limit, name, ...(role ? { role } : {}) }));
-  }, [dispatch, page, limit, name, role]);
+    if (hasAccess) {
+      dispatch(fetchUsers({ page, limit, name, ...(role ? { role } : {}) }));
+    }
+  }, [dispatch, page, limit, name, role, hasAccess]);
 
   const handleLimitChange = (level: number) => {
     dispatch(setLimit(level));
@@ -35,6 +53,24 @@ export const UserListGeneric = ({
   };
 
   if (error) toastr.error(error);
+
+  // Check if user has access to this section
+  if (!hasAccess) {
+    return (
+      <>
+        <NavHeader name={nameTitle} />
+        <div className="wrapper wrapper-content">
+          <div className="middle-box text-center animated fadeInRightBig">
+            <h3 className="font-bold">Acceso denegado</h3>
+            <div className="error-desc">
+              No tienes permisos para ver esta sección. Solo usuarios con rol{" "}
+              {allowedRoles.join(", ")} pueden acceder.
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -78,6 +114,7 @@ export const UserListGeneric = ({
                     restore={res}
                     remove={canRemove}
                     delete={canDelete}
+                    userRole={role}
                   />
                   <PaginationList filter={users} />
                 </div>

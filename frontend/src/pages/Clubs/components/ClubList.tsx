@@ -12,6 +12,7 @@ import {
 } from "../../../store/clubsThunks";
 import type { AppDispatch } from "../../../store/store";
 import type { Club } from "../interfaces";
+import { useAuth } from "../../../hooks";
 
 interface ClubProps {
   clubs: Club[];
@@ -27,8 +28,17 @@ export const ClubList = ({
   delete: canDelete,
 }: ClubProps) => {
   const dispatch = useDispatch<AppDispatch>();
+  const { userRole } = useAuth();
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [selectedClub, setSelectedClub] = useState<Club | null>(null);
+
+  // Only coaches, assistants, admins and superadmins can manage clubs
+  const canManageClubs =
+    userRole &&
+    ["coach", "assistant", "admin", "superadmin"].includes(userRole);
+  const canEditClub = edit && canManageClubs;
+  const canRemoveClub = canRemove && canManageClubs;
+  const canDeleteClub = canDelete && canManageClubs;
 
   const handleRemove = async (id?: string) => {
     if (!id) return;
@@ -98,15 +108,15 @@ export const ClubList = ({
               {club.images ? (
                 <div
                   onClick={() => {
-                    if (!edit) return;
+                    if (!canEditClub) return;
                     setSelectedClub(club);
                     setImageModalOpen(true);
                   }}
                   style={{
-                    cursor: edit ? "pointer" : "default",
+                    cursor: canEditClub ? "pointer" : "default",
                     display: "inline-block",
                   }}
-                  aria-hidden={!edit}
+                  aria-hidden={!canEditClub}
                 >
                   <Image
                     src={club.images.small}
@@ -118,7 +128,7 @@ export const ClubList = ({
                 <div
                   className="btn btn-outline-secondary btn-rounded"
                   onClick={() => {
-                    if (!edit) return;
+                    if (!canEditClub) return;
                     setSelectedClub(club);
                     setImageModalOpen(true);
                   }}
@@ -129,8 +139,8 @@ export const ClubList = ({
                     alignItems: "center",
                     justifyContent: "center",
                     borderRadius: "50%",
-                    opacity: edit ? 1 : 0.6,
-                    cursor: edit ? "pointer" : "not-allowed",
+                    opacity: canEditClub ? 1 : 0.6,
+                    cursor: canEditClub ? "pointer" : "not-allowed",
                   }}
                 >
                   sin logo
@@ -175,7 +185,7 @@ export const ClubList = ({
                   </Link>
                 ) : (
                   <>
-                    {edit && (
+                    {canEditClub && (
                       <Link
                         to={`/clubs/edit/${club._id}`}
                         className="btn btn-xs btn-outline-secondary"
@@ -191,7 +201,7 @@ export const ClubList = ({
                     >
                       <i className="fa fa-eye"></i>Grupos
                     </Link>
-                    {canRemove && (
+                    {canRemoveClub && (
                       <button
                         className="btn btn-xs btn-outline-danger"
                         onClick={() => handleRemove(club._id)}
@@ -200,7 +210,7 @@ export const ClubList = ({
                         <i className="fa fa-trash-o"></i>Remover
                       </button>
                     )}
-                    {canDelete && (
+                    {canDeleteClub && (
                       <button
                         className="btn btn-xs btn-danger"
                         onClick={() => handleDelete(club._id)}

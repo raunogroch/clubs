@@ -17,6 +17,9 @@ export interface User {
   name?: string;
   lastname?: string;
   birth_date?: string;
+  gender?: "M" | "F" | string;
+  height?: number;
+  weight?: number;
   username?: string;
   password?: string;
   active?: boolean;

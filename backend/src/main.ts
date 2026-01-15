@@ -29,6 +29,8 @@ async function bootstrap() {
     prefix: '/images/',
   });
 
+  app.setGlobalPrefix('api');
+
   await app.listen(process.env.PORT ?? 3000);
   logger.log(`Application is running on: ${await app.getUrl()}`);
   logger.log(`Image Processor: ${process.env.IMAGE_PROCESSOR_API}`);

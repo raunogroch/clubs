@@ -51,30 +51,84 @@ export class UsersService {
   folder = 'profile'; // Define la carpeta donde se guardaran las fotos de perfil
 
   /**
+   * Valida que los campos requeridos según el rol estén presentes
+   */
+  private validateRequiredFieldsByRole(createUserDto: CreateUserDto): void {
+    const role = createUserDto.role;
+    const errors: string[] = [];
+
+    // Campos requeridos para cada rol
+    const requiredFields: Record<Roles, string[]> = {
+      [Roles.ATHLETE]: ['username', 'password', 'name', 'lastname'],
+      [Roles.PARENT]: ['name', 'lastname'],
+      [Roles.COACH]: ['username', 'password', 'name', 'lastname'],
+      [Roles.ASSISTANT]: ['username', 'password', 'name', 'lastname'],
+      [Roles.ADMIN]: ['username', 'password', 'name', 'lastname'],
+      [Roles.SUPERADMIN]: ['username', 'password', 'name', 'lastname'],
+    };
+
+    const required = requiredFields[role] || [];
+    for (const field of required) {
+      if (!createUserDto[field]) {
+        errors.push(`Field '${field}' is required for role '${role}'`);
+      }
+    }
+
+    if (errors.length > 0) {
+      throw new Error(errors.join('; '));
+    }
+  }
+
+  /**
    * Crea un nuevo usuario si el username no existe previamente
    * SRP: validación, imagen y password delegados a servicios
    */
   async create(createUserDto: CreateUserDto): Promise<any> {
-    await this.userValidator.validateUniqueUsername(createUserDto.username);
+    // Validar campos requeridos según el rol
+    this.validateRequiredFieldsByRole(createUserDto);
+
+    // Validar username único solo si el rol requiere username
+    if (createUserDto.username) {
+      await this.userValidator.validateUniqueUsername(createUserDto.username);
+    }
+
     let imageProcessingSkipped = false;
-    try {
-      createUserDto.images = (await this.userImageService.processImage(
-        this.folder,
-        createUserDto.image,
-      )) as { small: string; medium: string; large: string };
-    } catch (error: any) {
-      if (error && error.getStatus && error.getStatus() === 503) {
-        console.warn(
-          'Image processor service unavailable; creating user without images',
-        );
-        imageProcessingSkipped = true;
-      } else {
-        throw error;
+
+    // Procesar imagen solo si el rol la requiere y se proporciona
+    if (
+      [
+        Roles.ATHLETE,
+        Roles.COACH,
+        Roles.ASSISTANT,
+        Roles.ADMIN,
+        Roles.SUPERADMIN,
+      ].includes(createUserDto.role) &&
+      createUserDto.image
+    ) {
+      try {
+        createUserDto.images = (await this.userImageService.processImage(
+          this.folder,
+          createUserDto.image,
+        )) as { small: string; medium: string; large: string };
+      } catch (error: any) {
+        if (error && error.getStatus && error.getStatus() === 503) {
+          console.warn(
+            'Image processor service unavailable; creating user without images',
+          );
+          imageProcessingSkipped = true;
+        } else {
+          throw error;
+        }
       }
     }
-    createUserDto.password = await this.userPasswordService.hashPassword(
-      createUserDto.password,
-    );
+
+    // Hashear contraseña solo si el rol la requiere
+    if (createUserDto.password) {
+      createUserDto.password = await this.userPasswordService.hashPassword(
+        createUserDto.password,
+      );
+    }
+
     const created = await this.userRepository.create(createUserDto);
     if (imageProcessingSkipped) {
       return {

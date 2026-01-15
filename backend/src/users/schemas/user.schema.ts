@@ -5,47 +5,67 @@ import { Roles } from '../enum/roles.enum';
 // Esquema de User para Mongoose
 @Schema({ timestamps: true })
 export class User extends mongoose.Document {
-  /** Nombre de usuario */
-  @Prop({ required: true, unique: true })
-  username: string;
-
-  /** Contraseña encriptada */
-  @Prop({ required: true })
-  password: string;
-
-  /** Rol del usuario */
-  @Prop()
+  /** Rol del usuario (ATHLETE, PARENT, COACH, ASSISTANT, ADMIN, SUPERADMIN) */
+  @Prop({ required: true, enum: Roles })
   role: Roles;
 
-  /** Nombre real del usuario */
-  @Prop()
-  name: string;
+  // ========== CAMPOS COMUNES A MÚLTIPLES ROLES ==========
 
-  /** Apellido del usuario */
-  @Prop()
-  lastname: string;
+  /** Nombre de usuario (ATHLETE, COACH, ASSISTANT, ADMIN, SUPERADMIN) */
+  @Prop({ required: false, unique: true, sparse: true })
+  username?: string;
 
-  /** Cédula de identidad */
-  @Prop()
-  ci: string;
+  /** Contraseña encriptada (ATHLETE, COACH, ASSISTANT, ADMIN, SUPERADMIN) */
+  @Prop({ required: false })
+  password?: string;
 
-  /** Fecha de nacimiento */
-  @Prop()
-  birth_date: Date;
+  /** Nombre real del usuario (todos excepto PARENT) */
+  @Prop({ required: false })
+  name?: string;
+
+  /** Segundo nombre (ATHLETE, PARENT, COACH, ASSISTANT) */
+  @Prop({ required: false })
+  middle_name?: string;
+
+  /** Apellido del usuario (todos excepto SUPERADMIN/ADMIN) */
+  @Prop({ required: false })
+  lastname?: string;
+
+  /** Cédula de identidad (ATHLETE, PARENT, COACH, ASSISTANT, ADMIN) */
+  @Prop({ required: false })
+  ci?: string;
+
+  // ========== CAMPOS ESPECÍFICOS DE ATHLETE ==========
+
+  /** Género del atleta (ATHLETE) */
+  @Prop({ required: false })
+  gender?: string;
+
+  /** Fecha de nacimiento (ATHLETE) */
+  @Prop({ required: false })
+  birth_date?: Date;
+
+  // ========== CAMPOS ESPECÍFICOS DE PARENT ==========
+
+  /** Teléfono del padre/tutor (PARENT) */
+  @Prop({ required: false })
+  phone?: string;
+
+  // ========== CAMPOS OPCIONALES (LEGADO) ==========
 
   /** Altura en centímetros */
-  @Prop()
-  height: number;
+  @Prop({ required: false })
+  height?: number;
 
   /** Peso en kilogramos */
-  @Prop()
-  weight: number;
+  @Prop({ required: false })
+  weight?: number;
 
   /** Bandera para soft-delete */
   @Prop({ type: Boolean, default: true })
   active: boolean;
 
-  /** Imágenes de perfil en diferentes resoluciones */
+  /** Imágenes de perfil en diferentes resoluciones (ATHLETE, COACH, ASSISTANT, ADMIN, SUPERADMIN) */
   @Prop({
     type: {
       small: { type: String },
