@@ -8,4 +8,4 @@ export * from "./Image";
 export * from "./StaticMessage";
 export * from "./CheckboxList";
 export * from "./Button";
-export * from "./ImageUploadModal";
+export * from "./ImageUploadModal";export * from "./DynamicFormField";

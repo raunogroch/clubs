@@ -1,7 +1,8 @@
-import { Input } from ".";
 import { Role, type UserFormProps } from "../interfaces";
 import { UserRoleSelector } from "../pages/Users/components";
 import { useUserForm } from "../pages/Users/hooks";
+import { DynamicFormField } from "./DynamicFormField";
+import { getFieldsForRole } from "../config/roleFieldsConfig";
 
 export const GenericUserForm = ({
   user,
@@ -9,6 +10,7 @@ export const GenericUserForm = ({
   onSuccess,
 }: UserFormProps) => {
   const { formData, errors, handleChange, handleSubmit } = useUserForm(user);
+  const roleFields = getFieldsForRole(formData.role);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,119 +31,20 @@ export const GenericUserForm = ({
           onError={errors.role}
         />
 
-        <div className="form-group row">
-          <label htmlFor="name" className="col-sm-2 col-form-label">
-            Nombres
-          </label>
-          <div className="col-sm-10">
-            <Input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className={`form-control ${errors.name ? "is-invalid" : ""}`}
-            />
-            {errors.name && (
-              <div className="invalid-feedback">{errors.name}</div>
-            )}
-          </div>
-        </div>
-
-        <div className="form-group row">
-          <label htmlFor="lastname" className="col-sm-2 col-form-label">
-            Apellidos
-          </label>
-          <div className="col-sm-10">
-            <Input
-              type="text"
-              id="lastname"
-              name="lastname"
-              value={formData.lastname}
-              onChange={handleChange}
-              className={`form-control ${errors.lastname ? "is-invalid" : ""}`}
-            />
-            {errors.lastname && (
-              <div className="invalid-feedback">{errors.lastname}</div>
-            )}
-          </div>
-        </div>
-
-        <div className="form-group row">
-          <label htmlFor="username" className="col-sm-2 col-form-label">
-            Username
-          </label>
-          <div className="col-sm-10">
-            <Input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              className={`form-control ${errors.username ? "is-invalid" : ""}`}
-            />
-            {errors.username && (
-              <div className="invalid-feedback">{errors.username}</div>
-            )}
-          </div>
-        </div>
-
-        <div className="form-group row">
-          <label htmlFor="password" className="col-sm-2 col-form-label">
-            Contraseña
-          </label>
-          <div className="col-sm-10">
-            <Input
-              type={formData._id ? "password" : "text"}
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className={`form-control ${errors.password ? "is-invalid" : ""}`}
-            />
-            {errors.password && (
-              <div className="invalid-feedback">{errors.password}</div>
-            )}
-          </div>
-        </div>
-
-        <div className="form-group row">
-          <label htmlFor="ci" className="col-sm-2 col-form-label">
-            Carnet
-          </label>
-          <div className="col-sm-10">
-            <Input
-              type="text"
-              id="ci"
-              name="ci"
-              value={formData.ci}
-              onChange={handleChange}
-              className={`form-control ${errors.ci ? "is-invalid" : ""}`}
-            />
-            {errors.ci && <div className="invalid-feedback">{errors.ci}</div>}
-          </div>
-        </div>
-
-        <div className="form-group row">
-          <label htmlFor="birth_date" className="col-sm-2 col-form-label">
-            Fecha de nacimiento
-          </label>
-          <div className="col-sm-10">
-            <Input
-              type="date"
-              id="birth_date"
-              name="birth_date"
-              value={formData.birth_date}
-              onChange={handleChange}
-              className={`form-control ${
-                errors.birth_date ? "is-invalid" : ""
-              }`}
-            />
-            {errors.birth_date && (
-              <div className="invalid-feedback">{errors.birth_date}</div>
-            )}
-          </div>
-        </div>
+        {formData.role && (
+          <>
+            {roleFields.map((field) => (
+              <DynamicFormField
+                key={field.name}
+                field={field}
+                value={formData[field.name as keyof typeof formData]}
+                error={(errors as any)[field.name]}
+                onChange={handleChange}
+                isEditing={!!user}
+              />
+            ))}
+          </>
+        )}
 
         <div className="form-group row">
           <div className="col-sm-10 offset-sm-2">
