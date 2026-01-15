@@ -29,35 +29,35 @@ export const UserRoleSelector = ({
     currentRole === "superadmin"
       ? [
           { value: "", label: "Seleccione un rol para el usuario" },
-          { value: "athlete", label: "Deportista" },
-          { value: "parent", label: "Responsable" },
-          { value: "coach", label: "Entrenador" },
-          { value: "assistant", label: "Asistente" },
-          { value: "admin", label: "Administrador" },
           { value: "superadmin", label: "Super Administrador" },
+          { value: "admin", label: "Administrador" },
+          { value: "assistant", label: "Asistente" },
+          { value: "coach", label: "Entrenador" },
+          { value: "parent", label: "Tutor" },
+          { value: "athlete", label: "Deportista" },
         ]
       : currentRole === "admin"
       ? [
           { value: "", label: "Seleccione un rol para el usuario" },
-          { value: "athlete", label: "Deportista" },
-          { value: "parent", label: "Responsable" },
-          { value: "coach", label: "Entrenador" },
-          { value: "assistant", label: "Asistente" },
           { value: "admin", label: "Administrador" },
+          { value: "assistant", label: "Asistente" },
+          { value: "coach", label: "Entrenador" },
+          { value: "parent", label: "Tutor" },
+          { value: "athlete", label: "Deportista" },
         ]
       : currentRole === "assistant"
       ? [
+          { value: "parent", label: "Tutor" },
           { value: "athlete", label: "Deportista" },
-          { value: "parent", label: "Responsable" },
         ]
       : [
           // Fallback: mostrar las mismas opciones que admin para evitar bloquear la creación
           { value: "", label: "Seleccione un rol para el usuario" },
-          { value: "athlete", label: "Deportista" },
-          { value: "parent", label: "Responsable" },
-          { value: "coach", label: "Entrenador" },
-          { value: "assistant", label: "Asistente" },
           { value: "admin", label: "Administrador" },
+          { value: "assistant", label: "Asistente" },
+          { value: "coach", label: "Entrenador" },
+          { value: "parent", label: "Tutor" },
+          { value: "athlete", label: "Deportista" },
         ];
 
   return (

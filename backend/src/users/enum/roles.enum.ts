@@ -1,8 +1,8 @@
 export enum Roles {
-  ATHLETE = 'athlete',
-  PARENT = 'parent',
-  COACH = 'coach',
-  ASSISTANT = 'assistant',
-  ADMIN = 'admin',
   SUPERADMIN = 'superadmin',
+  ADMIN = 'admin',
+  ASSISTANT = 'assistant',
+  COACH = 'coach',
+  PARENT = 'parent',
+  ATHLETE = 'athlete',
 }

@@ -5,14 +5,15 @@ interface DynamicFormFieldProps {
   field: FieldConfig;
   value: any;
   error?: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  onChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => void;
 }
 
 const genderOptions = [
-  { value: '', label: 'Seleccione' },
-  { value: 'male', label: 'Masculino' },
-  { value: 'female', label: 'Femenino' },
-  { value: 'other', label: 'Otro' },
+  { value: "", label: "Seleccione" },
+  { value: "male", label: "Masculino" },
+  { value: "female", label: "Femenino" },
 ];
 
 export const DynamicFormField = ({
@@ -21,23 +22,23 @@ export const DynamicFormField = ({
   error,
   onChange,
 }: DynamicFormFieldProps) => {
-  const inputClassName = `form-control ${error ? 'is-invalid' : ''}`;
+  const inputClassName = `form-control ${error ? "is-invalid" : ""}`;
 
   // Map custom field types to HTML input types
   const getInputType = (): string => {
-    if (field.type === 'email' || field.type === 'tel') {
+    if (field.type === "email" || field.type === "tel") {
       return field.type;
     }
-    if (field.type === 'date') {
-      return 'date';
+    if (field.type === "date") {
+      return "date";
     }
-    if (field.type === 'password') {
-      return 'password';
+    if (field.type === "password") {
+      return "password";
     }
-    if (field.type === 'textarea') {
-      return 'text';
+    if (field.type === "textarea") {
+      return "text";
     }
-    return 'text';
+    return "text";
   };
 
   return (
@@ -47,26 +48,26 @@ export const DynamicFormField = ({
         {field.required && <span className="text-danger">*</span>}
       </label>
       <div className="col-sm-10">
-        {field.type === 'select' ? (
+        {field.type === "select" ? (
           <select
             id={field.name}
             name={field.name}
-            value={value || ''}
+            value={value || ""}
             onChange={onChange}
             className={inputClassName}
           >
-            {field.name === 'gender' &&
+            {field.name === "gender" &&
               genderOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
               ))}
           </select>
-        ) : field.type === 'textarea' ? (
+        ) : field.type === "textarea" ? (
           <textarea
             id={field.name}
             name={field.name}
-            value={value || ''}
+            value={value || ""}
             onChange={onChange as any}
             placeholder={field.placeholder}
             className={inputClassName}
@@ -76,7 +77,7 @@ export const DynamicFormField = ({
             type={getInputType() as any}
             id={field.name}
             name={field.name}
-            value={value || ''}
+            value={value || ""}
             onChange={onChange}
             placeholder={field.placeholder}
             className={inputClassName}

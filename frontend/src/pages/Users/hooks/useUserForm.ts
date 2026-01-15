@@ -74,7 +74,9 @@ export const useUserForm = (initialData?: User) => {
       const value = (formData as any)[field.name];
 
       if (field.required && (!value || value.toString().trim() === "")) {
-        newErrors[field.name as keyof UserErrors] = `${field.label} es requerido`;
+        newErrors[
+          field.name as keyof UserErrors
+        ] = `${field.label} es requerido`;
       }
 
       // Validación específica para fecha
@@ -146,47 +148,6 @@ export const useUserForm = (initialData?: User) => {
       } else {
         const result: any = await dispatch(
           createUser(cleanedData as any)
-        ).unwrap();
-        if (result && result.imageProcessingSkipped) {
-          toastr.warning(
-            "Usuario creado, pero la imagen no pudo procesarse (servicio de imágenes no disponible)"
-          );
-        } else {
-          toastr.success("Usuario creado correctamente");
-        }
-      }
-      return true;
-    } catch (error: any) {
-      const errorMessage = error.message || "Error de conexión";
-      toastr.error(errorMessage);
-      return false;
-    }
-  };
-
-  const updateFormData = (newData: Partial<UserFormModel>) => {
-    setFormData((prev) => ({ ...prev, ...newData }));
-
-    if (newData.password === initialData?.password) {
-      setIsPasswordModified(false);
-    }
-  };
-
-  return {
-    formData,
-    errors,
-    handleChange,
-    handleSubmit,
-    setFormData: updateFormData,
-    isPasswordModified,
-  };
-};
-          );
-        } else {
-          toastr.success("Usuario actualizado correctamente");
-        }
-      } else {
-        const result: any = await dispatch(
-          createUser(formData as any)
         ).unwrap();
         if (result && result.imageProcessingSkipped) {
           toastr.warning(

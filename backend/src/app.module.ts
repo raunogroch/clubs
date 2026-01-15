@@ -8,6 +8,7 @@ import { SportsModule } from './sports/sports.module';
 import { GroupsModule } from './clubs/groups/groups.module';
 import { PaymentsModule } from './payments/payments.module';
 import { HttpModule } from './common/http/http.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { HttpModule } from './common/http/http.module';
     SportsModule,
     GroupsModule,
     PaymentsModule,
+    AdminModule,
   ],
 })
 export class AppModule {}

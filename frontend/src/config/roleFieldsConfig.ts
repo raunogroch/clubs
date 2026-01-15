@@ -2,7 +2,14 @@
  * Configuración de campos requeridos y opcionales para cada rol
  */
 
-export type FieldType = 'text' | 'email' | 'password' | 'date' | 'select' | 'textarea' | 'tel';
+export type FieldType =
+  | "text"
+  | "email"
+  | "password"
+  | "date"
+  | "select"
+  | "textarea"
+  | "tel";
 
 export interface FieldConfig {
   name: string;
@@ -24,42 +31,42 @@ export interface RoleFieldsConfig {
 
 const commonFields: FieldConfig[] = [
   {
-    name: 'name',
-    label: 'Nombres',
-    type: 'text',
+    name: "name",
+    label: "Nombres",
+    type: "text",
     required: true,
-    placeholder: 'Ej: Juan',
+    placeholder: "Ej: Juan",
   },
   {
-    name: 'lastname',
-    label: 'Apellidos',
-    type: 'text',
+    name: "lastname",
+    label: "Apellidos",
+    type: "text",
     required: true,
-    placeholder: 'Ej: Pérez García',
+    placeholder: "Ej: Pérez García",
   },
   {
-    name: 'ci',
-    label: 'Carnet de Identidad',
-    type: 'text',
+    name: "ci",
+    label: "Carnet de Identidad",
+    type: "text",
     required: false,
-    placeholder: 'Ej: 12345678',
+    placeholder: "Ej: 12345678",
   },
 ];
 
 const credentialsFields: FieldConfig[] = [
   {
-    name: 'username',
-    label: 'Nombre de Usuario',
-    type: 'text',
+    name: "username",
+    label: "Nombre de Usuario",
+    type: "text",
     required: true,
-    placeholder: 'Ej: juan.perez',
+    placeholder: "Ej: juan.perez",
   },
   {
-    name: 'password',
-    label: 'Contraseña',
-    type: 'password',
+    name: "password",
+    label: "Contraseña",
+    type: "password",
     required: true,
-    help: 'Mínimo 6 caracteres',
+    help: "Mínimo 6 caracteres",
   },
 ];
 
@@ -70,11 +77,11 @@ export const roleFieldsConfig: RoleFieldsConfig = {
     fields: [
       ...commonFields,
       {
-        name: 'middle_name',
-        label: 'Nombre del Medio (opcional)',
-        type: 'text',
+        name: "middle_name",
+        label: "Nombre del Medio (opcional)",
+        type: "text",
         required: false,
-        placeholder: 'Ej: Miguel',
+        placeholder: "Ej: Miguel",
       },
       ...credentialsFields,
     ],
@@ -86,11 +93,11 @@ export const roleFieldsConfig: RoleFieldsConfig = {
     fields: [
       ...commonFields,
       {
-        name: 'middle_name',
-        label: 'Nombre del Medio (opcional)',
-        type: 'text',
+        name: "middle_name",
+        label: "Nombre del Medio (opcional)",
+        type: "text",
         required: false,
-        placeholder: 'Ej: Miguel',
+        placeholder: "Ej: Miguel",
       },
       ...credentialsFields,
     ],
@@ -102,11 +109,11 @@ export const roleFieldsConfig: RoleFieldsConfig = {
     fields: [
       ...commonFields,
       {
-        name: 'middle_name',
-        label: 'Nombre del Medio (opcional)',
-        type: 'text',
+        name: "middle_name",
+        label: "Nombre del Medio (opcional)",
+        type: "text",
         required: false,
-        placeholder: 'Ej: Miguel',
+        placeholder: "Ej: Miguel",
       },
       ...credentialsFields,
     ],
@@ -118,11 +125,11 @@ export const roleFieldsConfig: RoleFieldsConfig = {
     fields: [
       ...commonFields,
       {
-        name: 'middle_name',
-        label: 'Nombre del Medio (opcional)',
-        type: 'text',
+        name: "middle_name",
+        label: "Nombre del Medio (opcional)",
+        type: "text",
         required: false,
-        placeholder: 'Ej: Miguel',
+        placeholder: "Ej: Miguel",
       },
       ...credentialsFields,
     ],
@@ -134,22 +141,22 @@ export const roleFieldsConfig: RoleFieldsConfig = {
     fields: [
       ...commonFields,
       {
-        name: 'middle_name',
-        label: 'Nombre del Medio (opcional)',
-        type: 'text',
+        name: "middle_name",
+        label: "Nombre del Medio (opcional)",
+        type: "text",
         required: false,
-        placeholder: 'Ej: Miguel',
+        placeholder: "Ej: Miguel",
       },
       {
-        name: 'gender',
-        label: 'Género (opcional)',
-        type: 'select',
+        name: "gender",
+        label: "Género (opcional)",
+        type: "select",
         required: false,
       },
       {
-        name: 'birth_date',
-        label: 'Fecha de Nacimiento (opcional)',
-        type: 'date',
+        name: "birth_date",
+        label: "Fecha de Nacimiento (opcional)",
+        type: "date",
         required: false,
       },
       ...credentialsFields,
@@ -162,18 +169,18 @@ export const roleFieldsConfig: RoleFieldsConfig = {
     fields: [
       ...commonFields,
       {
-        name: 'middle_name',
-        label: 'Nombre del Medio (opcional)',
-        type: 'text',
+        name: "middle_name",
+        label: "Nombre del Medio (opcional)",
+        type: "text",
         required: false,
-        placeholder: 'Ej: Miguel',
+        placeholder: "Ej: Miguel",
       },
       {
-        name: 'phone',
-        label: 'Teléfono (opcional)',
-        type: 'tel',
+        name: "phone",
+        label: "Teléfono (opcional)",
+        type: "tel",
         required: false,
-        placeholder: 'Ej: +1 234 567 8900',
+        placeholder: "Ej: +1 234 567 8900",
       },
     ],
   },
