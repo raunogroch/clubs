@@ -32,8 +32,11 @@ export class ClubsController {
    * Endpoint para crear un club
    */
   @Post()
-  async create(@Body() createClubDto: CreateClubDto) {
-    return this.clubsService.create(createClubDto);
+  async create(
+    @Body() createClubDto: CreateClubDto,
+    @CurrentUser() user: currentAuth,
+  ) {
+    return this.clubsService.create(createClubDto, user);
   }
 
   /**
@@ -56,16 +59,20 @@ export class ClubsController {
    * Endpoint para actualizar un club
    */
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateClubDto: UpdateClubDto) {
-    return this.clubsService.update(id, updateClubDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateClubDto: UpdateClubDto,
+    @CurrentUser() user: currentAuth,
+  ) {
+    return this.clubsService.update(id, updateClubDto, user);
   }
 
   /**
    * Endpoint para eliminar un club
    */
   @Delete(':id')
-  async remove(@Param('id') id: string) {
-    return this.clubsService.remove(id);
+  async remove(@Param('id') id: string, @CurrentUser() user: currentAuth) {
+    return this.clubsService.remove(id, user);
   }
 
   /**

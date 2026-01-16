@@ -1,8 +1,11 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { adminGroupsService } from '../../services/admin-groups.service';
-import type { CreateAdminGroupPayload } from '../../services/admin-groups.service';
-import '../../styles/Forms.css';
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import toastr from "toastr";
+import "toastr/build/toastr.min.css";
+import { adminGroupsService } from "../../services/admin-groups.service";
+import { userService } from "../../services/userService";
+import type { CreateAdminGroupPayload } from "../../services/admin-groups.service";
+import type { User } from "../../interfaces";
 
 interface AdminGroupFormProps {
   name?: string;
@@ -16,22 +19,31 @@ export const AdminGroupForm = ({ name, sub, sub1 }: AdminGroupFormProps) => {
   const [loading, setLoading] = useState(id ? true : false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [administrators, setAdministrators] = useState<User[]>([]);
 
   const [formData, setFormData] = useState<CreateAdminGroupPayload>({
-    name: '',
-    description: '',
-    sport: '',
-    category: '',
-    schedule: [],
-    coaches: [],
-    athletes: [],
+    name: "",
+    administrator: "",
   });
 
   useEffect(() => {
+    fetchAdministrators();
     if (id) {
       fetchGroup();
     }
   }, [id]);
+
+  const fetchAdministrators = async () => {
+    try {
+      const response = await userService.getAdmins(1000);
+      if (response.data) {
+        setAdministrators(response.data);
+      }
+    } catch (err) {
+      console.error("Error fetching administrators", err);
+      toastr.error("Error cargando administradores");
+    }
+  };
 
   const fetchGroup = async () => {
     try {
@@ -39,23 +51,25 @@ export const AdminGroupForm = ({ name, sub, sub1 }: AdminGroupFormProps) => {
       const group = await adminGroupsService.getById(id!);
       setFormData({
         name: group.name,
-        description: group.description,
-        sport: group.sport || '',
-        category: group.category || '',
-        schedule: group.schedule || [],
-        coaches: group.coaches?.map((c: any) => c._id) || [],
-        athletes: group.athletes?.map((a: any) => a._id) || [],
+        administrator:
+          typeof group.administrator === "object"
+            ? group.administrator._id
+            : group.administrator || "",
       });
       setError(null);
     } catch (err) {
-      setError('Error loading group');
+      setError("Error loading group");
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -75,9 +89,11 @@ export const AdminGroupForm = ({ name, sub, sub1 }: AdminGroupFormProps) => {
         await adminGroupsService.create(formData);
       }
 
-      navigate('/admin/groups');
+      toastr.success("Grupo guardado exitosamente");
+      navigate("/admin/groups");
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Error saving group');
+      setError(err.response?.data?.message || "Error saving group");
+      toastr.error(err.response?.data?.message || "Error al guardar el grupo");
       console.error(err);
     } finally {
       setSubmitting(false);
@@ -99,69 +115,56 @@ export const AdminGroupForm = ({ name, sub, sub1 }: AdminGroupFormProps) => {
       {error && <div className="alert alert-danger">{error}</div>}
 
       <form onSubmit={handleSubmit} className="form">
-        <div className="form-group">
-          <label htmlFor="name">Nombre del Grupo *</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            placeholder="Ej: Grupo A - Fútbol"
-            className="form-input"
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="description">Descripción *</label>
-          <textarea
-            id="description"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            required
-            placeholder="Descripción del grupo"
-            className="form-textarea"
-            rows={4}
-          />
-        </div>
-
-        <div className="form-row">
-          <div className="form-group">
-            <label htmlFor="sport">Deporte</label>
-            <input
-              type="text"
-              id="sport"
-              name="sport"
-              value={formData.sport}
-              onChange={handleChange}
-              placeholder="Ej: Fútbol"
-              className="form-input"
-            />
+        <div className="row">
+          <div className="col-md-6">
+            <div className="form-group">
+              <label htmlFor="name">Nombre del Grupo *</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                placeholder="Ej: Grupo 1 - Grupo 2 ..."
+                className="form-control"
+              />
+            </div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="category">Categoría</label>
-            <input
-              type="text"
-              id="category"
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              placeholder="Ej: U-15"
-              className="form-input"
-            />
+          <div className="col-md-6">
+            <div className="form-group">
+              <label htmlFor="administrator">Administrador del Grupo *</label>
+              <select
+                id="administrator"
+                name="administrator"
+                value={formData.administrator || ""}
+                onChange={handleChange}
+                required
+                className="form-control"
+              >
+                <option value="">-- Seleccionar Administrador --</option>
+                {administrators.map((admin) => (
+                  <option key={admin._id} value={admin._id}>
+                    {admin.name} {admin.lastname}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
         <div className="form-actions">
-          <button type="submit" disabled={submitting} className="btn btn-primary">
-            {submitting ? 'Guardando...' : id ? 'Actualizar' : 'Crear'}
+          <button
+            type="submit"
+            disabled={submitting}
+            className="btn btn-primary"
+          >
+            {submitting ? "Guardando..." : id ? "Actualizar" : "Crear"}
           </button>
           <button
             type="button"
-            onClick={() => navigate('/admin/groups')}
+            onClick={() => navigate("/admin/groups")}
             className="btn btn-secondary"
           >
             Cancelar
@@ -169,7 +172,8 @@ export const AdminGroupForm = ({ name, sub, sub1 }: AdminGroupFormProps) => {
         </div>
 
         <p className="form-note">
-          Nota: Puede asignar entrenadores y atletas después de crear el grupo.
+          * Campo requerido. El administrador podrá gestionar recursos dentro de
+          este grupo.
         </p>
       </form>
     </div>

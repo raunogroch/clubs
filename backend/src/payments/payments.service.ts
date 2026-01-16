@@ -8,28 +8,62 @@ import { Payment } from './schemas/payment.schema';
 import { PaymentRepository } from './repository/payment.repository';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Club } from 'src/clubs/schema/club.schema';
+import { Roles } from 'src/users/enum/roles.enum';
+import { User } from 'src/users/schemas/user.schema';
 
 @Injectable()
 export class PaymentsService {
   constructor(
     private readonly paymentRepository: PaymentRepository,
     @InjectModel(Club.name) private readonly clubModel: Model<Club>,
+    @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {}
 
-  async findAll(id: string): Promise<Payment | null> {
+  /**
+   * Obtener el groupId del admin desde AdminGroup
+   */
+  private async getAdminGroup(userId: string): Promise<Types.ObjectId | null> {
+    try {
+      const adminGroupModel =
+        this.userModel.collection.conn.model('AdminGroup');
+      const adminGroup = await adminGroupModel.findOne({
+        administrator: userId,
+      });
+      return adminGroup?._id || null;
+    } catch (error) {
+      console.error('Error getting admin group:', error);
+      return null;
+    }
+  }
+
+  async findAll(
+    id: string,
+    requestingUser?: { sub: string; role: string },
+  ): Promise<Payment | null> {
     return await this.paymentRepository.findById(id);
   }
   /**
    * Crea un pago. Si no se pasa amount, toma el monthly_fee del club.
    */
-  async create(createPaymentDto: CreatePaymentDto): Promise<Payment> {
+  async create(
+    createPaymentDto: CreatePaymentDto,
+    requestingUser?: { sub: string; role: string },
+  ): Promise<Payment> {
     const { athleteId, clubId, amount, month, note } = createPaymentDto;
 
     // Buscar club para obtener monthly_fee
     const club = await this.clubModel.findById(clubId);
     if (!club) throw new NotFoundException('Club no encontrado');
+
+    // Si es ADMIN, asignar automáticamente su groupId
+    if (requestingUser && requestingUser.role === Roles.ADMIN) {
+      const adminGroup = await this.getAdminGroup(requestingUser.sub);
+      if (adminGroup) {
+        createPaymentDto.groupId = adminGroup.toString();
+      }
+    }
 
     // validar month (si se provee) -> no puede ser anterior al mes actual
     if (month) {
@@ -73,6 +107,7 @@ export class PaymentsService {
       amount: finalAmount,
       month: month,
       note: note,
+      groupId: createPaymentDto.groupId,
     } as any);
 
     return payment;

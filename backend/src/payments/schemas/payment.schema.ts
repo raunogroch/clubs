@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { Document } from 'mongoose';
+import mongoose, { Document, Types } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class Payment extends Document {
@@ -20,6 +20,14 @@ export class Payment extends Document {
   /** Nota o justificativo cuando el monto difiere del mensual */
   @Prop({ type: String })
   note?: string;
+
+  /** Grupo administrativo propietario de este pago */
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'AdminGroup',
+    required: false,
+  })
+  groupId?: Types.ObjectId;
 }
 
 export const PaymentSchema = SchemaFactory.createForClass(Payment);

@@ -59,4 +59,17 @@ export class AdminGroupsController {
   restore(@Param('id') id: string) {
     return this.adminGroupsService.restore(id);
   }
+
+  /**
+   * Asignar administrador a un grupo
+   */
+  @Patch(':id/administrator')
+  assignAdministrator(
+    @Param('id') id: string,
+    @Body() body: { administratorId: string },
+  ) {
+    return this.adminGroupsService.update(id, {
+      administrator: body.administratorId,
+    });
+  }
 }

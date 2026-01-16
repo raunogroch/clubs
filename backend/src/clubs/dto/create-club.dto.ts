@@ -39,4 +39,9 @@ export class CreateClubDto {
   @IsOptional()
   @IsMongoId({ each: true })
   assistants?: Types.ObjectId[];
+
+  /** Grupo administrativo propietario del club */
+  @IsOptional()
+  @IsMongoId()
+  groupId?: string;
 }

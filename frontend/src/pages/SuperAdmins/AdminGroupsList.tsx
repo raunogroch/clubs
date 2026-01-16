@@ -1,8 +1,16 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { adminGroupsService } from '../../services/admin-groups.service';
-import type { AdminGroup } from '../../services/admin-groups.service';
-import '../../styles/Tables.css';
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import swal from "sweetalert";
+import toastr from "toastr";
+import "toastr/build/toastr.min.css";
+import { adminGroupsService } from "../../services/admin-groups.service";
+import type { AdminGroup } from "../../services/admin-groups.service";
+import { NavHeader, Spinner } from "../../components";
+import { PaginationList } from "../../components/PaginationList";
+import { useAuth } from "../../hooks";
+import { setLimit, setPage } from "../../store";
+import type { AppDispatch, RootState } from "../../store";
 
 interface AdminGroupsListProps {
   name?: string;
@@ -13,23 +21,29 @@ interface AdminGroupsListProps {
 }
 
 export const AdminGroupsList = ({
-  name,
-  sub,
-  edit = false,
-  delete: canDelete = false,
-  restore: canRestore = false,
+  name = "Grupos",
+  sub = "Gestión General",
+  edit = true,
+  delete: canDelete = true,
+  restore: canRestore = true,
 }: AdminGroupsListProps) => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
+  const { role } = useAuth();
+
   const [groups, setGroups] = useState<AdminGroup[]>([]);
   const [filteredGroups, setFilteredGroups] = useState<AdminGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [showDeleted, setShowDeleted] = useState(false);
-  const navigate = useNavigate();
+
+  const filter = useSelector((state: RootState) => state.filters);
+  const { limit, page } = filter;
 
   useEffect(() => {
     fetchGroups();
-  }, [showDeleted]);
+  }, [showDeleted, page, limit]);
 
   const fetchGroups = async () => {
     try {
@@ -38,165 +52,291 @@ export const AdminGroupsList = ({
         ? await adminGroupsService.getAllIncludingDeleted()
         : await adminGroupsService.getAll();
       setGroups(data);
-      setFilteredGroups(data);
+      filterGroups(data, searchTerm);
       setError(null);
     } catch (err) {
-      setError('Error loading groups');
+      setError("Error cargando grupos");
+      toastr.error("Error al cargar los grupos");
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const term = e.target.value.toLowerCase();
-    setSearchTerm(term);
-
-    const filtered = groups.filter(
+  const filterGroups = (data: AdminGroup[], term: string) => {
+    const filtered = data.filter(
       (group) =>
-        group.name.toLowerCase().includes(term) ||
-        group.description.toLowerCase().includes(term),
+        group.name.toLowerCase().includes(term.toLowerCase()) ||
+        group.description.toLowerCase().includes(term.toLowerCase())
     );
     setFilteredGroups(filtered);
   };
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm('¿Está seguro de que desea eliminar este grupo?')) {
-      try {
-        await adminGroupsService.delete(id);
-        fetchGroups();
-      } catch (err) {
-        console.error('Error deleting group', err);
-      }
-    }
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const term = e.target.value;
+    setSearchTerm(term);
+    filterGroups(groups, term);
+    dispatch(setPage(1));
   };
 
-  const handleRestore = async (id: string) => {
-    try {
-      await adminGroupsService.restore(id);
-      fetchGroups();
-    } catch (err) {
-      console.error('Error restoring group', err);
-    }
+  const handleDelete = (id: string) => {
+    swal({
+      title: "¿Estás seguro?",
+      text: "¡El grupo será desactivado!",
+      icon: "warning",
+      buttons: ["Cancelar", "Sí, desactivar!"],
+      dangerMode: true,
+    }).then(async (willDelete) => {
+      if (willDelete) {
+        try {
+          await adminGroupsService.delete(id);
+          toastr.success("Grupo desactivado correctamente");
+          fetchGroups();
+        } catch (err) {
+          toastr.error("Error al desactivar el grupo");
+          console.error(err);
+        }
+      }
+    });
+  };
+
+  const handleRestore = (id: string) => {
+    swal({
+      title: "¿Estás seguro?",
+      text: "¡El grupo será reactivado!",
+      icon: "warning",
+      buttons: ["Cancelar", "Sí, reactivar!"],
+      dangerMode: true,
+    }).then(async (willRestore) => {
+      if (willRestore) {
+        try {
+          await adminGroupsService.restore(id);
+          toastr.success("Grupo reactivado correctamente");
+          fetchGroups();
+        } catch (err) {
+          toastr.error("Error al reactivar el grupo");
+          console.error(err);
+        }
+      }
+    });
   };
 
   const handleEdit = (id: string) => {
     navigate(`/admin/groups/edit/${id}`);
   };
 
-  if (loading) {
-    return <div className="loading">Cargando grupos...</div>;
-  }
+  const handleLimitChange = (newLimit: number) => {
+    dispatch(setLimit(newLimit));
+    dispatch(setPage(1));
+  };
 
-  if (error) {
-    return <div className="error">{error}</div>;
+  const canManageGroups = role === "superadmin";
+
+  if (!canManageGroups) {
+    return (
+      <>
+        <NavHeader name={name} />
+        <div className="wrapper wrapper-content">
+          <div className="middle-box text-center animated fadeInRightBig">
+            <h3 className="font-bold">Acceso denegado</h3>
+            <div className="error-desc">
+              No tienes permisos para acceder a esta sección. Solo superadmins
+              pueden gestionar grupos.
+            </div>
+          </div>
+        </div>
+      </>
+    );
   }
 
   return (
-    <div className="container-list">
-      <div className="header-section">
-        <div>
-          <h1>{name}</h1>
-          {sub && <p>{sub}</p>}
-        </div>
-        <button
-          className="btn btn-primary"
-          onClick={() => navigate('/admin/groups/create')}
-        >
-          <i className="fa fa-plus"></i> Nuevo Grupo
-        </button>
-      </div>
+    <>
+      <NavHeader name={name} />
+      {loading && <Spinner />}
 
-      <div className="filter-section">
-        <div className="search-box">
-          <input
-            type="text"
-            placeholder="Buscar por nombre o descripción..."
-            value={searchTerm}
-            onChange={handleSearch}
-            className="search-input"
-          />
-        </div>
-        {canRestore && (
-          <label className="checkbox-label">
-            <input
-              type="checkbox"
-              checked={showDeleted}
-              onChange={(e) => setShowDeleted(e.target.checked)}
-            />
-            Mostrar eliminados
-          </label>
-        )}
-      </div>
-
-      {filteredGroups.length === 0 ? (
-        <div className="no-data">No hay grupos disponibles</div>
-      ) : (
-        <div className="table-responsive">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Nombre</th>
-                <th>Descripción</th>
-                <th>Deporte</th>
-                <th>Categoría</th>
-                <th>Entrenadores</th>
-                <th>Atletas</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredGroups.map((group) => (
-                <tr key={group._id} className={!group.active ? 'deleted-row' : ''}>
-                  <td>{group.name}</td>
-                  <td>{group.description}</td>
-                  <td>{group.sport || '-'}</td>
-                  <td>{group.category || '-'}</td>
-                  <td>{group.coaches?.length || 0}</td>
-                  <td>{group.athletes?.length || 0}</td>
-                  <td>
-                    <span className={`badge ${group.active ? 'active' : 'inactive'}`}>
-                      {group.active ? 'Activo' : 'Inactivo'}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="actions">
-                      {edit && (
-                        <button
-                          className="btn-icon edit"
-                          onClick={() => handleEdit(group._id)}
-                          title="Editar"
-                        >
-                          <i className="fa fa-edit"></i>
-                        </button>
-                      )}
-                      {canDelete && group.active && (
-                        <button
-                          className="btn-icon delete"
-                          onClick={() => handleDelete(group._id)}
-                          title="Eliminar"
-                        >
-                          <i className="fa fa-trash"></i>
-                        </button>
-                      )}
-                      {canRestore && !group.active && (
-                        <button
-                          className="btn-icon restore"
-                          onClick={() => handleRestore(group._id)}
-                          title="Restaurar"
-                        >
-                          <i className="fa fa-undo"></i>
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {!loading && error && (
+        <div className="wrapper wrapper-content">
+          <div className="alert alert-danger" role="alert">
+            {error}
+          </div>
         </div>
       )}
-    </div>
+
+      {!loading && filteredGroups.length === 0 && !error && (
+        <div className="wrapper wrapper-content">
+          <div className="middle-box text-center animated fadeInRightBig">
+            <h3 className="font-bold">No hay grupos disponibles</h3>
+            <div className="error-desc">
+              {showDeleted
+                ? "No hay grupos con los criterios de búsqueda."
+                : "Crea tu primer grupo haciendo clic en el botón de abajo."}
+            </div>
+            {!showDeleted && (
+              <button
+                className="btn btn-primary m-t-md"
+                onClick={() => navigate("/admin/groups/create")}
+              >
+                <i className="fa fa-plus"></i> Crear Grupo
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {!loading && filteredGroups.length > 0 && (
+        <div className="wrapper wrapper-content animated fadeInRight">
+          <div className="row">
+            <div className="col-12">
+              <div className="ibox">
+                <div className="ibox-title d-flex justify-content-between align-items-center">
+                  <div className="flex-grow-1">
+                    <h5>{sub}</h5>
+                  </div>
+                  <div className="btn-group mr-2">
+                    {[5, 10, 15].map((level) => (
+                      <button
+                        key={level}
+                        className={`btn btn-white ${
+                          limit === level ? "active" : ""
+                        }`}
+                        onClick={() => handleLimitChange(level)}
+                      >
+                        {level}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => navigate("/admin/groups/create")}
+                  >
+                    <i className="fa fa-plus"></i> Nuevo
+                  </button>
+                </div>
+
+                <div className="ibox-content">
+                  <div className="row m-b-md">
+                    <div className="col-sm-6">
+                      <input
+                        type="text"
+                        placeholder="Buscar por nombre o descripción..."
+                        value={searchTerm}
+                        onChange={handleSearch}
+                        className="form-control"
+                      />
+                    </div>
+                    <div className="col-sm-6">
+                      <label className="checkbox-inline">
+                        <input
+                          type="checkbox"
+                          checked={showDeleted}
+                          onChange={(e) => setShowDeleted(e.target.checked)}
+                        />
+                        <span className="ml-2">Mostrar inactivos</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="table-responsive">
+                    <table className="table table-striped table-hover">
+                      <thead>
+                        <tr>
+                          <th>Nombre</th>
+                          <th className="text-center">Administrador</th>
+                          <th className="text-center">Estado</th>
+                          {canManageGroups && (
+                            <th className="text-center">Acciones</th>
+                          )}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredGroups
+                          .slice((page - 1) * limit, page * limit)
+                          .map((group) => (
+                            <tr
+                              key={group._id}
+                              className={!group.active ? "table-danger" : ""}
+                            >
+                              <td className="align-middle">
+                                <strong>{group.name}</strong>
+                              </td>
+                              <td className="align-middle text-center">
+                                {group.administrator &&
+                                typeof group.administrator === "object" ? (
+                                  <span className="badge badge-success">
+                                    {group.administrator.name}{" "}
+                                    {group.administrator.lastname}
+                                  </span>
+                                ) : (
+                                  <span className="badge badge-secondary">
+                                    Sin asignar
+                                  </span>
+                                )}
+                              </td>
+                              <td className="align-middle text-center">
+                                {group.active ? (
+                                  <span className="label label-primary">
+                                    Activo
+                                  </span>
+                                ) : (
+                                  <span className="label label-danger">
+                                    Inactivo
+                                  </span>
+                                )}
+                              </td>
+                              {canManageGroups && (
+                                <td className="align-middle text-center">
+                                  <div
+                                    className="btn-group btn-group-sm"
+                                    role="group"
+                                  >
+                                    {edit && group.active && (
+                                      <button
+                                        type="button"
+                                        className="btn btn-primary"
+                                        onClick={() => handleEdit(group._id)}
+                                        title="Editar"
+                                      >
+                                        <i className="fa fa-edit"></i>
+                                      </button>
+                                    )}
+                                    {canDelete && group.active && (
+                                      <button
+                                        type="button"
+                                        className="btn btn-danger"
+                                        onClick={() => handleDelete(group._id)}
+                                        title="Desactivar"
+                                      >
+                                        <i className="fa fa-trash"></i>
+                                      </button>
+                                    )}
+                                    {canRestore && !group.active && (
+                                      <button
+                                        type="button"
+                                        className="btn btn-warning"
+                                        onClick={() => handleRestore(group._id)}
+                                        title="Reactivar"
+                                      >
+                                        <i className="fa fa-undo"></i>
+                                      </button>
+                                    )}
+                                  </div>
+                                </td>
+                              )}
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <PaginationList
+                    filter={{ ...filter, total: filteredGroups.length }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };

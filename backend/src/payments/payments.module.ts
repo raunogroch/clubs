@@ -4,6 +4,7 @@ import { PaymentsController } from './payments.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Payment, PaymentSchema } from './schemas/payment.schema';
 import { Club, ClubSchema } from 'src/clubs/schema/club.schema';
+import { User, UserSchema } from 'src/users/schemas/user.schema';
 import { PaymentRepository } from './repository/payment.repository';
 
 @Module({
@@ -11,6 +12,7 @@ import { PaymentRepository } from './repository/payment.repository';
     MongooseModule.forFeature([
       { name: Payment.name, schema: PaymentSchema },
       { name: Club.name, schema: ClubSchema },
+      { name: User.name, schema: UserSchema },
     ]),
   ],
   controllers: [PaymentsController],

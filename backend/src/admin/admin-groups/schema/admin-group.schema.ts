@@ -47,8 +47,8 @@ export class AdminGroup extends Document {
   @Prop({ type: String, required: true })
   name: string;
 
-  @Prop({ type: String, required: true })
-  description: string;
+  @Prop({ type: String, required: false })
+  description?: string;
 
   @Prop({ type: String, required: false })
   sport?: string;
@@ -64,6 +64,21 @@ export class AdminGroup extends Document {
 
   @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })
   athletes?: Types.ObjectId[];
+
+  @Prop({ type: Types.ObjectId, ref: 'User', required: false })
+  administrator?: Types.ObjectId;
+
+  @Prop({ type: [Types.ObjectId], ref: 'Club', default: [] })
+  clubs?: Types.ObjectId[];
+
+  @Prop({ type: [Types.ObjectId], ref: 'Sport', default: [] })
+  sports?: Types.ObjectId[];
+
+  @Prop({ type: [Types.ObjectId], default: [] })
+  subscriptions?: Types.ObjectId[];
+
+  @Prop({ type: Types.ObjectId, ref: 'User', required: false })
+  createdBy?: Types.ObjectId;
 
   @Prop({ type: Boolean, default: true })
   active: boolean;

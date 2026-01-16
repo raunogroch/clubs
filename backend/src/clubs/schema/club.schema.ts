@@ -56,6 +56,14 @@ export class Club extends Document {
   })
   groups: Group[];
 
+  /** Grupo administrativo propietario de este club */
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'AdminGroup',
+    required: false,
+  })
+  groupId?: mongoose.Schema.Types.ObjectId;
+
   /** Asistentes responsables de este club */
   @Prop({
     type: [mongoose.Schema.Types.ObjectId],

@@ -34,31 +34,7 @@ export class CreateAdminGroupDto {
   @IsNotEmpty()
   name: string;
 
-  @IsString()
-  @IsNotEmpty()
-  description: string;
-
   @IsOptional()
-  @IsString()
-  sport?: string;
-
-  @IsOptional()
-  @IsString()
-  category?: string;
-
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => DailyScheduleDto)
-  schedule?: DailyScheduleDto[];
-
-  @IsOptional()
-  @IsArray()
-  @IsMongoId({ each: true })
-  coaches?: string[];
-
-  @IsOptional()
-  @IsArray()
-  @IsMongoId({ each: true })
-  athletes?: string[];
+  @IsMongoId()
+  administrator?: string;
 }

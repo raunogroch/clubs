@@ -13,27 +13,33 @@ export class AdminGroupsService {
 
   async create(createAdminGroupDto: CreateAdminGroupDto): Promise<AdminGroup> {
     const group = await this.adminGroupModel.create(createAdminGroupDto);
-    return group.populate(['coaches', 'athletes']);
+    return group.populate([
+      'administrator',
+      'coaches',
+      'athletes',
+      'clubs',
+      'sports',
+    ]);
   }
 
   async findAll(): Promise<AdminGroup[]> {
     return this.adminGroupModel
       .find({ active: true })
-      .populate(['coaches', 'athletes'])
+      .populate(['administrator', 'coaches', 'athletes', 'clubs', 'sports'])
       .sort({ createdAt: -1 });
   }
 
   async findAllIncludeDeleted(): Promise<AdminGroup[]> {
     return this.adminGroupModel
       .find()
-      .populate(['coaches', 'athletes'])
+      .populate(['administrator', 'coaches', 'athletes', 'clubs', 'sports'])
       .sort({ createdAt: -1 });
   }
 
   async findOne(id: string): Promise<AdminGroup> {
     const group = await this.adminGroupModel
       .findById(id)
-      .populate(['coaches', 'athletes']);
+      .populate(['administrator', 'coaches', 'athletes', 'clubs', 'sports']);
 
     if (!group) {
       throw new NotFoundException(`Admin group with ID ${id} not found`);
@@ -48,7 +54,7 @@ export class AdminGroupsService {
   ): Promise<AdminGroup> {
     const group = await this.adminGroupModel
       .findByIdAndUpdate(id, updateAdminGroupDto, { new: true })
-      .populate(['coaches', 'athletes']);
+      .populate(['administrator', 'coaches', 'athletes', 'clubs', 'sports']);
 
     if (!group) {
       throw new NotFoundException(`Admin group with ID ${id} not found`);
@@ -61,7 +67,7 @@ export class AdminGroupsService {
     // Soft delete
     const group = await this.adminGroupModel
       .findByIdAndUpdate(id, { active: false }, { new: true })
-      .populate(['coaches', 'athletes']);
+      .populate(['administrator', 'coaches', 'athletes', 'clubs', 'sports']);
 
     if (!group) {
       throw new NotFoundException(`Admin group with ID ${id} not found`);
@@ -73,12 +79,23 @@ export class AdminGroupsService {
   async restore(id: string): Promise<AdminGroup> {
     const group = await this.adminGroupModel
       .findByIdAndUpdate(id, { active: true }, { new: true })
-      .populate(['coaches', 'athletes']);
+      .populate(['administrator', 'coaches', 'athletes', 'clubs', 'sports']);
 
     if (!group) {
       throw new NotFoundException(`Admin group with ID ${id} not found`);
     }
 
     return group;
+  }
+
+  /**
+   * Obtiene el grupo asignado a un administrador
+   */
+  async findByAdministrator(
+    administratorId: string,
+  ): Promise<AdminGroup | null> {
+    return this.adminGroupModel
+      .findOne({ administrator: administratorId, active: true })
+      .populate(['administrator', 'coaches', 'athletes', 'clubs', 'sports']);
   }
 }

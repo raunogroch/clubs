@@ -4,6 +4,7 @@ import {
   IsString,
   IsNumber,
   Matches,
+  IsMongoId,
 } from 'class-validator';
 
 export class CreatePaymentDto {
@@ -29,4 +30,9 @@ export class CreatePaymentDto {
   @IsOptional()
   @IsString()
   note?: string;
+
+  /** Grupo administrativo propietario del pago */
+  @IsOptional()
+  @IsMongoId()
+  groupId?: string;
 }

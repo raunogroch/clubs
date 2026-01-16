@@ -31,8 +31,11 @@ export class SportsController {
    * Endpoint para crear un deporte
    */
   @Post()
-  create(@Body() createSportDto: CreateSportDto) {
-    return this.sportsService.create(createSportDto);
+  create(
+    @Body() createSportDto: CreateSportDto,
+    @CurrentUser() user: currentAuth,
+  ) {
+    return this.sportsService.create(createSportDto, user);
   }
 
   /**
@@ -55,16 +58,20 @@ export class SportsController {
    * Endpoint para actualizar un deporte
    */
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSportDto: UpdateSportDto) {
-    return this.sportsService.update(id, updateSportDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateSportDto: UpdateSportDto,
+    @CurrentUser() user: currentAuth,
+  ) {
+    return this.sportsService.update(id, updateSportDto, user);
   }
 
   /**
    * Endpoint para eliminar un deporte
    */
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.sportsService.remove(id);
+  remove(@Param('id') id: string, @CurrentUser() user: currentAuth) {
+    return this.sportsService.remove(id, user);
   }
 
   /**

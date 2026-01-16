@@ -6,11 +6,20 @@ import {
   Get,
   Query,
   BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+
+interface currentAuth {
+  sub: string;
+  role: string;
+}
 
 @Controller('payments')
+@UseGuards(JwtAuthGuard)
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
   /**
@@ -30,13 +39,16 @@ export class PaymentsController {
   }
 
   @Get('/:id')
-  async findAll(@Param('id') id: string) {
+  async findAll(@Param('id') id: string, @CurrentUser() user: currentAuth) {
     // Placeholder for future implementation
-    return this.paymentsService.findAll(id);
+    return this.paymentsService.findAll(id, user);
   }
 
   @Post()
-  async create(@Body() createPaymentDto: CreatePaymentDto) {
-    return this.paymentsService.create(createPaymentDto);
+  async create(
+    @Body() createPaymentDto: CreatePaymentDto,
+    @CurrentUser() user: currentAuth,
+  ) {
+    return this.paymentsService.create(createPaymentDto, user);
   }
 }

@@ -174,7 +174,15 @@ export const roleRoutes: RoleRoutes = {
       path: "/admin/groups",
       icon: "fa-object-group",
       label: "Gestión de Grupos",
-      element: <AdminGroupsList name="Grupos" sub="Gestión General" edit delete restore />,
+      element: (
+        <AdminGroupsList
+          name="Grupos"
+          sub="Gestión General"
+          edit
+          delete
+          restore
+        />
+      ),
     },
     {
       path: "/admin/groups/create",

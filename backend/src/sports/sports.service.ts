@@ -10,6 +10,9 @@ import { Sport } from './schemas/sport.schemas';
 import type { ISportRepository } from './repository/sport.repository.interface';
 import { Inject } from '@nestjs/common';
 import { SportValidatorService } from './sport-validator.service';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
+import { User } from 'src/users/schemas/user.schema';
 
 @Injectable()
 export class SportsService {
@@ -17,13 +20,63 @@ export class SportsService {
     @Inject('SportRepository')
     private readonly sportRepository: ISportRepository,
     private readonly sportValidator: SportValidatorService,
+    @InjectModel(User.name) private readonly userModel: Model<User>,
   ) {}
+
+  /**
+   * Obtener el groupId del admin desde AdminGroup
+   */
+  private async getAdminGroup(userId: string): Promise<Types.ObjectId | null> {
+    try {
+      const adminGroupModel =
+        this.userModel.collection.conn.model('AdminGroup');
+      const adminGroup = await adminGroupModel.findOne({
+        administrator: userId,
+      });
+      return adminGroup?._id || null;
+    } catch (error) {
+      console.error('Error getting admin group:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Validar que el admin puede acceder al deporte
+   */
+  private async validateAdminAccess(
+    sportId: string,
+    adminUserId: string,
+  ): Promise<boolean> {
+    const sport = await this.sportRepository.findById(sportId);
+    if (!sport) return false;
+
+    const adminGroup = await this.getAdminGroup(adminUserId);
+    if (!adminGroup) return false;
+
+    const sportGroupId =
+      (sport as any).groupId?._id?.toString() ||
+      (sport as any).groupId?.toString();
+    const adminGroupId = adminGroup._id?.toString() || adminGroup?.toString();
+
+    return sportGroupId === adminGroupId;
+  }
 
   /**
    * Crea un nuevo deporte si el nombre no existe previamente
    * SRP: la validación se delega al validador
    */
-  async create(createSportDto: CreateSportDto): Promise<Sport> {
+  async create(
+    createSportDto: CreateSportDto,
+    requestingUser?: { sub: string; role: string },
+  ): Promise<Sport> {
+    // Si el usuario es ADMIN, asignar automáticamente su groupId
+    if (requestingUser && requestingUser.role === Roles.ADMIN) {
+      const adminGroup = await this.getAdminGroup(requestingUser.sub);
+      if (adminGroup) {
+        createSportDto.groupId = adminGroup.toString();
+      }
+    }
+
     await this.sportValidator.validateUniqueName(createSportDto.name);
     return this.sportRepository.create(createSportDto);
   }
@@ -36,6 +89,22 @@ export class SportsService {
 
     if (!requestingUser || requestingUser.role !== Roles.SUPERADMIN) {
       sports = sports.filter((s) => (s as any).active === true);
+    }
+
+    // Filtrar por grupo si es ADMIN
+    if (requestingUser && requestingUser.role === Roles.ADMIN) {
+      const adminGroup = await this.getAdminGroup(requestingUser.sub);
+      if (adminGroup) {
+        sports = sports.filter((s: any) => {
+          const sportGroupId =
+            s.groupId?._id?.toString() || s.groupId?.toString();
+          const adminGroupId =
+            adminGroup._id?.toString() || adminGroup?.toString();
+          return sportGroupId === adminGroupId;
+        });
+      } else {
+        sports = []; // Si no tiene grupo asignado, no ve deportes
+      }
     }
 
     return sports;
@@ -55,7 +124,16 @@ export class SportsService {
   async update(
     id: string,
     updateSportDto: UpdateSportDto,
+    requestingUser?: { sub: string; role: string },
   ): Promise<Sport | null> {
+    // Validar acceso si es admin
+    if (requestingUser && requestingUser.role === Roles.ADMIN) {
+      const hasAccess = await this.validateAdminAccess(id, requestingUser.sub);
+      if (!hasAccess) {
+        throw new NotFoundException('No tienes acceso a este deporte');
+      }
+    }
+
     // 1. Verificar que el deporte existe
     const sport = await this.sportRepository.findById(id);
     if (!sport) {
@@ -80,7 +158,18 @@ export class SportsService {
    * Elimina un deporte por su ID
    * Lanza una excepción si el deporte está vinculado a algún club
    */
-  async remove(id: string): Promise<Sport | null> {
+  async remove(
+    id: string,
+    requestingUser?: { sub: string; role: string },
+  ): Promise<Sport | null> {
+    // Validar acceso si es admin
+    if (requestingUser && requestingUser.role === Roles.ADMIN) {
+      const hasAccess = await this.validateAdminAccess(id, requestingUser.sub);
+      if (!hasAccess) {
+        throw new NotFoundException('No tienes acceso a este deporte');
+      }
+    }
+
     // Verificar si el deporte está vinculado a algún club
     const isLinked = await this.sportRepository.isLinkedToAnyClub(id);
     if (isLinked) {

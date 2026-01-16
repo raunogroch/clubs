@@ -21,3 +21,4 @@ template
 
 create-users.sh
 create-superadmins.sh
+*.sh

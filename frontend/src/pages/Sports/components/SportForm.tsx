@@ -43,7 +43,7 @@ export const SportForm = ({
         <div className="form-group row">
           <div className="col-sm-10 offset-sm-2">
             <button type="submit" className="btn btn-primary mr-2">
-              {initialData ? "Actualizar" : "Crear"} Club
+              {initialData ? "Actualizar" : "Crear"}
             </button>
             {onCancel && (
               <button
