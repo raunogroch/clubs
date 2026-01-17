@@ -1,34 +1,55 @@
+/**
+ * Módulo raíz de la aplicación (AppModule)
+ * Este módulo contiene la configuración general de la aplicación
+ *
+ * Módulos importados:
+ * - ConfigModule: Carga variables de entorno desde el archivo .env
+ * - MongooseModule: Conexión a la base de datos MongoDB
+ * - AuthModule: Autenticación y JWT
+ * - UsersModule: Gestión de usuarios
+ */
+
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { ClubsModule } from './clubs/clubs.module';
-import { SportsModule } from './sports/sports.module';
-import { GroupsModule } from './clubs/groups/groups.module';
-import { PaymentsModule } from './payments/payments.module';
-import { HttpModule } from './common/http/http.module';
-import { AdminModule } from './admin/admin.module';
+import { AssignmentsModule } from './assignments/assignments.module';
 
 @Module({
   imports: [
+    /**
+     * ConfigModule: Carga las variables de entorno desde .env
+     * isGlobal: true hace que las variables estén disponibles en toda la aplicación
+     */
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
     }),
+
+    /**
+     * MongooseModule: Conecta la aplicación a MongoDB
+     * Usa las variables de entorno MONGODB_URI desde ConfigService
+     *
+     * Ejemplo de MONGODB_URI:
+     * mongodb+srv://usuario:contraseña@cluster.mongodb.net/nombreBaseDatos
+     */
     MongooseModule.forRootAsync({
-      useFactory: () => ({
-        uri: process.env.MONGODB_URI,
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGODB_URI'),
       }),
+      inject: [ConfigService],
     }),
-    HttpModule,
+
+    // Módulo de autenticación (JWT, login, logout)
     AuthModule,
+
+    // Módulo de gestión de usuarios
     UsersModule,
-    ClubsModule,
-    SportsModule,
-    GroupsModule,
-    PaymentsModule,
-    AdminModule,
+
+    // Módulo de asignaciones (asignar módulos a administradores)
+    AssignmentsModule,
   ],
 })
 export class AppModule {}

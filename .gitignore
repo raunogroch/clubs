@@ -22,3 +22,7 @@ template
 create-users.sh
 create-superadmins.sh
 *.sh
+*.md
+
+backend_back
+frontend_back

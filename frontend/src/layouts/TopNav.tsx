@@ -6,7 +6,7 @@ import {
 import styles from "./TopNav.module.css";
 import { Input } from "../components";
 import { useDispatch } from "react-redux";
-import { type AppDispatch, setName, setPage } from "../store";
+import { type AppDispatch } from "../store";
 import React, { useState, useEffect, useCallback } from "react";
 import { useDebounce } from "../hooks/useDebounce";
 import { logoutThunk } from "../store/authThunk";
@@ -31,12 +31,13 @@ export const TopNav = () => {
   const debouncedSearch = useDebounce(search, 300);
 
   // Efecto optimizado para búsqueda
+  // SIMPLIFICADO: Store de búsqueda removido
   useEffect(() => {
-    if (isSearchVisible) {
-      dispatch(setName(debouncedSearch));
-      dispatch(setPage(1));
-    }
-  }, [debouncedSearch, dispatch, isSearchVisible]);
+    // if (isSearchVisible) {
+    //   dispatch(setName(debouncedSearch));
+    //   dispatch(setPage(1));
+    // }
+  }, [debouncedSearch, isSearchVisible]);
 
   // Logout sencillo y eficiente, con buenas prácticas
   const handleLogout = useCallback(

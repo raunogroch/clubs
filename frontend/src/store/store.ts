@@ -1,28 +1,12 @@
 import { configureStore } from "@reduxjs/toolkit";
 import messageReducer from "./messageSlice";
 import authReducer, { login } from "./authSlice";
-import usersReducer from "./usersSlice";
-import filterReducer from "./filterSlice";
-import clubsReducer from "./clubsSlice";
-import entitiesReducer from "./entitiesSlice";
-import sportsReducer from "./sportsSlice";
-import groupsReducer from "./groupsSlice";
-import coachReducer from "./coachSlice";
 import { tokenSessionMiddleware } from "./middleware/tokenSessionMiddleware";
-import paymentsReducer from "./paymentSlice";
 
 export const store = configureStore({
   reducer: {
     message: messageReducer,
     auth: authReducer,
-    users: usersReducer,
-    filters: filterReducer,
-    clubs: clubsReducer,
-    entities: entitiesReducer,
-    sports: sportsReducer,
-    groups: groupsReducer,
-    coach: coachReducer,
-    payments: paymentsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(tokenSessionMiddleware),

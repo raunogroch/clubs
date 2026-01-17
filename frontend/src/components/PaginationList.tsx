@@ -1,7 +1,7 @@
-import { useDispatch } from "react-redux";
-import { setPage } from "../store/filterSlice";
+// import { useDispatch } from "react-redux";
+// import { setPage } from "../store/filterSlice";
 
-/* 
+/*
   En filter tiene que ir el objeto con pafinacion 
   
   const { users, status, error } = useSelector(
@@ -13,12 +13,12 @@ import { setPage } from "../store/filterSlice";
 */
 
 export const PaginationList = ({ filter }) => {
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch(); - removido
 
   const totalPages = Math.max(1, Math.ceil(filter.total / filter.limit));
 
-  const handlePageChange = (page: number) => {
-    dispatch(setPage(page));
+  const handlePageChange = (_page: number) => {
+    // dispatch(setPage(page)); - removido
   };
 
   const getPageNumbers = () => {

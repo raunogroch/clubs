@@ -1,4 +1,26 @@
-// Servicio para la gestión de usuarios
+/**
+ * UsersService - Servicio de Gestión de Usuarios
+ * 
+ * Responsabilidades principales:
+ * - CRUD de usuarios (Create, Read, Update, Delete)
+ * - Validación de datos según el rol del usuario
+ * - Generación automática de credenciales para atletas
+ * - Filtrado de usuarios según el rol del usuario autenticado
+ * - Gestión de soft delete (inactivar usuarios)
+ * 
+ * Roles soportados:
+ * - SUPERADMIN: Acceso total a todos los usuarios
+ * - ADMIN: Puede gestionar todos excepto superadmins
+ * - ASSISTANT: Puede gestionar padres y atletas
+ * - COACH: Solo puede ver padres y atletas
+ * - ATHLETE: Usuario individual
+ * - PARENT: Tutor/Apoderado
+ * 
+ * Patrones utilizados:
+ * - Repository Pattern: Para abstracción de datos
+ * - Dependency Injection: Servicios inyectados en constructor
+ */
+
 import {
   Injectable,
   NotFoundException,
@@ -11,53 +33,50 @@ import type { IUserRepository } from './repository/user.repository.interface';
 import { Inject } from '@nestjs/common';
 import { UserValidatorService } from './user-validator.service';
 import { UserPasswordService } from './user-password.service';
-import { ImageService } from 'src/utils';
-import { GroupsUserHelperService } from '../clubs/groups/groups-user-helper.service';
 
+/**
+ * Interfaz para el usuario autenticado extraído del JWT
+ * Se usa en métodos para filtrar datos según el rol del usuario
+ */
 interface currentAuth {
-  sub: string;
-  role: string;
+  sub: string; // ID del usuario
+  role: string; // Rol del usuario
 }
 
 @Injectable()
 export class UsersService {
+  /**
+   * Constructor con inyección de dependencias
+   * @param userRepository - Repositorio para acceder a datos de usuarios
+   * @param userValidator - Servicio para validar usuarios
+   * @param userPasswordService - Servicio para hashear contraseñas
+   */
   constructor(
     @Inject('UserRepository') private readonly userRepository: IUserRepository,
     private readonly userValidator: UserValidatorService,
-    private readonly userImageService: ImageService,
     private readonly userPasswordService: UserPasswordService,
-    private readonly groupsUserHelperService: GroupsUserHelperService,
   ) {}
-  /**
-   * Obtiene los clubes y grupos en los que el usuario está agregado
-   */
-  async getClubsAndGroupsByUser(userId: string) {
-    // Busca los grupos donde el usuario es coach o athlete
-    const groups = await this.groupsUserHelperService.findGroupsByUser(userId);
-    // Agrupa los grupos por club
-    const clubsMap = new Map();
-    groups.forEach((group: any) => {
-      const club = group.clubId;
-      if (!club) return;
-      if (!clubsMap.has(club._id.toString())) {
-        clubsMap.set(club._id.toString(), { club, groups: [] });
-      }
-      clubsMap.get(club._id.toString()).groups.push(group);
-    });
-    // Devuelve un array de clubes con sus grupos correspondientes
-    return Array.from(clubsMap.values());
-  }
 
-  folder = 'profile'; // Define la carpeta donde se guardaran las fotos de perfil
+  /** Carpeta donde se almacenan las fotos de perfil de usuarios */
+  folder = 'profile';
 
   /**
    * Valida que los campos requeridos según el rol estén presentes
+   * Cada rol tiene requisitos diferentes:
+   * - ATHLETE y PARENT: Solo requieren nombre y apellido
+   * - COACH, ASSISTANT, ADMIN, SUPERADMIN: Requieren username, password, nombre y apellido
+   * 
+   * @param createUserDto - Datos del usuario a validar
+   * @throws Error si faltan campos requeridos
    */
   private validateRequiredFieldsByRole(createUserDto: CreateUserDto): void {
     const role = createUserDto.role;
     const errors: string[] = [];
 
-    // Campos requeridos para cada rol
+    /**
+     * Definir los campos requeridos para cada rol
+     * Esto es un lookup que hace el código más mantenible
+     */
     const requiredFields: Record<Roles, string[]> = {
       [Roles.ATHLETE]: ['name', 'lastname'],
       [Roles.PARENT]: ['name', 'lastname'],
@@ -67,7 +86,10 @@ export class UsersService {
       [Roles.SUPERADMIN]: ['username', 'password', 'name', 'lastname'],
     };
 
+    // Obtener los campos requeridos para el rol del usuario
     const required = requiredFields[role] || [];
+    
+    // Validar que todos los campos requeridos estén presentes
     for (const field of required) {
       if (!createUserDto[field]) {
         errors.push(`Field '${field}' is required for role '${role}'`);
@@ -118,6 +140,8 @@ export class UsersService {
     let imageProcessingSkipped = false;
 
     // Procesar imagen solo si el rol la requiere y se proporciona
+    // SIMPLIFICADO: Imagen processing removida
+    /*
     if (
       [
         Roles.ATHLETE,
@@ -144,6 +168,7 @@ export class UsersService {
         }
       }
     }
+    */
 
     // Hashear contraseña solo si el rol la requiere
     if (createUserDto.password) {
@@ -153,12 +178,6 @@ export class UsersService {
     }
 
     const created = await this.userRepository.create(createUserDto);
-    if (imageProcessingSkipped) {
-      return {
-        ...((created as any).toObject?.() ?? created),
-        imageProcessingSkipped: true,
-      };
-    }
     return created;
   }
 
@@ -269,6 +288,7 @@ export class UsersService {
         updateUserDto.password,
       );
     }
+    /*
     let imageProcessingSkipped = false;
     try {
       updateUserDto.images = await this.userImageService.processImage(
@@ -285,14 +305,17 @@ export class UsersService {
         throw error;
       }
     }
+    */
     const updated = await this.userRepository.updateById(id, updateUserDto);
     if (!updated) return null;
+    /*
     if (imageProcessingSkipped) {
       return {
         ...((updated as any).toObject?.() ?? updated),
         imageProcessingSkipped: true,
       };
     }
+    */
     return updated;
   }
 

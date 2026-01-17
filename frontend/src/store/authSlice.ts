@@ -1,21 +1,58 @@
+/**
+ * AuthSlice - Slice de Redux para gestionar el estado de autenticación
+ * 
+ * Responsabilidades:
+ * - Almacenar información del usuario autenticado
+ * - Gestionar el estado de login/logout
+ * - Guardar y recuperar el token JWT
+ * - Mantener el estado de carga de peticiones de autenticación
+ * 
+ * Estado:
+ * {
+ *   user: Usuario autenticado o null
+ *   token: JWT token o null
+ *   isAuthenticated: boolean
+ *   status: Estado de la petición (idle, loading, succeeded, failed)
+ *   error: Mensaje de error o null
+ * }
+ * 
+ * Acciones disponibles:
+ * - loginThunk: Envía credenciales al servidor y obtiene el token
+ * - logoutThunk: Invalida el token y limpia el estado
+ * - checkAuth: Verifica si el usuario aún está autenticado
+ * - login: Acción manual para establecer usuario y token
+ * - logout: Acción manual para limpiar el estado
+ */
+
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { checkAuth, loginThunk, logoutThunk } from "./authThunk";
 
+/**
+ * Interfaz que define la estructura del usuario autenticado
+ */
 interface User {
-  id?: string;
-  name: string;
-  role: string;
-  [key: string]: any;
+  id?: string;        // ID del usuario
+  name: string;       // Nombre completo o nombre de usuario
+  role: string;       // Rol del usuario (ADMIN, COACH, ATHLETE, etc)
+  [key: string]: any; // Otros campos dinámicos que pueda tener el usuario
 }
 
+/**
+ * Interfaz que define el estado de autenticación global
+ * Este es el estado que se almacena en Redux
+ */
 interface AuthState {
-  user: User | null;
-  token: string | null;
-  isAuthenticated: boolean;
-  status: "idle" | "loading" | "succeeded" | "failed";
-  error: string | null;
+  user: User | null;                         // Usuario autenticado
+  token: string | null;                      // Token JWT
+  isAuthenticated: boolean;                  // Indicador de si está logueado
+  status: "idle" | "loading" | "succeeded" | "failed"; // Estado de la petición
+  error: string | null;                      // Mensaje de error si algo falló
 }
 
+/**
+ * Estado inicial de autenticación
+ * Cuando la app carga, no hay usuario ni token
+ */
 const initialState: AuthState = {
   user: null,
   token: null,

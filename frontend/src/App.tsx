@@ -1,3 +1,22 @@
+/**
+ * Componente raíz de la aplicación (App)
+ * 
+ * Responsabilidades:
+ * - Configurar React Router para navegación
+ * - Proporcionar contexto de autenticación
+ * - Renderizar rutas públicas y privadas
+ * - Configurar notificaciones (toastr)
+ * 
+ * Estructura:
+ * App (componente raíz)
+ *   ↓
+ * Router (BrowserRouter)
+ *   ↓
+ * AuthProvider (contexto de autenticación)
+ *   ↓
+ * Routes (rutas según rol del usuario)
+ */
+
 import {
   BrowserRouter as Router,
   Routes,
@@ -11,13 +30,21 @@ import { useSelector } from "react-redux";
 import toastr from "toastr";
 import "toastr/build/toastr.min.css";
 
+/**
+ * Configurar las opciones globales de las notificaciones (toastr)
+ * Estas opciones se aplican a todos los toasts que se muestren en la app
+ */
 toastr.options = {
-  closeButton: true,
-  progressBar: true,
-  positionClass: "toast-top-right",
-  timeOut: 3000,
+  closeButton: true,      // Mostrar botón para cerrar la notificación
+  progressBar: true,      // Mostrar barra de progreso
+  positionClass: "toast-top-right", // Posición en la pantalla
+  timeOut: 3000,         // Cerrar automáticamente después de 3 segundos
 };
 
+/**
+ * Componente principal de la aplicación
+ * Configura React Router y AuthProvider
+ */
 export const App = () => {
   return (
     <Router>
@@ -28,12 +55,29 @@ export const App = () => {
   );
 };
 
+/**
+ * Componente que maneja todas las rutas de la aplicación
+ * 
+ * Lógica:
+ * 1. Obtiene el usuario y rol del estado global (Redux)
+ * 2. Busca las rutas permitidas para ese rol
+ * 3. Renderiza rutas públicas (login) y privadas (protegidas)
+ * 4. Maneja redirecciones según el estado de autenticación
+ */
 const AppRoutes = () => {
+  // Obtener estado de autenticación desde Redux
   const isAuthenticated = useSelector((state: any) => state.auth);
   const { user } = isAuthenticated;
   const role = user?.role || "";
+  
+  // Obtener las rutas permitidas para el rol del usuario actual
   const allowedRoutes = roleRoutes[role] || [];
 
+  /**
+   * Extraer rutas hijas (subrutas)
+   * Algunas rutas tienen rutas hijas anidadas
+   * Ejemplo: /admin tiene /admin/users, /admin/settings
+   */
   const childRoutes = allowedRoutes
     .filter((route) => route.children)
     .flatMap((route) => route.children);
