@@ -20,6 +20,7 @@ import type {
 } from "../../services/assignments.service";
 import assignmentsService from "../../services/assignments.service";
 import userService from "../../services/userService";
+import { NavHeader } from "../../components";
 
 interface User {
   _id: string;
@@ -29,7 +30,7 @@ interface User {
   role: string;
 }
 
-export const Assignments = () => {
+const Assignments = () => {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -221,106 +222,98 @@ export const Assignments = () => {
   }
 
   return (
-    <div className="wrapper wrapper-content animated fadeInRight">
-      <div className="ibox float-e-margins">
-        <div className="ibox-title">
-          <h2>Asignaciones de Módulos</h2>
-          <p className="text-muted" style={{ marginTop: "5px" }}>
-            Gestiona la asignación de módulos a administradores
-          </p>
-        </div>
-        <div className="ibox-content">
-          <div className="m-b-20">
-            <button
-              className="btn btn-primary btn-w-m"
-              onClick={handleOpenCreate}
-            >
-              <i className="fa fa-plus"></i> Crear Asignación
-            </button>
-          </div>
+    <>
+      <NavHeader name="Asignaciones de Módulos" pageCreate="Crear" />
 
-          {assignments.length > 0 ? (
-            <div className="table-responsive">
-              <table className="table table-striped table-hover">
-                <thead>
-                  <tr>
-                    <th>Módulo</th>
-                    <th>Administradores Asignados</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {assignments.map((assignment) => (
-                    <tr key={assignment._id}>
-                      <td>{assignment.module_name}</td>
-                      <td>
-                        <div
-                          style={{
-                            display: "flex",
-                            flexWrap: "wrap",
-                            gap: "5px",
-                          }}
-                        >
-                          {assignment.assigned_admins.map((adminId) => (
-                            <span
-                              key={adminId}
-                              className="label label-primary"
-                              style={{
-                                borderRadius: "20px",
-                                padding: "4px 10px",
-                                fontSize: "11px",
-                              }}
-                            >
-                              {getUserName(adminId)}
-                            </span>
-                          ))}
-                        </div>
-                      </td>
-                      <td>
-                        <span
-                          className={`label ${
-                            assignment.is_active
-                              ? "label-primary"
-                              : "label-danger"
-                          }`}
-                        >
-                          {assignment.is_active ? "Activo" : "Inactivo"}
-                        </span>
-                      </td>
-                      <td>
-                        <div className="btn-group" role="group">
+      <div className="wrapper wrapper-content animated fadeInRight">
+        <div className="ibox float-e-margins">
+          <div className="ibox-content">
+            {assignments.length > 0 ? (
+              <div className="table-responsive">
+                <table className="table table-striped table-hover">
+                  <thead>
+                    <tr>
+                      <th>Módulo</th>
+                      <th>Administradores Asignados</th>
+                      <th>Estado</th>
+                      <th style={{ textAlign: "center" }}>Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {assignments.map((assignment) => (
+                      <tr
+                        key={assignment._id}
+                        style={{ verticalAlign: "middle" }}
+                      >
+                        <td style={{ verticalAlign: "middle" }}>
+                          {assignment.module_name}
+                        </td>
+                        <td style={{ verticalAlign: "middle" }}>
+                          <div
+                            style={{
+                              display: "flex",
+                              flexWrap: "wrap",
+                              gap: "5px",
+                            }}
+                          >
+                            {assignment.assigned_admins.map((adminId) => (
+                              <span
+                                key={adminId}
+                                className="label label-primary"
+                                style={{
+                                  borderRadius: "20px",
+                                  padding: "4px 10px",
+                                  fontSize: "11px",
+                                }}
+                              >
+                                {getUserName(adminId)}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td style={{ verticalAlign: "middle" }}>
+                          <span
+                            className={`label ${
+                              assignment.is_active
+                                ? "label-primary"
+                                : "label-danger"
+                            }`}
+                          >
+                            {assignment.is_active ? "Activo" : "Inactivo"}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: "center" }}>
                           <button
-                            className="btn btn-xs btn-success"
+                            className="btn btn-xs btn-success mx-1"
                             onClick={() => handleOpenEdit(assignment)}
                             title="Editar"
                           >
-                            <i className="fa fa-pencil"></i>
+                            <i className="fa fa-pencil"></i> Editar
                           </button>
                           <button
-                            className="btn btn-xs btn-danger"
+                            className="btn btn-xs btn-danger mx-1"
                             onClick={() => handleDelete(assignment._id)}
                             title="Eliminar"
                           >
-                            <i className="fa fa-trash"></i>
+                            <i className="fa fa-trash"></i> Eliminar
                           </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="alert alert-info m-t-20">
-              <p style={{ marginBottom: "15px" }}>
-                No hay asignaciones creadas
-              </p>
-              <button className="btn btn-primary" onClick={handleOpenCreate}>
-                Crear primera asignación
-              </button>
-            </div>
-          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="alert alert-info m-t-20">
+                <p style={{ marginBottom: "15px" }}>
+                  No hay asignaciones creadas
+                </p>
+                <button className="btn btn-primary" onClick={handleOpenCreate}>
+                  Crear primera asignación
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -509,8 +502,8 @@ export const Assignments = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
-export default Assignments;
+export { Assignments };
