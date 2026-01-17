@@ -4,6 +4,7 @@ import { AssignmentsService } from './assignments.service';
 import { AssignmentsController } from './assignments.controller';
 import { Assignment, AssignmentSchema } from './schemas/assignment.schema';
 import { AssignmentRepository } from './repository/assignment.repository';
+import { User, UserSchema } from '../users/schemas/user.schema';
 
 /**
  * AssignmentsModule - Módulo de Asignaciones
@@ -18,6 +19,7 @@ import { AssignmentRepository } from './repository/assignment.repository';
   imports: [
     MongooseModule.forFeature([
       { name: Assignment.name, schema: AssignmentSchema },
+      { name: User.name, schema: UserSchema },
     ]),
   ],
   controllers: [AssignmentsController],

@@ -79,5 +79,13 @@ export class User extends mongoose.Document {
     medium: string;
     large: string;
   };
+
+  /** Array de IDs de asignaciones para admins */
+  @Prop({
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Assignment' }],
+    default: [],
+    required: false,
+  })
+  assignments?: mongoose.Types.ObjectId[];
 }
 export const UserSchema = SchemaFactory.createForClass(User);

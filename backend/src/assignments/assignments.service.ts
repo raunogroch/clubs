@@ -7,6 +7,9 @@ import {
 import { Assignment } from './schemas/assignment.schema';
 import { CreateAssignmentDto, UpdateAssignmentDto } from './dto';
 import { AssignmentRepository } from './repository/assignment.repository';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { User } from '../users/schemas/user.schema';
 
 /**
  * AssignmentsService - Servicio de Gestión de Asignaciones
@@ -19,7 +22,10 @@ import { AssignmentRepository } from './repository/assignment.repository';
  */
 @Injectable()
 export class AssignmentsService {
-  constructor(private readonly assignmentRepository: AssignmentRepository) {}
+  constructor(
+    private readonly assignmentRepository: AssignmentRepository,
+    @InjectModel(User.name) private readonly userModel: Model<User>,
+  ) {}
 
   /**
    * Crear una nueva asignación de módulo
@@ -57,6 +63,14 @@ export class AssignmentsService {
       ...createAssignmentDto,
       assigned_by: superAdminId,
     });
+
+    // Agregar el ID del assignment a los usuarios asignados
+    if (createAssignmentDto.assigned_admins && assignment._id) {
+      await this.userModel.updateMany(
+        { _id: { $in: createAssignmentDto.assigned_admins } },
+        { $addToSet: { assignments: assignment._id } },
+      );
+    }
 
     return assignment;
   }
@@ -153,6 +167,33 @@ export class AssignmentsService {
       );
     }
 
+    // Si se actualizan los admins asignados, actualizar también el campo assignments de los usuarios
+    if (updateAssignmentDto.assigned_admins) {
+      const oldAdmins = assignment.assigned_admins.map((a) => a.toString());
+      const newAdmins = updateAssignmentDto.assigned_admins;
+
+      // Admins que se removieron
+      const removedAdmins = oldAdmins.filter((id) => !newAdmins.includes(id));
+      // Admins que se agregaron
+      const addedAdmins = newAdmins.filter((id) => !oldAdmins.includes(id));
+
+      // Remover el ID del assignment de los admins removidos
+      if (removedAdmins.length > 0) {
+        await this.userModel.updateMany(
+          { _id: { $in: removedAdmins } },
+          { $pull: { assignments: id } },
+        );
+      }
+
+      // Agregar el ID del assignment a los nuevos admins
+      if (addedAdmins.length > 0) {
+        await this.userModel.updateMany(
+          { _id: { $in: addedAdmins } },
+          { $addToSet: { assignments: id } },
+        );
+      }
+    }
+
     const updatedAssignment = await this.assignmentRepository.update(
       id,
       updateAssignmentDto,
@@ -171,6 +212,14 @@ export class AssignmentsService {
 
     if (!assignment) {
       throw new NotFoundException(`Asignación con ID '${id}' no encontrada`);
+    }
+
+    // Remover el ID del assignment de todos los usuarios asignados
+    if (assignment.assigned_admins && assignment.assigned_admins.length > 0) {
+      await this.userModel.updateMany(
+        { _id: { $in: assignment.assigned_admins } },
+        { $pull: { assignments: id } },
+      );
     }
 
     const deleted = await this.assignmentRepository.delete(id);

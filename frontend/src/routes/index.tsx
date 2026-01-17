@@ -1,5 +1,12 @@
 import type { JSX } from "react";
-import { Dashboard, Assignments } from "../pages";
+import {
+  Dashboard,
+  Assignments,
+  Assistants,
+  Coaches,
+  Parents,
+  Athletes,
+} from "../pages";
 
 export type MenuRoute = {
   path: string;
@@ -32,6 +39,19 @@ export const roleRoutes: RoleRoutes = {
       icon: "fa-home",
       label: "Principal",
       element: <Dashboard />,
+    },
+    {
+      path: "/users",
+      icon: "fa-users",
+      label: "Users",
+      children: [
+        {
+          path: "/users/assistants",
+          label: "Assistants",
+          element: <Assistants />,
+        },
+        { path: "/users/coaches", label: "Coaches", element: <Coaches /> },
+      ],
     },
   ],
   assistant: [

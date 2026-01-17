@@ -1,12 +1,12 @@
 /**
  * AuthService - Servicio de Autenticación
- * 
+ *
  * Responsabilidades:
  * - Validar credenciales de usuario (username + password)
  * - Generar tokens JWT después de validar credenciales
  * - Revocar tokens (logout)
  * - Validar integridad de tokens revocados
- * 
+ *
  * Flujo de autenticación:
  * 1. Usuario envía username y password
  * 2. Se validan las credenciales con bcrypt
@@ -39,7 +39,7 @@ export class AuthService {
   /**
    * Valida las credenciales de un usuario
    * Compara la contraseña enviada con la contraseña hasheada en la BD
-   * 
+   *
    * @param username - Usuario del que se valida la contraseña
    * @param pass - Contraseña en texto plano a validar
    * @returns Objeto del usuario sin la contraseña, o null si la validación falla
@@ -58,7 +58,7 @@ export class AuthService {
 
   /**
    * Realiza el login del usuario y genera un token JWT
-   * 
+   *
    * @param loginDto - DTO con username y password
    * @returns Objeto con el token JWT y información del usuario
    * @throws UnauthorizedException si las credenciales no son válidas
@@ -76,7 +76,7 @@ export class AuthService {
      * Esto permite revocar tokens específicos sin afectar otros tokens del mismo usuario
      */
     const jti = randomBytes(16).toString('hex');
-    
+
     /**
      * Payload del JWT contiene:
      * - username: Usuario que se autenticó
@@ -100,6 +100,8 @@ export class AuthService {
           role: user.role,
           // Return the images object (preferred) - keep backward compatibility by including image? not included
           images: (user as any)?.images || undefined,
+          // Array de IDs de asignaciones para admins
+          assignments: (user as any)?.assignments || [],
         },
       },
     };

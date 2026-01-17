@@ -30,6 +30,7 @@ export interface User {
   groups?: any[];
   coaches?: any[];
   athletes?: any[];
+  assignments?: string[]; // Array de IDs de asignaciones
 }
 
 export type UserErrors = {

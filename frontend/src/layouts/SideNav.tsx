@@ -31,16 +31,41 @@ export const SideNav = () => {
   };
 
   const role = user?.role || "";
-  const menuItems = roleRoutes[role] || [];
+  // Obtener menú base del rol actual
+  const baseMenuItems = roleRoutes[role] || [];
+
+  // Estado para controlar qué menus están abiertos (expandidos)
   const [openMenus, setOpenMenus] = React.useState<{ [key: string]: boolean }>(
-    {}
+    {},
   );
 
+  // Verificar si el admin tiene assignments asignados
+  // El campo assignments viene del usuario cuando inicia sesión
+  const hasAssignments = React.useMemo(() => {
+    if (role === "admin") {
+      return (
+        Array.isArray((user as any)?.assignments) &&
+        (user as any).assignments.length > 0
+      );
+    }
+    // Superadmin y otros roles siempre tienen acceso
+    return true;
+  }, [role, (user as any)?.assignments]);
+
+  // Filtrar el menú: si es admin sin assignments, mostrar solo dashboard
+  const menuItems = React.useMemo(() => {
+    if (role === "admin" && !hasAssignments) {
+      return baseMenuItems.filter((item) => item.path === "/");
+    }
+    return baseMenuItems;
+  }, [role, hasAssignments, baseMenuItems]);
+
+  // Sincronizar menus abiertos cuando cambia la ruta o los items del menú
   React.useEffect(() => {
     const syncOpenMenus = (
       items: Array<(typeof menuItems)[0]>,
       parentKey = "",
-      acc: { [key: string]: boolean } = {}
+      acc: { [key: string]: boolean } = {},
     ) => {
       items.forEach((item) => {
         const key = parentKey + item.path;
@@ -49,7 +74,7 @@ export const SideNav = () => {
           | undefined;
         if (children && children.length > 0) {
           const isAnyChildActive = children.some((child) =>
-            isActive(child.path)
+            isActive(child.path),
           );
           acc[key] = isAnyChildActive;
           syncOpenMenus(children, key, acc);
@@ -62,25 +87,33 @@ export const SideNav = () => {
 
   const handleMenuClick = (
     key: string,
-    e: React.MouseEvent<HTMLAnchorElement>
+    e: React.MouseEvent<HTMLAnchorElement>,
   ) => {
     e.preventDefault();
     setOpenMenus((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
+  /**
+   * Renderiza los items del menú de forma recursiva.
+   * - Si un item tiene children (submenus), renderiza como un menú padre expandible
+   * - Si no tiene children, renderiza como un enlace directo
+   *
+   * @param items - Array de items del menú
+   * @param parentKey - Clave del padre (para identificar submenus anidados)
+   */
   function renderMenuItems(
     items: Array<(typeof menuItems)[0]>,
-    parentKey = ""
+    parentKey = "",
   ) {
     return items
-      .filter((item) => item.icon || item.children)
+      .filter((item) => item.icon || item.children || item.label)
       .map((item) => {
         const key = parentKey + item.path;
         const children = item.children as
           | Array<(typeof menuItems)[0]>
           | undefined;
         const isAnyChildActive = children?.some((child) =>
-          isActive(child.path)
+          isActive(child.path),
         );
 
         if (children && children.length > 0) {
@@ -91,7 +124,6 @@ export const SideNav = () => {
             >
               <a href="#" onClick={(e) => handleMenuClick(key, e)}>
                 {item.icon && <i className={`fa ${item.icon}`}></i>}{" "}
-                {/* Wrap label with .nav-label so CSS can hide/show it when body has class "mini-navbar" */}
                 <span className="nav-label">{item.label}</span>
                 <span className="fa arrow"></span>
               </a>
