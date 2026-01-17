@@ -83,6 +83,7 @@ export class SportsService {
 
   /**
    * Obtiene todos los deportes
+   * Nota: Los deportes son compartidos entre todos los grupos
    */
   async findAll(requestingUser?: { sub: string; role: string }) {
     let sports = await this.sportRepository.findAll();
@@ -91,22 +92,7 @@ export class SportsService {
       sports = sports.filter((s) => (s as any).active === true);
     }
 
-    // Filtrar por grupo si es ADMIN
-    if (requestingUser && requestingUser.role === Roles.ADMIN) {
-      const adminGroup = await this.getAdminGroup(requestingUser.sub);
-      if (adminGroup) {
-        sports = sports.filter((s: any) => {
-          const sportGroupId =
-            s.groupId?._id?.toString() || s.groupId?.toString();
-          const adminGroupId =
-            adminGroup._id?.toString() || adminGroup?.toString();
-          return sportGroupId === adminGroupId;
-        });
-      } else {
-        sports = []; // Si no tiene grupo asignado, no ve deportes
-      }
-    }
-
+    // Los deportes se ven por todos (no se filtra por grupo)
     return sports;
   }
 

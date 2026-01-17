@@ -47,16 +47,6 @@ export const ClubForm = ({
         />
 
         <FormField
-          title="Lugar de entrenamiento"
-          type="text"
-          name="place"
-          value={formData.place}
-          error={errors.place}
-          handleChange={handleChange}
-          placeholder="Direccion..."
-        />
-
-        <FormField
           title="Mensualidad"
           type="number"
           name="monthly_pay"

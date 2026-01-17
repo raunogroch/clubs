@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from '../schemas/user.schema';
+import { Roles } from '../enum/roles.enum';
 import { IUserRepository } from './user.repository.interface';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
@@ -25,6 +26,13 @@ export class UserRepository implements IUserRepository {
    */
   async findOneByUsername(username: string): Promise<User | null> {
     return this.userModel.findOne({ username });
+  }
+
+  /**
+   * Busca un usuario por su CI
+   */
+  async findByCi(ci: string): Promise<User | null> {
+    return this.userModel.findOne({ ci, role: Roles.ATHLETE });
   }
 
   /**

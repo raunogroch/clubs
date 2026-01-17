@@ -8,7 +8,7 @@ import "toastr/build/toastr.min.css";
 
 const emptyClub: Club = {
   name: "",
-  place: "",
+
   sport: "" as any,
   description: "",
   groups: [],
@@ -42,7 +42,6 @@ export const useClubForm = (initialData?: Club) => {
     if (!formData.name) newErrors.name = "El nombre del club es requerido";
     if (!formData.sport)
       newErrors.sport = "La disciplina deportiva es requerida";
-    if (!formData.place) newErrors.place = "La ubicacion es requerida";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;

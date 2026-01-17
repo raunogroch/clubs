@@ -27,6 +27,32 @@ export const userService = {
       return handleApiError(error);
     }
   },
+
+  async findAthleteByCi(ci: string): Promise<ApiResponse<any>> {
+    try {
+      const response = await api.get(`/users/search/by-ci/${ci}`);
+      return {
+        code: response.status,
+        message: "Atleta encontrado",
+        data: response.data,
+      };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  },
+
+  async createAthlete(athleteData: any): Promise<ApiResponse<any>> {
+    try {
+      const response = await api.post("/users", athleteData);
+      return {
+        code: response.status,
+        message: "Atleta creado",
+        data: response.data,
+      };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  },
 };
 
 export default userService;

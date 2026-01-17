@@ -34,10 +34,6 @@ export class Club extends Document {
   })
   sport: Sport;
 
-  /** Lugar de entrenamiento del club */
-  @Prop({ type: String })
-  place: string;
-
   /** Breve referencia del club */
   @Prop({ type: String })
   description: string;

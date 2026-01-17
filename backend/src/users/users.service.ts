@@ -59,7 +59,7 @@ export class UsersService {
 
     // Campos requeridos para cada rol
     const requiredFields: Record<Roles, string[]> = {
-      [Roles.ATHLETE]: ['username', 'password', 'name', 'lastname'],
+      [Roles.ATHLETE]: ['name', 'lastname'],
       [Roles.PARENT]: ['name', 'lastname'],
       [Roles.COACH]: ['username', 'password', 'name', 'lastname'],
       [Roles.ASSISTANT]: ['username', 'password', 'name', 'lastname'],
@@ -86,6 +86,29 @@ export class UsersService {
   async create(createUserDto: CreateUserDto): Promise<any> {
     // Validar campos requeridos según el rol
     this.validateRequiredFieldsByRole(createUserDto);
+
+    // Para ATHLETE sin username, generar automáticamente
+    if (createUserDto.role === Roles.ATHLETE && !createUserDto.username) {
+      const baseUsername = `${createUserDto.name?.toLowerCase() || 'athlete'}.${
+        createUserDto.lastname?.toLowerCase() || 'user'
+      }`.replace(/\s+/g, '');
+      let username = baseUsername;
+      let counter = 1;
+
+      // Asegurar que el username sea único
+      while (await this.userValidator.usernameExists(username)) {
+        username = `${baseUsername}${counter}`;
+        counter++;
+      }
+      createUserDto.username = username;
+    }
+
+    // Para ATHLETE sin password, generar automáticamente
+    if (createUserDto.role === Roles.ATHLETE && !createUserDto.password) {
+      createUserDto.password =
+        Math.random().toString(36).substring(2, 10) +
+        Math.random().toString(36).substring(2, 10);
+    }
 
     // Validar username único solo si el rol requiere username
     if (createUserDto.username) {
@@ -304,6 +327,14 @@ export class UsersService {
     const userExist = await this.findOneById(id);
     if (!userExist) throw new NotFoundException('El usuario no fue encontrado');
     return userExist;
+  }
+
+  /**
+   * Busca un usuario atleta por CI
+   */
+  async findByCi(ci: string): Promise<User | null> {
+    const user = await this.userRepository.findByCi(ci);
+    return user || null;
   }
 
   /**

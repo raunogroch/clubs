@@ -16,6 +16,11 @@ export class UserValidatorService {
     }
   }
 
+  async usernameExists(username: string): Promise<boolean> {
+    const user = await this.userRepository.findOneByUsername(username);
+    return !!user;
+  }
+
   async validateExistence(id: string): Promise<void> {
     const user = await this.userRepository.findById(id);
     if (!user) {

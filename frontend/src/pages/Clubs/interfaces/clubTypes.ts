@@ -9,7 +9,7 @@ export interface Club {
     large: string;
   };
   name: string;
-  place: string;
+
   sport: Sport;
   description: string;
   groups: IGroup[];

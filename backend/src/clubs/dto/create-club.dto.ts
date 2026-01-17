@@ -21,11 +21,6 @@ export class CreateClubDto {
   @IsMongoId({ each: true })
   sport: Types.ObjectId;
 
-  /** Ubicacion de entrenamiento */
-  @IsString()
-  @IsNotEmpty()
-  place: string;
-
   /** Una breve descripcion del club */
   @IsString()
   @IsNotEmpty()

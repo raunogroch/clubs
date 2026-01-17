@@ -21,35 +21,29 @@ export class CreateUserDto {
 
   /** Nombre de usuario (ATHLETE, COACH, ASSISTANT, ADMIN, SUPERADMIN) */
   @ValidateIf((o) =>
-    [
-      Roles.ATHLETE,
-      Roles.COACH,
-      Roles.ASSISTANT,
-      Roles.ADMIN,
-      Roles.SUPERADMIN,
-    ].includes(o.role),
+    [Roles.COACH, Roles.ASSISTANT, Roles.ADMIN, Roles.SUPERADMIN].includes(
+      o.role,
+    ),
   )
   @IsNotEmpty({
     message: 'Username is required for this role',
   })
   @IsString()
+  @IsOptional()
   username?: string;
 
   /** Contraseña (ATHLETE, COACH, ASSISTANT, ADMIN, SUPERADMIN) */
   @ValidateIf((o) =>
-    [
-      Roles.ATHLETE,
-      Roles.COACH,
-      Roles.ASSISTANT,
-      Roles.ADMIN,
-      Roles.SUPERADMIN,
-    ].includes(o.role),
+    [Roles.COACH, Roles.ASSISTANT, Roles.ADMIN, Roles.SUPERADMIN].includes(
+      o.role,
+    ),
   )
   @IsNotEmpty({
     message: 'Password is required for this role',
   })
   @IsString()
   @MinLength(6)
+  @IsOptional()
   password?: string;
 
   /** Nombre (requerido para todos excepto PARENT) */

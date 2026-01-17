@@ -119,4 +119,13 @@ export class UsersController {
   profile(@Param('id') id: string) {
     return this.usersService.profile(id);
   }
+
+  /**
+   * Endpoint para buscar un atleta por CI
+   */
+  @Get('search/by-ci/:ci')
+  @Roles(Role.SUPERADMIN, Role.ADMIN, Role.ASSISTANT)
+  findByCi(@Param('ci') ci: string) {
+    return this.usersService.findByCi(ci);
+  }
 }

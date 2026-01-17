@@ -8,6 +8,7 @@ import { fetchEntities } from "../../../store/entitiesThunks";
 import type { AppDispatch, RootState } from "../../../store";
 import type { User } from "../../../interfaces";
 import { NavHeader } from "../../../components";
+import { userService } from "../../../services/userService";
 
 interface Props {
   name?: string;
@@ -24,6 +25,20 @@ export const GroupAthletes = ({ name, sub, sub1 }: Props) => {
 
   // Local optimistic state so UI updates instantly while server call completes
   const [localGroup, setLocalGroup] = useState<any | null>(group ?? null);
+
+  // New state for search and registration
+  const [searchCi, setSearchCi] = useState<string>("");
+  const [searchResult, setSearchResult] = useState<User | null>(null);
+  const [foundAthlete, setFoundAthlete] = useState<boolean>(false);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [showCreateForm, setShowCreateForm] = useState<boolean>(false);
+  const [newAthleteData, setNewAthleteData] = useState({
+    name: "",
+    lastname: "",
+    ci: "",
+    role: "athlete",
+  });
+  const [isCreating, setIsCreating] = useState<boolean>(false);
 
   // Keep localGroup in sync with store updates (server response)
   useEffect(() => {
@@ -61,9 +76,6 @@ export const GroupAthletes = ({ name, sub, sub1 }: Props) => {
     );
   }, [groupAthleteIds, allAthletes]);
 
-  // Right column: show all athletes but disable add when already in group
-  const availableToAdd: User[] = allAthletes;
-
   // Optimistic add
   const handleAdd = async (athlete: User) => {
     if (!clubId || !localGroup || !athlete._id) return;
@@ -98,6 +110,80 @@ export const GroupAthletes = ({ name, sub, sub1 }: Props) => {
     }
   };
 
+  // Search athlete by CI
+  const handleSearchByCi = async () => {
+    if (!searchCi.trim()) {
+      toastr.warning("Por favor ingresa una cédula");
+      return;
+    }
+
+    setIsSearching(true);
+    const response = await userService.findAthleteByCi(searchCi.trim());
+    setIsSearching(false);
+
+    if (response.code === 200 && response.data) {
+      setSearchResult(response.data);
+      setFoundAthlete(true);
+      setShowCreateForm(false);
+    } else {
+      setFoundAthlete(false);
+      setShowCreateForm(true);
+      setNewAthleteData({
+        ...newAthleteData,
+        ci: searchCi.trim(),
+      });
+    }
+  };
+
+  // Add found athlete to group
+  const handleAddFoundAthlete = async () => {
+    if (!searchResult) return;
+    await handleAdd(searchResult);
+    setSearchCi("");
+    setSearchResult(null);
+    setFoundAthlete(false);
+  };
+
+  // Create new athlete
+  const handleCreateNewAthlete = async () => {
+    if (
+      !newAthleteData.name ||
+      !newAthleteData.lastname ||
+      !newAthleteData.ci
+    ) {
+      toastr.warning("Por favor completa todos los campos");
+      return;
+    }
+
+    setIsCreating(true);
+    const response = await userService.createAthlete(newAthleteData);
+    setIsCreating(false);
+
+    if (response.code === 201 && response.data) {
+      toastr.success("Atleta creado exitosamente");
+      // Add the new athlete to the group
+      await handleAdd(response.data);
+      setSearchCi("");
+      setNewAthleteData({
+        name: "",
+        lastname: "",
+        ci: "",
+        role: "athlete",
+      });
+      setShowCreateForm(false);
+    } else {
+      toastr.error("No se pudo crear el atleta");
+    }
+  };
+
+  // Clear search
+  const handleClearSearch = () => {
+    setSearchCi("");
+    setSearchResult(null);
+    setFoundAthlete(false);
+    setShowCreateForm(false);
+  };
+
   return (
     <>
       <NavHeader name={name} sub={sub} sub1={sub1} />
@@ -119,7 +205,7 @@ export const GroupAthletes = ({ name, sub, sub1 }: Props) => {
                     className="list-group-item d-flex justify-content-between align-items-center"
                   >
                     <div>
-                      {a.name || "-"} {a.lastname || ""}
+                      {a.ci || "-"} - {a.lastname || ""} {a.name || ""}
                     </div>
                     <div>
                       <button
@@ -137,44 +223,142 @@ export const GroupAthletes = ({ name, sub, sub1 }: Props) => {
           </div>
 
           <div className="col-md-6">
-            <div className="ibox-title">
-              Atletas disponibles ({availableToAdd.length})
-            </div>
+            <div className="ibox-title">Registrar Atleta</div>
             <div className="ibox-content">
-              <ul className="list-group">
-                {availableToAdd.length === 0 && (
-                  <li className="list-group-item">
-                    No hay atletas disponibles
-                  </li>
-                )}
+              {/* Search or Create Form */}
+              {!foundAthlete && !showCreateForm && (
+                <div>
+                  <div className="form-group">
+                    <div className="input-group">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Ingresa la cédula del atleta"
+                        value={searchCi}
+                        onChange={(e) => setSearchCi(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === "Enter") handleSearchByCi();
+                        }}
+                      />
+                      <span className="input-group-btn">
+                        <button
+                          className="btn btn-primary"
+                          type="button"
+                          onClick={handleSearchByCi}
+                          disabled={isSearching}
+                        >
+                          {isSearching ? "Buscando..." : "Buscar"}
+                        </button>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
-                {availableToAdd.map((a) => {
-                  const inGroup = groupAthleteIds.includes(a._id);
-                  return (
-                    <li
-                      key={a._id}
-                      className="list-group-item d-flex justify-content-between align-items-center"
+              {/* Found Athlete Result */}
+              {foundAthlete && searchResult && (
+                <div className="alert alert-success">
+                  <h4>¡Atleta encontrado!</h4>
+                  <p>
+                    <strong>Nombre:</strong> {searchResult.name}{" "}
+                    {searchResult.lastname}
+                  </p>
+                  <p>
+                    <strong>Cédula:</strong> {searchResult.ci}
+                  </p>
+                  <p>
+                    <strong>Usuario:</strong> {searchResult.username}
+                  </p>
+                  <div className="mt-2">
+                    <button
+                      className="btn btn-success mr-2"
+                      onClick={handleAddFoundAthlete}
                     >
-                      <div>
-                        {a.name || "-"} {a.lastname || ""}
-                      </div>
-                      <div>
-                        {inGroup ? (
-                          ""
-                        ) : (
-                          <button
-                            type="button"
-                            className="btn btn-xs btn-success"
-                            onClick={() => handleAdd(a)}
-                          >
-                            <i className="fa fa-plus"></i>
-                          </button>
-                        )}
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
+                      <i className="fa fa-plus"></i> Agregar al grupo
+                    </button>
+                    <button
+                      className="btn btn-secondary"
+                      onClick={handleClearSearch}
+                    >
+                      Buscar otro
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Create New Athlete Form */}
+              {showCreateForm && (
+                <div className="alert alert-info">
+                  <h4>Crear nuevo atleta</h4>
+                  <p className="text-muted">
+                    No se encontró un atleta con esa cédula. Crea uno nuevo:
+                  </p>
+
+                  <div className="form-group">
+                    <label>Nombre</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Nombre"
+                      value={newAthleteData.name}
+                      onChange={(e) =>
+                        setNewAthleteData({
+                          ...newAthleteData,
+                          name: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Apellido</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Apellido"
+                      value={newAthleteData.lastname}
+                      onChange={(e) =>
+                        setNewAthleteData({
+                          ...newAthleteData,
+                          lastname: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Cédula</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Cédula"
+                      value={newAthleteData.ci}
+                      onChange={(e) =>
+                        setNewAthleteData({
+                          ...newAthleteData,
+                          ci: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="mt-2">
+                    <button
+                      className="btn btn-success mr-2"
+                      onClick={handleCreateNewAthlete}
+                      disabled={isCreating}
+                    >
+                      {isCreating ? "Creando..." : "Crear y agregar al grupo"}
+                    </button>
+                    <button
+                      className="btn btn-secondary"
+                      onClick={handleClearSearch}
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

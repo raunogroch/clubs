@@ -4,7 +4,8 @@ import { useParams } from "react-router-dom";
 import toastr from "toastr";
 import { createGroup, updateGroup } from "../../../store/groupsThunks";
 import type { AppDispatch } from "../../../store";
-import type { GroupErrors, IGroup } from "../interface/groupTypes";
+import type { GroupErrors, IGroup, WeekDays } from "../interface/groupTypes";
+import { WeekDays as WeekDaysEnum } from "../interface/groupTypes";
 import "toastr/build/toastr.min.css";
 
 export const initialGroupData: IGroup = {
@@ -21,6 +22,30 @@ export const initialGroupData: IGroup = {
   active: true,
 };
 
+// Mapeo de días para iterar al siguiente
+const daysOrder = [
+  WeekDaysEnum.LUNES,
+  WeekDaysEnum.MARTES,
+  WeekDaysEnum.MIERCOLES,
+  WeekDaysEnum.JUEVES,
+  WeekDaysEnum.VIERNES,
+  WeekDaysEnum.SABADO,
+  WeekDaysEnum.DOMINGO,
+];
+
+const getNextDay = (currentDay: string | WeekDays): string => {
+  if (!currentDay) return WeekDaysEnum.LUNES;
+
+  const dayString = String(currentDay).trim();
+  const currentIndex = daysOrder.findIndex(
+    (day) => String(day).trim().toLowerCase() === dayString.toLowerCase()
+  );
+
+  if (currentIndex === -1) return WeekDaysEnum.LUNES;
+  const nextIndex = (currentIndex + 1) % daysOrder.length;
+  return daysOrder[nextIndex];
+};
+
 export const useGroup = (initialData?: IGroup) => {
   const { clubId } = useParams<{ clubId: string }>();
   const dispatch = useDispatch<AppDispatch>();
@@ -31,11 +56,31 @@ export const useGroup = (initialData?: IGroup) => {
 
   const addSchedule = () => {
     if (groupFormState.dailySchedules.length >= 7) return;
+
+    // Obtener el último cronograma para pre-completar los datos
+    const lastSchedule =
+      groupFormState.dailySchedules.length > 0
+        ? groupFormState.dailySchedules[
+            groupFormState.dailySchedules.length - 1
+          ]
+        : null;
+
+    // Calcular el siguiente día
+    const nextDay = lastSchedule?.day
+      ? getNextDay(lastSchedule.day)
+      : WeekDaysEnum.LUNES;
+
     setGroupFormState((prev) => ({
       ...prev,
       dailySchedules: [
         ...prev.dailySchedules,
-        { day: "", turn: "", startTime: "", endTime: "", active: true },
+        {
+          day: nextDay as WeekDays,
+          turn: lastSchedule?.turn || "",
+          startTime: lastSchedule?.startTime || "",
+          endTime: lastSchedule?.endTime || "",
+          active: true,
+        },
       ],
     }));
   };
