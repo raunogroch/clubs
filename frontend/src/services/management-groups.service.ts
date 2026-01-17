@@ -8,7 +8,7 @@ export interface AdministratorInfo {
   phone?: string;
 }
 
-export interface AdminGroup {
+export interface ManagementGroup {
   _id: string;
   name: string;
   description?: string;
@@ -25,7 +25,7 @@ export interface AdminGroup {
   updatedAt: string;
 }
 
-export interface CreateAdminGroupPayload {
+export interface CreateManagementGroupPayload {
   name: string;
   description?: string;
   sport?: string;
@@ -36,41 +36,41 @@ export interface CreateAdminGroupPayload {
   administrator?: string;
 }
 
-export const adminGroupsService = {
-  getAll: async (): Promise<AdminGroup[]> => {
+export const managementGroupsService = {
+  getAll: async (): Promise<ManagementGroup[]> => {
     const response = await api.get("/admin/groups");
     return response.data;
   },
 
-  getAllIncludingDeleted: async (): Promise<AdminGroup[]> => {
+  getAllIncludingDeleted: async (): Promise<ManagementGroup[]> => {
     const response = await api.get("/admin/groups/all/including-deleted");
     return response.data;
   },
 
-  getById: async (id: string): Promise<AdminGroup> => {
+  getById: async (id: string): Promise<ManagementGroup> => {
     const response = await api.get(`/admin/groups/${id}`);
     return response.data;
   },
 
-  create: async (payload: CreateAdminGroupPayload): Promise<AdminGroup> => {
+  create: async (payload: CreateManagementGroupPayload): Promise<ManagementGroup> => {
     const response = await api.post("/admin/groups", payload);
     return response.data;
   },
 
   update: async (
     id: string,
-    payload: Partial<CreateAdminGroupPayload>
-  ): Promise<AdminGroup> => {
+    payload: Partial<CreateManagementGroupPayload>
+  ): Promise<ManagementGroup> => {
     const response = await api.patch(`/admin/groups/${id}`, payload);
     return response.data;
   },
 
-  delete: async (id: string): Promise<AdminGroup> => {
+  delete: async (id: string): Promise<ManagementGroup> => {
     const response = await api.delete(`/admin/groups/${id}`);
     return response.data;
   },
 
-  restore: async (id: string): Promise<AdminGroup> => {
+  restore: async (id: string): Promise<ManagementGroup> => {
     const response = await api.patch(`/admin/groups/${id}/restore`);
     return response.data;
   },
@@ -78,7 +78,7 @@ export const adminGroupsService = {
   assignAdministrator: async (
     id: string,
     administratorId: string
-  ): Promise<AdminGroup> => {
+  ): Promise<ManagementGroup> => {
     const response = await api.patch(`/admin/groups/${id}/administrator`, {
       administratorId,
     });

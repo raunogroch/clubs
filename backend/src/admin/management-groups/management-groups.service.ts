@@ -1,18 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { AdminGroup } from './schema';
-import { CreateAdminGroupDto, UpdateAdminGroupDto } from './dto';
+import { ManagementGroup } from './schema';
+import { CreateManagementGroupDto, UpdateManagementGroupDto } from './dto';
 
 @Injectable()
-export class AdminGroupsService {
+export class ManagementGroupsService {
   constructor(
-    @InjectModel('AdminGroup')
-    private readonly adminGroupModel: Model<AdminGroup>,
+    @InjectModel('ManagementGroup')
+    private readonly adminGroupModel: Model<ManagementGroup>,
   ) {}
 
-  async create(createAdminGroupDto: CreateAdminGroupDto): Promise<AdminGroup> {
-    const group = await this.adminGroupModel.create(createAdminGroupDto);
+  async create(createManagementGroupDto: CreateManagementGroupDto): Promise<ManagementGroup> {
+    const group = await this.adminGroupModel.create(createManagementGroupDto);
     return group.populate([
       'administrator',
       'coaches',
@@ -22,21 +22,21 @@ export class AdminGroupsService {
     ]);
   }
 
-  async findAll(): Promise<AdminGroup[]> {
+  async findAll(): Promise<ManagementGroup[]> {
     return this.adminGroupModel
       .find({ active: true })
       .populate(['administrator', 'coaches', 'athletes', 'clubs', 'sports'])
       .sort({ createdAt: -1 });
   }
 
-  async findAllIncludeDeleted(): Promise<AdminGroup[]> {
+  async findAllIncludeDeleted(): Promise<ManagementGroup[]> {
     return this.adminGroupModel
       .find()
       .populate(['administrator', 'coaches', 'athletes', 'clubs', 'sports'])
       .sort({ createdAt: -1 });
   }
 
-  async findOne(id: string): Promise<AdminGroup> {
+  async findOne(id: string): Promise<ManagementGroup> {
     const group = await this.adminGroupModel
       .findById(id)
       .populate(['administrator', 'coaches', 'athletes', 'clubs', 'sports']);
@@ -50,10 +50,10 @@ export class AdminGroupsService {
 
   async update(
     id: string,
-    updateAdminGroupDto: UpdateAdminGroupDto,
-  ): Promise<AdminGroup> {
+    updateManagementGroupDto: UpdateManagementGroupDto,
+  ): Promise<ManagementGroup> {
     const group = await this.adminGroupModel
-      .findByIdAndUpdate(id, updateAdminGroupDto, { new: true })
+      .findByIdAndUpdate(id, updateManagementGroupDto, { new: true })
       .populate(['administrator', 'coaches', 'athletes', 'clubs', 'sports']);
 
     if (!group) {
@@ -63,7 +63,7 @@ export class AdminGroupsService {
     return group;
   }
 
-  async remove(id: string): Promise<AdminGroup> {
+  async remove(id: string): Promise<ManagementGroup> {
     // Soft delete
     const group = await this.adminGroupModel
       .findByIdAndUpdate(id, { active: false }, { new: true })
@@ -76,7 +76,7 @@ export class AdminGroupsService {
     return group;
   }
 
-  async restore(id: string): Promise<AdminGroup> {
+  async restore(id: string): Promise<ManagementGroup> {
     const group = await this.adminGroupModel
       .findByIdAndUpdate(id, { active: true }, { new: true })
       .populate(['administrator', 'coaches', 'athletes', 'clubs', 'sports']);
@@ -93,7 +93,7 @@ export class AdminGroupsService {
    */
   async findByAdministrator(
     administratorId: string,
-  ): Promise<AdminGroup | null> {
+  ): Promise<ManagementGroup | null> {
     return this.adminGroupModel
       .findOne({ administrator: administratorId, active: true })
       .populate(['administrator', 'coaches', 'athletes', 'clubs', 'sports']);

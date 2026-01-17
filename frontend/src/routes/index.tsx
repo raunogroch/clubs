@@ -23,7 +23,10 @@ import { Coaches } from "../pages/Coaches/components";
 import { DashboardCoach } from "../pages/dashboardCoaches/DashboardCoach";
 import { Admins } from "../pages/Admins";
 import { Superadmins } from "../pages/SuperAdmins";
-import { AdminGroupsList, AdminGroupForm } from "../pages/SuperAdmins";
+import {
+  ManagementGroupsList,
+  ManagementGroupForm,
+} from "../pages/SuperAdmins";
 import { RegisterPayment } from "../pages";
 import { Assistants } from "../pages/Assistants";
 import { Parents } from "../pages/Parents";
@@ -175,7 +178,7 @@ export const roleRoutes: RoleRoutes = {
       icon: "fa-object-group",
       label: "Gestión de Grupos",
       element: (
-        <AdminGroupsList
+        <ManagementGroupsList
           name="Grupos"
           sub="Gestión General"
           edit
@@ -186,11 +189,11 @@ export const roleRoutes: RoleRoutes = {
     },
     {
       path: "/admin/groups/create",
-      element: <AdminGroupForm name="Grupos" sub="Crear" />,
+      element: <ManagementGroupForm name="Grupos" sub="Crear" />,
     },
     {
       path: "/admin/groups/edit/:id",
-      element: <AdminGroupForm name="Grupos" sub="Editar" />,
+      element: <ManagementGroupForm name="Grupos" sub="Editar" />,
     },
     {
       path: "/users/superadmin/edit/:id",

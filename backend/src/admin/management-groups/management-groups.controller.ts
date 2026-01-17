@@ -8,9 +8,9 @@ import {
   Delete,
   UseGuards,
 } from '@nestjs/common';
-import { AdminGroupsService } from './admin-groups.service';
-import { CreateAdminGroupDto } from './dto';
-import { UpdateAdminGroupDto } from './dto';
+import { ManagementGroupsService } from './management-groups.service';
+import { CreateManagementGroupDto } from './dto';
+import { UpdateManagementGroupDto } from './dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
@@ -19,12 +19,12 @@ import { Roles as Role } from 'src/users/enum/roles.enum';
 @Controller('admin/groups')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.SUPERADMIN)
-export class AdminGroupsController {
-  constructor(private readonly adminGroupsService: AdminGroupsService) {}
+export class ManagementGroupsController {
+  constructor(private readonly adminGroupsService: ManagementGroupsService) {}
 
   @Post()
-  create(@Body() createAdminGroupDto: CreateAdminGroupDto) {
-    return this.adminGroupsService.create(createAdminGroupDto);
+  create(@Body() createManagementGroupDto: CreateManagementGroupDto) {
+    return this.adminGroupsService.create(createManagementGroupDto);
   }
 
   @Get()
@@ -45,9 +45,9 @@ export class AdminGroupsController {
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() updateAdminGroupDto: UpdateAdminGroupDto,
+    @Body() updateManagementGroupDto: UpdateManagementGroupDto,
   ) {
-    return this.adminGroupsService.update(id, updateAdminGroupDto);
+    return this.adminGroupsService.update(id, updateManagementGroupDto);
   }
 
   @Delete(':id')

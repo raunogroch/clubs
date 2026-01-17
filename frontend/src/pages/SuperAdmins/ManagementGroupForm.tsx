@@ -2,18 +2,22 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import toastr from "toastr";
 import "toastr/build/toastr.min.css";
-import { adminGroupsService } from "../../services/admin-groups.service";
+import { managementGroupsService } from "../../services/management-groups.service";
 import { userService } from "../../services/userService";
-import type { CreateAdminGroupPayload } from "../../services/admin-groups.service";
+import type { CreateManagementGroupPayload } from "../../services/management-groups.service";
 import type { User } from "../../interfaces";
 
-interface AdminGroupFormProps {
+interface ManagementGroupFormProps {
   name?: string;
   sub?: string;
   sub1?: string;
 }
 
-export const AdminGroupForm = ({ name, sub, sub1 }: AdminGroupFormProps) => {
+export const ManagementGroupForm = ({
+  name,
+  sub,
+  sub1,
+}: ManagementGroupFormProps) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(id ? true : false);
@@ -21,7 +25,7 @@ export const AdminGroupForm = ({ name, sub, sub1 }: AdminGroupFormProps) => {
   const [error, setError] = useState<string | null>(null);
   const [administrators, setAdministrators] = useState<User[]>([]);
 
-  const [formData, setFormData] = useState<CreateAdminGroupPayload>({
+  const [formData, setFormData] = useState<CreateManagementGroupPayload>({
     name: "",
     administrator: "",
   });
@@ -48,7 +52,7 @@ export const AdminGroupForm = ({ name, sub, sub1 }: AdminGroupFormProps) => {
   const fetchGroup = async () => {
     try {
       setLoading(true);
-      const group = await adminGroupsService.getById(id!);
+      const group = await managementGroupsService.getById(id!);
       setFormData({
         name: group.name,
         administrator:
@@ -84,9 +88,9 @@ export const AdminGroupForm = ({ name, sub, sub1 }: AdminGroupFormProps) => {
       setError(null);
 
       if (id) {
-        await adminGroupsService.update(id, formData);
+        await managementGroupsService.update(id, formData);
       } else {
-        await adminGroupsService.create(formData);
+        await managementGroupsService.create(formData);
       }
 
       toastr.success("Grupo guardado exitosamente");

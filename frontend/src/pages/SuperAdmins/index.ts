@@ -1,3 +1,3 @@
 export * from "./components/Superadmins";
-export * from "./AdminGroupsList";
-export * from "./AdminGroupForm";
+export * from "./ManagementGroupsList";
+export * from "./ManagementGroupForm";

@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { AdminGroupsModule } from './admin-groups/admin-groups.module';
+import { ManagementGroupsModule } from './management-groups/management-groups.module';
 
 @Module({
-  imports: [AdminGroupsModule],
-  exports: [AdminGroupsModule],
+  imports: [ManagementGroupsModule],
+  exports: [ManagementGroupsModule],
 })
 export class AdminModule {}

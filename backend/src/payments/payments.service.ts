@@ -27,7 +27,7 @@ export class PaymentsService {
   private async getAdminGroup(userId: string): Promise<Types.ObjectId | null> {
     try {
       const adminGroupModel =
-        this.userModel.collection.conn.model('AdminGroup');
+        this.userModel.collection.conn.model('ManagementGroup');
       const adminGroup = await adminGroupModel.findOne({
         administrator: userId,
       });

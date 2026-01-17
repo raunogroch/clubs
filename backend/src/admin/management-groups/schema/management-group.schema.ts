@@ -43,7 +43,7 @@ export class DailySchedule {
 }
 
 @Schema({ timestamps: true })
-export class AdminGroup extends Document {
+export class ManagementGroup extends Document {
   @Prop({ type: String, required: true })
   name: string;
 
@@ -90,4 +90,4 @@ export class AdminGroup extends Document {
   updatedAt?: Date;
 }
 
-export const AdminGroupSchema = SchemaFactory.createForClass(AdminGroup);
+export const ManagementGroupSchema = SchemaFactory.createForClass(ManagementGroup);

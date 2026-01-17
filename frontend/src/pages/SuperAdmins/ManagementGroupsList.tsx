@@ -4,15 +4,15 @@ import { useDispatch, useSelector } from "react-redux";
 import swal from "sweetalert";
 import toastr from "toastr";
 import "toastr/build/toastr.min.css";
-import { adminGroupsService } from "../../services/admin-groups.service";
-import type { AdminGroup } from "../../services/admin-groups.service";
+import { managementGroupsService } from "../../services/management-groups.service";
+import type { ManagementGroup } from "../../services/management-groups.service";
 import { NavHeader, Spinner } from "../../components";
 import { PaginationList } from "../../components/PaginationList";
 import { useAuth } from "../../hooks";
 import { setLimit, setPage } from "../../store";
 import type { AppDispatch, RootState } from "../../store";
 
-interface AdminGroupsListProps {
+interface ManagementGroupsListProps {
   name?: string;
   sub?: string;
   edit?: boolean;
@@ -20,19 +20,19 @@ interface AdminGroupsListProps {
   restore?: boolean;
 }
 
-export const AdminGroupsList = ({
+export const ManagementGroupsList = ({
   name = "Grupos",
   sub = "Gestión General",
   edit = true,
   delete: canDelete = true,
   restore: canRestore = true,
-}: AdminGroupsListProps) => {
+}: ManagementGroupsListProps) => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const { role } = useAuth();
 
-  const [groups, setGroups] = useState<AdminGroup[]>([]);
-  const [filteredGroups, setFilteredGroups] = useState<AdminGroup[]>([]);
+  const [groups, setGroups] = useState<ManagementGroup[]>([]);
+  const [filteredGroups, setFilteredGroups] = useState<ManagementGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -49,8 +49,8 @@ export const AdminGroupsList = ({
     try {
       setLoading(true);
       const data = showDeleted
-        ? await adminGroupsService.getAllIncludingDeleted()
-        : await adminGroupsService.getAll();
+        ? await managementGroupsService.getAllIncludingDeleted()
+        : await managementGroupsService.getAll();
       setGroups(data);
       filterGroups(data, searchTerm);
       setError(null);
@@ -63,7 +63,7 @@ export const AdminGroupsList = ({
     }
   };
 
-  const filterGroups = (data: AdminGroup[], term: string) => {
+  const filterGroups = (data: ManagementGroup[], term: string) => {
     const filtered = data.filter(
       (group) =>
         group.name.toLowerCase().includes(term.toLowerCase()) ||
@@ -89,7 +89,7 @@ export const AdminGroupsList = ({
     }).then(async (willDelete) => {
       if (willDelete) {
         try {
-          await adminGroupsService.delete(id);
+          await managementGroupsService.delete(id);
           toastr.success("Grupo desactivado correctamente");
           fetchGroups();
         } catch (err) {
@@ -110,7 +110,7 @@ export const AdminGroupsList = ({
     }).then(async (willRestore) => {
       if (willRestore) {
         try {
-          await adminGroupsService.restore(id);
+          await managementGroupsService.restore(id);
           toastr.success("Grupo reactivado correctamente");
           fetchGroups();
         } catch (err) {

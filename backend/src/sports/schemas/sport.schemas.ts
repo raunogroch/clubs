@@ -11,7 +11,7 @@ export class Sport extends Document {
   /** Grupo administrativo propietario de este deporte */
   @Prop({
     type: Types.ObjectId,
-    ref: 'AdminGroup',
+    ref: 'ManagementGroup',
     required: false,
   })
   groupId?: Types.ObjectId;

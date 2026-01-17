@@ -24,7 +24,7 @@ export class Payment extends Document {
   /** Grupo administrativo propietario de este pago */
   @Prop({
     type: Types.ObjectId,
-    ref: 'AdminGroup',
+    ref: 'ManagementGroup',
     required: false,
   })
   groupId?: Types.ObjectId;

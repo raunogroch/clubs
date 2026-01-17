@@ -29,7 +29,7 @@ export class DailyScheduleDto {
   active?: boolean;
 }
 
-export class CreateAdminGroupDto {
+export class CreateManagementGroupDto {
   @IsString()
   @IsNotEmpty()
   name: string;

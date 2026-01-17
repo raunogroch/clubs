@@ -55,7 +55,7 @@ export class Club extends Document {
   /** Grupo administrativo propietario de este club */
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'AdminGroup',
+    ref: 'ManagementGroup',
     required: false,
   })
   groupId?: mongoose.Schema.Types.ObjectId;
