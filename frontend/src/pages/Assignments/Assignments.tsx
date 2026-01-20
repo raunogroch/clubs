@@ -223,7 +223,11 @@ const Assignments = () => {
 
   return (
     <>
-      <NavHeader name="Asignaciones de Módulos" pageCreate="Crear" />
+      <NavHeader
+        name="Asignaciones de Módulos"
+        pageCreate="Crear"
+        onCreateClick={handleOpenCreate}
+      />
 
       <div className="wrapper wrapper-content animated fadeInRight">
         <div className="ibox float-e-margins">

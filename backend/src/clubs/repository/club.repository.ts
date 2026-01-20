@@ -61,16 +61,27 @@ export class ClubRepository {
     clubId: string,
     updateClubDto: UpdateClubDto,
   ): Promise<Club | null> {
-    return this.clubModel.findByIdAndUpdate(clubId, updateClubDto, {
-      new: true,
-    });
+    try {
+      return await this.clubModel.findByIdAndUpdate(clubId, updateClubDto, {
+        new: true,
+        runValidators: true,
+      });
+    } catch (error) {
+      console.error('Error en update del repository:', error);
+      throw error;
+    }
   }
 
   /**
    * Eliminar un club
    */
   async delete(clubId: string): Promise<Club | null> {
-    return this.clubModel.findByIdAndDelete(clubId);
+    try {
+      return await this.clubModel.findByIdAndDelete(clubId, { new: true });
+    } catch (error) {
+      console.error('Error en delete del repository:', error);
+      throw error;
+    }
   }
 
   /**

@@ -333,18 +333,6 @@ export const Clubs = ({ name }: { name?: string }) => {
                 </div>
 
                 <div className="form-group">
-                  <label>Descripción</label>
-                  <textarea
-                    className="form-control"
-                    name="description"
-                    value={formData.description || ""}
-                    onChange={handleChange}
-                    placeholder="Descripción del club"
-                    rows={3}
-                  ></textarea>
-                </div>
-
-                <div className="form-group">
                   <label>Ubicación</label>
                   <input
                     type="text"
@@ -355,25 +343,6 @@ export const Clubs = ({ name }: { name?: string }) => {
                     placeholder="Ej: Cancha 1"
                   />
                 </div>
-
-                {!editingId && (
-                  <div className="form-group">
-                    <label>Asignación *</label>
-                    <select
-                      className="form-control"
-                      name="assignment_id"
-                      value={formData.assignment_id}
-                      onChange={handleChange}
-                    >
-                      <option value="">Selecciona una asignación</option>
-                      {assignments.map((assignment) => (
-                        <option key={assignment._id} value={assignment._id}>
-                          {assignment.module_name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
               </div>
               <div className="modal-footer">
                 <button

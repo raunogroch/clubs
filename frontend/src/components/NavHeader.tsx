@@ -5,6 +5,7 @@ interface NavHeaderProps {
   sub?: string;
   sub1?: string;
   pageCreate?: string;
+  onCreateClick?: () => void;
 }
 
 function getUserSection(pathname: string) {
@@ -14,7 +15,13 @@ function getUserSection(pathname: string) {
   return "";
 }
 
-export const NavHeader = ({ name, sub, sub1, pageCreate }: NavHeaderProps) => {
+export const NavHeader = ({
+  name,
+  sub,
+  sub1,
+  pageCreate,
+  onCreateClick,
+}: NavHeaderProps) => {
   const pageTitle = name || "Principal";
   const isPrincipalPage = pageTitle === "Principal";
   const location = useLocation();
@@ -29,7 +36,7 @@ export const NavHeader = ({ name, sub, sub1, pageCreate }: NavHeaderProps) => {
       label: name,
       to: sub
         ? `/${location.pathname.split("/")[1]}${getUserSection(
-            location.pathname
+            location.pathname,
           )}`
         : undefined,
     });
@@ -68,12 +75,18 @@ export const NavHeader = ({ name, sub, sub1, pageCreate }: NavHeaderProps) => {
 
           {pageCreate && (
             <div className="title-action">
-              <Link
-                to={`${location.pathname}/create`}
-                className="btn btn-primary"
-              >
-                <i className="fa fa-plus"></i> {pageCreate}
-              </Link>
+              {onCreateClick ? (
+                <button onClick={onCreateClick} className="btn btn-primary">
+                  <i className="fa fa-plus"></i> {pageCreate}
+                </button>
+              ) : (
+                <Link
+                  to={`${location.pathname}/create`}
+                  className="btn btn-primary"
+                >
+                  <i className="fa fa-plus"></i> {pageCreate}
+                </Link>
+              )}
             </div>
           )}
         </div>

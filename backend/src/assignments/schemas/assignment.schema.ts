@@ -15,6 +15,10 @@ export class Assignment extends mongoose.Document {
   @Prop({ required: true, type: [mongoose.Schema.Types.ObjectId], default: [] })
   assigned_admins: mongoose.Types.ObjectId[];
 
+  /** Array de IDs de clubs pertenecientes a este assignment */
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'Club', default: [] })
+  clubs: mongoose.Types.ObjectId[];
+
   /** ID del superadmin que realizó la asignación */
   @Prop({ required: true, type: mongoose.Schema.Types.ObjectId })
   assigned_by: mongoose.Types.ObjectId;

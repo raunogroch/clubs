@@ -305,4 +305,39 @@ export class AssignmentsService {
   async getAssignmentsByAdmin(adminId: string): Promise<Assignment[]> {
     return this.getUserAssignments(adminId);
   }
+
+  /**
+   * Agregar un club a una asignación
+   * @param assignmentId ID de la asignación
+   * @param clubId ID del club
+   */
+  async addClubToAssignment(
+    assignmentId: string,
+    clubId: string,
+  ): Promise<void> {
+    try {
+      await this.assignmentRepository.addClubToAssignment(assignmentId, clubId);
+    } catch (error) {
+      console.error('Error al agregar club a asignación:', error);
+    }
+  }
+
+  /**
+   * Remover un club de una asignación
+   * @param assignmentId ID de la asignación
+   * @param clubId ID del club
+   */
+  async removeClubFromAssignment(
+    assignmentId: string,
+    clubId: string,
+  ): Promise<void> {
+    try {
+      await this.assignmentRepository.removeClubFromAssignment(
+        assignmentId,
+        clubId,
+      );
+    } catch (error) {
+      console.error('Error al remover club de asignación:', error);
+    }
+  }
 }

@@ -95,4 +95,44 @@ export class AssignmentRepository implements IAssignmentRepository {
     const result = await this.assignmentModel.findByIdAndDelete(id).exec();
     return !!result;
   }
+
+  /**
+   * Agregar un club a una asignación (usando $addToSet para evitar duplicados)
+   * @param assignmentId ID de la asignación
+   * @param clubId ID del club
+   * @returns Asignación actualizada
+   */
+  async addClubToAssignment(
+    assignmentId: string,
+    clubId: string,
+  ): Promise<Assignment | null> {
+    return this.assignmentModel
+      .findByIdAndUpdate(
+        assignmentId,
+        { $addToSet: { clubs: clubId } },
+        { new: true },
+      )
+      .populate('assigned_admins assigned_by clubs')
+      .exec();
+  }
+
+  /**
+   * Remover un club de una asignación (usando $pull)
+   * @param assignmentId ID de la asignación
+   * @param clubId ID del club
+   * @returns Asignación actualizada
+   */
+  async removeClubFromAssignment(
+    assignmentId: string,
+    clubId: string,
+  ): Promise<Assignment | null> {
+    return this.assignmentModel
+      .findByIdAndUpdate(
+        assignmentId,
+        { $pull: { clubs: clubId } },
+        { new: true },
+      )
+      .populate('assigned_admins assigned_by clubs')
+      .exec();
+  }
 }

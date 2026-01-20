@@ -47,6 +47,12 @@ export class ClubsService {
     // Crear el club
     const club = await this.clubRepository.create(createClubDto, userId);
 
+    // Agregar el club al assignment
+    await this.assignmentsService.addClubToAssignment(
+      createClubDto.assignment_id,
+      (club._id as any).toString(),
+    );
+
     return {
       _id: club._id,
       name: club.name,
@@ -97,9 +103,14 @@ export class ClubsService {
     }
 
     // Verificar que el usuario es admin de la asignación
+    // Extraer el ID correctamente (puede estar populated como objeto)
+    const assignmentId =
+      typeof club.assignment_id === 'object' && club.assignment_id !== null
+        ? (club.assignment_id as any)._id.toString()
+        : (club.assignment_id as any).toString();
     const isAdmin = await this.assignmentsService.isUserAdminOfAssignment(
       userId,
-      club.assignment_id.toString(),
+      assignmentId,
     );
 
     if (!isAdmin) {
@@ -113,27 +124,62 @@ export class ClubsService {
 
   /**
    * Actualizar un club
-   * Solo el creador puede actualizar
+   * El creador o administrador de la asignación pueden actualizar
    */
   async updateClub(
     clubId: string,
     updateClubDto: UpdateClubDto,
     userId: string,
   ) {
-    const club = await this.clubRepository.findById(clubId);
+    try {
+      const club = await this.clubRepository.findById(clubId);
 
-    if (!club) {
-      throw new NotFoundException(`Club con ID ${clubId} no encontrado`);
+      if (!club) {
+        throw new NotFoundException(`Club con ID ${clubId} no encontrado`);
+      }
+
+      // Verificar permisos - creador o admin de la asignación
+      const isCreator = club.created_by.toString() === userId;
+      // Extraer el ID correctamente (puede estar populated como objeto)
+      const assignmentId =
+        typeof club.assignment_id === 'object' && club.assignment_id !== null
+          ? (club.assignment_id as any)._id.toString()
+          : (club.assignment_id as any).toString();
+      const isAssignmentAdmin =
+        await this.assignmentsService.isUserAdminOfAssignment(
+          userId,
+          assignmentId,
+        );
+
+      if (!isCreator && !isAssignmentAdmin) {
+        throw new ForbiddenException(
+          'No tienes permisos para actualizar este club',
+        );
+      }
+
+      const updatedClub = await this.clubRepository.update(
+        clubId,
+        updateClubDto,
+      );
+
+      if (!updatedClub) {
+        throw new NotFoundException('No se pudo actualizar el club');
+      }
+
+      return updatedClub;
+    } catch (error) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      console.error('Error al actualizar club:', error);
+      throw new BadRequestException(
+        'Error al actualizar el club. Por favor intenta nuevamente.',
+      );
     }
-
-    // Verificar que el usuario es el creador
-    if (club.created_by.toString() !== userId) {
-      throw new ForbiddenException('Solo el creador puede actualizar el club');
-    }
-
-    const updatedClub = await this.clubRepository.update(clubId, updateClubDto);
-
-    return updatedClub;
   }
 
   /**
@@ -141,29 +187,68 @@ export class ClubsService {
    * Solo el creador o admin de la asignación pueden eliminar
    */
   async deleteClub(clubId: string, userId: string) {
-    const club = await this.clubRepository.findById(clubId);
+    try {
+      // Validar que el ID sea un ObjectId válido
+      if (!clubId || clubId.length !== 24) {
+        throw new BadRequestException('ID de club inválido');
+      }
 
-    if (!club) {
-      throw new NotFoundException(`Club con ID ${clubId} no encontrado`);
-    }
+      const club = await this.clubRepository.findById(clubId);
 
-    // Verificar permisos
-    const isCreator = club.created_by.toString() === userId;
-    const isAssignmentAdmin =
-      await this.assignmentsService.isUserAdminOfAssignment(
-        userId,
-        club.assignment_id.toString(),
+      if (!club) {
+        throw new NotFoundException(`Club con ID ${clubId} no encontrado`);
+      }
+
+      // Verificar permisos
+      const isCreator = club.created_by.toString() === userId;
+      // Extraer el ID correctamente (puede estar populated como objeto)
+      const assignmentId =
+        typeof club.assignment_id === 'object' && club.assignment_id !== null
+          ? (club.assignment_id as any)._id.toString()
+          : (club.assignment_id as any).toString();
+      const isAssignmentAdmin =
+        await this.assignmentsService.isUserAdminOfAssignment(
+          userId,
+          assignmentId,
+        );
+
+      if (!isCreator && !isAssignmentAdmin) {
+        throw new ForbiddenException(
+          'No tienes permisos para eliminar este club',
+        );
+      }
+
+      const deletedClub = await this.clubRepository.delete(clubId);
+
+      if (!deletedClub) {
+        throw new NotFoundException('No se pudo eliminar el club');
+      }
+
+      // Remover el club del assignment
+      await this.assignmentsService.removeClubFromAssignment(
+        assignmentId,
+        clubId,
       );
 
-    if (!isCreator && !isAssignmentAdmin) {
-      throw new ForbiddenException(
-        'No tienes permisos para eliminar este club',
+      return { message: 'Club eliminado exitosamente' };
+    } catch (error) {
+      // Re-lanzar excepciones de NestJS
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+
+      // Log del error para debugging
+      console.error('Error al eliminar club:', error);
+
+      // Lanzar error genérico para otros errores
+      throw new BadRequestException(
+        'Error al eliminar el club. Por favor intenta nuevamente.',
       );
     }
-
-    await this.clubRepository.delete(clubId);
-
-    return { message: 'Club eliminado exitosamente' };
   }
 
   /**
