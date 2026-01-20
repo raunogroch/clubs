@@ -8,14 +8,15 @@
  * - Delegar lógica de negocio a AssignmentsService
  *
  * Endpoints:
- * POST   /api/assignments                    - Crear asignación (SUPERADMIN)
- * GET    /api/assignments                    - Listar asignaciones (SUPERADMIN)
- * GET    /api/assignments/:id                - Obtener asignación por ID (SUPERADMIN)
- * GET    /api/assignments/module/:moduleName - Obtener asignación por nombre del módulo (SUPERADMIN)
- * PATCH  /api/assignments/:id                - Actualizar asignación (SUPERADMIN)
- * DELETE /api/assignments/:id                - Eliminar asignación (SUPERADMIN)
- * GET    /api/assignments/admin/modules      - Obtener módulos asignados al admin actual (ADMIN)
+ * POST   /api/assignments                        - Crear asignación (SUPERADMIN)
+ * GET    /api/assignments                        - Listar asignaciones (SUPERADMIN)
+ * GET    /api/assignments/:id                    - Obtener asignación por ID (SUPERADMIN)
+ * GET    /api/assignments/module/:moduleName     - Obtener asignación por nombre del módulo (SUPERADMIN)
+ * PATCH  /api/assignments/:id                    - Actualizar asignación (SUPERADMIN)
+ * DELETE /api/assignments/:id                    - Eliminar asignación (SUPERADMIN)
+ * GET    /api/assignments/admin/modules          - Obtener módulos asignados al admin actual (ADMIN)
  * GET    /api/assignments/admin/access/:moduleName - Verificar acceso a módulo (ADMIN)
+ * GET    /api/assignments/admin/my-assignments   - Obtener asignaciones del admin actual (ADMIN)
  */
 
 import {
@@ -117,6 +118,21 @@ export class AssignmentsController {
     );
 
     return { module: moduleName, hasAccess };
+  }
+
+  /**
+   * GET /api/assignments/admin/my-assignments
+   * Obtener todas las asignaciones del administrador autenticado
+   *
+   * Roles permitidos: ADMIN
+   *
+   * @param currentUser Usuario autenticado (admin)
+   * @returns Array de asignaciones donde el usuario es admin
+   */
+  @Get('admin/my-assignments')
+  @Roles(Role.ADMIN)
+  async getMyAssignments(@CurrentUser() currentUser: CurrentAuth) {
+    return this.assignmentsService.getAssignmentsByAdmin(currentUser.sub);
   }
 
   /**

@@ -15,6 +15,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { AssignmentsModule } from './assignments/assignments.module';
+import { ClubsModule } from './clubs/clubs.module';
 
 @Module({
   imports: [
@@ -50,6 +51,9 @@ import { AssignmentsModule } from './assignments/assignments.module';
 
     // Módulo de asignaciones (asignar módulos a administradores)
     AssignmentsModule,
+
+    // Módulo de clubs (crear y gestionar clubs por asignación)
+    ClubsModule,
   ],
 })
 export class AppModule {}

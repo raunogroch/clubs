@@ -264,4 +264,45 @@ export class AssignmentsService {
 
     return assignment.assigned_admins.some((id) => id.toString() === adminId);
   }
+
+  /**
+   * Verificar si un usuario es administrador de una asignación específica
+   * @param userId ID del usuario
+   * @param assignmentId ID de la asignación
+   * @returns true si es administrador, false en caso contrario
+   */
+  async isUserAdminOfAssignment(
+    userId: string,
+    assignmentId: string,
+  ): Promise<boolean> {
+    const assignment = await this.assignmentRepository.findById(assignmentId);
+
+    if (!assignment) {
+      return false;
+    }
+
+    return assignment.assigned_admins.some((id) => id.toString() === userId);
+  }
+
+  /**
+   * Obtener todas las asignaciones de un usuario
+   * @param userId ID del usuario
+   * @returns Array de asignaciones del usuario
+   */
+  async getUserAssignments(userId: string): Promise<Assignment[]> {
+    return this.assignmentRepository.findAll({
+      assigned_admins: userId,
+      is_active: true,
+    });
+  }
+
+  /**
+   * Obtener todas las asignaciones del administrador autenticado
+   * (alias para getUserAssignments)
+   * @param adminId ID del administrador
+   * @returns Array de asignaciones del administrador
+   */
+  async getAssignmentsByAdmin(adminId: string): Promise<Assignment[]> {
+    return this.getUserAssignments(adminId);
+  }
 }

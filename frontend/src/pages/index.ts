@@ -3,6 +3,7 @@ export * from "./Login";
 export * from "./NotFound";
 export * from "./Navigation";
 export * from "./Assignments";
+export * from "./Clubs";
 export * from "./Assistants";
 export * from "./Coaches";
 export * from "./Parents";

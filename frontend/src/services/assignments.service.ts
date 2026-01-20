@@ -228,6 +228,30 @@ class AssignmentsService {
 
     return safeParseJson(response);
   }
+
+  /**
+   * Obtener todas las asignaciones del admin actual
+   * GET /api/assignments/admin/my-assignments
+   */
+  async getMyAssignments(): Promise<Assignment[]> {
+    const response = await fetch(
+      `${API_URL}/assignments/admin/my-assignments`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      },
+    );
+
+    if (!response.ok) {
+      const error = await safeParseJson(response);
+      throw new Error(error.message || "Error al obtener tus asignaciones");
+    }
+
+    return safeParseJson(response);
+  }
 }
 
 export default new AssignmentsService();
