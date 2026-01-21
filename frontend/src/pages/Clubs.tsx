@@ -7,6 +7,7 @@
  * - Actualizar clubs existentes
  * - Eliminar clubs
  * - Gestionar miembros de clubs
+ * - Gestionar grupos dentro de cada club
  *
  * Solo accesible por administradores con assignments asignados
  */
@@ -19,7 +20,9 @@ import type { RootState } from "../store/store";
 import type { Club, CreateClubRequest } from "../services/clubs.service";
 import clubsService from "../services/clubs.service";
 import assignmentsService from "../services/assignments.service";
+import { sportService } from "../services/sportService";
 import { NavHeader } from "../components";
+import { Groups } from "./Groups";
 
 interface Assignment {
   _id: string;
@@ -31,19 +34,29 @@ interface Assignment {
   updated_at: string;
 }
 
+interface Sport {
+  _id: string;
+  name: string;
+  active: boolean;
+}
+
 export const Clubs = ({ name }: { name?: string }) => {
   const user = useSelector((state: RootState) => state.auth.user);
 
   // Estado
   const [clubs, setClubs] = useState<Club[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [sports, setSports] = useState<Sport[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [selectedClubForGroups, setSelectedClubForGroups] = useState<
+    string | null
+  >(null);
 
   // Formulario
   const [formData, setFormData] = useState<CreateClubRequest>({
-    name: "",
+    sport_id: "",
     description: "",
     location: "",
     assignment_id: "",
@@ -54,16 +67,18 @@ export const Clubs = ({ name }: { name?: string }) => {
     loadData();
   }, []);
 
-  // Cargar clubs y asignaciones
+  // Cargar clubs, asignaciones y deportes
   const loadData = async () => {
     try {
       setLoading(true);
-      const [clubsData, assignmentsData] = await Promise.all([
+      const [clubsData, assignmentsData, sportsData] = await Promise.all([
         clubsService.getAll(),
         assignmentsService.getMyAssignments(),
+        sportService.getAll(),
       ]);
       setClubs(clubsData);
       setAssignments(assignmentsData);
+      setSports(sportsData || []);
     } catch (error: any) {
       console.error("Error al cargar datos:", error);
       toastr.error(error.message || "Error al cargar los datos");
@@ -72,17 +87,17 @@ export const Clubs = ({ name }: { name?: string }) => {
     }
   };
 
-  // Obtener nombre de asignación por ID
-  const getAssignmentName = (assignmentId: string): string => {
-    const assignment = assignments.find((a) => a._id === assignmentId);
-    return assignment?.module_name || "Desconocida";
+  // Obtener nombre del deporte por ID
+  const getSportName = (sportId: string): string => {
+    const sport = sports.find((s) => s._id === sportId);
+    return sport?.name || `Deporte ID: ${sportId}`;
   };
 
   // Abrir modal para crear
   const handleOpenCreate = () => {
     setEditingId(null);
     setFormData({
-      name: "",
+      sport_id: "",
       description: "",
       location: "",
       assignment_id: assignments[0]?._id || "",
@@ -94,7 +109,7 @@ export const Clubs = ({ name }: { name?: string }) => {
   const handleOpenEdit = (club: Club) => {
     setEditingId(club._id);
     setFormData({
-      name: club.name,
+      sport_id: club.sport_id,
       description: club.description || "",
       location: club.location || "",
       assignment_id: club.assignment_id,
@@ -107,7 +122,7 @@ export const Clubs = ({ name }: { name?: string }) => {
     setShowModal(false);
     setEditingId(null);
     setFormData({
-      name: "",
+      sport_id: "",
       description: "",
       location: "",
       assignment_id: assignments[0]?._id || "",
@@ -129,8 +144,8 @@ export const Clubs = ({ name }: { name?: string }) => {
 
   // Guardar club (crear o actualizar)
   const handleSave = async () => {
-    if (!formData.name.trim()) {
-      toastr.warning("El nombre del club es requerido");
+    if (!formData.sport_id.trim()) {
+      toastr.warning("Debes seleccionar un deporte");
       return;
     }
 
@@ -145,7 +160,6 @@ export const Clubs = ({ name }: { name?: string }) => {
       if (editingId) {
         // Actualizar
         const updated = await clubsService.update(editingId, {
-          name: formData.name,
           description: formData.description,
           location: formData.location,
         });
@@ -216,87 +230,104 @@ export const Clubs = ({ name }: { name?: string }) => {
   return (
     <>
       <NavHeader name={name} />
-      <div className="wrapper wrapper-content">
-        <div className="row">
-          <div className="col-lg-12">
-            <div className="ibox">
-              <div className="ibox-title">
-                <h5>Gestión de Clubs</h5>
-                <div className="ibox-tools">
-                  <button
-                    className="btn btn-primary btn-sm"
-                    onClick={handleOpenCreate}
-                    disabled={loading || assignments.length === 0}
-                  >
-                    <i className="fa fa-plus"></i> Crear Club
-                  </button>
+
+      {/* Si hay un club seleccionado para gestionar grupos, mostrar ese componente */}
+      {selectedClubForGroups ? (
+        <Groups
+          clubId={selectedClubForGroups}
+          onBack={() => setSelectedClubForGroups(null)}
+        />
+      ) : (
+        <div className="wrapper wrapper-content">
+          <div className="row">
+            <div className="col-lg-12">
+              <div className="ibox">
+                <div className="ibox-title">
+                  <h5>Gestión de Clubs</h5>
+                  <div className="ibox-tools">
+                    <button
+                      className="btn btn-primary btn-sm"
+                      onClick={handleOpenCreate}
+                      disabled={loading || assignments.length === 0}
+                    >
+                      <i className="fa fa-plus"></i> Crear Club
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <div className="ibox-content">
-                {loading ? (
-                  <div className="text-center">
-                    <p>Cargando clubs...</p>
-                  </div>
-                ) : clubs.length === 0 ? (
-                  <div className="text-center">
-                    <p className="text-muted">
-                      No hay clubs creados aún. Crea uno nuevo para comenzar.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="table-responsive">
-                    <table className="table table-striped table-hover">
-                      <thead>
-                        <tr>
-                          <th>Nombre</th>
-                          <th>Descripción</th>
-                          <th>Ubicación</th>
-                          <th>Asignación</th>
-                          <th>Miembros</th>
-                          <th>Acciones</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {clubs.map((club) => (
-                          <tr key={club._id}>
-                            <td>
-                              <strong>{club.name}</strong>
-                            </td>
-                            <td>{club.description || "-"}</td>
-                            <td>{club.location || "-"}</td>
-                            <td>{getAssignmentName(club.assignment_id)}</td>
-                            <td>
-                              <span className="badge badge-primary">
-                                {club.members.length}
-                              </span>
-                            </td>
-                            <td>
-                              <button
-                                className="btn btn-primary btn-xs"
-                                onClick={() => handleOpenEdit(club)}
-                                title="Editar"
-                              >
-                                <i className="fa fa-edit"></i>
-                              </button>{" "}
-                              <button
-                                className="btn btn-danger btn-xs"
-                                onClick={() => handleDelete(club._id)}
-                                title="Eliminar"
-                              >
-                                <i className="fa fa-trash"></i>
-                              </button>
-                            </td>
+                <div className="ibox-content">
+                  {loading ? (
+                    <div className="text-center">
+                      <p>Cargando clubs...</p>
+                    </div>
+                  ) : clubs.length === 0 ? (
+                    <div className="text-center">
+                      <p className="text-muted">
+                        No hay clubs creados aún. Crea uno nuevo para comenzar.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="table-responsive">
+                      <table className="table table-striped table-hover">
+                        <thead>
+                          <tr>
+                            <th>Disciplina</th>
+                            <th>Ubicación</th>
+                            <th>Asignación</th>
+                            <th>Miembros</th>
+                            <th>Acciones</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                        </thead>
+                        <tbody>
+                          {clubs.map((club) => (
+                            <tr key={club._id}>
+                              <td>
+                                <strong>{getSportName(club.sport_id)}</strong>
+                              </td>
+                              <td>{club.location || "-"}</td>
+                              <td>
+                                <button
+                                  className="btn btn-info btn-xs"
+                                  onClick={() =>
+                                    setSelectedClubForGroups(club._id)
+                                  }
+                                  title="Gestionar grupos"
+                                >
+                                  <i className="fa fa-sitemap"></i> &nbsp;grupos
+                                </button>
+                              </td>
+                              <td>
+                                <span className="badge badge-primary">
+                                  {club.members.length}
+                                </span>
+                              </td>
+                              <td>
+                                <button
+                                  className="btn btn-primary btn-xs"
+                                  onClick={() => handleOpenEdit(club)}
+                                  title="Editar"
+                                >
+                                  <i className="fa fa-edit"></i> Editar
+                                </button>{" "}
+                                <button
+                                  className="btn btn-danger btn-xs"
+                                  onClick={() => handleDelete(club._id)}
+                                  title="Eliminar"
+                                >
+                                  <i className="fa fa-trash"></i> Eliminar
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Modal de Crear/Editar */}
       {showModal && (
@@ -321,14 +352,31 @@ export const Clubs = ({ name }: { name?: string }) => {
               </div>
               <div className="modal-body">
                 <div className="form-group">
-                  <label>Nombre del Club *</label>
-                  <input
-                    type="text"
+                  <label>Deporte *</label>
+                  <select
                     className="form-control"
-                    name="name"
-                    value={formData.name}
+                    name="sport_id"
+                    value={formData.sport_id}
                     onChange={handleChange}
-                    placeholder="Ej: Club de Tenis"
+                  >
+                    <option value="">-- Selecciona un deporte --</option>
+                    {sports.map((sport) => (
+                      <option key={sport._id} value={sport._id}>
+                        {sport.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Descripción</label>
+                  <textarea
+                    className="form-control"
+                    name="description"
+                    value={formData.description || ""}
+                    onChange={handleChange}
+                    placeholder="Ej: Club de tenis profesional"
+                    rows={3}
                   />
                 </div>
 

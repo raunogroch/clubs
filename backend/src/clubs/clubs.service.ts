@@ -13,6 +13,7 @@ import { CreateClubDto } from './dto/create-club.dto';
 import { UpdateClubDto } from './dto/update-club.dto';
 import { ClubRepository } from './repository/club.repository';
 import { AssignmentsService } from '../assignments/assignments.service';
+import { SportsService } from '../sports/sports.service';
 import { Assignment } from '../assignments/schemas/assignment.schema';
 
 @Injectable()
@@ -20,6 +21,7 @@ export class ClubsService {
   constructor(
     private clubRepository: ClubRepository,
     private assignmentsService: AssignmentsService,
+    private sportsService: SportsService,
   ) {}
 
   /**
@@ -39,9 +41,12 @@ export class ClubsService {
       );
     }
 
-    // Validar que el nombre no esté vacío
-    if (!createClubDto.name || createClubDto.name.trim().length === 0) {
-      throw new BadRequestException('El nombre del club no puede estar vacío');
+    // Validar que el deporte existe
+    const sport = await this.sportsService.findOne(createClubDto.sport_id);
+    if (!sport) {
+      throw new NotFoundException(
+        `El deporte con ID ${createClubDto.sport_id} no existe`,
+      );
     }
 
     // Crear el club
@@ -55,7 +60,7 @@ export class ClubsService {
 
     return {
       _id: club._id,
-      name: club.name,
+      sport_id: club.sport_id,
       description: club.description,
       location: club.location,
       assignment_id: club.assignment_id,

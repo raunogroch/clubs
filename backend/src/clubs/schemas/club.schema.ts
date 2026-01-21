@@ -9,11 +9,15 @@ import { Document, Types } from 'mongoose';
 @Schema({ timestamps: true })
 export class Club extends Document {
   /**
-   * Nombre del club
-   * Requerido, único dentro de la asignación
+   * Deporte asociado al club
+   * Referencia al documento de Sport
    */
-  @Prop({ required: true })
-  name: string;
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'Sport',
+    required: true,
+  })
+  sport_id: Types.ObjectId;
 
   /**
    * Descripción del club
@@ -77,6 +81,9 @@ export const ClubSchema = SchemaFactory.createForClass(Club);
 /**
  * Índices para mejor performance
  */
-ClubSchema.index({ assignment_id: 1, name: 1 }, { unique: true });
+ClubSchema.index({ assignment_id: 1, sport_id: 1 }, { unique: true });
+ClubSchema.index({ assignment_id: 1 });
+ClubSchema.index({ created_by: 1 });
+ClubSchema.index({ sport_id: 1 });
 ClubSchema.index({ assignment_id: 1 });
 ClubSchema.index({ created_by: 1 });

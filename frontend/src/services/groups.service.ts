@@ -1,40 +1,32 @@
 /**
- * Servicio de Clubs (API)
+ * Servicio de Grupos (API)
  *
- * Maneja todas las llamadas HTTP relacionadas con clubs
- * Solo los administradores con assignments asignados pueden acceder
+ * Maneja todas las llamadas HTTP relacionadas con grupos
+ * Solo los administradores de la asignación del club pueden acceder
  */
 
 const API_URL = import.meta.env.VITE_BACKEND_URI;
 
-export interface Club {
+export interface Group {
   _id: string;
-  sport_id: string;
-  sport?: {
-    _id: string;
-    name: string;
-    active: boolean;
-  };
+  name: string;
   description?: string;
-  location?: string;
-  assignment_id: string;
+  club_id: string;
   created_by: string;
   members: string[];
   createdAt: string;
   updatedAt: string;
 }
 
-export interface CreateClubRequest {
-  sport_id: string;
+export interface CreateGroupRequest {
+  name: string;
   description?: string;
-  location?: string;
-  assignment_id: string;
+  club_id: string;
 }
 
-export interface UpdateClubRequest {
-  sport_id?: string;
+export interface UpdateGroupRequest {
+  name?: string;
   description?: string;
-  location?: string;
 }
 
 /**
@@ -56,99 +48,97 @@ async function safeParseJson(response: Response) {
   }
 }
 
-class ClubsService {
+class GroupsService {
   /**
-   * Crear un nuevo club
-   * POST /api/clubs
+   * Crear un nuevo grupo
+   * POST /api/groups
    */
-  async create(club: CreateClubRequest): Promise<Club> {
-    const response = await fetch(`${API_URL}/clubs`, {
+  async create(group: CreateGroupRequest): Promise<Group> {
+    const response = await fetch(`${API_URL}/groups`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
-      body: JSON.stringify(club),
+      body: JSON.stringify(group),
     });
 
     if (!response.ok) {
       const error = await safeParseJson(response);
-      throw new Error(error.message || "Error al crear el club");
+      throw new Error(error.message || "Error al crear el grupo");
     }
 
     return safeParseJson(response);
   }
 
   /**
-   * Obtener todos los clubs del usuario actual (sus assignments)
-   * GET /api/clubs
+   * Obtener todos los grupos de un club
+   * GET /api/groups/club/:clubId
    */
-  async getAll(): Promise<Club[]> {
-    const response = await fetch(`${API_URL}/clubs`, {
+  async getByClub(clubId: string): Promise<Group[]> {
+    const response = await fetch(`${API_URL}/groups/club/${clubId}`, {
       method: "GET",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     });
 
     if (!response.ok) {
       const error = await safeParseJson(response);
-      throw new Error(error.message || "Error al obtener los clubs");
+      throw new Error(error.message || "Error al obtener los grupos");
     }
 
     return safeParseJson(response);
   }
 
   /**
-   * Obtener club por ID
-   * GET /api/clubs/:id
+   * Obtener un grupo específico
+   * GET /api/groups/:groupId
    */
-  async getById(id: string): Promise<Club> {
-    const response = await fetch(`${API_URL}/clubs/${id}`, {
+  async getById(groupId: string): Promise<Group> {
+    const response = await fetch(`${API_URL}/groups/${groupId}`, {
       method: "GET",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     });
 
     if (!response.ok) {
       const error = await safeParseJson(response);
-      throw new Error(error.message || "Error al obtener el club");
+      throw new Error(error.message || "Error al obtener el grupo");
     }
 
     return safeParseJson(response);
   }
 
   /**
-   * Actualizar un club
-   * PATCH /api/clubs/:id
+   * Actualizar un grupo
+   * PATCH /api/groups/:groupId
    */
-  async update(id: string, club: UpdateClubRequest): Promise<Club> {
-    const response = await fetch(`${API_URL}/clubs/${id}`, {
+  async update(groupId: string, group: UpdateGroupRequest): Promise<Group> {
+    const response = await fetch(`${API_URL}/groups/${groupId}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
-      body: JSON.stringify(club),
+      body: JSON.stringify(group),
     });
 
     if (!response.ok) {
       const error = await safeParseJson(response);
-      throw new Error(error.message || "Error al actualizar el club");
+      throw new Error(error.message || "Error al actualizar el grupo");
     }
 
     return safeParseJson(response);
   }
 
   /**
-   * Eliminar un club
-   * DELETE /api/clubs/:id
+   * Eliminar un grupo
+   * DELETE /api/groups/:groupId
    */
-  async delete(id: string): Promise<void> {
-    const response = await fetch(`${API_URL}/clubs/${id}`, {
+  async delete(groupId: string): Promise<void> {
+    const response = await fetch(`${API_URL}/groups/${groupId}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -157,17 +147,17 @@ class ClubsService {
 
     if (!response.ok) {
       const error = await safeParseJson(response);
-      throw new Error(error.message || "Error al eliminar el club");
+      throw new Error(error.message || "Error al eliminar el grupo");
     }
   }
 
   /**
-   * Agregar miembro a un club
-   * POST /api/clubs/:clubId/members/:memberId
+   * Añadir un miembro a un grupo
+   * POST /api/groups/:groupId/members/:memberId
    */
-  async addMember(clubId: string, memberId: string): Promise<Club> {
+  async addMember(groupId: string, memberId: string): Promise<Group> {
     const response = await fetch(
-      `${API_URL}/clubs/${clubId}/members/${memberId}`,
+      `${API_URL}/groups/${groupId}/members/${memberId}`,
       {
         method: "POST",
         headers: {
@@ -178,19 +168,19 @@ class ClubsService {
 
     if (!response.ok) {
       const error = await safeParseJson(response);
-      throw new Error(error.message || "Error al agregar miembro");
+      throw new Error(error.message || "Error al añadir miembro");
     }
 
     return safeParseJson(response);
   }
 
   /**
-   * Remover miembro de un club
-   * DELETE /api/clubs/:clubId/members/:memberId
+   * Remover un miembro del grupo
+   * DELETE /api/groups/:groupId/members/:memberId
    */
-  async removeMember(clubId: string, memberId: string): Promise<Club> {
+  async removeMember(groupId: string, memberId: string): Promise<Group> {
     const response = await fetch(
-      `${API_URL}/clubs/${clubId}/members/${memberId}`,
+      `${API_URL}/groups/${groupId}/members/${memberId}`,
       {
         method: "DELETE",
         headers: {
@@ -208,5 +198,5 @@ class ClubsService {
   }
 }
 
-const clubsService = new ClubsService();
-export default clubsService;
+const groupsService = new GroupsService();
+export default groupsService;

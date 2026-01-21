@@ -16,6 +16,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { AssignmentsModule } from './assignments/assignments.module';
 import { ClubsModule } from './clubs/clubs.module';
+import { SportsModule } from './sports/sports.module';
 
 @Module({
   imports: [
@@ -51,6 +52,9 @@ import { ClubsModule } from './clubs/clubs.module';
 
     // Módulo de asignaciones (asignar módulos a administradores)
     AssignmentsModule,
+
+    // Módulo de deportes (crear y gestionar deportes)
+    SportsModule,
 
     // Módulo de clubs (crear y gestionar clubs por asignación)
     ClubsModule,
