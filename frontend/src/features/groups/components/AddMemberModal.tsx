@@ -158,20 +158,22 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
                   />
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="create-user-username">Usuario *</label>
-                  <input
-                    id="create-user-username"
-                    type="text"
-                    className="form-control"
-                    value={createUserData.username}
-                    onChange={(e) =>
-                      onCreateUserDataChange("username", e.target.value)
-                    }
-                    placeholder="Ej: juan.garcia"
-                    disabled={loading}
-                  />
-                </div>
+                {memberType === "coach" && (
+                  <div className="form-group">
+                    <label htmlFor="create-user-username">Usuario *</label>
+                    <input
+                      id="create-user-username"
+                      type="text"
+                      className="form-control"
+                      value={createUserData.username}
+                      onChange={(e) =>
+                        onCreateUserDataChange("username", e.target.value)
+                      }
+                      placeholder="Ej: juan.garcia"
+                      disabled={loading}
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>

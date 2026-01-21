@@ -57,7 +57,7 @@ export const ScheduleList: React.FC<ScheduleListProps> = ({
               <em>{MESSAGES.NO_SCHEDULES}</em>
             </p>
           ) : (
-            <ul className="row mb-0" style={{ marginBottom: "10px" }}>
+            <ul className="row mb-0 d-flex align-items-center justify-content-center">
               {schedules.map((schedule, idx) => (
                 <li
                   key={idx}

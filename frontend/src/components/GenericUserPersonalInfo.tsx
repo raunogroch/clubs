@@ -5,12 +5,14 @@ interface Props {
   formData: User;
   errors: UserErrors;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  isAthleteWithAutoCredentials?: boolean;
 }
 
 export const GenericUserPersonalInfo = ({
   formData,
   errors,
   onChange,
+  isAthleteWithAutoCredentials = false,
 }: Props) => {
   return (
     <>
@@ -78,16 +80,22 @@ export const GenericUserPersonalInfo = ({
           Nombre de usuario
         </label>
         <div className="col-sm-10">
-          <Input
-            type="text"
-            id="username"
-            name="username"
-            value={formData.username}
-            onChange={onChange}
-            className={`form-control ${errors.username ? "is-invalid" : ""}`}
-            placeholder="nick123"
-            required
-          />
+          {isAthleteWithAutoCredentials ? (
+            <div className="alert alert-info" style={{ marginBottom: 0 }}>
+              <small>Se generará automáticamente</small>
+            </div>
+          ) : (
+            <Input
+              type="text"
+              id="username"
+              name="username"
+              value={formData.username}
+              onChange={onChange}
+              className={`form-control ${errors.username ? "is-invalid" : ""}`}
+              placeholder="nick123"
+              required
+            />
+          )}
           {errors.username && (
             <div className="invalid-feedback">{errors.username}</div>
           )}

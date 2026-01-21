@@ -61,7 +61,8 @@ export const GroupCard: React.FC<GroupCardProps> = ({
             {group.monthly_fee !== undefined && group.monthly_fee > 0 && (
               <div className="mt-1">
                 <small className="badge badge-info">
-                  <i className="fa fa-money"></i> {formatPrice(group.monthly_fee)}/mes
+                  <i className="fa fa-money"></i>{" "}
+                  {formatPrice(group.monthly_fee)}/mes
                 </small>
               </div>
             )}

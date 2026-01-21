@@ -20,6 +20,7 @@ import type { Club, CreateClubRequest } from "../services/clubs.service";
 import clubsService from "../services/clubs.service";
 import assignmentsService from "../services/assignments.service";
 import { sportService } from "../services/sportService";
+import groupsService from "../services/groups.service";
 import { NavHeader } from "../components";
 import { Groups } from "./Groups";
 
@@ -46,6 +47,9 @@ export const Clubs = ({ name }: { name?: string }) => {
   const [clubs, setClubs] = useState<Club[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [sports, setSports] = useState<Sport[]>([]);
+  const [clubMembers, setClubMembers] = useState<
+    Record<string, { athletes: number; coaches: number }>
+  >({});
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -78,6 +82,31 @@ export const Clubs = ({ name }: { name?: string }) => {
       setClubs(clubsData);
       setAssignments(assignmentsData);
       setSports(sportsData || []);
+
+      // Cargar miembros (athletes y coaches) de cada club
+      const membersData: Record<string, { athletes: number; coaches: number }> =
+        {};
+      for (const club of clubsData) {
+        try {
+          const groups = await groupsService.getByClub(club._id);
+          const totalAthletes = groups.reduce(
+            (sum, g) => sum + (g.athletes?.length || 0),
+            0,
+          );
+          const totalCoaches = groups.reduce(
+            (sum, g) => sum + (g.coaches?.length || 0),
+            0,
+          );
+          membersData[club._id] = {
+            athletes: totalAthletes,
+            coaches: totalCoaches,
+          };
+        } catch (error) {
+          console.error(`Error al cargar grupos del club ${club._id}:`, error);
+          membersData[club._id] = { athletes: 0, coaches: 0 };
+        }
+      }
+      setClubMembers(membersData);
     } catch (error: any) {
       console.error("Error al cargar datos:", error);
       toastr.error(error.message || "Error al cargar los datos");
@@ -271,7 +300,9 @@ export const Clubs = ({ name }: { name?: string }) => {
                           <tr>
                             <th>Disciplina</th>
                             <th>Ubicación</th>
-                            <th>Asignación</th>
+                            <th>Grupos</th>
+                            <th>Deportistas</th>
+                            <th>Entrenadores</th>
                             <th>Acciones</th>
                           </tr>
                         </thead>
@@ -294,6 +325,19 @@ export const Clubs = ({ name }: { name?: string }) => {
                                   &nbsp;Gestionar grupos
                                 </button>
                               </td>
+                              <td>
+                                <span className="badge badge-primary">
+                                  Registrados ( &nbsp;
+                                  {clubMembers[club._id]?.athletes || 0} &nbsp;)
+                                </span>
+                              </td>
+                              <td>
+                                <span className="badge badge-info">
+                                  Registrados ( &nbsp;
+                                  {clubMembers[club._id]?.coaches || 0} &nbsp;)
+                                </span>
+                              </td>
+
                               <td>
                                 <button
                                   className="btn btn-primary btn-xs"

@@ -2,7 +2,13 @@
  * DTO para crear un grupo
  */
 
-import { IsString, IsOptional, IsMongoId, IsNumber, Min } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsMongoId,
+  IsNumber,
+  Min,
+} from 'class-validator';
 
 export class CreateGroupDto {
   /**

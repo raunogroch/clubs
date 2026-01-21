@@ -14,7 +14,7 @@ export const Athletes = () => {
   const { items, status, error } = useSelector((s: RootState) => s.users);
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
-  const [form, setForm] = useState({ name: "", username: "" });
+  const [form, setForm] = useState({ name: "", lastname: "" });
   const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -23,7 +23,7 @@ export const Athletes = () => {
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ name: "", username: "" });
+    setForm({ name: "", lastname: "" });
     setFormError(null);
     setShowModal(true);
   };
@@ -31,7 +31,7 @@ export const Athletes = () => {
     setEditing(u);
     setForm({
       name: u.name || "",
-      username: u.username || "",
+      lastname: u.lastname || "",
     });
     setFormError(null);
     setShowModal(true);
@@ -41,7 +41,8 @@ export const Athletes = () => {
     setFormError(null);
   };
   const validate = () => {
-    if (!form.username.trim()) return "El username es requerido";
+    if (!form.name?.trim()) return "El nombre es requerido";
+    if (!form.lastname?.trim()) return "El apellido es requerido";
     return null;
   };
   const handleSubmit = async (e: React.FormEvent) => {
@@ -91,7 +92,7 @@ export const Athletes = () => {
                 <thead>
                   <tr>
                     <th>Nombre</th>
-                    <th>Username</th>
+                    <th>Apellido</th>
                     <th style={{ textAlign: "center" }}>Acciones</th>
                   </tr>
                 </thead>
@@ -99,7 +100,7 @@ export const Athletes = () => {
                   {items.map((u: any) => (
                     <tr key={u._id}>
                       <td>{u.name}</td>
-                      <td>{u.username}</td>
+                      <td>{u.lastname}</td>
                       <td style={{ textAlign: "center" }}>
                         <button
                           className="btn btn-xs btn-success mx-1"
@@ -144,6 +145,11 @@ export const Athletes = () => {
                 {formError && (
                   <div className="alert alert-danger">{formError}</div>
                 )}
+                <div className="alert alert-info">
+                  <small>
+                    El usuario y contraseña serán generados automáticamente
+                  </small>
+                </div>
                 <form onSubmit={handleSubmit}>
                   <div className="form-group">
                     <label>Nombre</label>
@@ -156,12 +162,12 @@ export const Athletes = () => {
                     />
                   </div>
                   <div className="form-group">
-                    <label>Username</label>
+                    <label>Apellido</label>
                     <input
                       className="form-control"
-                      value={form.username}
+                      value={form.lastname}
                       onChange={(e) =>
-                        setForm({ ...form, username: e.target.value })
+                        setForm({ ...form, lastname: e.target.value })
                       }
                     />
                   </div>

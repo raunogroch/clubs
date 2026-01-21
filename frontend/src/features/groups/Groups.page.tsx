@@ -1,9 +1,9 @@
 /**
  * Página Principal de Grupos
- * 
+ *
  * Contenedor que orquesta toda la lógica de negocio y componentes.
  * Separación clara entre presentación y lógica.
- * 
+ *
  * Estructura:
  * 1. Imports
  * 2. State Management (hooks)
@@ -12,22 +12,17 @@
  * 5. JSX Rendering
  */
 
-import { useState, useEffect } from 'react';
-import toastr from 'toastr';
+import { useState, useEffect } from "react";
+import toastr from "toastr";
 
 // Servicios
-import groupsService from '../../services/groups.service';
-import clubsService from '../../services/clubs.service';
-import { sportService } from '../../services/sportService';
-import userService from '../../services/userService';
+import groupsService from "../../services/groups.service";
+import clubsService from "../../services/clubs.service";
+import { sportService } from "../../services/sportService";
+import userService from "../../services/userService";
 
 // Tipos
-import type {
-  Group,
-  Sport,
-  User,
-  MemberDetail,
-} from './types';
+import type { Group, Sport, User, MemberDetail } from "./types";
 
 // Hooks custom
 import {
@@ -35,7 +30,7 @@ import {
   useGroupExpansion,
   useAddMemberModal,
   useScheduleModal,
-} from './hooks';
+} from "./hooks";
 
 // Componentes
 import {
@@ -45,14 +40,12 @@ import {
   GroupCard,
   ScheduleList,
   MemberList,
-} from './components';
+} from "./components";
 
 // Estilos y constantes
-import { groupsStyles } from './styles/groups.styles';
-import { MESSAGES } from './constants';
-import {
-  buildMemberDetailsMap,
-} from './utils';
+import { groupsStyles } from "./styles/groups.styles";
+import { MESSAGES } from "./constants";
+import { buildMemberDetailsMap } from "./utils";
 
 /**
  * Props del componente Groups
@@ -64,7 +57,7 @@ interface GroupsProps {
 
 /**
  * Componente principal de Grupos
- * 
+ *
  * Gestiona:
  * - Carga de grupos y datos relacionados
  * - CRUD de grupos
@@ -78,7 +71,7 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
 
   // Datos principales
   const [groups, setGroups] = useState<Group[]>([]);
-  const [clubName, setClubName] = useState<string>('');
+  const [clubName, setClubName] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [memberDetails, setMemberDetails] = useState<
     Record<string, MemberDetail>
@@ -137,8 +130,8 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
       // Cargar detalles de miembros
       await loadMembersDetails(groupsData);
     } catch (error: any) {
-      console.error('Error al cargar datos:', error);
-      toastr.error(error.message || 'Error al cargar los datos');
+      console.error("Error al cargar datos:", error);
+      toastr.error(error.message || "Error al cargar los datos");
     } finally {
       setLoading(false);
     }
@@ -170,10 +163,10 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
           if (response.code === 200 && Array.isArray(response.data)) {
             response.data.forEach((user: User) => {
               details[user._id] = {
-                name: user.name || '',
-                lastname: user.lastname || '',
-                role: user.role || 'unknown',
-                ci: user.ci || '',
+                name: user.name || "",
+                lastname: user.lastname || "",
+                role: user.role || "unknown",
+                ci: user.ci || "",
               };
             });
           }
@@ -182,7 +175,7 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
 
       setMemberDetails(details);
     } catch (error: any) {
-      console.error('Error al cargar detalles de miembros:', error);
+      console.error("Error al cargar detalles de miembros:", error);
       setMemberDetails({});
     }
   };
@@ -208,9 +201,10 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
         const updated = await groupsService.update(groupForm.editingId, {
           name: groupForm.formData.name,
           description: groupForm.formData.description,
-          monthly_fee: groupForm.formData.monthly_fee,
         });
-        setGroups(groups.map((g) => (g._id === groupForm.editingId ? updated : g)));
+        setGroups(
+          groups.map((g) => (g._id === groupForm.editingId ? updated : g)),
+        );
         toastr.success(MESSAGES.SUCCESS_GROUP_UPDATED);
       } else {
         // Crear nuevo grupo
@@ -222,8 +216,8 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
       setShowGroupModal(false);
       groupForm.resetForm();
     } catch (error: any) {
-      console.error('Error al guardar grupo:', error);
-      toastr.error(error.message || 'Error al guardar el grupo');
+      console.error("Error al guardar grupo:", error);
+      toastr.error(error.message || "Error al guardar el grupo");
     } finally {
       setLoading(false);
     }
@@ -243,8 +237,8 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
       setGroups(groups.filter((g) => g._id !== groupId));
       toastr.success(MESSAGES.SUCCESS_GROUP_DELETED);
     } catch (error: any) {
-      console.error('Error al eliminar grupo:', error);
-      toastr.error(error.message || 'Error al eliminar el grupo');
+      console.error("Error al eliminar grupo:", error);
+      toastr.error(error.message || "Error al eliminar el grupo");
     } finally {
       setLoading(false);
     }
@@ -284,32 +278,24 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
           // Rol no coincide, mostrar opción de crear
           toastr.warning(
             `${MESSAGES.INFO_MEMBER_ROLE_MISMATCH}`
-              .replace('{{role}}', response.data.role)
-              .replace('{{expectedRole}}', addMemberModal.memberType),
+              .replace("{{role}}", response.data.role)
+              .replace("{{expectedRole}}", addMemberModal.memberType),
           );
           addMemberModal.setShowCreateUserForm(true);
-          addMemberModal.updateCreateUserData(
-            'ci',
-            addMemberModal.searchCi,
-          );
+          addMemberModal.updateCreateUserData("ci", addMemberModal.searchCi);
         }
       } else {
         // Usuario no encontrado
         const type =
-          addMemberModal.memberType === 'coach'
-            ? 'Entrenador'
-            : 'Deportista';
+          addMemberModal.memberType === "coach" ? "Entrenador" : "Deportista";
         toastr.info(`${type} ${MESSAGES.INFO_MEMBER_NOT_FOUND}`);
         addMemberModal.setShowCreateUserForm(true);
-        addMemberModal.updateCreateUserData(
-          'ci',
-          addMemberModal.searchCi,
-        );
+        addMemberModal.updateCreateUserData("ci", addMemberModal.searchCi);
       }
     } catch (error: any) {
-      console.error('Error al buscar usuario:', error);
+      console.error("Error al buscar usuario:", error);
       addMemberModal.setShowCreateUserForm(true);
-      addMemberModal.updateCreateUserData('ci', addMemberModal.searchCi);
+      addMemberModal.updateCreateUserData("ci", addMemberModal.searchCi);
     } finally {
       addMemberModal.setSearchLoading(false);
     }
@@ -319,10 +305,7 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
    * Agrega un miembro al grupo
    */
   const handleAddMember = async () => {
-    if (
-      !addMemberModal.selectedGroupId ||
-      !addMemberModal.searchResult
-    ) {
+    if (!addMemberModal.selectedGroupId || !addMemberModal.searchResult) {
       toastr.warning(MESSAGES.ERROR_USER_NOT_SELECTED);
       return;
     }
@@ -331,12 +314,12 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
       addMemberModal.setSearchLoading(true);
       let updatedGroup: Group | undefined;
 
-      if (addMemberModal.memberType === 'coach') {
+      if (addMemberModal.memberType === "coach") {
         updatedGroup = await groupsService.addCoach(
           addMemberModal.selectedGroupId,
           addMemberModal.searchResult._id,
         );
-      } else if (addMemberModal.memberType === 'athlete') {
+      } else if (addMemberModal.memberType === "athlete") {
         updatedGroup = await groupsService.addAthlete(
           addMemberModal.selectedGroupId,
           addMemberModal.searchResult._id,
@@ -364,14 +347,12 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
       }
 
       const type =
-        addMemberModal.memberType === 'coach' ? 'Entrenador' : 'Deportista';
-      toastr.success(
-        `${type} ${MESSAGES.SUCCESS_MEMBER_ADDED}`,
-      );
+        addMemberModal.memberType === "coach" ? "Entrenador" : "Deportista";
+      toastr.success(`${type} ${MESSAGES.SUCCESS_MEMBER_ADDED}`);
       addMemberModal.closeModal();
     } catch (error: any) {
-      console.error('Error al agregar miembro:', error);
-      toastr.error(error.message || 'Error al agregar el miembro');
+      console.error("Error al agregar miembro:", error);
+      toastr.error(error.message || "Error al agregar el miembro");
     } finally {
       addMemberModal.setSearchLoading(false);
     }
@@ -381,8 +362,7 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
    * Crea un nuevo usuario (coach o athlete)
    */
   const handleCreateUser = async () => {
-    const { name, lastname, ci, username } =
-      addMemberModal.createUserData;
+    const { name, lastname, ci, username } = addMemberModal.createUserData;
 
     if (!name.trim()) {
       toastr.warning(MESSAGES.ERROR_USER_NAME_REQUIRED);
@@ -392,7 +372,9 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
       toastr.warning(MESSAGES.ERROR_USER_LASTNAME_REQUIRED);
       return;
     }
-    if (!username.trim()) {
+
+    // Username solo es requerido para coaches, no para athletes
+    if (addMemberModal.memberType === "coach" && !username.trim()) {
       toastr.warning(MESSAGES.ERROR_USER_USERNAME_REQUIRED);
       return;
     }
@@ -403,7 +385,7 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
         name,
         lastname,
         ci,
-        username,
+        ...(addMemberModal.memberType === "coach" && { username }),
         role: addMemberModal.memberType,
       });
 
@@ -411,16 +393,14 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
         addMemberModal.setSearchResult(newUser.data);
         addMemberModal.setShowCreateUserForm(false);
         const type =
-          addMemberModal.memberType === 'coach'
-            ? 'Entrenador'
-            : 'Deportista';
+          addMemberModal.memberType === "coach" ? "Entrenador" : "Deportista";
         toastr.success(`${type} ${MESSAGES.SUCCESS_USER_CREATED}`);
       } else {
-        toastr.error('Error al crear el usuario');
+        toastr.error("Error al crear el usuario");
       }
     } catch (error: any) {
-      console.error('Error al crear usuario:', error);
-      toastr.error(error.message || 'Error al crear el usuario');
+      console.error("Error al crear usuario:", error);
+      toastr.error(error.message || "Error al crear el usuario");
     } finally {
       addMemberModal.setSearchLoading(false);
     }
@@ -452,10 +432,7 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
 
       // Remover horarios antiguos
       for (let i = 0; i < currentSchedules.length; i++) {
-        await groupsService.removeSchedule(
-          scheduleModal.editingGroupId,
-          0,
-        );
+        await groupsService.removeSchedule(scheduleModal.editingGroupId, 0);
       }
 
       // Agregar nuevos horarios
@@ -478,8 +455,8 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
       toastr.success(MESSAGES.SUCCESS_SCHEDULES_SAVED);
       scheduleModal.closeModal();
     } catch (error: any) {
-      console.error('Error al guardar horarios:', error);
-      toastr.error(error.message || 'Error al guardar los horarios');
+      console.error("Error al guardar horarios:", error);
+      toastr.error(error.message || "Error al guardar los horarios");
     } finally {
       setLoading(false);
     }
@@ -495,17 +472,14 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
 
     try {
       setLoading(true);
-      const updatedGroup = await groupsService.removeSchedule(
-        groupId,
-        index,
-      );
+      const updatedGroup = await groupsService.removeSchedule(groupId, index);
       setGroups((prev) =>
         prev.map((g) => (g._id === groupId ? updatedGroup : g)),
       );
       toastr.success(MESSAGES.SUCCESS_SCHEDULE_DELETED);
     } catch (error: any) {
-      console.error('Error al remover horario:', error);
-      toastr.error(error.message || 'Error al remover el horario');
+      console.error("Error al remover horario:", error);
+      toastr.error(error.message || "Error al remover el horario");
     } finally {
       setLoading(false);
     }
@@ -533,7 +507,7 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
                     disabled={loading}
                   >
                     <i className="fa fa-arrow-left"></i> Volver
-                  </button>{' '}
+                  </button>{" "}
                   <button
                     className="btn btn-xs btn-primary"
                     onClick={() => {
@@ -555,9 +529,7 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
                   </div>
                 ) : groups.length === 0 ? (
                   <div className="text-center">
-                    <p className="text-muted">
-                      {MESSAGES.STATE_NO_GROUPS}
-                    </p>
+                    <p className="text-muted">{MESSAGES.STATE_NO_GROUPS}</p>
                   </div>
                 ) : (
                   <div>
@@ -565,14 +537,10 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
                       <GroupCard
                         key={group._id}
                         group={group}
-                        isExpanded={groupExpansion.isExpanded(
-                          group._id,
-                        )}
+                        isExpanded={groupExpansion.isExpanded(group._id)}
                         isLoading={loading}
                         onToggleExpand={() =>
-                          groupExpansion.toggleGroupExpansion(
-                            group._id,
-                          )
+                          groupExpansion.toggleGroupExpansion(group._id)
                         }
                         onEdit={() => {
                           groupForm.openForEdit(group);
@@ -595,8 +563,7 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
                                 handleRemoveSchedule(group._id, idx)
                               }
                               isEditing={
-                                scheduleModal.editingGroupId ===
-                                group._id
+                                scheduleModal.editingGroupId === group._id
                               }
                               isLoading={loading}
                             />
@@ -613,10 +580,7 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
                             memberDetails={memberDetails}
                             memberCount={group.coaches?.length || 0}
                             onAddMember={() =>
-                              addMemberModal.openModal(
-                                group._id,
-                                'coach',
-                              )
+                              addMemberModal.openModal(group._id, "coach")
                             }
                             onRemoveMember={() => {
                               // TODO: Implementar remover coach
@@ -632,10 +596,7 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
                             memberDetails={memberDetails}
                             memberCount={group.athletes?.length || 0}
                             onAddMember={() =>
-                              addMemberModal.openModal(
-                                group._id,
-                                'athlete',
-                              )
+                              addMemberModal.openModal(group._id, "athlete")
                             }
                             onRemoveMember={() => {
                               // TODO: Implementar remover athlete
@@ -664,9 +625,7 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
           groupForm.resetForm();
         }}
         onSave={handleSaveGroup}
-        onFieldChange={(field, value) =>
-          groupForm.updateField(field, value)
-        }
+        onFieldChange={(field, value) => groupForm.updateField(field, value)}
       />
 
       <AddMemberModal
