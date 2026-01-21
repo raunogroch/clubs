@@ -7,6 +7,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
+/**
+ * Interfaz para horarios
+ */
+export interface Schedule {
+  day: string; // Día de la semana (Monday, Tuesday, etc.)
+  startTime: string; // Hora de inicio (HH:mm)
+  endTime: string; // Hora de fin (HH:mm)
+}
+
 @Schema({ timestamps: true })
 export class Group extends Document {
   /**
@@ -64,6 +73,22 @@ export class Group extends Document {
     default: [],
   })
   coaches: Types.ObjectId[];
+
+  /**
+   * Array de horarios del grupo
+   * Cada horario contiene día de la semana y rango de horas
+   */
+  @Prop({
+    type: [
+      {
+        day: String, // Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday
+        startTime: String, // HH:mm format
+        endTime: String, // HH:mm format
+      },
+    ],
+    default: [],
+  })
+  schedule?: Schedule[];
 
   /**
    * Timestamp de creación (automático)

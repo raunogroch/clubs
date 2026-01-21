@@ -120,8 +120,16 @@ export class GroupsService {
       throw new NotFoundException(`Grupo con ID ${groupId} no encontrado`);
     }
 
+    // Extraer el club_id correctamente (puede estar poblado)
+    let clubId: string;
+    if (typeof group.club_id === 'object' && group.club_id !== null) {
+      clubId = (group.club_id as any)._id?.toString() || String(group.club_id);
+    } else {
+      clubId = String(group.club_id);
+    }
+
     // Verificar acceso al club
-    await this.verifyClubAccess(group.club_id.toString(), userId);
+    await this.verifyClubAccess(clubId, userId);
 
     return group;
   }
@@ -139,8 +147,16 @@ export class GroupsService {
       throw new NotFoundException(`Grupo con ID ${groupId} no encontrado`);
     }
 
+    // Extraer el club_id correctamente (puede estar poblado)
+    let clubId: string;
+    if (typeof group.club_id === 'object' && group.club_id !== null) {
+      clubId = (group.club_id as any)._id?.toString() || String(group.club_id);
+    } else {
+      clubId = String(group.club_id);
+    }
+
     // Verificar acceso al club
-    await this.verifyClubAccess(group.club_id.toString(), userId);
+    await this.verifyClubAccess(clubId, userId);
 
     const updated = await this.groupRepository.update(groupId, updateGroupDto);
     if (!updated) {
@@ -159,8 +175,16 @@ export class GroupsService {
       throw new NotFoundException(`Grupo con ID ${groupId} no encontrado`);
     }
 
+    // Extraer el club_id correctamente (puede estar poblado)
+    let clubId: string;
+    if (typeof group.club_id === 'object' && group.club_id !== null) {
+      clubId = (group.club_id as any)._id?.toString() || String(group.club_id);
+    } else {
+      clubId = String(group.club_id);
+    }
+
     // Verificar acceso al club
-    await this.verifyClubAccess(group.club_id.toString(), userId);
+    await this.verifyClubAccess(clubId, userId);
 
     const deleted = await this.groupRepository.delete(groupId);
     if (!deleted) {
@@ -452,6 +476,116 @@ export class GroupsService {
       return updated;
     } catch (error) {
       console.error('Error en removeMember:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Agregar horario a un grupo
+   */
+  async addSchedule(
+    groupId: string,
+    day: string,
+    startTime: string,
+    endTime: string,
+    userId: string,
+  ): Promise<Group> {
+    try {
+      const group = await this.groupRepository.findById(groupId);
+      if (!group) {
+        throw new NotFoundException(`Grupo con ID ${groupId} no encontrado`);
+      }
+
+      // Extraer el ID del club
+      let clubId: string;
+      if (typeof group.club_id === 'object' && group.club_id !== null) {
+        clubId =
+          (group.club_id as any)._id?.toString?.() ||
+          (group.club_id as any)?.toString?.();
+      } else {
+        clubId = String(group.club_id);
+      }
+
+      // Verificar acceso al club
+      await this.verifyClubAccess(clubId, userId);
+
+      // Validar que el horario sea válido
+      if (
+        ![
+          'Monday',
+          'Tuesday',
+          'Wednesday',
+          'Thursday',
+          'Friday',
+          'Saturday',
+          'Sunday',
+        ].includes(day)
+      ) {
+        throw new BadRequestException(`Día inválido: ${day}`);
+      }
+
+      if (startTime >= endTime) {
+        throw new BadRequestException(
+          'La hora de inicio debe ser menor a la hora de fin',
+        );
+      }
+
+      const updated = await this.groupRepository.addSchedule(groupId, {
+        day,
+        startTime,
+        endTime,
+      });
+
+      if (!updated) {
+        throw new NotFoundException(`Grupo con ID ${groupId} no encontrado`);
+      }
+
+      return updated;
+    } catch (error) {
+      console.error('Error en addSchedule:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Remover horario de un grupo
+   */
+  async removeSchedule(
+    groupId: string,
+    scheduleIndex: number,
+    userId: string,
+  ): Promise<Group> {
+    try {
+      const group = await this.groupRepository.findById(groupId);
+      if (!group) {
+        throw new NotFoundException(`Grupo con ID ${groupId} no encontrado`);
+      }
+
+      // Extraer el ID del club
+      let clubId: string;
+      if (typeof group.club_id === 'object' && group.club_id !== null) {
+        clubId =
+          (group.club_id as any)._id?.toString?.() ||
+          (group.club_id as any)?.toString?.();
+      } else {
+        clubId = String(group.club_id);
+      }
+
+      // Verificar acceso al club
+      await this.verifyClubAccess(clubId, userId);
+
+      const updated = await this.groupRepository.removeSchedule(
+        groupId,
+        scheduleIndex,
+      );
+
+      if (!updated) {
+        throw new NotFoundException(`Grupo con ID ${groupId} no encontrado`);
+      }
+
+      return updated;
+    } catch (error) {
+      console.error('Error en removeSchedule:', error);
       throw error;
     }
   }

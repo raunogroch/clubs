@@ -265,4 +265,64 @@ export class GroupRepository {
       throw error;
     }
   }
+
+  /**
+   * Agregar horario a un grupo
+   */
+  async addSchedule(
+    groupId: string,
+    schedule: { day: string; startTime: string; endTime: string },
+  ): Promise<Group | null> {
+    try {
+      return await this.groupModel
+        .findByIdAndUpdate(
+          groupId,
+          { $push: { schedule: schedule } },
+          { new: true },
+        )
+        .populate('created_by', 'name')
+        .populate('athletes', 'name role ci lastname')
+        .populate('coaches', 'name role ci lastname')
+        .populate('club_id', 'name')
+        .exec();
+    } catch (error) {
+      console.error('Error en addSchedule del repository:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Remover horario de un grupo
+   */
+  async removeSchedule(
+    groupId: string,
+    scheduleIndex: number,
+  ): Promise<Group | null> {
+    try {
+      // Primero obtenemos el grupo
+      const group = await this.groupModel.findById(groupId).exec();
+      if (!group) return null;
+
+      // Removemos el horario por índice
+      if (group.schedule && group.schedule.length > scheduleIndex) {
+        group.schedule.splice(scheduleIndex, 1);
+        return group
+          .save()
+          .then(() =>
+            this.groupModel
+              .findById(groupId)
+              .populate('created_by', 'name')
+              .populate('athletes', 'name role ci lastname')
+              .populate('coaches', 'name role ci lastname')
+              .populate('club_id', 'name')
+              .exec(),
+          );
+      }
+
+      return group;
+    } catch (error) {
+      console.error('Error en removeSchedule del repository:', error);
+      throw error;
+    }
+  }
 }

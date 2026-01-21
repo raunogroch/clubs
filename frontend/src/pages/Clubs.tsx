@@ -228,7 +228,7 @@ export const Clubs = ({ name }: { name?: string }) => {
 
   return (
     <>
-      <NavHeader name={name} />
+      <NavHeader name={"Clubs"} />
 
       {/* Si hay un club seleccionado para gestionar grupos, mostrar ese componente */}
       {selectedClubForGroups ? (

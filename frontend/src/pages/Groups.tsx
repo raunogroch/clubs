@@ -23,7 +23,7 @@ const styles = `
   .section-box {
     padding: 15px;
     border: 1px solid #e0e0e0;
-    border-radius: 4px;
+    
     background-color: #fafafa;
     margin-bottom: 10px;
   }
@@ -61,7 +61,7 @@ const styles = `
   
   .badge {
     padding: 4px 8px;
-    border-radius: 3px;
+    
     font-size: 12px;
     font-weight: bold;
   }
@@ -90,6 +90,16 @@ interface User {
   username: string;
   role: string;
   ci?: string;
+}
+
+enum Day {
+  Monday = "Lunes",
+  Tuesday = "Martes",
+  Wednesday = "Miércoles",
+  Thursday = "Jueves",
+  Friday = "Viernes",
+  Saturday = "Sábado",
+  Sunday = "Domingo",
 }
 
 export const Groups = ({
@@ -127,6 +137,47 @@ export const Groups = ({
       { name: string; lastname: string; role: string; ci?: string }
     >
   >({});
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+
+  // Toggle expansión de grupo
+  const toggleGroupExpansion = (groupId: string) => {
+    const newExpanded = new Set(expandedGroups);
+    if (newExpanded.has(groupId)) {
+      newExpanded.delete(groupId);
+    } else {
+      newExpanded.add(groupId);
+    }
+    setExpandedGroups(newExpanded);
+  };
+
+  // Estado para horarios
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [editingSchedulesGroup, setEditingSchedulesGroup] = useState<
+    string | null
+  >(null);
+  const [editingSchedules, setEditingSchedules] = useState<
+    Array<{
+      day: string;
+      startTime: string;
+      endTime: string;
+    }>
+  >([]);
+
+  // Helper para obtener el siguiente día
+  const getNextDay = (currentDay: string): string => {
+    const days = [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday",
+    ];
+    const index = days.indexOf(currentDay);
+    if (index === -1 || index === days.length - 1) return "Monday";
+    return days[index + 1];
+  };
 
   // Formulario
   const [formData, setFormData] = useState<CreateGroupRequest>({
@@ -636,6 +687,145 @@ export const Groups = ({
     });
   };
 
+  // Abrir edición de horarios (inline)
+  const handleOpenScheduleEditor = (
+    groupId: string,
+    currentSchedules: any[],
+  ) => {
+    setEditingSchedulesGroup(groupId);
+    if (currentSchedules && currentSchedules.length > 0) {
+      setEditingSchedules([...currentSchedules]);
+    } else {
+      setEditingSchedules([
+        {
+          day: "Monday",
+          startTime: "09:00",
+          endTime: "10:00",
+        },
+      ]);
+    }
+    setShowScheduleModal(true);
+  };
+
+  // Cerrar edición de horarios
+  const handleCloseScheduleEditor = () => {
+    setShowScheduleModal(false);
+    setEditingSchedulesGroup(null);
+    setEditingSchedules([]);
+  };
+
+  // Agregar nueva fila de horario (copia del anterior y autoincrementa día)
+  const handleAddScheduleRow = () => {
+    if (editingSchedules.length === 0) {
+      setEditingSchedules([
+        {
+          day: "Monday",
+          startTime: "09:00",
+          endTime: "10:00",
+        },
+      ]);
+      return;
+    }
+
+    const lastSchedule = editingSchedules[editingSchedules.length - 1];
+    const newDay = getNextDay(lastSchedule.day);
+
+    setEditingSchedules([
+      ...editingSchedules,
+      {
+        day: newDay,
+        startTime: lastSchedule.startTime,
+        endTime: lastSchedule.endTime,
+      },
+    ]);
+  };
+
+  // Actualizar una fila de horario
+  const handleUpdateScheduleRow = (
+    index: number,
+    field: string,
+    value: string,
+  ) => {
+    const updated = [...editingSchedules];
+    updated[index] = {
+      ...updated[index],
+      [field]: value,
+    };
+    setEditingSchedules(updated);
+  };
+
+  // Remover una fila de horario siendo editada
+  const handleRemoveScheduleRow = (index: number) => {
+    setEditingSchedules(editingSchedules.filter((_, i) => i !== index));
+  };
+
+  // Guardar todos los horarios
+  const handleSaveSchedules = async () => {
+    if (!editingSchedulesGroup || editingSchedules.length === 0) {
+      toastr.warning("Debe agregar al menos un horario");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Obtener los horarios actuales del grupo
+      const currentGroup = groups.find((g) => g._id === editingSchedulesGroup);
+      const currentSchedules = currentGroup?.schedule || [];
+
+      // Remover los horarios antiguos
+      for (let i = 0; i < currentSchedules.length; i++) {
+        await groupsService.removeSchedule(editingSchedulesGroup, 0);
+      }
+
+      // Agregar los nuevos horarios
+      let updatedGroup = currentGroup;
+      for (const schedule of editingSchedules) {
+        updatedGroup = await groupsService.addSchedule(
+          editingSchedulesGroup,
+          schedule.day,
+          schedule.startTime,
+          schedule.endTime,
+        );
+      }
+
+      setGroups((prevGroups) =>
+        prevGroups.map((g) =>
+          g._id === editingSchedulesGroup ? updatedGroup : g,
+        ),
+      );
+
+      toastr.success("Horarios guardados correctamente");
+      handleCloseScheduleEditor();
+    } catch (error: any) {
+      console.error("Error al guardar horarios:", error);
+      toastr.error(error.message || "Error al guardar los horarios");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Remover horario (para borrar desde la tarjeta, no desde la edición)
+  const handleRemoveSchedule = async (groupId: string, index: number) => {
+    if (!window.confirm("¿Estás seguro de que deseas eliminar este horario?")) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const updatedGroup = await groupsService.removeSchedule(groupId, index);
+      setGroups((prevGroups) =>
+        prevGroups.map((g) => (g._id === groupId ? updatedGroup : g)),
+      );
+      toastr.success("Horario eliminado correctamente");
+    } catch (error: any) {
+      console.error("Error al remover horario:", error);
+      toastr.error(error.message || "Error al remover el horario");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Obtener miembros de un grupo filtrados por rol
   const getMembersByRole = (group: Group, role: "coach" | "athlete") => {
     const memberIds =
@@ -672,24 +862,22 @@ export const Groups = ({
           <div className="col-lg-12">
             <div className="ibox">
               <div className="ibox-title">
-                <h5>
-                  Grupos del club de{" "}
-                  <span className="font-bold">{clubName}</span>
-                </h5>
+                <h5>Grupos del club de {clubName}</h5>
                 <div className="ibox-tools">
                   <button
-                    className="btn btn-default btn-sm"
+                    className="btn btn-warning btn-xs mr-1"
                     onClick={onBack}
                     title="Volver a clubs"
                   >
                     <i className="fa fa-arrow-left"></i> Volver
-                  </button>{" "}
+                  </button>
+
                   <button
-                    className="btn btn-primary btn-sm"
+                    className="btn btn-primary btn-xs"
                     onClick={handleOpenCreate}
-                    disabled={loading}
+                    title="Crear grupo"
                   >
-                    <i className="fa fa-plus"></i> Crear Grupo
+                    <i className="fa fa-plus"></i> Crear grupo
                   </button>
                 </div>
               </div>
@@ -708,201 +896,311 @@ export const Groups = ({
                 ) : (
                   <div>
                     {groups.map((group) => (
-                      <div key={group._id} className="panel panel-default mb-3">
-                        <div
-                          className="panel-heading"
-                          style={{ backgroundColor: "#f5f5f5" }}
-                        >
-                          <div className="row">
+                      <div key={group._id} className="ibox">
+                        <div className="ibox-title">
+                          <div className="row w-100" style={{ margin: 0 }}>
                             <div className="col-md-8">
-                              <h4 style={{ margin: "0" }}>
-                                <strong>{group.name}</strong>
-                              </h4>
-                              <small className="text-muted">
-                                {group.description || "Sin descripción"}
-                              </small>
+                              <button
+                                className="btn btn-link"
+                                onClick={() => toggleGroupExpansion(group._id)}
+                                style={{
+                                  textAlign: "left",
+                                  padding: 0,
+                                  textDecoration: "none",
+                                }}
+                              >
+                                <i
+                                  className={`fa ${
+                                    expandedGroups.has(group._id)
+                                      ? "fa-chevron-down"
+                                      : "fa-chevron-right"
+                                  }`}
+                                  style={{ marginRight: "8px" }}
+                                ></i>
+                                <h4 style={{ display: "inline", margin: 0 }}>
+                                  <strong>{group.name}</strong>
+                                </h4>
+                              </button>
+                              <div>
+                                <small className="text-muted">
+                                  {group.description || "Sin descripción"}
+                                </small>
+                              </div>
                             </div>
-                            <div className="col-md-4 text-right">
+                            <div className="ibox-tools">
                               <button
                                 className="btn btn-primary btn-xs"
                                 onClick={() => handleOpenEdit(group)}
                                 title="Editar"
                               >
-                                <i className="fa fa-edit"></i> Editar
+                                <i className="fa fa-edit"></i>
                               </button>{" "}
                               <button
                                 className="btn btn-danger btn-xs"
                                 onClick={() => handleDelete(group._id)}
                                 title="Eliminar"
                               >
-                                <i className="fa fa-trash"></i> Eliminar
+                                <i className="fa fa-trash"></i>
                               </button>
                             </div>
                           </div>
                         </div>
-                        <div className="panel-body">
-                          <div className="row">
-                            {/* Coaches Section */}
-                            <div className="col-md-6">
-                              <div className="section-box">
-                                <h5>
-                                  <i className="fa fa-user-tie"></i>{" "}
-                                  Entrenadores
-                                  <span className="badge badge-info ml-2">
-                                    {(group.coaches || []).length}
-                                  </span>
-                                </h5>
-                                <button
-                                  className="btn btn-success btn-sm btn-block my-1"
-                                  onClick={() =>
-                                    handleOpenAddMember(group._id, "coach")
-                                  }
-                                  title="Agregar Entrenador"
-                                >
-                                  <i className="fa fa-plus"></i> Agregar
-                                  Entrenador(es)
-                                </button>
-                                <div className="members-list">
-                                  {(group.coaches || []).length === 0 ? (
+                        {expandedGroups.has(group._id) && (
+                          <div className="ibox-content">
+                            <div className="row mt-3">
+                              <div className="col-md-12">
+                                <div className="section-box">
+                                  <h5 className="d-flex justify-content-between">
+                                    <div>
+                                      <i className="fa fa-calendar"></i>{" "}
+                                      Horarios
+                                      <span className="badge badge-secondary ml-2">
+                                        {(group.schedule || []).length}
+                                      </span>{" "}
+                                    </div>
+                                    <button
+                                      className="btn btn-warning btn-xs"
+                                      onClick={() =>
+                                        handleOpenScheduleEditor(
+                                          group._id,
+                                          group.schedule,
+                                        )
+                                      }
+                                      title="Editar horarios"
+                                    >
+                                      <i className="fa fa-edit"></i> Editar
+                                      Horarios
+                                    </button>
+                                  </h5>
+                                  {editingSchedulesGroup === group._id ? (
                                     <p className="text-muted">
-                                      <em>Sin entrenadores asignados</em>
+                                      <em>Editando horarios...</em>
                                     </p>
                                   ) : (
-                                    <ul
-                                      className="list-group"
-                                      style={{ marginBottom: "10px" }}
-                                    >
-                                      {getMembersByRole(group, "coach").map(
-                                        (memberId) => {
-                                          const member =
-                                            memberDetails[memberId];
-                                          return (
-                                            <li
-                                              key={memberId}
-                                              className="list-group-item"
-                                              style={{
-                                                display: "flex",
-                                                justifyContent: "space-between",
-                                                alignItems: "center",
-                                                padding: "8px 12px",
-                                                borderRadius: "3px",
-                                                marginBottom: "5px",
-                                                backgroundColor: "#f9f9f9",
-                                                border: "1px solid #ddd",
-                                              }}
-                                            >
-                                              <span>
-                                                <strong>
-                                                  {member
-                                                    ? `${member.ci || "S/N"} - ${member.lastname} ${member.name}`
-                                                    : "Desconocido"}
-                                                </strong>
-                                              </span>
-                                              <button
-                                                className="btn btn-danger btn-xs"
-                                                onClick={() => {
-                                                  // TODO: Implementar remover coach
-                                                }}
-                                                title="Remover"
-                                              >
-                                                <i className="fa fa-trash"></i>
-                                              </button>
-                                            </li>
-                                          );
-                                        },
-                                      )}
-                                    </ul>
+                                    <>
+                                      <div className="members-list">
+                                        {(group.schedule || []).length === 0 ? (
+                                          <p className="text-muted">
+                                            <em>Sin horarios asignados</em>
+                                          </p>
+                                        ) : (
+                                          <ul
+                                            className="row mb-0"
+                                            style={{ marginBottom: "10px" }}
+                                          >
+                                            {(group.schedule || []).map(
+                                              (schedule, idx) => (
+                                                <li
+                                                  key={idx}
+                                                  className="col-2 mx-1"
+                                                  style={{
+                                                    display: "flex",
+                                                    justifyContent:
+                                                      "space-between",
+                                                    alignItems: "center",
+                                                    padding: "8px 12px",
+                                                    marginBottom: "5px",
+                                                    backgroundColor: "#f5f5f5",
+                                                    border: "1px solid #ddd",
+                                                  }}
+                                                >
+                                                  <span>
+                                                    <strong>
+                                                      {Day[schedule.day]}:{" "}
+                                                      {schedule.startTime} -{" "}
+                                                      {schedule.endTime}
+                                                    </strong>
+                                                  </span>
+                                                  <button
+                                                    className="btn btn-danger btn-xs"
+                                                    onClick={() =>
+                                                      handleRemoveSchedule(
+                                                        group._id,
+                                                        idx,
+                                                      )
+                                                    }
+                                                    title="Remover"
+                                                  >
+                                                    <i className="fa fa-trash"></i>
+                                                  </button>
+                                                </li>
+                                              ),
+                                            )}
+                                          </ul>
+                                        )}
+                                      </div>
+                                    </>
                                   )}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="row">
+                              {/* Coaches Section */}
+                              <div className="col-md-6">
+                                <div className="section-box">
+                                  <h5 className="d-flex justify-content-between">
+                                    <div>
+                                      <i className="fa fa-user-tie"></i>{" "}
+                                      Entrenadores
+                                      <span className="badge badge-info ml-2">
+                                        {(group.coaches || []).length}
+                                      </span>
+                                    </div>
+                                    <button
+                                      className="btn btn-success btn-xs"
+                                      onClick={() =>
+                                        handleOpenAddMember(group._id, "coach")
+                                      }
+                                      title="Agregar Entrenador"
+                                    >
+                                      <i className="fa fa-plus"></i> Agregar
+                                      Entrenador(es)
+                                    </button>
+                                  </h5>
+
+                                  <div className="members-list">
+                                    {(group.coaches || []).length === 0 ? (
+                                      <p className="text-muted">
+                                        <em>Sin entrenadores asignados</em>
+                                      </p>
+                                    ) : (
+                                      <ul className="list-group mb-0">
+                                        {getMembersByRole(group, "coach").map(
+                                          (memberId) => {
+                                            const member =
+                                              memberDetails[memberId];
+                                            return (
+                                              <li
+                                                key={memberId}
+                                                className="list-group-item"
+                                                style={{
+                                                  display: "flex",
+                                                  justifyContent:
+                                                    "space-between",
+                                                  alignItems: "center",
+                                                  padding: "8px 12px",
+                                                  marginBottom: "5px",
+                                                  backgroundColor: "#f9f9f9",
+                                                  border: "1px solid #ddd",
+                                                }}
+                                              >
+                                                <span>
+                                                  <strong>
+                                                    {member
+                                                      ? `${member.ci || "S/N"} - ${member.lastname} ${member.name}`
+                                                      : "Desconocido"}
+                                                  </strong>
+                                                </span>
+                                                <button
+                                                  className="btn btn-danger btn-xs"
+                                                  onClick={() => {
+                                                    // TODO: Implementar remover coach
+                                                  }}
+                                                  title="Remover"
+                                                >
+                                                  <i className="fa fa-trash"></i>
+                                                </button>
+                                              </li>
+                                            );
+                                          },
+                                        )}
+                                      </ul>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Athletes Section */}
+                              <div className="col-md-6">
+                                <div className="section-box">
+                                  <h5 className="d-flex justify-content-between">
+                                    <div>
+                                      <i className="fa fa-person-running"></i>{" "}
+                                      Deportistas
+                                      <span className="badge badge-primary ml-2">
+                                        {(group.athletes || []).length}
+                                      </span>
+                                    </div>
+                                    <button
+                                      className="btn btn-info btn-xs"
+                                      onClick={() =>
+                                        handleOpenAddMember(
+                                          group._id,
+                                          "athlete",
+                                        )
+                                      }
+                                      title="Agregar Deportista"
+                                    >
+                                      <i className="fa fa-plus"></i> Agregar
+                                      Atleta(s)
+                                    </button>
+                                  </h5>
+
+                                  <div className="members-list">
+                                    {(group.athletes || []).length === 0 ? (
+                                      <p className="text-muted">
+                                        <em>Sin deportistas asignados</em>
+                                      </p>
+                                    ) : (
+                                      <ul className="list-group mb-0">
+                                        {getMembersByRole(group, "athlete").map(
+                                          (memberId) => {
+                                            const member =
+                                              memberDetails[memberId];
+                                            return (
+                                              <li
+                                                key={memberId}
+                                                className="list-group-item"
+                                                style={{
+                                                  display: "flex",
+                                                  justifyContent:
+                                                    "space-between",
+                                                  alignItems: "center",
+                                                  padding: "8px 12px",
+                                                  marginBottom: "5px",
+                                                  backgroundColor: "#f0f7ff",
+                                                  border: "1px solid #b3d9ff",
+                                                }}
+                                              >
+                                                <span>
+                                                  <strong>
+                                                    {member
+                                                      ? `${member.ci || "S/N"} - ${member.lastname} ${member.name}`
+                                                      : "Desconocido"}
+                                                  </strong>
+                                                </span>
+                                                <button
+                                                  className="btn btn-danger btn-xs"
+                                                  onClick={() => {
+                                                    // TODO: Implementar remover athlete
+                                                  }}
+                                                  title="Remover"
+                                                >
+                                                  <i className="fa fa-trash"></i>
+                                                </button>
+                                              </li>
+                                            );
+                                          },
+                                        )}
+                                      </ul>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                             </div>
 
-                            {/* Athletes Section */}
-                            <div className="col-md-6">
-                              <div className="section-box">
-                                <h5>
-                                  <i className="fa fa-person-running"></i>{" "}
-                                  Deportistas
-                                  <span className="badge badge-primary ml-2">
-                                    {(group.athletes || []).length}
-                                  </span>
-                                </h5>
-                                <button
-                                  className="btn btn-info btn-sm btn-block my-1"
-                                  onClick={() =>
-                                    handleOpenAddMember(group._id, "athlete")
-                                  }
-                                  title="Agregar Deportista"
-                                >
-                                  <i className="fa fa-plus"></i> Agregar
-                                  Atleta(s)
-                                </button>
-                                <div className="members-list">
-                                  {(group.athletes || []).length === 0 ? (
-                                    <p className="text-muted">
-                                      <em>Sin deportistas asignados</em>
-                                    </p>
-                                  ) : (
-                                    <ul
-                                      className="list-group"
-                                      style={{ marginBottom: "10px" }}
-                                    >
-                                      {getMembersByRole(group, "athlete").map(
-                                        (memberId) => {
-                                          const member =
-                                            memberDetails[memberId];
-                                          return (
-                                            <li
-                                              key={memberId}
-                                              className="list-group-item"
-                                              style={{
-                                                display: "flex",
-                                                justifyContent: "space-between",
-                                                alignItems: "center",
-                                                padding: "8px 12px",
-                                                borderRadius: "3px",
-                                                marginBottom: "5px",
-                                                backgroundColor: "#f0f7ff",
-                                                border: "1px solid #b3d9ff",
-                                              }}
-                                            >
-                                              <span>
-                                                <strong>
-                                                  {member
-                                                    ? `${member.ci || "S/N"} - ${member.lastname} ${member.name}`
-                                                    : "Desconocido"}
-                                                </strong>
-                                              </span>
-                                              <button
-                                                className="btn btn-danger btn-xs"
-                                                onClick={() => {
-                                                  // TODO: Implementar remover athlete
-                                                }}
-                                                title="Remover"
-                                              >
-                                                <i className="fa fa-trash"></i>
-                                              </button>
-                                            </li>
-                                          );
-                                        },
-                                      )}
-                                    </ul>
+                            <div className="row mt-3">
+                              <div className="col-md-12">
+                                <small className="text-muted">
+                                  Creado:{" "}
+                                  {new Date(group.createdAt).toLocaleDateString(
+                                    "es-ES",
                                   )}
-                                </div>
+                                </small>
                               </div>
                             </div>
                           </div>
-                          <div className="row mt-3">
-                            <div className="col-md-12">
-                              <small className="text-muted">
-                                Creado:{" "}
-                                {new Date(group.createdAt).toLocaleDateString(
-                                  "es-ES",
-                                )}
-                              </small>
-                            </div>
-                          </div>
-                        </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -1129,6 +1427,131 @@ export const Groups = ({
                     Crear y Agregar
                   </button>
                 )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para editar horarios */}
+      {showScheduleModal && editingSchedulesGroup && (
+        <div
+          className="modal"
+          style={{ display: "block", backgroundColor: "rgba(0,0,0,.5)" }}
+          onClick={handleCloseScheduleEditor}
+        >
+          <div
+            className="modal-dialog modal-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-content">
+              <div className="modal-header">
+                <h4 className="modal-title">Editar Horarios</h4>
+                <button
+                  type="button"
+                  className="close"
+                  onClick={handleCloseScheduleEditor}
+                >
+                  &times;
+                </button>
+              </div>
+              <div className="modal-body">
+                <div style={{ maxHeight: "400px", overflowY: "auto" }}>
+                  {editingSchedules.map((schedule, idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        display: "flex",
+                        gap: "8px",
+                        marginBottom: "12px",
+                        alignItems: "center",
+                        flexWrap: "wrap",
+                        padding: "10px",
+                        backgroundColor: "#f9f9f9",
+                        border: "1px solid #e0e0e0",
+                      }}
+                    >
+                      <div style={{ flex: "0 1 120px" }}>
+                        <select
+                          className="form-control"
+                          value={schedule.day}
+                          onChange={(e) =>
+                            handleUpdateScheduleRow(idx, "day", e.target.value)
+                          }
+                        >
+                          <option value="Monday">Lunes</option>
+                          <option value="Tuesday">Martes</option>
+                          <option value="Wednesday">Miércoles</option>
+                          <option value="Thursday">Jueves</option>
+                          <option value="Friday">Viernes</option>
+                          <option value="Saturday">Sábado</option>
+                          <option value="Sunday">Domingo</option>
+                        </select>
+                      </div>
+                      <div style={{ flex: "0 1 110px" }}>
+                        <input
+                          type="time"
+                          className="form-control"
+                          value={schedule.startTime}
+                          onChange={(e) =>
+                            handleUpdateScheduleRow(
+                              idx,
+                              "startTime",
+                              e.target.value,
+                            )
+                          }
+                        />
+                      </div>
+                      <div style={{ flex: "0 1 110px" }}>
+                        <input
+                          type="time"
+                          className="form-control"
+                          value={schedule.endTime}
+                          onChange={(e) =>
+                            handleUpdateScheduleRow(
+                              idx,
+                              "endTime",
+                              e.target.value,
+                            )
+                          }
+                        />
+                      </div>
+                      <button
+                        className="btn btn-danger btn-xs"
+                        onClick={() => handleRemoveScheduleRow(idx)}
+                        title="Remover fila"
+                      >
+                        <i className="fa fa-trash"></i>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ marginTop: "15px" }}>
+                  <button
+                    className="btn btn-info btn-xs"
+                    onClick={handleAddScheduleRow}
+                    title="Agregar fila"
+                  >
+                    <i className="fa fa-plus"></i> Agregar horario
+                  </button>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-default"
+                  onClick={handleCloseScheduleEditor}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleSaveSchedules}
+                  disabled={loading || editingSchedules.length === 0}
+                >
+                  <i className="fa fa-save"></i> Guardar
+                </button>
               </div>
             </div>
           </div>

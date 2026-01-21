@@ -163,4 +163,45 @@ export class GroupsController {
   ) {
     return this.groupsService.removeMember(groupId, memberId, user.sub, role);
   }
+
+  /**
+   * POST /groups/:groupId/schedule
+   * Agregar horario a un grupo
+   */
+  @Post(':groupId/schedule')
+  async addSchedule(
+    @Param('groupId') groupId: string,
+    @Body()
+    body: {
+      day: string;
+      startTime: string;
+      endTime: string;
+    },
+    @CurrentUser() user: any,
+  ) {
+    return this.groupsService.addSchedule(
+      groupId,
+      body.day,
+      body.startTime,
+      body.endTime,
+      user.sub,
+    );
+  }
+
+  /**
+   * DELETE /groups/:groupId/schedule/:index
+   * Remover horario de un grupo
+   */
+  @Delete(':groupId/schedule/:index')
+  async removeSchedule(
+    @Param('groupId') groupId: string,
+    @Param('index') index: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.groupsService.removeSchedule(
+      groupId,
+      parseInt(index),
+      user.sub,
+    );
+  }
 }

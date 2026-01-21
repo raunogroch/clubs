@@ -16,6 +16,11 @@ export interface Group {
   athletes: string[];
   coaches: string[];
   members?: string[]; // legacy support
+  schedule?: Array<{
+    day: string;
+    startTime: string;
+    endTime: string;
+  }>;
   createdAt: string;
   updatedAt: string;
 }
@@ -312,6 +317,66 @@ class GroupsService {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
     });
+
+    return safeParseJson(response);
+  }
+
+  /**
+   * Agregar horario a un grupo
+   * POST /api/groups/:groupId/schedule
+   */
+  async addSchedule(
+    groupId: string,
+    day: string,
+    startTime: string,
+    endTime: string,
+  ): Promise<Group> {
+    const response = await fetch(`${API_URL}/groups/${groupId}/schedule`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({
+        day,
+        startTime,
+        endTime,
+      }),
+    });
+
+    if (!response.ok) {
+      let errorMessage = "Error al agregar horario";
+      try {
+        const error = await safeParseJson(response);
+        errorMessage = error.message || errorMessage;
+      } catch {
+        errorMessage = `Error ${response.status}: ${response.statusText}`;
+      }
+      throw new Error(errorMessage);
+    }
+
+    return safeParseJson(response);
+  }
+
+  /**
+   * Remover horario de un grupo
+   * DELETE /api/groups/:groupId/schedule/:index
+   */
+  async removeSchedule(groupId: string, scheduleIndex: number): Promise<Group> {
+    const response = await fetch(
+      `${API_URL}/groups/${groupId}/schedule/${scheduleIndex}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      },
+    );
+
+    if (!response.ok) {
+      const error = await safeParseJson(response);
+      throw new Error(error.message || "Error al remover horario");
+    }
 
     return safeParseJson(response);
   }
