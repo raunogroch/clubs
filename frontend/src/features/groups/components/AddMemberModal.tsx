@@ -1,11 +1,11 @@
 /**
  * Modal para Agregar Miembros (Coach o Atleta)
- * 
+ *
  * Componente presentacional que maneja la UI del formulario de búsqueda/creación.
  */
 
-import React from 'react';
-import type { User, MemberType, CreateUserData } from '../types';
+import React from "react";
+import type { User, MemberType, CreateUserData } from "../types";
 
 interface AddMemberModalProps {
   isOpen: boolean;
@@ -40,12 +40,12 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  const memberTypeLabel = memberType === 'coach' ? 'Entrenador' : 'Deportista';
+  const memberTypeLabel = memberType === "coach" ? "Entrenador" : "Deportista";
 
   return (
     <div
       className="modal"
-      style={{ display: 'block', backgroundColor: 'rgba(0,0,0,.5)' }}
+      style={{ display: "block", backgroundColor: "rgba(0,0,0,.5)" }}
       onClick={onClose}
     >
       <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
@@ -65,9 +65,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
           <div className="modal-body">
             {/* Búsqueda de usuario */}
             <div className="form-group">
-              <label htmlFor="search-ci">
-                Buscar por Carnet (CI)
-              </label>
+              <label htmlFor="search-ci">Buscar por Carnet (CI)</label>
               <div className="input-group">
                 <input
                   id="search-ci"
@@ -77,7 +75,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
                   onChange={(e) => onSearchCiChange(e.target.value)}
                   placeholder="Ingresa el carnet (CI)"
                   onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
+                    if (e.key === "Enter") {
                       onSearch();
                     }
                   }}
@@ -101,7 +99,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
               <div className="alert alert-info">
                 <h5>Usuario encontrado:</h5>
                 <p>
-                  <strong>Nombre:</strong> {searchResult.name}{' '}
+                  <strong>Nombre:</strong> {searchResult.name}{" "}
                   {searchResult.lastname}
                 </p>
                 <p>
@@ -126,7 +124,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
                     className="form-control"
                     value={createUserData.name}
                     onChange={(e) =>
-                      onCreateUserDataChange('name', e.target.value)
+                      onCreateUserDataChange("name", e.target.value)
                     }
                     placeholder="Ej: Juan"
                     disabled={loading}
@@ -141,7 +139,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
                     className="form-control"
                     value={createUserData.lastname}
                     onChange={(e) =>
-                      onCreateUserDataChange('lastname', e.target.value)
+                      onCreateUserDataChange("lastname", e.target.value)
                     }
                     placeholder="Ej: García"
                     disabled={loading}
@@ -168,7 +166,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
                     className="form-control"
                     value={createUserData.username}
                     onChange={(e) =>
-                      onCreateUserDataChange('username', e.target.value)
+                      onCreateUserDataChange("username", e.target.value)
                     }
                     placeholder="Ej: juan.garcia"
                     disabled={loading}

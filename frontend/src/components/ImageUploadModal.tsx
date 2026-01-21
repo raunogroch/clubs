@@ -39,7 +39,7 @@ export const ImageUploadModal: React.FC<Props> = ({
       const result: any = await onSave(payloadImage);
       if (result && result.imageProcessingSkipped) {
         toastr.warning(
-          "La imagen no pudo procesarse. Se guardaron los cambios sin imagen."
+          "La imagen no pudo procesarse. Se guardaron los cambios sin imagen.",
         );
       } else {
         toastr.success("Imagen actualizada");

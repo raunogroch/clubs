@@ -1,17 +1,17 @@
 /**
  * Utilidades para el módulo de Grupos
- * 
+ *
  * Funciones helper reutilizables que encapsulan lógica común.
  */
 
-import type { MemberDetail, Schedule } from './types';
-import { DAYS_OF_WEEK } from './constants';
+import type { MemberDetail, Schedule } from "./types";
+import { DAYS_OF_WEEK } from "./constants";
 
 /**
  * Obtiene el siguiente día de la semana
  * @param currentDay - Día actual (ej: "Monday")
  * @returns El siguiente día, o "Monday" si está en domingo
- * 
+ *
  * @example
  * getNextDay("Monday") // Retorna "Tuesday"
  * getNextDay("Sunday") // Retorna "Monday"
@@ -31,13 +31,13 @@ export function getNextDay(currentDay: string): string {
  */
 export function getDayName(dayKey: string): string {
   const names: Record<string, string> = {
-    Monday: 'Lunes',
-    Tuesday: 'Martes',
-    Wednesday: 'Miércoles',
-    Thursday: 'Jueves',
-    Friday: 'Viernes',
-    Saturday: 'Sábado',
-    Sunday: 'Domingo',
+    Monday: "Lunes",
+    Tuesday: "Martes",
+    Wednesday: "Miércoles",
+    Thursday: "Jueves",
+    Friday: "Viernes",
+    Saturday: "Sábado",
+    Sunday: "Domingo",
   };
   return names[dayKey] || dayKey;
 }
@@ -64,12 +64,12 @@ export function extractMemberDetail(data: any): MemberDetail | null {
   if (!data) return null;
 
   // Si es un objeto poblado
-  if (typeof data === 'object' && data._id) {
+  if (typeof data === "object" && data._id) {
     return {
-      name: data.name || '',
-      lastname: data.lastname || '',
-      role: data.role || 'unknown',
-      ci: data.ci || '',
+      name: data.name || "",
+      lastname: data.lastname || "",
+      role: data.role || "unknown",
+      ci: data.ci || "",
     };
   }
 
@@ -82,7 +82,7 @@ export function extractMemberDetail(data: any): MemberDetail | null {
  * @returns String formateado "CI - Apellido Nombre"
  */
 export function formatMemberDisplay(member: MemberDetail): string {
-  const ci = member.ci || 'S/N';
+  const ci = member.ci || "S/N";
   return `${ci} - ${member.lastname} ${member.name}`;
 }
 
@@ -101,8 +101,8 @@ export function buildMemberDetailsMap(
     // Procesar atletas
     (group.athletes || []).forEach((athlete: any) => {
       const detail = extractMemberDetail(athlete);
-      if (detail && (athlete._id || typeof athlete === 'string')) {
-        const id = typeof athlete === 'string' ? athlete : athlete._id;
+      if (detail && (athlete._id || typeof athlete === "string")) {
+        const id = typeof athlete === "string" ? athlete : athlete._id;
         details[id] = detail;
       }
     });
@@ -110,8 +110,8 @@ export function buildMemberDetailsMap(
     // Procesar entrenadores
     (group.coaches || []).forEach((coach: any) => {
       const detail = extractMemberDetail(coach);
-      if (detail && (coach._id || typeof coach === 'string')) {
-        const id = typeof coach === 'string' ? coach : coach._id;
+      if (detail && (coach._id || typeof coach === "string")) {
+        const id = typeof coach === "string" ? coach : coach._id;
         details[id] = detail;
       }
     });
@@ -119,8 +119,8 @@ export function buildMemberDetailsMap(
     // Procesar legacy members
     (group.members || []).forEach((member: any) => {
       const detail = extractMemberDetail(member);
-      if (detail && (member._id || typeof member === 'string')) {
-        const id = typeof member === 'string' ? member : member._id;
+      if (detail && (member._id || typeof member === "string")) {
+        const id = typeof member === "string" ? member : member._id;
         details[id] = detail;
       }
     });
@@ -137,8 +137,8 @@ export function buildMemberDetailsMap(
 export function extractMemberIds(memberIds: any[]): string[] {
   return memberIds
     .map((member) => {
-      if (typeof member === 'string') return member;
-      if (typeof member === 'object' && member._id) return member._id;
+      if (typeof member === "string") return member;
+      if (typeof member === "object" && member._id) return member._id;
       return null;
     })
     .filter((id): id is string => id !== null);

@@ -312,7 +312,10 @@ const Assignments = () => {
                 <p style={{ marginBottom: "15px" }}>
                   No hay asignaciones creadas
                 </p>
-                <button className="btn btn-xs btn-primary" onClick={handleOpenCreate}>
+                <button
+                  className="btn btn-xs btn-primary"
+                  onClick={handleOpenCreate}
+                >
                   Crear primera asignación
                 </button>
               </div>
@@ -492,10 +495,7 @@ const Assignments = () => {
                     >
                       Cancelar
                     </button>
-                    <button
-                      type="submit"
-                      className="btn btn-xs btn-primary"
-                    >
+                    <button type="submit" className="btn btn-xs btn-primary">
                       {editingId ? "Actualizar" : "Crear"} Asignación
                     </button>
                   </div>

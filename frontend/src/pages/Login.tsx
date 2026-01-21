@@ -20,7 +20,7 @@ export const Login = () => {
   });
   const dispatch = useDispatch<AppDispatch>();
   const isAuthenticated = useSelector(
-    (state: RootState) => state.auth.isAuthenticated
+    (state: RootState) => state.auth.isAuthenticated,
   );
   const status = useSelector((state: RootState) => state.auth.status);
   const error = useSelector((state: RootState) => state.auth.error);

@@ -72,7 +72,7 @@ export const PaginationList = ({ filter }) => {
           >
             {page}
           </button>
-        )
+        ),
       )}
 
       <button

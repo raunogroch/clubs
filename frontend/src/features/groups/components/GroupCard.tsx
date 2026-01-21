@@ -1,11 +1,11 @@
 /**
  * Componente para mostrar una tarjeta de grupo expandible
- * 
+ *
  * Muestra la información básica del grupo y permite expandir para ver detalles
  */
 
-import React from 'react';
-import type { Group } from '../types';
+import React from "react";
+import type { Group } from "../types";
 
 interface GroupCardProps {
   group: Group;
@@ -26,7 +26,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
   onDelete,
   children,
 }) => {
-  const createdDate = new Date(group.createdAt).toLocaleDateString('es-ES');
+  const createdDate = new Date(group.createdAt).toLocaleDateString("es-ES");
 
   return (
     <div className="ibox">
@@ -41,7 +41,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
             >
               <i
                 className={`fa ${
-                  isExpanded ? 'fa-chevron-down' : 'fa-chevron-right'
+                  isExpanded ? "fa-chevron-down" : "fa-chevron-right"
                 } chevron-icon`}
               ></i>
               <h4>
@@ -52,7 +52,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
             {/* Descripción */}
             <div>
               <small className="text-muted">
-                {group.description || 'Sin descripción'}
+                {group.description || "Sin descripción"}
               </small>
             </div>
           </div>
@@ -66,7 +66,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
               disabled={isLoading}
             >
               <i className="fa fa-edit"></i>
-            </button>{' '}
+            </button>{" "}
             <button
               className="btn btn-danger btn-xs"
               onClick={onDelete}

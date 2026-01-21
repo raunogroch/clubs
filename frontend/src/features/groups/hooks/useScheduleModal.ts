@@ -1,13 +1,13 @@
 /**
  * Hook para manejar el modal de editar horarios
- * 
+ *
  * Gestiona el estado de edición de horarios
  */
 
-import { useState, useCallback } from 'react';
-import type { Schedule } from '../types';
-import { getNextDay } from '../utils';
-import { DEFAULT_SCHEDULE } from '../constants';
+import { useState, useCallback } from "react";
+import type { Schedule } from "../types";
+import { getNextDay } from "../utils";
+import { DEFAULT_SCHEDULE } from "../constants";
 
 export function useScheduleModal() {
   const [showModal, setShowModal] = useState(false);

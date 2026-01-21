@@ -179,10 +179,7 @@ export const Athletes = () => {
                     >
                       Cancelar
                     </button>
-                    <button
-                      type="submit"
-                      className="btn btn-xs btn-primary"
-                    >
+                    <button type="submit" className="btn btn-xs btn-primary">
                       {editing ? "Actualizar" : "Crear"}
                     </button>
                   </div>

@@ -1,6 +1,6 @@
 /**
  * Tipos y Interfaces para el módulo de Grupos
- * 
+ *
  * Define las estructuras de datos utilizadas en toda la funcionalidad de grupos.
  * Esto centraliza los tipos para mayor mantenibilidad.
  */
@@ -91,7 +91,7 @@ export interface GroupFormState {
 /**
  * Tipos de miembros que se pueden agregar
  */
-export type MemberType = 'coach' | 'athlete';
+export type MemberType = "coach" | "athlete";
 
 /**
  * Estados de la búsqueda de usuarios

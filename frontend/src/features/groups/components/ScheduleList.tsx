@@ -1,12 +1,12 @@
 /**
  * Componente para mostrar lista de horarios
- * 
+ *
  * Presenta los horarios de un grupo de forma ordenada
  */
 
-import React from 'react';
-import type { Schedule } from '../types';
-import { DayName } from '../types';
+import React from "react";
+import type { Schedule } from "../types";
+import { DayName } from "../types";
 
 interface ScheduleListProps {
   schedules: Schedule[];
@@ -24,9 +24,9 @@ export const ScheduleList: React.FC<ScheduleListProps> = ({
   isLoading = false,
 }) => {
   const MESSAGES = {
-    NO_SCHEDULES: 'Sin horarios asignados',
-    EDITING: 'Editando horarios...',
-    BUTTON_EDIT: 'Editar Horarios',
+    NO_SCHEDULES: "Sin horarios asignados",
+    EDITING: "Editando horarios...",
+    BUTTON_EDIT: "Editar Horarios",
   };
 
   return (
@@ -34,9 +34,7 @@ export const ScheduleList: React.FC<ScheduleListProps> = ({
       <h5 className="d-flex justify-content-between">
         <div>
           <i className="fa fa-calendar"></i> Horarios
-          <span className="badge badge-secondary ml-2">
-            {schedules.length}
-          </span>
+          <span className="badge badge-secondary ml-2">{schedules.length}</span>
         </div>
         <button
           className="btn btn-warning btn-xs"
@@ -59,25 +57,25 @@ export const ScheduleList: React.FC<ScheduleListProps> = ({
               <em>{MESSAGES.NO_SCHEDULES}</em>
             </p>
           ) : (
-            <ul className="row mb-0" style={{ marginBottom: '10px' }}>
+            <ul className="row mb-0" style={{ marginBottom: "10px" }}>
               {schedules.map((schedule, idx) => (
                 <li
                   key={idx}
                   className="col-2 mx-1 schedule-item"
                   style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '8px 12px',
-                    borderRadius: '3px',
-                    marginBottom: '5px',
-                    backgroundColor: '#f5f5f5',
-                    border: '1px solid #ddd',
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "8px 12px",
+                    borderRadius: "3px",
+                    marginBottom: "5px",
+                    backgroundColor: "#f5f5f5",
+                    border: "1px solid #ddd",
                   }}
                 >
                   <span>
                     <strong>
-                      {(DayName as any)[schedule.day]}: {schedule.startTime} -{' '}
+                      {(DayName as any)[schedule.day]}: {schedule.startTime} -{" "}
                       {schedule.endTime}
                     </strong>
                   </span>

@@ -1,6 +1,6 @@
 /**
  * Estilos del módulo de Grupos
- * 
+ *
  * Todas las clases CSS están aquí, separadas del componente.
  * Fácil de mantener y actualizar el diseño.
  */

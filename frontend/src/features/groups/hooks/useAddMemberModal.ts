@@ -1,57 +1,54 @@
 /**
  * Hook para manejar el modal de agregar miembros
- * 
+ *
  * Gestiona el estado de búsqueda y creación de nuevos miembros
  */
 
-import { useState, useCallback } from 'react';
-import type { User, MemberType, CreateUserData } from '../types';
+import { useState, useCallback } from "react";
+import type { User, MemberType, CreateUserData } from "../types";
 
 export function useAddMemberModal() {
   const [showModal, setShowModal] = useState(false);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [memberType, setMemberType] = useState<MemberType | null>(null);
-  const [searchCi, setSearchCi] = useState('');
+  const [searchCi, setSearchCi] = useState("");
   const [searchResult, setSearchResult] = useState<User | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
   const [showCreateUserForm, setShowCreateUserForm] = useState(false);
   const [createUserData, setCreateUserData] = useState<CreateUserData>({
-    name: '',
-    lastname: '',
-    ci: '',
-    username: '',
+    name: "",
+    lastname: "",
+    ci: "",
+    username: "",
   });
 
-  const openModal = useCallback(
-    (groupId: string, type: MemberType) => {
-      setSelectedGroupId(groupId);
-      setMemberType(type);
-      setSearchCi('');
-      setSearchResult(null);
-      setShowCreateUserForm(false);
-      setCreateUserData({
-        name: '',
-        lastname: '',
-        ci: '',
-        username: '',
-      });
-      setShowModal(true);
-    },
-    [],
-  );
+  const openModal = useCallback((groupId: string, type: MemberType) => {
+    setSelectedGroupId(groupId);
+    setMemberType(type);
+    setSearchCi("");
+    setSearchResult(null);
+    setShowCreateUserForm(false);
+    setCreateUserData({
+      name: "",
+      lastname: "",
+      ci: "",
+      username: "",
+    });
+    setShowModal(true);
+  }, []);
 
   const closeModal = useCallback(() => {
     setShowModal(false);
     setSelectedGroupId(null);
     setMemberType(null);
-    setSearchCi('');
+    setSearchCi("");
     setSearchResult(null);
     setShowCreateUserForm(false);
     setCreateUserData({
-      name: '',
-      lastname: '',
-      ci: '',
-      username: '',
+      name: "",
+      lastname: "",
+      ci: "",
+      username: "",
     });
   }, []);
 

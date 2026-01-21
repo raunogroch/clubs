@@ -1,15 +1,13 @@
 /**
  * Hook para manejar el estado de expansión de grupos
- * 
+ *
  * Gestiona qué grupos están abiertos/cerrados
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback } from "react";
 
 export function useGroupExpansion() {
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
-    new Set(),
-  );
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
   const toggleGroupExpansion = useCallback((groupId: string) => {
     setExpandedGroups((prev) => {
