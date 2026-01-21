@@ -12,6 +12,7 @@ import {
   Body,
   Param,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
@@ -84,28 +85,82 @@ export class GroupsController {
   }
 
   /**
+   * POST /groups/:groupId/athletes/:athleteId
+   * Añadir un atleta al grupo
+   */
+  @Post(':groupId/athletes/:athleteId')
+  async addAthlete(
+    @Param('groupId') groupId: string,
+    @Param('athleteId') athleteId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.groupsService.addAthlete(groupId, athleteId, user.sub);
+  }
+
+  /**
+   * DELETE /groups/:groupId/athletes/:athleteId
+   * Remover un atleta del grupo
+   */
+  @Delete(':groupId/athletes/:athleteId')
+  async removeAthlete(
+    @Param('groupId') groupId: string,
+    @Param('athleteId') athleteId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.groupsService.removeAthlete(groupId, athleteId, user.sub);
+  }
+
+  /**
+   * POST /groups/:groupId/coaches/:coachId
+   * Añadir un entrenador al grupo
+   */
+  @Post(':groupId/coaches/:coachId')
+  async addCoach(
+    @Param('groupId') groupId: string,
+    @Param('coachId') coachId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.groupsService.addCoach(groupId, coachId, user.sub);
+  }
+
+  /**
+   * DELETE /groups/:groupId/coaches/:coachId
+   * Remover un entrenador del grupo
+   */
+  @Delete(':groupId/coaches/:coachId')
+  async removeCoach(
+    @Param('groupId') groupId: string,
+    @Param('coachId') coachId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.groupsService.removeCoach(groupId, coachId, user.sub);
+  }
+
+  /**
    * POST /groups/:groupId/members/:memberId
-   * Añadir un miembro al grupo
+   * Añadir un miembro al grupo (legacy)
    */
   @Post(':groupId/members/:memberId')
   async addMember(
     @Param('groupId') groupId: string,
     @Param('memberId') memberId: string,
     @CurrentUser() user: any,
+    @Query('role') role?: string,
   ) {
-    return this.groupsService.addMember(groupId, memberId, user.sub);
+    return this.groupsService.addMember(groupId, memberId, user.sub, role);
   }
 
   /**
    * DELETE /groups/:groupId/members/:memberId
-   * Remover un miembro del grupo
+   * Remover un miembro del grupo (legacy)
    */
   @Delete(':groupId/members/:memberId')
   async removeMember(
     @Param('groupId') groupId: string,
     @Param('memberId') memberId: string,
     @CurrentUser() user: any,
+    @Query('role') role?: string,
   ) {
-    return this.groupsService.removeMember(groupId, memberId, user.sub);
+    return this.groupsService.removeMember(groupId, memberId, user.sub, role);
   }
 }

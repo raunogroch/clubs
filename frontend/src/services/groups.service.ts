@@ -13,7 +13,9 @@ export interface Group {
   description?: string;
   club_id: string;
   created_by: string;
-  members: string[];
+  athletes: string[];
+  coaches: string[];
+  members?: string[]; // legacy support
   createdAt: string;
   updatedAt: string;
 }
@@ -152,12 +154,12 @@ class GroupsService {
   }
 
   /**
-   * Añadir un miembro a un grupo
-   * POST /api/groups/:groupId/members/:memberId
+   * Añadir un atleta a un grupo
+   * POST /api/groups/:groupId/athletes/:athleteId
    */
-  async addMember(groupId: string, memberId: string): Promise<Group> {
+  async addAthlete(groupId: string, athleteId: string): Promise<Group> {
     const response = await fetch(
-      `${API_URL}/groups/${groupId}/members/${memberId}`,
+      `${API_URL}/groups/${groupId}/athletes/${athleteId}`,
       {
         method: "POST",
         headers: {
@@ -167,20 +169,26 @@ class GroupsService {
     );
 
     if (!response.ok) {
-      const error = await safeParseJson(response);
-      throw new Error(error.message || "Error al añadir miembro");
+      let errorMessage = "Error al añadir atleta";
+      try {
+        const error = await safeParseJson(response);
+        errorMessage = error.message || errorMessage;
+      } catch {
+        errorMessage = `Error ${response.status}: ${response.statusText}`;
+      }
+      throw new Error(errorMessage);
     }
 
     return safeParseJson(response);
   }
 
   /**
-   * Remover un miembro del grupo
-   * DELETE /api/groups/:groupId/members/:memberId
+   * Remover un atleta del grupo
+   * DELETE /api/groups/:groupId/athletes/:athleteId
    */
-  async removeMember(groupId: string, memberId: string): Promise<Group> {
+  async removeAthlete(groupId: string, athleteId: string): Promise<Group> {
     const response = await fetch(
-      `${API_URL}/groups/${groupId}/members/${memberId}`,
+      `${API_URL}/groups/${groupId}/athletes/${athleteId}`,
       {
         method: "DELETE",
         headers: {
@@ -191,8 +199,119 @@ class GroupsService {
 
     if (!response.ok) {
       const error = await safeParseJson(response);
-      throw new Error(error.message || "Error al remover miembro");
+      throw new Error(error.message || "Error al remover atleta");
     }
+
+    return safeParseJson(response);
+  }
+
+  /**
+   * Añadir un entrenador a un grupo
+   * POST /api/groups/:groupId/coaches/:coachId
+   */
+  async addCoach(groupId: string, coachId: string): Promise<Group> {
+    const response = await fetch(
+      `${API_URL}/groups/${groupId}/coaches/${coachId}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      },
+    );
+
+    if (!response.ok) {
+      let errorMessage = "Error al añadir entrenador";
+      try {
+        const error = await safeParseJson(response);
+        errorMessage = error.message || errorMessage;
+      } catch {
+        errorMessage = `Error ${response.status}: ${response.statusText}`;
+      }
+      throw new Error(errorMessage);
+    }
+
+    return safeParseJson(response);
+  }
+
+  /**
+   * Remover un entrenador del grupo
+   * DELETE /api/groups/:groupId/coaches/:coachId
+   */
+  async removeCoach(groupId: string, coachId: string): Promise<Group> {
+    const response = await fetch(
+      `${API_URL}/groups/${groupId}/coaches/${coachId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      },
+    );
+
+    if (!response.ok) {
+      const error = await safeParseJson(response);
+      throw new Error(error.message || "Error al remover entrenador");
+    }
+
+    return safeParseJson(response);
+  }
+
+  /**
+   * Añadir un miembro a un grupo (legacy)
+   * POST /api/groups/:groupId/members/:memberId
+   */
+  async addMember(
+    groupId: string,
+    memberId: string,
+    role?: string,
+  ): Promise<Group> {
+    const url = new URL(`${API_URL}/groups/${groupId}/members/${memberId}`);
+    if (role) {
+      url.searchParams.append("role", role);
+    }
+
+    const response = await fetch(url.toString(), {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+
+    if (!response.ok) {
+      let errorMessage = "Error al añadir miembro";
+      try {
+        const error = await safeParseJson(response);
+        errorMessage = error.message || errorMessage;
+      } catch {
+        errorMessage = `Error ${response.status}: ${response.statusText}`;
+      }
+      throw new Error(errorMessage);
+    }
+
+    return safeParseJson(response);
+  }
+
+  /**
+   * Remover un miembro del grupo (legacy)
+   * DELETE /api/groups/:groupId/members/:memberId
+   */
+  async removeMember(
+    groupId: string,
+    memberId: string,
+    role?: string,
+  ): Promise<Group> {
+    const url = new URL(`${API_URL}/groups/${groupId}/members/${memberId}`);
+    if (role) {
+      url.searchParams.append("role", role);
+    }
+
+    const response = await fetch(url.toString(), {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
 
     return safeParseJson(response);
   }

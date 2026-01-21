@@ -6,7 +6,7 @@ interface DynamicFormFieldProps {
   value: any;
   error?: string;
   onChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => void;
 }
 
@@ -26,7 +26,7 @@ export const DynamicFormField = ({
 
   // Map custom field types to HTML input types
   const getInputType = (): string => {
-    if (field.type === "email" || field.type === "tel") {
+    if (field.type === "tel") {
       return field.type;
     }
     if (field.type === "date") {

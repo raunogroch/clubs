@@ -36,6 +36,27 @@ export class UserRepository implements IUserRepository {
   }
 
   /**
+   * Busca un usuario por su CI y rol opcional
+   */
+  async findByCiByRole(ci: string, role?: string): Promise<User | null> {
+    const filter: any = { ci };
+    if (role) {
+      filter.role = role;
+    }
+    return this.userModel.findOne(filter);
+  }
+
+  /**
+   * Obtiene múltiples usuarios por sus IDs
+   */
+  async findByIds(ids: string[]): Promise<User[]> {
+    if (!ids || ids.length === 0) {
+      return [];
+    }
+    return this.userModel.find({ _id: { $in: ids } });
+  }
+
+  /**
    * Crea un nuevo usuario
    */
   async create(createUserDto: CreateUserDto): Promise<User> {

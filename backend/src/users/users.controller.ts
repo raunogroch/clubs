@@ -1,12 +1,12 @@
 /**
  * UsersController - Controlador de Usuarios
- * 
+ *
  * Responsabilidades:
  * - Manejar solicitudes HTTP para operaciones de usuarios
  * - Validar autenticación con JwtAuthGuard
  * - Validar autorización con RolesGuard
  * - Delegar lógica de negocio a UsersService
- * 
+ *
  * Endpoints:
  * POST   /api/users              - Crear usuario
  * GET    /api/users              - Listar usuarios
@@ -26,9 +26,9 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { Query } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -42,13 +42,13 @@ import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
  * Se obtiene del decorador @CurrentUser()
  */
 interface currentAuth {
-  sub: string;  // ID del usuario (subject del JWT)
+  sub: string; // ID del usuario (subject del JWT)
   role: string; // Rol del usuario
 }
 
 /**
  * Controlador principal para todas las operaciones con usuarios
- * 
+ *
  * Guards:
  * - JwtAuthGuard: Valida que el cliente envíe un JWT válido
  * - RolesGuard: Valida que el usuario tenga el rol requerido
@@ -59,17 +59,31 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   /**
+   * POST /api/users/batch/by-ids
+   * Obtener múltiples usuarios por sus IDs
+   *
+   * Roles permitidos: SUPERADMIN, ADMIN, ASSISTANT, COACH
+   *
+   * @param body - { ids: string[] } - Array de IDs de usuarios
+   * @returns Array de usuarios
+   */
+  @Post('batch/by-ids')
+  @Roles(Role.SUPERADMIN, Role.ADMIN, Role.ASSISTANT, Role.COACH)
+  findByIds(@Body() body: { ids: string[] }) {
+    return this.usersService.findByIds(body.ids);
+  }
+
+  /**
    * POST /api/users
    * Crear un nuevo usuario
-   * 
+   *
    * Roles permitidos: SUPERADMIN, ADMIN, ASSISTANT
-   * 
+   *
    * Validaciones:
    * - Campos requeridos según el rol
    * - Username único
-   * - Email válido
    * - Contraseña mínimo 8 caracteres
-   * 
+   *
    * @param createUserDto - DTO con los datos del usuario a crear
    * @returns Usuario creado (sin contraseña)
    */
@@ -82,15 +96,15 @@ export class UsersController {
   /**
    * GET /api/users
    * Obtener lista de usuarios con filtros y paginación
-   * 
+   *
    * Roles permitidos: SUPERADMIN, ADMIN, ASSISTANT, COACH
-   * 
+   *
    * Filtrado automático según el rol:
    * - SUPERADMIN: Ve todos los usuarios
    * - ADMIN: Ve todos excepto SUPERADMIN
    * - ASSISTANT: Ve solo ATHLETE y PARENT
    * - COACH: Ve solo ATHLETE y PARENT
-   * 
+   *
    * @param user - Usuario autenticado (inyectado por @CurrentUser)
    * @param page - Número de página (default: 1)
    * @param limit - Usuarios por página (default: 0 = todos)
@@ -167,11 +181,13 @@ export class UsersController {
   }
 
   /**
-   * Endpoint para buscar un atleta por CI
+   * Endpoint para buscar un usuario por CI con filtro de rol opcional
+   * Query params:
+   * - role: 'coach' | 'athlete' (opcional, por defecto busca cualquier rol)
    */
   @Get('search/by-ci/:ci')
-  @Roles(Role.SUPERADMIN, Role.ADMIN, Role.ASSISTANT)
-  findByCi(@Param('ci') ci: string) {
-    return this.usersService.findByCi(ci);
+  @Roles(Role.SUPERADMIN, Role.ADMIN, Role.ASSISTANT, Role.COACH)
+  findByCi(@Param('ci') ci: string, @Query('role') role?: string) {
+    return this.usersService.findByCiByRole(ci, role);
   }
 }

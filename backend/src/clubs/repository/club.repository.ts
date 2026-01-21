@@ -36,8 +36,8 @@ export class ClubRepository {
       .find({
         assignment_id: new Types.ObjectId(assignmentId),
       })
-      .populate('created_by', 'email name')
-      .populate('members', 'email name')
+      .populate('created_by', 'name')
+      .populate('members', 'name')
       .sort({ createdAt: -1 })
       .exec();
   }
@@ -48,8 +48,8 @@ export class ClubRepository {
   async findById(clubId: string): Promise<Club | null> {
     return this.clubModel
       .findById(clubId)
-      .populate('created_by', 'email name')
-      .populate('members', 'email name')
+      .populate('created_by', 'name')
+      .populate('members', 'name')
       .populate('assignment_id', 'module_name')
       .exec();
   }

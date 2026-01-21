@@ -149,15 +149,6 @@ export const Sports = ({ name }: { name?: string }) => {
             <div className="ibox">
               <div className="ibox-title">
                 <h5>Gestión de Deportes</h5>
-                <div className="ibox-tools">
-                  <button
-                    className="btn btn-primary btn-sm"
-                    onClick={handleOpenCreate}
-                    disabled={loading}
-                  >
-                    <i className="fa fa-plus"></i> Crear Deporte
-                  </button>
-                </div>
               </div>
               <div className="ibox-content">
                 {loading ? (
@@ -204,7 +195,7 @@ export const Sports = ({ name }: { name?: string }) => {
                                 onClick={() => handleOpenEdit(sport)}
                                 title="Editar"
                               >
-                                <i className="fa fa-edit"></i>
+                                <i className="fa fa-edit"></i> Editar
                               </button>{" "}
                               {sport.active ? (
                                 <button
@@ -212,7 +203,7 @@ export const Sports = ({ name }: { name?: string }) => {
                                   onClick={() => handleDelete(sport._id)}
                                   title="Eliminar"
                                 >
-                                  <i className="fa fa-trash"></i>
+                                  <i className="fa fa-trash"></i> Eliminar
                                 </button>
                               ) : (
                                 <button

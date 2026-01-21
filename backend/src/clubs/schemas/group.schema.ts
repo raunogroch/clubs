@@ -44,15 +44,26 @@ export class Group extends Document {
   created_by: Types.ObjectId;
 
   /**
-   * Miembros del grupo
-   * Array de IDs de usuarios que son miembros
+   * Array de atletas del grupo
+   * Contiene IDs de usuarios con rol 'athlete'
    */
   @Prop({
     type: [Types.ObjectId],
     ref: 'User',
     default: [],
   })
-  members: Types.ObjectId[];
+  athletes: Types.ObjectId[];
+
+  /**
+   * Array de entrenadores del grupo
+   * Contiene IDs de usuarios con rol 'coach'
+   */
+  @Prop({
+    type: [Types.ObjectId],
+    ref: 'User',
+    default: [],
+  })
+  coaches: Types.ObjectId[];
 
   /**
    * Timestamp de creación (automático)

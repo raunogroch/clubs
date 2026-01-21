@@ -9,12 +9,10 @@ export class GroupResponseDto {
   club_id: string;
   created_by: {
     _id: string;
-    email?: string;
     name?: string;
   };
   members: {
     _id: string;
-    email?: string;
     name?: string;
   }[];
   createdAt: Date;

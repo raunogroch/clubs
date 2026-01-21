@@ -19,6 +19,65 @@ import clubsService from "../services/clubs.service";
 import { sportService } from "../services/sportService";
 import userService from "../services/userService";
 
+// Estilos inline para la sección
+const styles = `
+  .section-box {
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    background-color: #fafafa;
+    margin-bottom: 10px;
+  }
+  
+  .section-box h5 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    color: #333;
+    font-weight: 600;
+  }
+  
+  .members-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+  }
+  
+  .members-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .mb-3 {
+    margin-bottom: 20px;
+  }
+  
+  .ml-2 {
+    margin-left: 8px;
+  }
+  
+  .mt-3 {
+    margin-top: 15px;
+  }
+  
+  .badge {
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+  
+  .badge-info {
+    background-color: #17a2b8;
+    color: white;
+  }
+  
+  .badge-primary {
+    background-color: #007bff;
+    color: white;
+  }
+`;
+
 interface Sport {
   _id: string;
   name: string;
@@ -62,8 +121,13 @@ export const Groups = ({
     lastname: "",
     ci: "",
     username: "",
-    email: "",
   });
+  const [memberDetails, setMemberDetails] = useState<
+    Record<
+      string,
+      { name: string; lastname: string; role: string; ci?: string }
+    >
+  >({});
 
   // Formulario
   const [formData, setFormData] = useState<CreateGroupRequest>({
@@ -92,11 +156,113 @@ export const Groups = ({
       // Buscar el nombre del deporte en la lista de deportes
       const sport = sportsData?.find((s: Sport) => s._id === clubData.sport_id);
       setClubName(sport?.name || `Deporte ID: ${clubData.sport_id}`);
+
+      // Cargar detalles de todos los miembros
+      await loadMembersDetails(groupsData);
     } catch (error: any) {
       console.error("Error al cargar datos:", error);
       toastr.error(error.message || "Error al cargar los datos");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Cargar detalles de los miembros
+  const loadMembersDetails = async (groupsData: Group[]) => {
+    try {
+      const details: Record<
+        string,
+        { name: string; lastname: string; role: string; ci?: string }
+      > = {};
+
+      // Procesar todos los grupos y extraer miembros
+      groupsData.forEach((g) => {
+        // Procesar athletes
+        (g.athletes || []).forEach((athlete: any) => {
+          if (typeof athlete === "object" && athlete?._id) {
+            // Ya viene poblado desde el backend
+            details[athlete._id] = {
+              name: athlete.name || "",
+              lastname: athlete.lastname || "",
+              role: athlete.role || "athlete",
+              ci: athlete.ci || "",
+            };
+          }
+        });
+
+        // Procesar coaches
+        (g.coaches || []).forEach((coach: any) => {
+          if (typeof coach === "object" && coach?._id) {
+            // Ya viene poblado desde el backend
+            details[coach._id] = {
+              name: coach.name || "",
+              lastname: coach.lastname || "",
+              role: coach.role || "coach",
+              ci: coach.ci || "",
+            };
+          }
+        });
+
+        // Procesar legacy members
+        (g.members || []).forEach((member: any) => {
+          if (typeof member === "object" && member?._id) {
+            details[member._id] = {
+              name: member.name || "",
+              lastname: member.lastname || "",
+              role: member.role || "unknown",
+              ci: member.ci || "",
+            };
+          }
+        });
+      });
+
+      // Si ya tenemos detalles del populate, usar esos
+      if (Object.keys(details).length > 0) {
+        setMemberDetails(details);
+        return;
+      }
+
+      // Si no vinieron populados, hacer llamada a la API
+      const allMemberIds = Array.from(
+        new Set(
+          groupsData.flatMap((g) => [
+            ...(g.athletes || []),
+            ...(g.coaches || []),
+            ...(g.members || []),
+          ]),
+        ),
+      );
+
+      if (allMemberIds.length === 0) {
+        setMemberDetails({});
+        return;
+      }
+
+      const response = await userService.getUsersById(allMemberIds);
+
+      if (
+        response.code === 200 &&
+        response.data &&
+        Array.isArray(response.data)
+      ) {
+        response.data.forEach((user: any) => {
+          if (user._id) {
+            details[user._id] = {
+              name: user.name || "",
+              lastname: user.lastname || "",
+              role: user.role || "unknown",
+              ci: user.ci || "",
+            };
+          }
+        });
+        setMemberDetails(details);
+      } else {
+        console.warn("No se pudieron cargar los detalles de los miembros");
+        setMemberDetails(Object.keys(details).length > 0 ? details : {});
+      }
+    } catch (error: any) {
+      console.error("Error al cargar detalles de miembros:", error);
+      setMemberDetails({});
     }
   };
 
@@ -211,7 +377,6 @@ export const Groups = ({
       lastname: "",
       ci: "",
       username: "",
-      email: "",
     });
     setShowAddMemberModal(true);
   };
@@ -229,7 +394,6 @@ export const Groups = ({
       lastname: "",
       ci: "",
       username: "",
-      email: "",
     });
   };
 
@@ -271,7 +435,6 @@ export const Groups = ({
             lastname: "",
             ci: searchCi,
             username: "",
-            email: "",
           });
         }
       } else {
@@ -286,7 +449,6 @@ export const Groups = ({
           lastname: "",
           ci: searchCi,
           username: "",
-          email: "",
         });
       }
     } catch (error: any) {
@@ -299,7 +461,6 @@ export const Groups = ({
         lastname: "",
         ci: searchCi,
         username: "",
-        email: "",
       });
     } finally {
       setSearchLoading(false);
@@ -315,11 +476,102 @@ export const Groups = ({
 
     try {
       setSearchLoading(true);
-      await groupsService.addMember(selectedGroupId, searchResult._id);
+      let updatedGroup: Group | undefined;
 
-      // Actualizar el grupo en la lista
-      const updatedGroups = await groupsService.getByClub(clubId);
-      setGroups(updatedGroups);
+      // Usar el endpoint específico según el tipo de miembro
+      if (memberType === "coach") {
+        updatedGroup = await groupsService.addCoach(
+          selectedGroupId,
+          searchResult._id,
+        );
+      } else if (memberType === "athlete") {
+        updatedGroup = await groupsService.addAthlete(
+          selectedGroupId,
+          searchResult._id,
+        );
+      }
+
+      // Actualizar el grupo específico en la lista
+      if (updatedGroup) {
+        setGroups((prevGroups) =>
+          prevGroups.map((g) =>
+            g._id === selectedGroupId ? updatedGroup! : g,
+          ),
+        );
+
+        // Actualizar member details con el nuevo miembro
+        const details: Record<
+          string,
+          { name: string; lastname: string; role: string; ci?: string }
+        > = {};
+
+        // Procesar athletes (pueden ser objetos o IDs)
+        (updatedGroup.athletes || []).forEach((athlete: any) => {
+          if (typeof athlete === "object" && athlete?._id) {
+            details[athlete._id] = {
+              name: athlete.name || "",
+              lastname: athlete.lastname || "",
+              role: athlete.role || "athlete",
+              ci: athlete.ci || "",
+            };
+          }
+        });
+
+        // Procesar coaches (pueden ser objetos o IDs)
+        (updatedGroup.coaches || []).forEach((coach: any) => {
+          if (typeof coach === "object" && coach?._id) {
+            details[coach._id] = {
+              name: coach.name || "",
+              lastname: coach.lastname || "",
+              role: coach.role || "coach",
+              ci: coach.ci || "",
+            };
+          }
+        });
+
+        // Si vinieron populados, usar esos datos directamente
+        if (Object.keys(details).length > 0) {
+          setMemberDetails((prev) => ({ ...prev, ...details }));
+        } else {
+          // Si no vinieron populados, hacer una llamada a la API
+          const allMemberIds = Array.from(
+            new Set([
+              ...(updatedGroup.athletes || []),
+              ...(updatedGroup.coaches || []),
+            ]),
+          );
+
+          if (allMemberIds.length > 0) {
+            const response = await userService.getUsersById(allMemberIds);
+            if (
+              response.code === 200 &&
+              response.data &&
+              Array.isArray(response.data)
+            ) {
+              const apiDetails: Record<
+                string,
+                { name: string; lastname: string; role: string; ci?: string }
+              > = {};
+              response.data.forEach((user: any) => {
+                if (user._id) {
+                  apiDetails[user._id] = {
+                    name: user.name || "",
+                    lastname: user.lastname || "",
+                    role: user.role || "unknown",
+                    ci: user.ci || "",
+                  };
+                }
+              });
+              setMemberDetails((prev) => ({ ...prev, ...apiDetails }));
+            }
+          }
+        }
+      } else {
+        // Si no hay respuesta, recargar como fallback
+        const updatedGroups = await groupsService.getByClub(clubId);
+        setGroups(updatedGroups);
+        await loadMembersDetails(updatedGroups);
+      }
 
       toastr.success(
         `${memberType === "coach" ? "Entrenador" : "Deportista"} agregado correctamente`,
@@ -347,10 +599,6 @@ export const Groups = ({
       toastr.warning("El usuario es requerido");
       return;
     }
-    if (!createUserData.email.trim()) {
-      toastr.warning("El email es requerido");
-      return;
-    }
 
     try {
       setSearchLoading(true);
@@ -359,7 +607,6 @@ export const Groups = ({
         lastname: createUserData.lastname,
         ci: createUserData.ci,
         username: createUserData.username,
-        email: createUserData.email,
         role: memberType,
       });
 
@@ -390,8 +637,37 @@ export const Groups = ({
     });
   };
 
+  // Obtener miembros de un grupo filtrados por rol
+  const getMembersByRole = (group: Group, role: "coach" | "athlete") => {
+    const memberIds =
+      role === "coach" ? group.coaches || [] : group.athletes || [];
+
+    if (!memberIds || memberIds.length === 0) {
+      return [];
+    }
+
+    return memberIds
+      .map((member: any) => {
+        // Si es un objeto (populado desde el backend), retorna el _id
+        // Si es un string (ID), retorna tal cual
+        if (typeof member === "object" && member?._id) {
+          return member._id;
+        }
+        return member;
+      })
+      .filter((memberId: string) => {
+        const member = memberDetails[memberId];
+        if (!member) {
+          console.debug(`Miembro ${memberId} no encontrado en memberDetails`);
+          return false;
+        }
+        return true;
+      });
+  };
+
   return (
     <>
+      <style>{styles}</style>
       <div className="wrapper wrapper-content">
         <div className="row">
           <div className="col-lg-12">
@@ -431,53 +707,23 @@ export const Groups = ({
                     </p>
                   </div>
                 ) : (
-                  <div className="table-responsive">
-                    <table className="table table-striped table-hover">
-                      <thead>
-                        <tr>
-                          <th>Nombre</th>
-                          <th>Descripción</th>
-                          <th>Gestion de coaches</th>
-                          <th>Gestion de atletas</th>
-                          <th>Horarios</th>
-                          <th>Acciones</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {groups.map((group) => (
-                          <tr key={group._id}>
-                            <td>
-                              <strong>{group.name}</strong>
-                            </td>
-                            <td>{group.description || "-"}</td>
-                            <td>
-                              <button
-                                className="btn btn-success btn-xs"
-                                onClick={() =>
-                                  handleOpenAddMember(group._id, "coach")
-                                }
-                                title="Agregar Entrenador"
-                              >
-                                <i className="fa fa-user-tie"></i> Coaches
-                              </button>{" "}
-                            </td>
-                            <td>
-                              <button
-                                className="btn btn-info btn-xs"
-                                onClick={() =>
-                                  handleOpenAddMember(group._id, "athlete")
-                                }
-                                title="Agregar Deportista"
-                              >
-                                <i className="fa fa-person-running"></i> Atletas
-                              </button>{" "}
-                            </td>
-                            <td>
-                              {new Date(group.createdAt).toLocaleDateString(
-                                "es-ES",
-                              )}
-                            </td>
-                            <td>
+                  <div>
+                    {groups.map((group) => (
+                      <div key={group._id} className="panel panel-default mb-3">
+                        <div
+                          className="panel-heading"
+                          style={{ backgroundColor: "#f5f5f5" }}
+                        >
+                          <div className="row">
+                            <div className="col-md-8">
+                              <h4 style={{ margin: "0" }}>
+                                <strong>{group.name}</strong>
+                              </h4>
+                              <small className="text-muted">
+                                {group.description || "Sin descripción"}
+                              </small>
+                            </div>
+                            <div className="col-md-4 text-right">
                               <button
                                 className="btn btn-primary btn-xs"
                                 onClick={() => handleOpenEdit(group)}
@@ -492,11 +738,172 @@ export const Groups = ({
                               >
                                 <i className="fa fa-trash"></i> Eliminar
                               </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="panel-body">
+                          <div className="row">
+                            {/* Coaches Section */}
+                            <div className="col-md-6">
+                              <div className="section-box">
+                                <h5>
+                                  <i className="fa fa-user-tie"></i>{" "}
+                                  Entrenadores
+                                  <span className="badge badge-info ml-2">
+                                    {(group.coaches || []).length}
+                                  </span>
+                                </h5>
+                                <button
+                                  className="btn btn-success btn-sm btn-block"
+                                  onClick={() =>
+                                    handleOpenAddMember(group._id, "coach")
+                                  }
+                                  title="Agregar Entrenador"
+                                >
+                                  <i className="fa fa-plus"></i> Agregar Coach
+                                </button>
+                                <div className="members-list">
+                                  {(group.coaches || []).length === 0 ? (
+                                    <p className="text-muted">
+                                      <em>Sin entrenadores asignados</em>
+                                    </p>
+                                  ) : (
+                                    <ul
+                                      className="list-group"
+                                      style={{ marginBottom: "10px" }}
+                                    >
+                                      {getMembersByRole(group, "coach").map(
+                                        (memberId) => {
+                                          const member =
+                                            memberDetails[memberId];
+                                          return (
+                                            <li
+                                              key={memberId}
+                                              className="list-group-item"
+                                              style={{
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                alignItems: "center",
+                                                padding: "8px 12px",
+                                                borderRadius: "3px",
+                                                marginBottom: "5px",
+                                                backgroundColor: "#f9f9f9",
+                                                border: "1px solid #ddd",
+                                              }}
+                                            >
+                                              <span>
+                                                <strong>
+                                                  {member
+                                                    ? `${member.ci || "S/N"} - ${member.lastname} ${member.name}`
+                                                    : "Desconocido"}
+                                                </strong>
+                                              </span>
+                                              <button
+                                                className="btn btn-danger btn-xs"
+                                                onClick={() => {
+                                                  // TODO: Implementar remover coach
+                                                }}
+                                                title="Remover"
+                                              >
+                                                <i className="fa fa-trash"></i>
+                                              </button>
+                                            </li>
+                                          );
+                                        },
+                                      )}
+                                    </ul>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Athletes Section */}
+                            <div className="col-md-6">
+                              <div className="section-box">
+                                <h5>
+                                  <i className="fa fa-person-running"></i>{" "}
+                                  Deportistas
+                                  <span className="badge badge-primary ml-2">
+                                    {(group.athletes || []).length}
+                                  </span>
+                                </h5>
+                                <button
+                                  className="btn btn-info btn-sm btn-block"
+                                  onClick={() =>
+                                    handleOpenAddMember(group._id, "athlete")
+                                  }
+                                  title="Agregar Deportista"
+                                >
+                                  <i className="fa fa-plus"></i> Agregar Atleta
+                                </button>
+                                <div className="members-list">
+                                  {(group.athletes || []).length === 0 ? (
+                                    <p className="text-muted">
+                                      <em>Sin deportistas asignados</em>
+                                    </p>
+                                  ) : (
+                                    <ul
+                                      className="list-group"
+                                      style={{ marginBottom: "10px" }}
+                                    >
+                                      {getMembersByRole(group, "athlete").map(
+                                        (memberId) => {
+                                          const member =
+                                            memberDetails[memberId];
+                                          return (
+                                            <li
+                                              key={memberId}
+                                              className="list-group-item"
+                                              style={{
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                alignItems: "center",
+                                                padding: "8px 12px",
+                                                borderRadius: "3px",
+                                                marginBottom: "5px",
+                                                backgroundColor: "#f0f7ff",
+                                                border: "1px solid #b3d9ff",
+                                              }}
+                                            >
+                                              <span>
+                                                <strong>
+                                                  {member
+                                                    ? `${member.ci || "S/N"} - ${member.lastname} ${member.name}`
+                                                    : "Desconocido"}
+                                                </strong>
+                                              </span>
+                                              <button
+                                                className="btn btn-danger btn-xs"
+                                                onClick={() => {
+                                                  // TODO: Implementar remover athlete
+                                                }}
+                                                title="Remover"
+                                              >
+                                                <i className="fa fa-trash"></i>
+                                              </button>
+                                            </li>
+                                          );
+                                        },
+                                      )}
+                                    </ul>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="row mt-3">
+                            <div className="col-md-12">
+                              <small className="text-muted">
+                                Creado:{" "}
+                                {new Date(group.createdAt).toLocaleDateString(
+                                  "es-ES",
+                                )}
+                              </small>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -688,17 +1095,6 @@ export const Groups = ({
                         value={createUserData.username}
                         onChange={handleChangeCreateUserData}
                         placeholder="Ej: juan.garcia"
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Email *</label>
-                      <input
-                        type="email"
-                        className="form-control"
-                        name="email"
-                        value={createUserData.email}
-                        onChange={handleChangeCreateUserData}
-                        placeholder="Ej: juan.garcia@example.com"
                       />
                     </div>
                   </div>

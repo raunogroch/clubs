@@ -1,13 +1,13 @@
 /**
  * UsersService - Servicio de Gestión de Usuarios
- * 
+ *
  * Responsabilidades principales:
  * - CRUD de usuarios (Create, Read, Update, Delete)
  * - Validación de datos según el rol del usuario
  * - Generación automática de credenciales para atletas
  * - Filtrado de usuarios según el rol del usuario autenticado
  * - Gestión de soft delete (inactivar usuarios)
- * 
+ *
  * Roles soportados:
  * - SUPERADMIN: Acceso total a todos los usuarios
  * - ADMIN: Puede gestionar todos excepto superadmins
@@ -15,7 +15,7 @@
  * - COACH: Solo puede ver padres y atletas
  * - ATHLETE: Usuario individual
  * - PARENT: Tutor/Apoderado
- * 
+ *
  * Patrones utilizados:
  * - Repository Pattern: Para abstracción de datos
  * - Dependency Injection: Servicios inyectados en constructor
@@ -65,7 +65,7 @@ export class UsersService {
    * Cada rol tiene requisitos diferentes:
    * - ATHLETE y PARENT: Solo requieren nombre y apellido
    * - COACH, ASSISTANT, ADMIN, SUPERADMIN: Requieren username, password, nombre y apellido
-   * 
+   *
    * @param createUserDto - Datos del usuario a validar
    * @throws Error si faltan campos requeridos
    */
@@ -88,7 +88,7 @@ export class UsersService {
 
     // Obtener los campos requeridos para el rol del usuario
     const required = requiredFields[role] || [];
-    
+
     // Validar que todos los campos requeridos estén presentes
     for (const field of required) {
       if (!createUserDto[field]) {
@@ -358,6 +358,22 @@ export class UsersService {
   async findByCi(ci: string): Promise<User | null> {
     const user = await this.userRepository.findByCi(ci);
     return user || null;
+  }
+
+  async findByCiByRole(ci: string, role?: string): Promise<User | null> {
+    const user = await this.userRepository.findByCiByRole(ci, role);
+    return user || null;
+  }
+
+  /**
+   * Obtiene múltiples usuarios por sus IDs
+   */
+  async findByIds(ids: string[]): Promise<User[]> {
+    if (!ids || ids.length === 0) {
+      return [];
+    }
+    const users = await this.userRepository.findByIds(ids);
+    return users || [];
   }
 
   /**

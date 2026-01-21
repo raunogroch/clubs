@@ -71,6 +71,20 @@ export const userService = {
       return handleApiError(error);
     }
   },
+
+  async getUsersById(ids: string[]): Promise<ApiResponse<any[]>> {
+    try {
+      const response = await api.post("/users/batch/by-ids", { ids });
+      const data = response.data?.data || response.data;
+      return {
+        code: response.status,
+        message: "Usuarios obtenidos",
+        data: Array.isArray(data) ? data : [],
+      };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  },
 };
 
 export default userService;

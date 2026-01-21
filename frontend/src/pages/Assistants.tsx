@@ -14,7 +14,7 @@ export const Assistants = () => {
   const { items, status, error } = useSelector((s: RootState) => s.users);
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
-  const [form, setForm] = useState({ name: "", username: "", email: "" });
+  const [form, setForm] = useState({ name: "", username: "" });
   const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -23,14 +23,12 @@ export const Assistants = () => {
 
   const validate = () => {
     if (!form.username.trim()) return "El username es requerido";
-    if (form.email && !/^\S+@\S+\.\S+$/.test(form.email))
-      return "Email inválido";
     return null;
   };
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ name: "", username: "", email: "" });
+    setForm({ name: "", username: "" });
     setFormError(null);
     setShowModal(true);
   };
@@ -40,7 +38,6 @@ export const Assistants = () => {
     setForm({
       name: u.name || "",
       username: u.username || "",
-      email: u.email || "",
     });
     setFormError(null);
     setShowModal(true);
@@ -108,7 +105,6 @@ export const Assistants = () => {
                   <tr>
                     <th>Nombre</th>
                     <th>Username</th>
-                    <th>Email</th>
                     <th style={{ textAlign: "center" }}>Acciones</th>
                   </tr>
                 </thead>
@@ -117,7 +113,6 @@ export const Assistants = () => {
                     <tr key={u._id}>
                       <td>{u.name}</td>
                       <td>{u.username}</td>
-                      <td>{u.email}</td>
                       <td style={{ textAlign: "center" }}>
                         <button
                           className="btn btn-xs btn-success mx-1"
@@ -180,16 +175,6 @@ export const Assistants = () => {
                       value={form.username}
                       onChange={(e) =>
                         setForm({ ...form, username: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Email</label>
-                    <input
-                      className="form-control"
-                      value={form.email}
-                      onChange={(e) =>
-                        setForm({ ...form, email: e.target.value })
                       }
                     />
                   </div>

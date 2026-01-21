@@ -36,8 +36,9 @@ export class GroupRepository {
       .find({
         club_id: new Types.ObjectId(clubId),
       })
-      .populate('created_by', 'email name')
-      .populate('members', 'email name')
+      .populate('created_by', 'name')
+      .populate('athletes', 'name role ci lastname')
+      .populate('coaches', 'name role ci lastname')
       .sort({ createdAt: -1 })
       .exec();
   }
@@ -48,8 +49,9 @@ export class GroupRepository {
   async findById(groupId: string): Promise<Group | null> {
     return this.groupModel
       .findById(groupId)
-      .populate('created_by', 'email name')
-      .populate('members', 'email name')
+      .populate('created_by', 'name')
+      .populate('athletes', 'name role ci lastname')
+      .populate('coaches', 'name role ci lastname')
       .populate('club_id', 'name')
       .exec();
   }
@@ -119,24 +121,149 @@ export class GroupRepository {
   }
 
   /**
-   * Añadir miembro a un grupo
+   * Añadir atleta a un grupo
    */
-  async addMember(groupId: string, memberId: string): Promise<Group | null> {
-    return this.groupModel.findByIdAndUpdate(
-      groupId,
-      { $addToSet: { members: new Types.ObjectId(memberId) } },
-      { new: true },
-    );
+  async addAthlete(groupId: string, athleteId: string): Promise<Group | null> {
+    try {
+      return await this.groupModel
+        .findByIdAndUpdate(
+          groupId,
+          { $addToSet: { athletes: new Types.ObjectId(athleteId) } },
+          { new: true },
+        )
+        .populate('created_by', 'name')
+        .populate('athletes', 'name role ci lastname')
+        .populate('coaches', 'name role ci lastname')
+        .populate('club_id', 'name')
+        .exec();
+    } catch (error) {
+      console.error('Error en addAthlete del repository:', error);
+      throw error;
+    }
   }
 
   /**
-   * Remover miembro de un grupo
+   * Remover atleta de un grupo
    */
-  async removeMember(groupId: string, memberId: string): Promise<Group | null> {
-    return this.groupModel.findByIdAndUpdate(
-      groupId,
-      { $pull: { members: new Types.ObjectId(memberId) } },
-      { new: true },
-    );
+  async removeAthlete(
+    groupId: string,
+    athleteId: string,
+  ): Promise<Group | null> {
+    try {
+      return await this.groupModel
+        .findByIdAndUpdate(
+          groupId,
+          { $pull: { athletes: new Types.ObjectId(athleteId) } },
+          { new: true },
+        )
+        .populate('created_by', 'name')
+        .populate('athletes', 'name role ci lastname')
+        .populate('coaches', 'name role ci lastname')
+        .populate('club_id', 'name')
+        .exec();
+    } catch (error) {
+      console.error('Error en removeAthlete del repository:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Añadir entrenador a un grupo
+   */
+  async addCoach(groupId: string, coachId: string): Promise<Group | null> {
+    try {
+      return await this.groupModel
+        .findByIdAndUpdate(
+          groupId,
+          { $addToSet: { coaches: new Types.ObjectId(coachId) } },
+          { new: true },
+        )
+        .populate('created_by', 'name')
+        .populate('athletes', 'name role ci lastname')
+        .populate('coaches', 'name role ci lastname')
+        .populate('club_id', 'name')
+        .exec();
+    } catch (error) {
+      console.error('Error en addCoach del repository:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Remover entrenador de un grupo
+   */
+  async removeCoach(groupId: string, coachId: string): Promise<Group | null> {
+    try {
+      return await this.groupModel
+        .findByIdAndUpdate(
+          groupId,
+          { $pull: { coaches: new Types.ObjectId(coachId) } },
+          { new: true },
+        )
+        .populate('created_by', 'name')
+        .populate('athletes', 'name role ci lastname')
+        .populate('coaches', 'name role ci lastname')
+        .populate('club_id', 'name')
+        .exec();
+    } catch (error) {
+      console.error('Error en removeCoach del repository:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Añadir miembro a un grupo (legacy - mantener para compatibilidad)
+   */
+  async addMember(
+    groupId: string,
+    memberId: string,
+    role?: string,
+  ): Promise<Group | null> {
+    try {
+      if (role === 'coach') {
+        return await this.addCoach(groupId, memberId);
+      } else if (role === 'athlete') {
+        return await this.addAthlete(groupId, memberId);
+      }
+      // Si no hay rol, intentar determinar por contexto o fallar
+      throw new Error('Role is required for addMember');
+    } catch (error) {
+      console.error('Error en addMember del repository:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Remover miembro de un grupo (legacy - mantener para compatibilidad)
+   */
+  async removeMember(
+    groupId: string,
+    memberId: string,
+    role?: string,
+  ): Promise<Group | null> {
+    try {
+      if (role === 'coach') {
+        return await this.removeCoach(groupId, memberId);
+      } else if (role === 'athlete') {
+        return await this.removeAthlete(groupId, memberId);
+      }
+      // Si no hay rol, intentar remover de ambos arrays
+      let result = await this.groupModel
+        .findByIdAndUpdate(
+          groupId,
+          {
+            $pull: {
+              athletes: new Types.ObjectId(memberId),
+              coaches: new Types.ObjectId(memberId),
+            },
+          },
+          { new: true },
+        )
+        .exec();
+      return result;
+    } catch (error) {
+      console.error('Error en removeMember del repository:', error);
+      throw error;
+    }
   }
 }
