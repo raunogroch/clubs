@@ -245,7 +245,7 @@ export const Clubs = ({ name }: { name?: string }) => {
                   <h5>Gestión de Clubs</h5>
                   <div className="ibox-tools">
                     <button
-                      className="btn btn-primary btn-sm"
+                      className="btn btn-xs btn-primary"
                       onClick={handleOpenCreate}
                       disabled={loading || assignments.length === 0}
                     >
@@ -389,14 +389,14 @@ export const Clubs = ({ name }: { name?: string }) => {
               <div className="modal-footer">
                 <button
                   type="button"
-                  className="btn btn-default"
+                  className="btn btn-xs btn-default"
                   onClick={handleCloseModal}
                 >
                   Cancelar
                 </button>
                 <button
                   type="button"
-                  className="btn btn-primary"
+                  className="btn btn-xs btn-primary"
                   onClick={handleSave}
                   disabled={loading}
                 >

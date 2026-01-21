@@ -79,7 +79,7 @@ export const Athletes = () => {
       <div className="wrapper wrapper-content">
         <div className="ibox">
           <div className="ibox-title">
-            <button className="btn btn-primary" onClick={openCreate}>
+            <button className="btn btn-xs btn-primary" onClick={openCreate}>
               Crear Athlete
             </button>
           </div>
@@ -174,15 +174,14 @@ export const Athletes = () => {
                   >
                     <button
                       type="button"
-                      className="btn btn-default"
+                      className="btn btn-xs btn-default"
                       onClick={closeModal}
                     >
                       Cancelar
                     </button>
                     <button
                       type="submit"
-                      className="btn btn-primary"
-                      disabled={status === "loading"}
+                      className="btn btn-xs btn-primary"
                     >
                       {editing ? "Actualizar" : "Crear"}
                     </button>

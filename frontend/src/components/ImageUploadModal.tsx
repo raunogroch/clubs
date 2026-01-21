@@ -92,12 +92,12 @@ export const ImageUploadModal: React.FC<Props> = ({
         </div>
 
         <div className="mt-3 d-flex justify-content-end gap-3">
-          <button className="btn btn-secondary mx-2" onClick={onClose}>
+          <button className="btn btn-xs btn-secondary mx-2" onClick={onClose}>
             {hasImage ? "Cancelar" : "Salir"}
           </button>
           {hasImage && (
             <button
-              className="btn btn-primary"
+              className="btn btn-xs btn-primary"
               onClick={handleSave}
               disabled={saving}
             >

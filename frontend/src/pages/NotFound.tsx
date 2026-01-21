@@ -18,7 +18,7 @@ export const NotFound = () => {
           verifica si la URL tiene algún error, luego presiona el botón de
           volver al menu principal <br />
           <br />
-          <button type="submit" className="btn btn-danger" onClick={handleBack}>
+          <button type="submit" className="btn btn-xs btn-danger" onClick={handleBack}>
             Volver al menú principal
           </button>
         </div>

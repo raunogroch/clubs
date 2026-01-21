@@ -79,7 +79,7 @@ export const Parents = () => {
       <div className="wrapper wrapper-content">
         <div className="ibox">
           <div className="ibox-title">
-            <button className="btn btn-primary" onClick={openCreate}>
+            <button className="btn btn-xs btn-primary" onClick={openCreate}>
               Crear Parent
             </button>
           </div>
@@ -174,14 +174,14 @@ export const Parents = () => {
                   >
                     <button
                       type="button"
-                      className="btn btn-default"
+                      className="btn btn-xs btn-default"
                       onClick={closeModal}
                     >
                       Cancelar
                     </button>
                     <button
                       type="submit"
-                      className="btn btn-primary"
+                      className="btn btn-xs btn-primary"
                       disabled={status === "loading"}
                     >
                       {editing ? "Actualizar" : "Crear"}

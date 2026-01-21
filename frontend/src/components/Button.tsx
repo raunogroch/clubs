@@ -11,7 +11,7 @@ interface ButtonProps {
 
 export const Button: React.FC<ButtonProps> = ({
   type = "button",
-  className = "btn",
+  className = \"btn btn-xs\",
   onClick,
   name = "",
   icon = "",

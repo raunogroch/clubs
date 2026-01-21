@@ -50,7 +50,7 @@ export const PaginationList = ({ filter }) => {
   return (
     <div className="pagination d-flex justify-content-center mt-3">
       <button
-        className="btn btn-white"
+        className="btn btn-xs btn-white"
         disabled={filter.page === 1}
         onClick={() => handlePageChange(filter.page - 1)}
       >
@@ -65,7 +65,7 @@ export const PaginationList = ({ filter }) => {
         ) : (
           <button
             key={`page-${page}-${idx}`} // Key única combinando página e índice
-            className={`btn btn-white mx-1 ${
+            className={`btn btn-xs btn-white mx-1 ${
               filter.page === page ? "active" : ""
             }`}
             onClick={() => handlePageChange(Number(page))}
@@ -76,7 +76,7 @@ export const PaginationList = ({ filter }) => {
       )}
 
       <button
-        className="btn btn-white"
+        className="btn btn-xs btn-white"
         disabled={filter.page === totalPages}
         onClick={() => handlePageChange(filter.page + 1)}
       >

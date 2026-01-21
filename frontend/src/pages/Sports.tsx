@@ -264,14 +264,14 @@ export const Sports = ({ name }: { name?: string }) => {
               <div className="modal-footer">
                 <button
                   type="button"
-                  className="btn btn-default"
+                  className="btn btn-xs btn-default"
                   onClick={handleCloseModal}
                 >
                   Cancelar
                 </button>
                 <button
                   type="button"
-                  className="btn btn-primary"
+                  className="btn btn-xs btn-primary"
                   onClick={handleSave}
                   disabled={loading}
                 >

@@ -143,7 +143,7 @@ export const ImageCropperWithInput = ({
         />
         <div className="mt-3">
           <button
-            className="btn btn-outline-danger btn-rounded"
+            className="btn btn-xs btn-outline-danger btn-rounded"
             onClick={handleReset}
           >
             Cambiar imagen
@@ -209,7 +209,7 @@ export const ImageCropperWithInput = ({
       </div>
       <div className="mt-3">
         <button
-          className="btn btn-outline-danger btn-rounded"
+          className="btn btn-xs btn-outline-danger btn-rounded"
           onClick={handleReset}
         >
           Cambiar imagen

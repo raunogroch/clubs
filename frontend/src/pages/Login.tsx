@@ -84,7 +84,7 @@ export const Login = () => {
 
           <button
             type="submit"
-            className="btn btn-primary block full-width m-b"
+            className="btn btn-xs btn-primary block full-width m-b"
             disabled={status === "loading"}
           >
             {status === "loading" ? "Ingresando ..." : "Ingresar"}

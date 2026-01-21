@@ -76,13 +76,13 @@ export const NavHeader = ({
           {pageCreate && (
             <div className="title-action">
               {onCreateClick ? (
-                <button onClick={onCreateClick} className="btn btn-primary">
+                <button onClick={onCreateClick} className="btn btn-xs btn-primary">
                   <i className="fa fa-plus"></i> {pageCreate}
                 </button>
               ) : (
                 <Link
                   to={`${location.pathname}/create`}
-                  className="btn btn-primary"
+                  className="btn btn-xs btn-primary"
                 >
                   <i className="fa fa-plus"></i> {pageCreate}
                 </Link>
