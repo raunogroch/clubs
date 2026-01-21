@@ -65,7 +65,6 @@ export class ClubsService {
       location: club.location,
       assignment_id: club.assignment_id,
       created_by: club.created_by,
-      members: club.members,
       createdAt: club.createdAt,
       updatedAt: club.updatedAt,
     };
@@ -280,12 +279,6 @@ export class ClubsService {
       );
     }
 
-    // Agregar miembro si no está ya
-    if (!club.members.some((memberId) => memberId.toString() === newMemberId)) {
-      club.members.push(newMemberId as any);
-      await club.save();
-    }
-
     return club;
   }
 
@@ -314,7 +307,6 @@ export class ClubsService {
     }
 
     // Remover miembro
-    club.members = club.members.filter((m) => m.toString() !== memberId);
     await club.save();
 
     return club;

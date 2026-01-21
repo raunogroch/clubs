@@ -76,30 +76,4 @@ export class ClubsController {
   async deleteClub(@Param('clubId') clubId: string, @CurrentUser() user: any) {
     return this.clubsService.deleteClub(clubId, user.sub);
   }
-
-  /**
-   * POST /clubs/:clubId/members/:memberId
-   * Añadir un miembro al club
-   */
-  @Post(':clubId/members/:memberId')
-  async addMember(
-    @Param('clubId') clubId: string,
-    @Param('memberId') memberId: string,
-    @CurrentUser() user: any,
-  ) {
-    return this.clubsService.addMember(clubId, user.sub, memberId);
-  }
-
-  /**
-   * DELETE /clubs/:clubId/members/:memberId
-   * Remover un miembro del club
-   */
-  @Delete(':clubId/members/:memberId')
-  async removeMember(
-    @Param('clubId') clubId: string,
-    @Param('memberId') memberId: string,
-    @CurrentUser() user: any,
-  ) {
-    return this.clubsService.removeMember(clubId, user.sub, memberId);
-  }
 }

@@ -6,7 +6,6 @@
  * - Crear nuevos grupos
  * - Actualizar grupos existentes
  * - Eliminar grupos
- * - Gestionar miembros de grupos
  *
  * Solo accesible por administradores de la asignación del club
  */
@@ -754,13 +753,14 @@ export const Groups = ({
                                   </span>
                                 </h5>
                                 <button
-                                  className="btn btn-success btn-sm btn-block"
+                                  className="btn btn-success btn-sm btn-block my-1"
                                   onClick={() =>
                                     handleOpenAddMember(group._id, "coach")
                                   }
                                   title="Agregar Entrenador"
                                 >
-                                  <i className="fa fa-plus"></i> Agregar Coach
+                                  <i className="fa fa-plus"></i> Agregar
+                                  Entrenador(es)
                                 </button>
                                 <div className="members-list">
                                   {(group.coaches || []).length === 0 ? (
@@ -828,13 +828,14 @@ export const Groups = ({
                                   </span>
                                 </h5>
                                 <button
-                                  className="btn btn-info btn-sm btn-block"
+                                  className="btn btn-info btn-sm btn-block my-1"
                                   onClick={() =>
                                     handleOpenAddMember(group._id, "athlete")
                                   }
                                   title="Agregar Deportista"
                                 >
-                                  <i className="fa fa-plus"></i> Agregar Atleta
+                                  <i className="fa fa-plus"></i> Agregar
+                                  Atleta(s)
                                 </button>
                                 <div className="members-list">
                                   {(group.athletes || []).length === 0 ? (

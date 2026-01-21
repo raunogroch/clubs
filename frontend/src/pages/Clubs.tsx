@@ -6,7 +6,6 @@
  * - Crear nuevos clubs
  * - Actualizar clubs existentes
  * - Eliminar clubs
- * - Gestionar miembros de clubs
  * - Gestionar grupos dentro de cada club
  *
  * Solo accesible por administradores con assignments asignados
@@ -273,7 +272,6 @@ export const Clubs = ({ name }: { name?: string }) => {
                             <th>Disciplina</th>
                             <th>Ubicación</th>
                             <th>Asignación</th>
-                            <th>Miembros</th>
                             <th>Acciones</th>
                           </tr>
                         </thead>
@@ -292,13 +290,9 @@ export const Clubs = ({ name }: { name?: string }) => {
                                   }
                                   title="Gestionar grupos"
                                 >
-                                  <i className="fa fa-sitemap"></i> &nbsp;grupos
+                                  <i className="fa fa-sitemap"></i>{" "}
+                                  &nbsp;Gestionar grupos
                                 </button>
-                              </td>
-                              <td>
-                                <span className="badge badge-primary">
-                                  {club.members.length}
-                                </span>
                               </td>
                               <td>
                                 <button

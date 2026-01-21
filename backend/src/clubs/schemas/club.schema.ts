@@ -53,17 +53,6 @@ export class Club extends Document {
   created_by: Types.ObjectId;
 
   /**
-   * Miembros del club
-   * Array de IDs de usuarios que son miembros
-   */
-  @Prop({
-    type: [Types.ObjectId],
-    ref: 'User',
-    default: [],
-  })
-  members: Types.ObjectId[];
-
-  /**
    * Timestamp de creación (automático)
    */
   @Prop()

@@ -22,7 +22,6 @@ export class GroupRepository {
       ...createGroupDto,
       club_id: new Types.ObjectId(createGroupDto.club_id),
       created_by: new Types.ObjectId(userId),
-      members: [new Types.ObjectId(userId)], // El creador es miembro
     });
 
     return group.save();

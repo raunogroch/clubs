@@ -22,7 +22,6 @@ export class ClubRepository {
       ...createClubDto,
       assignment_id: new Types.ObjectId(createClubDto.assignment_id),
       created_by: new Types.ObjectId(userId),
-      members: [new Types.ObjectId(userId)], // El creador es miembro
     });
 
     return club.save();
@@ -37,7 +36,6 @@ export class ClubRepository {
         assignment_id: new Types.ObjectId(assignmentId),
       })
       .populate('created_by', 'name')
-      .populate('members', 'name')
       .sort({ createdAt: -1 })
       .exec();
   }
@@ -49,7 +47,6 @@ export class ClubRepository {
     return this.clubModel
       .findById(clubId)
       .populate('created_by', 'name')
-      .populate('members', 'name')
       .populate('assignment_id', 'module_name')
       .exec();
   }
