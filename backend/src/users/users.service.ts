@@ -33,6 +33,10 @@ import type { IUserRepository } from './repository/user.repository.interface';
 import { Inject } from '@nestjs/common';
 import { UserValidatorService } from './user-validator.service';
 import { UserPasswordService } from './user-password.service';
+import { AssignmentsService } from '../assignments/assignments.service';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Group } from '../clubs/schemas/group.schema';
 
 /**
  * Interfaz para el usuario autenticado extraído del JWT
@@ -55,6 +59,8 @@ export class UsersService {
     @Inject('UserRepository') private readonly userRepository: IUserRepository,
     private readonly userValidator: UserValidatorService,
     private readonly userPasswordService: UserPasswordService,
+    private readonly assignmentsService: AssignmentsService,
+    @InjectModel(Group.name) private readonly groupModel: Model<Group>,
   ) {}
 
   /** Carpeta donde se almacenan las fotos de perfil de usuarios */
@@ -402,6 +408,75 @@ export class UsersService {
         return activeOnly.filter((user) => user.role === Roles.ATHLETE);
       default:
         return [];
+    }
+  }
+
+  /**
+   * Obtiene coaches únicos desde todos los grupos del assignment del admin
+   * @param requestingUser - Usuario que hace la solicitud
+   * @returns Array de coaches únicos sin duplicados
+   */
+  async getCoachesFromGroups(requestingUser: currentAuth): Promise<any[]> {
+    try {
+      // Obtener assignments del admin
+      const adminAssignments =
+        await this.assignmentsService.getAssignmentsByAdmin(requestingUser.sub);
+
+      if (!adminAssignments || adminAssignments.length === 0) {
+        return [];
+      }
+
+      // Obtener todos los clubes del primer assignment (o todos los clubes si hay múltiples)
+      const clubIds = adminAssignments[0]?.clubs || [];
+
+      if (!clubIds || clubIds.length === 0) {
+        return [];
+      }
+
+      // Obtener todos los grupos de esos clubes
+      const groups = await this.groupModel
+        .find({ club_id: { $in: clubIds } })
+        .populate('coaches')
+        .exec();
+
+      // Extraer coaches únicos
+      const uniqueCoachIds = new Set<string>();
+      const coachesMap = new Map<string, User>();
+
+      for (const group of groups) {
+        if (group.coaches && Array.isArray(group.coaches)) {
+          for (const coach of group.coaches) {
+            if (coach && (coach as any)._id) {
+              const coachId = (coach as any)._id.toString();
+              uniqueCoachIds.add(coachId);
+              coachesMap.set(coachId, coach as any);
+            }
+          }
+        }
+      }
+
+      // Mapear al JSON solicitado y retornar como array
+      const result = Array.from(coachesMap.values()).map((c: any) => ({
+        role: c.role,
+        username: c.username || null,
+        password: c.password || null,
+        name: c.name || null,
+        lastname: c.lastname || null,
+        ci: c.ci || null,
+        active: typeof c.active === 'boolean' ? c.active : true,
+        phone: c.phone || null,
+        images: {
+          small: c.images?.small || null,
+          medium: c.images?.medium || null,
+          large: c.images?.large || null,
+        },
+        _id: c._id,
+      }));
+
+      return result;
+    } catch (error) {
+      console.error('Error al obtener coaches desde grupos:', error);
+      return [];
     }
   }
 }

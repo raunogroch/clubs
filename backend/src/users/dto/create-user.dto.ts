@@ -70,7 +70,7 @@ export class CreateUserDto {
   )
   @IsOptional()
   @IsString()
-  middle_name?: string;
+  // middle_name removed from system
 
   /** Apellido (ATHLETE, PARENT, COACH, ASSISTANT, ADMIN, SUPERADMIN) */
   @ValidateIf((o) =>

@@ -147,31 +147,29 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="create-user-ci">Carnet (CI)</label>
+                  <label htmlFor="create-user-ci">Carnet (CI) *</label>
                   <input
                     id="create-user-ci"
                     type="text"
                     className="form-control"
                     value={createUserData.ci}
-                    disabled
-                    placeholder="Carnet"
+                    onChange={(e) =>
+                      onCreateUserDataChange("ci", e.target.value)
+                    }
+                    placeholder="Ingresa el carnet"
+                    disabled={loading}
                   />
                 </div>
 
                 {memberType === "coach" && (
-                  <div className="form-group">
-                    <label htmlFor="create-user-username">Usuario *</label>
-                    <input
-                      id="create-user-username"
-                      type="text"
-                      className="form-control"
-                      value={createUserData.username}
-                      onChange={(e) =>
-                        onCreateUserDataChange("username", e.target.value)
-                      }
-                      placeholder="Ej: juan.garcia"
-                      disabled={loading}
-                    />
+                  <div className="alert alert-info">
+                    <small>
+                      <strong>Nota:</strong> El usuario se generará
+                      automáticamente como la primera palabra del nombre y la
+                      primera palabra del apellido, separadas por un punto, en
+                      minúsculas y sin acentos (ej: "juan.garcia"). La
+                      contraseña será el carnet (CI).
+                    </small>
                   </div>
                 )}
               </div>

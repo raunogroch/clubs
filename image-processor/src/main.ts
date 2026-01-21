@@ -19,7 +19,7 @@ async function bootstrap() {
   app.use(bodyParser.json({ limit: "20mb" }));
   app.use(bodyParser.urlencoded({ extended: true, limit: "20mb" }));
 
-  const port = process.env.PORT || 4000;
+  const port = process.env.PORT || 4001;
 
   logger.log(`Listening on port ${port}`);
   await app.listen(port);

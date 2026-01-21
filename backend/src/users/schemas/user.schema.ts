@@ -22,11 +22,6 @@ export class User extends mongoose.Document {
   /** Nombre real del usuario (todos excepto PARENT) */
   @Prop({ required: false })
   name?: string;
-
-  /** Segundo nombre (ATHLETE, PARENT, COACH, ASSISTANT) */
-  @Prop({ required: false })
-  middle_name?: string;
-
   /** Apellido del usuario (todos excepto SUPERADMIN/ADMIN) */
   @Prop({ required: false })
   lastname?: string;

@@ -362,7 +362,7 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
    * Crea un nuevo usuario (coach o athlete)
    */
   const handleCreateUser = async () => {
-    const { name, lastname, ci, username } = addMemberModal.createUserData;
+    const { name, lastname, ci } = addMemberModal.createUserData;
 
     if (!name.trim()) {
       toastr.warning(MESSAGES.ERROR_USER_NAME_REQUIRED);
@@ -372,20 +372,38 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
       toastr.warning(MESSAGES.ERROR_USER_LASTNAME_REQUIRED);
       return;
     }
-
-    // Username solo es requerido para coaches, no para athletes
-    if (addMemberModal.memberType === "coach" && !username.trim()) {
-      toastr.warning(MESSAGES.ERROR_USER_USERNAME_REQUIRED);
+    if (!ci.trim()) {
+      toastr.warning("CI es requerido");
       return;
     }
 
     try {
       addMemberModal.setSearchLoading(true);
+
+      // Generar username automáticamente: primera palabra del nombre +
+      // primera palabra del apellido, separados por punto, en minúsculas y sin acentos
+      const normalizeWord = (s: string) =>
+        s
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^a-zA-Z0-9]/g, "")
+          .toLowerCase();
+
+      const firstNameWord = normalizeWord(name.trim().split(/\s+/)[0] || "");
+      const firstLastnameWord = normalizeWord(
+        lastname.trim().split(/\s+/)[0] || "",
+      );
+      const generatedUsername = `${firstNameWord}.${firstLastnameWord}`;
+
+      // Usar CI como contraseña
+      const generatedPassword = ci.trim();
+
       const newUser = await userService.createAthlete({
         name,
         lastname,
         ci,
-        ...(addMemberModal.memberType === "coach" && { username }),
+        username: generatedUsername,
+        password: generatedPassword,
         role: addMemberModal.memberType,
       });
 

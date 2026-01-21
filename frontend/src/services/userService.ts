@@ -85,6 +85,20 @@ export const userService = {
       return handleApiError(error);
     }
   },
+
+  async getCoachesFromGroups(): Promise<ApiResponse<any[]>> {
+    try {
+      const response = await api.get("/users/coaches/from-groups");
+      const data = response.data?.data || response.data;
+      return {
+        code: response.status,
+        message: "Coaches desde grupos obtenidos",
+        data: Array.isArray(data) ? data : [],
+      };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  },
 };
 
 export default userService;

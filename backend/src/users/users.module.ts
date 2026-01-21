@@ -6,10 +6,16 @@ import { User, UserSchema } from './schemas/user.schema';
 import { UserRepository } from './repository/user.repository';
 import { UserValidatorService } from './user-validator.service';
 import { UserPasswordService } from './user-password.service';
+import { AssignmentsModule } from '../assignments/assignments.module';
+import { Group, GroupSchema } from '../clubs/schemas/group.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      { name: Group.name, schema: GroupSchema },
+    ]),
+    AssignmentsModule,
   ],
   controllers: [UsersController],
   providers: [

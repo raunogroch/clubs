@@ -112,6 +112,12 @@ export class UsersController {
    * @param role - Filtrar por rol específico
    * @returns Array de usuarios filtrados y paginados
    */
+  @Get('coaches/from-groups')
+  @Roles(Role.SUPERADMIN, Role.ADMIN, Role.ASSISTANT)
+  async getCoachesFromGroups(@CurrentUser() user: currentAuth) {
+    return this.usersService.getCoachesFromGroups(user);
+  }
+
   @Get()
   @Roles(Role.SUPERADMIN, Role.ADMIN, Role.ASSISTANT, Role.COACH)
   findAll(

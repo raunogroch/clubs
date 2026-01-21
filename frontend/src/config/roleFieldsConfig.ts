@@ -73,65 +73,25 @@ export const roleFieldsConfig: RoleFieldsConfig = {
   superadmin: {
     requiresUsername: true,
     requiresPassword: true,
-    fields: [
-      ...commonFields,
-      {
-        name: "middle_name",
-        label: "Nombre del Medio (opcional)",
-        type: "text",
-        required: false,
-        placeholder: "Ej: Miguel",
-      },
-      ...credentialsFields,
-    ],
+    fields: [...commonFields, ...credentialsFields],
   },
 
   admin: {
     requiresUsername: true,
     requiresPassword: true,
-    fields: [
-      ...commonFields,
-      {
-        name: "middle_name",
-        label: "Nombre del Medio (opcional)",
-        type: "text",
-        required: false,
-        placeholder: "Ej: Miguel",
-      },
-      ...credentialsFields,
-    ],
+    fields: [...commonFields, ...credentialsFields],
   },
 
   coach: {
     requiresUsername: true,
     requiresPassword: true,
-    fields: [
-      ...commonFields,
-      {
-        name: "middle_name",
-        label: "Nombre del Medio (opcional)",
-        type: "text",
-        required: false,
-        placeholder: "Ej: Miguel",
-      },
-      ...credentialsFields,
-    ],
+    fields: [...commonFields, ...credentialsFields],
   },
 
   assistant: {
     requiresUsername: true,
     requiresPassword: true,
-    fields: [
-      ...commonFields,
-      {
-        name: "middle_name",
-        label: "Nombre del Medio (opcional)",
-        type: "text",
-        required: false,
-        placeholder: "Ej: Miguel",
-      },
-      ...credentialsFields,
-    ],
+    fields: [...commonFields, ...credentialsFields],
   },
 
   athlete: {
@@ -139,13 +99,6 @@ export const roleFieldsConfig: RoleFieldsConfig = {
     requiresPassword: true,
     fields: [
       ...commonFields,
-      {
-        name: "middle_name",
-        label: "Nombre del Medio (opcional)",
-        type: "text",
-        required: false,
-        placeholder: "Ej: Miguel",
-      },
       {
         name: "gender",
         label: "Género (opcional)",
@@ -167,13 +120,6 @@ export const roleFieldsConfig: RoleFieldsConfig = {
     requiresPassword: false,
     fields: [
       ...commonFields,
-      {
-        name: "middle_name",
-        label: "Nombre del Medio (opcional)",
-        type: "text",
-        required: false,
-        placeholder: "Ej: Miguel",
-      },
       {
         name: "phone",
         label: "Teléfono (opcional)",
