@@ -14,6 +14,7 @@ export function useGroupForm(clubId: string) {
     name: "",
     description: "",
     club_id: clubId,
+    monthly_fee: undefined,
   });
 
   const resetForm = useCallback(() => {
@@ -22,6 +23,7 @@ export function useGroupForm(clubId: string) {
       name: "",
       description: "",
       club_id: clubId,
+      monthly_fee: undefined,
     });
   }, [clubId]);
 
@@ -36,13 +38,14 @@ export function useGroupForm(clubId: string) {
         name: group.name,
         description: group.description || "",
         club_id: clubId,
+        monthly_fee: group.monthly_fee,
       });
     },
     [clubId],
   );
 
   const updateField = useCallback(
-    (field: keyof GroupFormState, value: string) => {
+    (field: keyof GroupFormState, value: string | number | undefined) => {
       setFormData((prev) => ({
         ...prev,
         [field]: value,

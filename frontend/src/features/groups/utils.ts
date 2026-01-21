@@ -8,6 +8,18 @@ import type { MemberDetail, Schedule } from "./types";
 import { DAYS_OF_WEEK } from "./constants";
 
 /**
+ * Formatea un número como precio/moneda en Bs. (Bolivianos)
+ * @param amount - Cantidad a formatear
+ * @returns Precio formateado (ej: "50.00 Bs.")
+ */
+export function formatPrice(amount?: number): string {
+  if (amount === undefined || amount === null) {
+    return "Sin precio";
+  }
+  return `${amount.toFixed(2)} Bs.`;
+}
+
+/**
  * Obtiene el siguiente día de la semana
  * @param currentDay - Día actual (ej: "Monday")
  * @returns El siguiente día, o "Monday" si está en domingo

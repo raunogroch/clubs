@@ -2,7 +2,7 @@
  * DTO para crear un grupo
  */
 
-import { IsString, IsOptional, IsMongoId } from 'class-validator';
+import { IsString, IsOptional, IsMongoId, IsNumber, Min } from 'class-validator';
 
 export class CreateGroupDto {
   /**
@@ -24,4 +24,13 @@ export class CreateGroupDto {
    */
   @IsMongoId()
   club_id: string;
+
+  /**
+   * Precio/Mensualidad del grupo (opcional)
+   * Costo en Bs. (Bolivianos)
+   */
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  monthly_fee?: number;
 }

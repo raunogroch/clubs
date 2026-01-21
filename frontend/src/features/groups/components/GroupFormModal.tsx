@@ -15,7 +15,7 @@ interface GroupFormModalProps {
   loading: boolean;
   onClose: () => void;
   onSave: () => void;
-  onFieldChange: (field: keyof GroupFormState, value: string) => void;
+  onFieldChange: (field: keyof GroupFormState, value: string | number | undefined) => void;
 }
 
 export const GroupFormModal: React.FC<GroupFormModalProps> = ({
@@ -76,6 +76,25 @@ export const GroupFormModal: React.FC<GroupFormModalProps> = ({
                 placeholder="Ej: Descripción del grupo"
                 rows={3}
               />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="group-monthly-fee">
+                Precio Mensual (Bs.)
+              </label>
+              <input
+                id="group-monthly-fee"
+                type="number"
+                className="form-control"
+                value={formData.monthly_fee || ""}
+                onChange={(e) => onFieldChange("monthly_fee", e.target.value ? parseFloat(e.target.value) : undefined)}
+                placeholder="Ej: 50.00"
+                step="0.01"
+                min="0"
+              />
+              <small className="form-text text-muted">
+                Costo de la inscripción mensual para este grupo
+              </small>
             </div>
           </div>
 

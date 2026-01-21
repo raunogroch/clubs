@@ -53,6 +53,7 @@ export interface Group {
   name: string;
   description?: string;
   club_id: string;
+  monthly_fee?: number;
   created_by: string;
   athletes: string[];
   coaches: string[];
@@ -69,6 +70,7 @@ export interface CreateGroupRequest {
   name: string;
   description?: string;
   club_id: string;
+  monthly_fee?: number;
 }
 
 /**
@@ -77,6 +79,7 @@ export interface CreateGroupRequest {
 export interface UpdateGroupRequest {
   name?: string;
   description?: string;
+  monthly_fee?: number;
 }
 
 /**
@@ -86,6 +89,7 @@ export interface GroupFormState {
   name: string;
   description: string;
   club_id: string;
+  monthly_fee?: number;
 }
 
 /**

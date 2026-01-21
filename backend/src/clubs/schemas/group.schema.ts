@@ -75,6 +75,16 @@ export class Group extends Document {
   coaches: Types.ObjectId[];
 
   /**
+   * Precio/Mensualidad del grupo
+   * Costo de la inscripción mensual en Bs. (Bolivianos)
+   */
+  @Prop({
+    type: Number,
+    default: 0,
+  })
+  monthly_fee?: number;
+
+  /**
    * Array de horarios del grupo
    * Cada horario contiene día de la semana y rango de horas
    */

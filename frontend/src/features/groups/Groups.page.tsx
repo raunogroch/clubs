@@ -208,6 +208,7 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
         const updated = await groupsService.update(groupForm.editingId, {
           name: groupForm.formData.name,
           description: groupForm.formData.description,
+          monthly_fee: groupForm.formData.monthly_fee,
         });
         setGroups(groups.map((g) => (g._id === groupForm.editingId ? updated : g)));
         toastr.success(MESSAGES.SUCCESS_GROUP_UPDATED);

@@ -6,6 +6,7 @@
 
 import React from "react";
 import type { Group } from "../types";
+import { formatPrice } from "../utils";
 
 interface GroupCardProps {
   group: Group;
@@ -55,6 +56,15 @@ export const GroupCard: React.FC<GroupCardProps> = ({
                 {group.description || "Sin descripción"}
               </small>
             </div>
+
+            {/* Precio mensual */}
+            {group.monthly_fee !== undefined && group.monthly_fee > 0 && (
+              <div className="mt-1">
+                <small className="badge badge-info">
+                  <i className="fa fa-money"></i> {formatPrice(group.monthly_fee)}/mes
+                </small>
+              </div>
+            )}
           </div>
 
           {/* Botones de acción */}

@@ -2,7 +2,7 @@
  * DTO para actualizar un grupo
  */
 
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsNumber, Min } from 'class-validator';
 
 export class UpdateGroupDto {
   /**
@@ -18,4 +18,13 @@ export class UpdateGroupDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  /**
+   * Precio/Mensualidad del grupo (opcional)
+   * Costo en Bs. (Bolivianos)
+   */
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  monthly_fee?: number;
 }
