@@ -10,6 +10,7 @@ import {
   IsEnum,
 } from 'class-validator';
 import { Roles } from '../enum/roles.enum';
+import * as mongoose from 'mongoose';
 
 export class CreateUserDto {
   /** Rol del usuario */
@@ -122,6 +123,11 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   phone?: string;
+
+  /** ID del padre/tutor (ATHLETE) */
+  @ValidateIf((o) => o.role === Roles.ATHLETE)
+  @IsOptional()
+  parent_id?: string | mongoose.Types.ObjectId;
 
   // ========== CAMPOS OPCIONALES (LEGADO) ==========
 

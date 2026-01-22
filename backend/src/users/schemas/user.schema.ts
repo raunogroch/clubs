@@ -40,6 +40,14 @@ export class User extends mongoose.Document {
   @Prop({ required: false })
   birth_date?: Date;
 
+  /** ID del padre/tutor (ATHLETE) */
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: false,
+  })
+  parent_id?: mongoose.Types.ObjectId;
+
   // ========== CAMPOS ESPECÍFICOS DE PARENT ==========
 
   /** Teléfono del padre/tutor (PARENT) */

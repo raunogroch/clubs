@@ -562,6 +562,7 @@ export class UsersService {
         ci: a.ci || null,
         active: typeof a.active === 'boolean' ? a.active : true,
         phone: a.phone || null,
+        parent_id: a.parent_id || null,
         images: {
           small: a.images?.small || null,
           medium: a.images?.medium || null,
