@@ -276,7 +276,7 @@ export const Clubs = ({ name }: { name?: string }) => {
                     <button
                       className="btn btn-xs btn-primary"
                       onClick={handleOpenCreate}
-                      disabled={loading || assignments.length === 0}
+                      disabled={loading}
                     >
                       <i className="fa fa-plus"></i> Crear Club
                     </button>
@@ -298,22 +298,34 @@ export const Clubs = ({ name }: { name?: string }) => {
                       <table className="table table-striped table-hover">
                         <thead>
                           <tr>
-                            <th>Disciplina</th>
-                            <th>Ubicación</th>
-                            <th>Grupos</th>
-                            <th>Deportistas</th>
-                            <th>Entrenadores</th>
-                            <th>Acciones</th>
+                            <th style={{ verticalAlign: "middle" }}>
+                              Disciplina
+                            </th>
+                            <th style={{ verticalAlign: "middle" }}>
+                              Ubicación
+                            </th>
+                            <th style={{ verticalAlign: "middle" }}>Grupos</th>
+                            <th style={{ verticalAlign: "middle" }}>
+                              Deportistas
+                            </th>
+                            <th style={{ verticalAlign: "middle" }}>
+                              Entrenadores
+                            </th>
+                            <th style={{ verticalAlign: "middle" }}>
+                              Acciones
+                            </th>
                           </tr>
                         </thead>
                         <tbody>
                           {clubs.map((club) => (
                             <tr key={club._id}>
-                              <td>
+                              <td style={{ verticalAlign: "middle" }}>
                                 <strong>{getSportName(club.sport_id)}</strong>
                               </td>
-                              <td>{club.location || "-"}</td>
-                              <td>
+                              <td style={{ verticalAlign: "middle" }}>
+                                {club.location || "-"}
+                              </td>
+                              <td style={{ verticalAlign: "middle" }}>
                                 <button
                                   className="btn btn-info btn-xs"
                                   onClick={() =>
@@ -325,20 +337,20 @@ export const Clubs = ({ name }: { name?: string }) => {
                                   &nbsp;Gestionar grupos
                                 </button>
                               </td>
-                              <td>
+                              <td style={{ verticalAlign: "middle" }}>
                                 <span className="badge badge-primary">
                                   Registrados ( &nbsp;
                                   {clubMembers[club._id]?.athletes || 0} &nbsp;)
                                 </span>
                               </td>
-                              <td>
+                              <td style={{ verticalAlign: "middle" }}>
                                 <span className="badge badge-info">
                                   Registrados ( &nbsp;
                                   {clubMembers[club._id]?.coaches || 0} &nbsp;)
                                 </span>
                               </td>
 
-                              <td>
+                              <td style={{ verticalAlign: "middle" }}>
                                 <button
                                   className="btn btn-primary btn-xs"
                                   onClick={() => handleOpenEdit(club)}
@@ -428,6 +440,23 @@ export const Clubs = ({ name }: { name?: string }) => {
                     onChange={handleChange}
                     placeholder="Ej: Cancha 1"
                   />
+                </div>
+
+                <div className="form-group">
+                  <label>Asignación *</label>
+                  <select
+                    className="form-control"
+                    name="assignment_id"
+                    value={formData.assignment_id}
+                    onChange={handleChange}
+                  >
+                    <option value="">-- Selecciona una asignación --</option>
+                    {assignments.map((assignment) => (
+                      <option key={assignment._id} value={assignment._id}>
+                        {assignment.module_name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
               <div className="modal-footer">
