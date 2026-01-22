@@ -126,6 +126,20 @@ export const userService = {
     }
   },
 
+  async getAthletesFromGroups(): Promise<ApiResponse<any[]>> {
+    try {
+      const response = await api.get("/users/athletes/from-groups");
+      const data = response.data?.data || response.data;
+      return {
+        code: response.status,
+        message: "Atletas desde grupos obtenidos",
+        data: Array.isArray(data) ? data : [],
+      };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  },
+
   async uploadCoachImage(payload: any): Promise<ApiResponse<any>> {
     try {
       const response = await api.post("/users/upload-image", payload);

@@ -144,8 +144,10 @@ export class UsersService {
     // Para ADMIN, generar username y password automáticamente
     if (createUserDto.role === Roles.ADMIN) {
       // Generar username de estructura: firstname.lastname
-      const firstName = createUserDto.name?.toLowerCase().split(' ')[0] || 'admin';
-      const lastName = createUserDto.lastname?.toLowerCase().split(' ')[0] || 'user';
+      const firstName =
+        createUserDto.name?.toLowerCase().split(' ')[0] || 'admin';
+      const lastName =
+        createUserDto.lastname?.toLowerCase().split(' ')[0] || 'user';
       const baseUsername = `${firstName}.${lastName}`;
       let username = baseUsername;
       let counter = 1;
@@ -485,6 +487,8 @@ export class UsersService {
         password: c.password || null,
         name: c.name || null,
         lastname: c.lastname || null,
+        gender: c.gender || null,
+        birth_date: c.birth_date || null,
         ci: c.ci || null,
         active: typeof c.active === 'boolean' ? c.active : true,
         phone: c.phone || null,
@@ -499,6 +503,76 @@ export class UsersService {
       return result;
     } catch (error) {
       console.error('Error al obtener coaches desde grupos:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Obtiene todos los atletas registrados en los grupos del club del admin
+   * Filtra por assignments -> clubes -> grupos -> athletes
+   */
+  async getAthletesFromGroups(requestingUser: currentAuth): Promise<any[]> {
+    try {
+      // Obtener assignments del admin
+      const adminAssignments =
+        await this.assignmentsService.getAssignmentsByAdmin(requestingUser.sub);
+
+      if (!adminAssignments || adminAssignments.length === 0) {
+        return [];
+      }
+
+      // Obtener todos los clubes del admin
+      const clubIds = adminAssignments[0]?.clubs || [];
+
+      if (!clubIds || clubIds.length === 0) {
+        return [];
+      }
+
+      // Obtener todos los grupos de esos clubes
+      const groups = await this.groupModel
+        .find({ club_id: { $in: clubIds } })
+        .populate('athletes')
+        .exec();
+
+      // Extraer athletes únicos
+      const uniqueAthleteIds = new Set<string>();
+      const athletesMap = new Map<string, User>();
+
+      for (const group of groups) {
+        if (group.athletes && Array.isArray(group.athletes)) {
+          for (const athlete of group.athletes) {
+            if (athlete && (athlete as any)._id) {
+              const athleteId = (athlete as any)._id.toString();
+              uniqueAthleteIds.add(athleteId);
+              athletesMap.set(athleteId, athlete as any);
+            }
+          }
+        }
+      }
+
+      // Mapear al JSON solicitado y retornar como array
+      const result = Array.from(athletesMap.values()).map((a: any) => ({
+        role: a.role,
+        username: a.username || null,
+        password: a.password || null,
+        name: a.name || null,
+        lastname: a.lastname || null,
+        gender: a.gender || null,
+        birth_date: a.birth_date || null,
+        ci: a.ci || null,
+        active: typeof a.active === 'boolean' ? a.active : true,
+        phone: a.phone || null,
+        images: {
+          small: a.images?.small || null,
+          medium: a.images?.medium || null,
+          large: a.images?.large || null,
+        },
+        _id: a._id,
+      }));
+
+      return result;
+    } catch (error) {
+      console.error('Error al obtener atletas desde grupos:', error);
       return [];
     }
   }

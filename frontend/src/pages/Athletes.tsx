@@ -19,6 +19,8 @@ export const Athletes = () => {
     username: "",
     ci: "",
     phone: "",
+    gender: "",
+    birth_date: "",
     active: true,
     images: { small: "", medium: "", large: "" },
   });
@@ -35,10 +37,14 @@ export const Athletes = () => {
   const loadAthletes = async () => {
     try {
       setLoading(true);
+      console.log("Loading all athletes...");
       const response = await userService.getAthletes();
+      console.log("Athletes response:", response);
       if (response.code === 200 && Array.isArray(response.data)) {
+        console.log("Athletes loaded successfully:", response.data);
         setAthletes(response.data);
       } else {
+        console.warn("No athletes found or invalid response format");
         setAthletes([]);
       }
     } catch (error) {
@@ -57,6 +63,8 @@ export const Athletes = () => {
       username: u.username || "",
       ci: u.ci || "",
       phone: u.phone || "",
+      gender: u.gender || "",
+      birth_date: u.birth_date ? u.birth_date.split("T")[0] : "",
       active: typeof u.active === "boolean" ? u.active : true,
       images: {
         small: (u.images && u.images.small) || "",
@@ -134,9 +142,51 @@ export const Athletes = () => {
     if (!form.lastname || !form.lastname.trim())
       return "El apellido es requerido";
     if (!form.ci || !form.ci.trim()) return "El CI es requerido";
-    if (!form.username || !form.username.trim())
-      return "El username es requerido";
+    if (!form.phone || !form.phone.trim()) return "El teléfono es requerido";
+    if (!form.gender) return "El género es requerido";
+    if (!form.birth_date) return "La fecha de nacimiento es requerida";
     return null;
+  };
+
+  const calculateAge = (birthDate: string | Date) => {
+    if (!birthDate) return "-";
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birth.getDate())
+    ) {
+      age--;
+    }
+    return age >= 0 ? age : "-";
+  };
+
+  const genderLabel = (g: string | undefined | null) => {
+    if (!g) return "-";
+    const map: Record<string, string> = {
+      male: "Masculino",
+      female: "Femenino",
+    };
+    return map[g] || g || "-";
+  };
+
+  const onCreateClick = () => {
+    setEditing(null);
+    setForm({
+      name: "",
+      lastname: "",
+      username: "",
+      ci: "",
+      phone: "",
+      gender: "",
+      birth_date: "",
+      active: true,
+      images: { small: "", medium: "", large: "" },
+    });
+    setFormError(null);
+    setShowModal(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -148,21 +198,37 @@ export const Athletes = () => {
     }
     setFormError(null);
     try {
-      const payload = { ...form, role: "athlete" };
+      console.log("Form data:", form);
+      const { username, ...payload } = form;
+      const payloadToSend = {
+        ...payload,
+        role: "athlete",
+      };
+      console.log("Payload to send:", payloadToSend);
       if (editing)
-        await dispatch(updateUser({ id: editing._id, user: payload })).unwrap();
+        await dispatch(
+          updateUser({ id: editing._id, user: payloadToSend }),
+        ).unwrap();
       else
-        await dispatch(createUser({ role: "athlete", user: payload })).unwrap();
+        await dispatch(
+          createUser({ role: "athlete", user: payloadToSend }),
+        ).unwrap();
+      console.log("Success! Reloading athletes...");
       await loadAthletes();
       closeModal();
     } catch (err: any) {
+      console.error("Error in handleSubmit:", err);
       setFormError((err && (err.message || err)) || "Error inesperado");
     }
   };
 
   return (
     <div>
-      <NavHeader name="Users - Athletes" pageCreate="Crear" />
+      <NavHeader
+        name="Atletas"
+        pageCreate="Crear Atleta"
+        onCreateClick={onCreateClick}
+      />
       <div className="wrapper wrapper-content">
         <div className="ibox">
           <div className="ibox-content">
@@ -179,7 +245,8 @@ export const Athletes = () => {
                     <th style={{ verticalAlign: "middle" }}>Nombre</th>
                     <th style={{ verticalAlign: "middle" }}>Username</th>
                     <th style={{ verticalAlign: "middle" }}>CI</th>
-                    <th style={{ verticalAlign: "middle" }}>Teléfono</th>
+                    <th style={{ verticalAlign: "middle" }}>Género</th>
+                    <th style={{ verticalAlign: "middle" }}>Edad</th>
                     <th
                       style={{ textAlign: "center", verticalAlign: "middle" }}
                     >
@@ -275,7 +342,21 @@ export const Athletes = () => {
                         )}
                       </td>
                       <td style={{ verticalAlign: "middle" }}>
-                        {u.phone || (
+                        {u.gender ? (
+                          genderLabel(u.gender)
+                        ) : (
+                          <span title="Sin dato">
+                            <i
+                              className="fa fa-exclamation-triangle"
+                              style={{ color: "red" }}
+                            ></i>
+                          </span>
+                        )}
+                      </td>
+                      <td style={{ verticalAlign: "middle" }}>
+                        {u.birth_date ? (
+                          `${calculateAge(u.birth_date)} años`
+                        ) : (
                           <span title="Sin dato">
                             <i
                               className="fa fa-exclamation-triangle"
@@ -324,53 +405,134 @@ export const Athletes = () => {
                   <div className="alert alert-danger">{formError}</div>
                 )}
                 <form onSubmit={handleSubmit}>
-                  <div className="form-group">
-                    <label>Nombre</label>
-                    <input
-                      className="form-control"
-                      value={form.name}
-                      onChange={(e) =>
-                        setForm({ ...form, name: e.target.value })
-                      }
-                    />
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: "12px",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label>Nombre</label>
+                      <input
+                        className="form-control"
+                        value={form.name}
+                        onChange={(e) =>
+                          setForm({ ...form, name: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label>Apellido</label>
+                      <input
+                        className="form-control"
+                        value={form.lastname}
+                        onChange={(e) =>
+                          setForm({ ...form, lastname: e.target.value })
+                        }
+                      />
+                    </div>
                   </div>
-                  <div className="form-group">
-                    <label>Apellido</label>
-                    <input
-                      className="form-control"
-                      value={form.lastname}
-                      onChange={(e) =>
-                        setForm({ ...form, lastname: e.target.value })
-                      }
-                    />
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: "12px",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label>CI</label>
+                      <input
+                        className="form-control"
+                        value={form.ci}
+                        onChange={(e) =>
+                          setForm({ ...form, ci: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label>Teléfono</label>
+                      <input
+                        className="form-control"
+                        value={form.phone}
+                        onChange={(e) =>
+                          setForm({ ...form, phone: e.target.value })
+                        }
+                      />
+                    </div>
                   </div>
-                  <div className="form-group">
-                    <label>CI</label>
-                    <input
-                      className="form-control"
-                      value={form.ci}
-                      onChange={(e) => setForm({ ...form, ci: e.target.value })}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Username</label>
-                    <input
-                      className="form-control"
-                      value={form.username}
-                      onChange={(e) =>
-                        setForm({ ...form, username: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Teléfono</label>
-                    <input
-                      className="form-control"
-                      value={form.phone}
-                      onChange={(e) =>
-                        setForm({ ...form, phone: e.target.value })
-                      }
-                    />
+                  {!editing && (
+                    <div className="form-group">
+                      <label>Username</label>
+                      <input
+                        className="form-control"
+                        value={form.username}
+                        readOnly
+                        style={{
+                          backgroundColor: "#f5f5f5",
+                          cursor: "not-allowed",
+                        }}
+                      />
+                      <small
+                        style={{
+                          color: "#999",
+                          marginTop: "4px",
+                          display: "block",
+                        }}
+                      >
+                        Se genera automáticamente
+                      </small>
+                    </div>
+                  )}
+                  {editing && (
+                    <div className="form-group">
+                      <label>Username</label>
+                      <input
+                        className="form-control"
+                        value={form.username}
+                        readOnly
+                        style={{
+                          backgroundColor: "#f5f5f5",
+                          cursor: "not-allowed",
+                        }}
+                      />
+                    </div>
+                  )}
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: "12px",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label>Género</label>
+                      <select
+                        className="form-control"
+                        value={form.gender}
+                        onChange={(e) =>
+                          setForm({ ...form, gender: e.target.value })
+                        }
+                      >
+                        <option value="">Seleccionar...</option>
+                        <option value="male">Masculino</option>
+                        <option value="female">Femenino</option>
+                      </select>
+                    </div>
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label>Fecha de Nacimiento</label>
+                      <input
+                        type="date"
+                        className="form-control"
+                        value={form.birth_date}
+                        onChange={(e) =>
+                          setForm({ ...form, birth_date: e.target.value })
+                        }
+                      />
+                    </div>
                   </div>
 
                   <div
@@ -378,6 +540,7 @@ export const Athletes = () => {
                       display: "flex",
                       justifyContent: "flex-end",
                       gap: 8,
+                      marginTop: "16px",
                     }}
                   >
                     <button

@@ -119,6 +119,12 @@ export class UsersController {
     return this.usersService.getCoachesFromGroups(user);
   }
 
+  @Get('athletes/from-groups')
+  @Roles(Role.SUPERADMIN, Role.ADMIN, Role.ASSISTANT)
+  async getAthletesFromGroups(@CurrentUser() user: currentAuth) {
+    return this.usersService.getAthletesFromGroups(user);
+  }
+
   @Get()
   @Roles(Role.SUPERADMIN, Role.ADMIN, Role.ASSISTANT, Role.COACH)
   findAll(

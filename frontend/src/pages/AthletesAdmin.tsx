@@ -7,7 +7,7 @@ import { userService } from "../services/userService";
 import Cropper from "react-cropper";
 import "cropperjs/dist/cropper.css";
 
-export const Admins = () => {
+export const AthletesAdmin = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [showModal, setShowModal] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
@@ -19,31 +19,37 @@ export const Admins = () => {
     username: "",
     ci: "",
     phone: "",
+    gender: "",
+    birth_date: "",
     active: true,
     images: { small: "", medium: "", large: "" },
   });
   const [formError, setFormError] = useState<string | null>(null);
-  const [admins, setAdmins] = useState<any[]>([]);
+  const [athletes, setAthletes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploadedImageBase64, setUploadedImageBase64] = useState<string>("");
   const cropperRef = useRef<any>(null);
 
   useEffect(() => {
-    loadAdmins();
+    loadAthletes();
   }, []);
 
-  const loadAdmins = async () => {
+  const loadAthletes = async () => {
     try {
       setLoading(true);
-      const response = await userService.getAdmins();
+      console.log("Loading athletes from groups...");
+      const response = await userService.getAthletesFromGroups();
+      console.log("Athletes response:", response);
       if (response.code === 200 && Array.isArray(response.data)) {
-        setAdmins(response.data);
+        console.log("Athletes loaded successfully:", response.data);
+        setAthletes(response.data);
       } else {
-        setAdmins([]);
+        console.warn("No athletes found or invalid response format");
+        setAthletes([]);
       }
     } catch (error) {
-      console.error("Error al cargar admins:", error);
-      setAdmins([]);
+      console.error("Error al cargar atletas:", error);
+      setAthletes([]);
     } finally {
       setLoading(false);
     }
@@ -57,6 +63,8 @@ export const Admins = () => {
       username: u.username || "",
       ci: u.ci || "",
       phone: u.phone || "",
+      gender: u.gender || "",
+      birth_date: u.birth_date ? u.birth_date.split("T")[0] : "",
       active: typeof u.active === "boolean" ? u.active : true,
       images: {
         small: (u.images && u.images.small) || "",
@@ -100,11 +108,11 @@ export const Admins = () => {
       const payload = {
         userId: editingImage._id,
         imageBase64: croppedBase64,
-        role: "admin",
+        role: "athlete",
       };
       const response = await userService.uploadCoachImage(payload);
       if (response.code === 200) {
-        await loadAdmins();
+        await loadAthletes();
         closeImageModal();
       } else {
         const errorMsg = response.message || "Error al procesar la imagen";
@@ -134,7 +142,51 @@ export const Admins = () => {
     if (!form.lastname || !form.lastname.trim())
       return "El apellido es requerido";
     if (!form.ci || !form.ci.trim()) return "El CI es requerido";
+    if (!form.phone || !form.phone.trim()) return "El teléfono es requerido";
+    if (!form.gender) return "El género es requerido";
+    if (!form.birth_date) return "La fecha de nacimiento es requerida";
     return null;
+  };
+
+  const calculateAge = (birthDate: string | Date) => {
+    if (!birthDate) return "-";
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birth.getDate())
+    ) {
+      age--;
+    }
+    return age >= 0 ? age : "-";
+  };
+
+  const genderLabel = (g: string | undefined | null) => {
+    if (!g) return "-";
+    const map: Record<string, string> = {
+      male: "Masculino",
+      female: "Femenino",
+    };
+    return map[g] || g || "-";
+  };
+
+  const onCreateClick = () => {
+    setEditing(null);
+    setForm({
+      name: "",
+      lastname: "",
+      username: "",
+      ci: "",
+      phone: "",
+      gender: "",
+      birth_date: "",
+      active: true,
+      images: { small: "", medium: "", large: "" },
+    });
+    setFormError(null);
+    setShowModal(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -146,20 +198,26 @@ export const Admins = () => {
     }
     setFormError(null);
     try {
-      // No enviar username y password - el backend los genera automáticamente
-      const { username, phone, ...payload } = form;
-      const payloadToSend = { ...payload, role: "admin", phone };
+      console.log("Form data:", form);
+      const { username, ...payload } = form;
+      const payloadToSend = {
+        ...payload,
+        role: "athlete",
+      };
+      console.log("Payload to send:", payloadToSend);
       if (editing)
         await dispatch(
           updateUser({ id: editing._id, user: payloadToSend }),
         ).unwrap();
       else
         await dispatch(
-          createUser({ role: "admin", user: payloadToSend }),
+          createUser({ role: "athlete", user: payloadToSend }),
         ).unwrap();
-      await loadAdmins();
+      console.log("Success! Reloading athletes...");
+      await loadAthletes();
       closeModal();
     } catch (err: any) {
+      console.error("Error in handleSubmit:", err);
       setFormError((err && (err.message || err)) || "Error inesperado");
     }
   };
@@ -167,20 +225,9 @@ export const Admins = () => {
   return (
     <div>
       <NavHeader
-        name="Administradores"
-        pageCreate="Crear administrador"
-        onCreateClick={() => {
-          setEditing(null);
-          setForm({
-            name: "",
-            lastname: "",
-            username: "",
-            ci: "",
-            phone: "",
-          });
-          setFormError(null);
-          setShowModal(true);
-        }}
+        name="Atletas del Club"
+        pageCreate="Crear Atleta"
+        onCreateClick={onCreateClick}
       />
       <div className="wrapper wrapper-content">
         <div className="ibox">
@@ -198,7 +245,8 @@ export const Admins = () => {
                     <th style={{ verticalAlign: "middle" }}>Nombre</th>
                     <th style={{ verticalAlign: "middle" }}>Username</th>
                     <th style={{ verticalAlign: "middle" }}>CI</th>
-                    <th style={{ verticalAlign: "middle" }}>Teléfono</th>
+                    <th style={{ verticalAlign: "middle" }}>Género</th>
+                    <th style={{ verticalAlign: "middle" }}>Edad</th>
                     <th
                       style={{ textAlign: "center", verticalAlign: "middle" }}
                     >
@@ -207,7 +255,7 @@ export const Admins = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {admins.map((u: any) => (
+                  {athletes.map((u: any) => (
                     <tr key={u._id}>
                       <td
                         style={{
@@ -294,7 +342,21 @@ export const Admins = () => {
                         )}
                       </td>
                       <td style={{ verticalAlign: "middle" }}>
-                        {u.phone || (
+                        {u.gender ? (
+                          genderLabel(u.gender)
+                        ) : (
+                          <span title="Sin dato">
+                            <i
+                              className="fa fa-exclamation-triangle"
+                              style={{ color: "red" }}
+                            ></i>
+                          </span>
+                        )}
+                      </td>
+                      <td style={{ verticalAlign: "middle" }}>
+                        {u.birth_date ? (
+                          `${calculateAge(u.birth_date)} años`
+                        ) : (
                           <span title="Sin dato">
                             <i
                               className="fa fa-exclamation-triangle"
@@ -332,7 +394,7 @@ export const Admins = () => {
             <div className="modal-content">
               <div className="modal-header">
                 <h4 className="modal-title">
-                  {editing ? "Editar Admin" : "Crear Admin"}
+                  {editing ? "Editar Atleta" : "Crear Atleta"}
                 </h4>
                 <button className="close" onClick={closeModal}>
                   &times;
@@ -343,47 +405,134 @@ export const Admins = () => {
                   <div className="alert alert-danger">{formError}</div>
                 )}
                 <form onSubmit={handleSubmit}>
-                  <div className="form-group">
-                    <label>Nombre</label>
-                    <input
-                      className="form-control"
-                      value={form.name}
-                      onChange={(e) => {
-                        const name = e.target.value;
-                        const username = `${name.toLowerCase().split(" ")[0]}.${form.lastname.toLowerCase().split(" ")[0]}`;
-                        setForm({ ...form, name, username });
-                      }}
-                    />
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: "12px",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label>Nombre</label>
+                      <input
+                        className="form-control"
+                        value={form.name}
+                        onChange={(e) =>
+                          setForm({ ...form, name: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label>Apellido</label>
+                      <input
+                        className="form-control"
+                        value={form.lastname}
+                        onChange={(e) =>
+                          setForm({ ...form, lastname: e.target.value })
+                        }
+                      />
+                    </div>
                   </div>
-                  <div className="form-group">
-                    <label>Apellido</label>
-                    <input
-                      className="form-control"
-                      value={form.lastname}
-                      onChange={(e) => {
-                        const lastname = e.target.value;
-                        const username = `${form.name.toLowerCase().split(" ")[0]}.${lastname.toLowerCase().split(" ")[0]}`;
-                        setForm({ ...form, lastname, username });
-                      }}
-                    />
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: "12px",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label>CI</label>
+                      <input
+                        className="form-control"
+                        value={form.ci}
+                        onChange={(e) =>
+                          setForm({ ...form, ci: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label>Teléfono</label>
+                      <input
+                        className="form-control"
+                        value={form.phone}
+                        onChange={(e) =>
+                          setForm({ ...form, phone: e.target.value })
+                        }
+                      />
+                    </div>
                   </div>
-                  <div className="form-group">
-                    <label>CI</label>
-                    <input
-                      className="form-control"
-                      value={form.ci}
-                      onChange={(e) => setForm({ ...form, ci: e.target.value })}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Teléfono</label>
-                    <input
-                      className="form-control"
-                      value={form.phone}
-                      onChange={(e) =>
-                        setForm({ ...form, phone: e.target.value })
-                      }
-                    />
+                  {!editing && (
+                    <div className="form-group">
+                      <label>Username</label>
+                      <input
+                        className="form-control"
+                        value={form.username}
+                        readOnly
+                        style={{
+                          backgroundColor: "#f5f5f5",
+                          cursor: "not-allowed",
+                        }}
+                      />
+                      <small
+                        style={{
+                          color: "#999",
+                          marginTop: "4px",
+                          display: "block",
+                        }}
+                      >
+                        Se genera automáticamente
+                      </small>
+                    </div>
+                  )}
+                  {editing && (
+                    <div className="form-group">
+                      <label>Username</label>
+                      <input
+                        className="form-control"
+                        value={form.username}
+                        readOnly
+                        style={{
+                          backgroundColor: "#f5f5f5",
+                          cursor: "not-allowed",
+                        }}
+                      />
+                    </div>
+                  )}
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: "12px",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label>Género</label>
+                      <select
+                        className="form-control"
+                        value={form.gender}
+                        onChange={(e) =>
+                          setForm({ ...form, gender: e.target.value })
+                        }
+                      >
+                        <option value="">Seleccionar...</option>
+                        <option value="male">Masculino</option>
+                        <option value="female">Femenino</option>
+                      </select>
+                    </div>
+                    <div className="form-group" style={{ margin: 0 }}>
+                      <label>Fecha de Nacimiento</label>
+                      <input
+                        type="date"
+                        className="form-control"
+                        value={form.birth_date}
+                        onChange={(e) =>
+                          setForm({ ...form, birth_date: e.target.value })
+                        }
+                      />
+                    </div>
                   </div>
 
                   <div
@@ -391,6 +540,7 @@ export const Admins = () => {
                       display: "flex",
                       justifyContent: "flex-end",
                       gap: 8,
+                      marginTop: "16px",
                     }}
                   >
                     <button
@@ -666,4 +816,4 @@ export const Admins = () => {
   );
 };
 
-export default Admins;
+export default AthletesAdmin;

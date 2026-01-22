@@ -8,6 +8,7 @@ import {
   Coaches,
   CoachesSuperadmin,
   Athletes,
+  AthletesAdmin,
   Sports,
 } from "../pages";
 
@@ -95,6 +96,11 @@ export const roleRoutes: RoleRoutes = {
           element: <Assistants />,
         },
         { path: "/users/coaches", label: "Entrenadores", element: <Coaches /> },
+        {
+          path: "/users/athletes",
+          label: "Atletas",
+          element: <AthletesAdmin />,
+        },
       ],
     },
   ],

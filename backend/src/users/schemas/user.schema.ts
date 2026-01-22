@@ -48,14 +48,6 @@ export class User extends mongoose.Document {
 
   // ========== CAMPOS OPCIONALES (LEGADO) ==========
 
-  /** Altura en centímetros */
-  @Prop({ required: false })
-  height?: number;
-
-  /** Peso en kilogramos */
-  @Prop({ required: false })
-  weight?: number;
-
   /** Bandera para soft-delete */
   @Prop({ type: Boolean, default: true })
   active: boolean;
