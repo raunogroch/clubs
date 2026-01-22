@@ -10,6 +10,7 @@ import {
   Athletes,
   AthletesAdmin,
   Sports,
+  ProfileAdmin,
 } from "../pages";
 
 export type MenuRoute = {
@@ -67,6 +68,10 @@ export const roleRoutes: RoleRoutes = {
     },
   ],
   admin: [
+    {
+      path: "/profile",
+      element: <ProfileAdmin />,
+    },
     {
       path: "/",
       icon: "fa-home",

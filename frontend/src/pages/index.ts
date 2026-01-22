@@ -13,3 +13,4 @@ export * from "./Parents";
 export * from "./Athletes";
 export * from "./AthletesAdmin";
 export * from "./Sports";
+export * from "./ProfileAdmin";

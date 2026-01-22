@@ -38,6 +38,7 @@ import { AssignmentsService } from '../assignments/assignments.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Group } from '../clubs/schemas/group.schema';
+import bcrypt from 'bcryptjs';
 
 /**
  * Interfaz para el usuario autenticado extraído del JWT
@@ -691,6 +692,99 @@ export class UsersService {
           `Error al procesar imagen: ${error?.message || 'Error desconocido'}`,
         );
       }
+    }
+  }
+
+  /**
+   * Cambiar la contraseña del usuario autenticado
+   *
+   * @param userId - ID del usuario autenticado
+   * @param currentPassword - Contraseña actual (para validación)
+   * @param newPassword - Nueva contraseña
+   * @returns { code: 200, message: "Contraseña actualizada correctamente" }
+   * @throws NotFoundException si el usuario no existe
+   * @throws Error si la contraseña actual es incorrecta
+   */
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<{ code: number; message: string }> {
+    try {
+      // Obtener el usuario por ID
+      const user = await this.userRepository.findById(userId);
+      if (!user) {
+        throw new NotFoundException(`Usuario con ID ${userId} no encontrado`);
+      }
+
+      // Validar que el usuario tenga contraseña configurada
+      if (!user.password) {
+        throw new Error('El usuario no tiene contraseña configurada');
+      }
+
+      // Validar que la contraseña actual sea correcta
+      const isPasswordValid = await bcrypt.compare(
+        currentPassword,
+        user.password,
+      );
+      if (!isPasswordValid) {
+        throw new Error('La contraseña actual es incorrecta');
+      }
+
+      // Hashear la nueva contraseña
+      const hashedPassword =
+        await this.userPasswordService.hashPassword(newPassword);
+
+      // Actualizar la contraseña
+      await this.userRepository.updateById(userId, {
+        password: hashedPassword,
+      });
+
+      return {
+        code: 200,
+        message: 'Contraseña actualizada correctamente',
+      };
+    } catch (error: any) {
+      throw new Error(error.message || 'Error al cambiar la contraseña');
+    }
+  }
+
+  /**
+   * Resetear la contraseña de un usuario a su CI
+   *
+   * @param userId - ID del usuario cuya contraseña se resetea
+   * @returns { code: 200, message: "Contraseña actualizada a su CI" }
+   * @throws NotFoundException si el usuario no existe
+   */
+  async resetPassword(userId: string): Promise<{ code: number; message: string }> {
+    try {
+      // Obtener el usuario por ID
+      const user = await this.userRepository.findById(userId);
+      if (!user) {
+        throw new NotFoundException(`Usuario con ID ${userId} no encontrado`);
+      }
+
+      // Validar que el usuario tenga CI configurado
+      if (!user.ci) {
+        throw new Error('El usuario no tiene CI configurado');
+      }
+
+      // Hashear el CI como nueva contraseña
+      const hashedPassword = await this.userPasswordService.hashPassword(
+        user.ci,
+      );
+
+      // Actualizar la contraseña
+      await this.userRepository.updateById(userId, {
+        password: hashedPassword,
+      });
+
+      return {
+        code: 200,
+        message: 'Contraseña actualizada a su CI',
+      };
+    } catch (error: any) {
+      throw new Error(error.message || 'Error al resetear la contraseña');
     }
   }
 }

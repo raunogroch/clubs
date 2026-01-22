@@ -25,6 +25,7 @@ export const Admins = () => {
   const [formError, setFormError] = useState<string | null>(null);
   const [admins, setAdmins] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [resetingPassword, setResetingPassword] = useState(false);
   const [uploadedImageBase64, setUploadedImageBase64] = useState<string>("");
   const cropperRef = useRef<any>(null);
 
@@ -161,6 +162,25 @@ export const Admins = () => {
       closeModal();
     } catch (err: any) {
       setFormError((err && (err.message || err)) || "Error inesperado");
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!editing) return;
+    try {
+      setResetingPassword(true);
+      const response = await userService.resetPassword(editing._id);
+      if (response.code === 200) {
+        import("toastr").then((toastr) => {
+          toastr.default.success(`Contraseña reseteada a: ${editing.ci}`);
+        });
+      }
+    } catch (error) {
+      import("toastr").then((toastr) => {
+        toastr.default.error("Error al resetear la contraseña");
+      });
+    } finally {
+      setResetingPassword(false);
     }
   };
 
@@ -389,24 +409,39 @@ export const Admins = () => {
                   <div
                     style={{
                       display: "flex",
-                      justifyContent: "flex-end",
+                      justifyContent: "space-between",
                       gap: 8,
                     }}
                   >
-                    <button
-                      type="button"
-                      className="btn btn-xs btn-default"
-                      onClick={closeModal}
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      type="submit"
-                      className="btn btn-xs btn-primary"
-                      disabled={loading}
-                    >
-                      {editing ? "Actualizar" : "Crear"}
-                    </button>
+                    <div>
+                      {editing && (
+                        <button
+                          type="button"
+                          className="btn btn-xs btn-warning"
+                          onClick={handleResetPassword}
+                          disabled={resetingPassword || loading}
+                          title="Resetea la contraseña al CI del usuario"
+                        >
+                          <i className="fa fa-key"></i> Resetear Contraseña
+                        </button>
+                      )}
+                    </div>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button
+                        type="button"
+                        className="btn btn-xs btn-default"
+                        onClick={closeModal}
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        className="btn btn-xs btn-primary"
+                        disabled={loading}
+                      >
+                        {editing ? "Actualizar" : "Crear"}
+                      </button>
+                    </div>
                   </div>
                 </form>
               </div>

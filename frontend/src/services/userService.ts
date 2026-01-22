@@ -181,6 +181,66 @@ export const userService = {
       return handleApiError(error);
     }
   },
+
+  async updateUser(id: string, userData: any): Promise<ApiResponse<any>> {
+    try {
+      const response = await api.put(`/users/${id}`, userData);
+      const data = response.data?.data || response.data;
+      return {
+        code: response.status,
+        message: "Usuario actualizado",
+        data,
+      };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  },
+
+  async getMe(): Promise<ApiResponse<any>> {
+    try {
+      const response = await api.get("/users/me");
+      const data = response.data?.data || response.data;
+      return {
+        code: response.status,
+        message: "Perfil obtenido",
+        data,
+      };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  },
+
+  async changePassword(
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<ApiResponse<any>> {
+    try {
+      const response = await api.post("/users/change-password", {
+        currentPassword,
+        newPassword,
+      });
+      return {
+        code: response.status,
+        message: "Contraseña actualizada",
+        data: response.data,
+      };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  },
+
+  async resetPassword(userId: string): Promise<ApiResponse<any>> {
+    try {
+      const response = await api.post(`/users/${userId}/reset-password`);
+      return {
+        code: response.status,
+        message: response.data?.message || "Contraseña reseteada",
+        data: response.data,
+      };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  },
 };
 
 export default userService;

@@ -214,4 +214,40 @@ export class UsersController {
   async uploadImage(@Body() payload: any) {
     return this.usersService.uploadUserImage(payload);
   }
+
+  /**
+   * POST /api/users/change-password
+   * Cambiar la contraseña del usuario autenticado
+   *
+   * @param body - { currentPassword: string, newPassword: string }
+   * @param currentUser - Usuario autenticado (del JWT)
+   * @returns { message: string, code: number }
+   */
+  @Post('change-password')
+  @HttpCode(200)
+  async changePassword(
+    @Body() body: { currentPassword: string; newPassword: string },
+    @CurrentUser() currentUser: currentAuth,
+  ) {
+    return this.usersService.changePassword(
+      currentUser.sub,
+      body.currentPassword,
+      body.newPassword,
+    );
+  }
+
+  /**
+   * POST /api/users/:id/reset-password
+   * Resetear la contraseña de un usuario a su CI
+   * Solo para ADMIN, SUPERADMIN o ASSISTANT
+   *
+   * @param id - ID del usuario a resetear la contraseña
+   * @returns { message: string, code: number }
+   */
+  @Post(':id/reset-password')
+  @HttpCode(200)
+  @Roles(Role.ADMIN, Role.SUPERADMIN, Role.ASSISTANT)
+  async resetPassword(@Param('id') id: string) {
+    return this.usersService.resetPassword(id);
+  }
 }
