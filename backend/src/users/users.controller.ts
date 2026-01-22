@@ -196,4 +196,14 @@ export class UsersController {
   findByCi(@Param('ci') ci: string, @Query('role') role?: string) {
     return this.usersService.findByCiByRole(ci, role);
   }
+
+  /**
+   * Endpoint para cargar una imagen de usuario
+   * Recibe imagen en base64 y la procesa con image-processor
+   */
+  @Post('upload-image')
+  @Roles(Role.SUPERADMIN, Role.ADMIN, Role.ASSISTANT, Role.COACH)
+  async uploadImage(@Body() payload: any) {
+    return this.usersService.uploadUserImage(payload);
+  }
 }

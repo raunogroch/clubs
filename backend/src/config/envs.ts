@@ -11,6 +11,11 @@
  * - IMAGE_PROCESSOR_API: URL de la API de procesamiento de imágenes
  */
 
+import { config } from 'dotenv';
+import joi = require('joi');
+
+config();
+
 export interface EnvConfig {
   mongodb: {
     uri: string;

@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
-import { NavHeader } from "../components";
+import { useEffect, useRef, useState } from "react";
+import { Image, NavHeader } from "../components";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../store/store";
 import { createUser, updateUser } from "../store/usersThunk";
 import { userService } from "../services/userService";
+import Cropper from "react-cropper";
+import "cropperjs/dist/cropper.css";
 
 export const Coaches = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -20,14 +22,11 @@ export const Coaches = () => {
     active: true,
     images: { small: "", medium: "", large: "" },
   });
-  const [imageForm, setImageForm] = useState<any>({
-    small: "",
-    medium: "",
-    large: "",
-  });
   const [formError, setFormError] = useState<string | null>(null);
   const [coaches, setCoaches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [uploadedImageBase64, setUploadedImageBase64] = useState<string>("");
+  const cropperRef = useRef<any>(null);
 
   useEffect(() => {
     loadCoachesFromGroups();
@@ -73,11 +72,7 @@ export const Coaches = () => {
   };
   const openImageEdit = (u: any) => {
     setEditingImage(u);
-    setImageForm({
-      small: (u.images && u.images.small) || "",
-      medium: (u.images && u.images.medium) || "",
-      large: (u.images && u.images.large) || "",
-    });
+    setUploadedImageBase64("");
     setShowImageModal(true);
   };
   const closeImageModal = () => {
@@ -86,18 +81,41 @@ export const Coaches = () => {
   };
   const handleImageSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!uploadedImageBase64) {
+      alert("Por favor sube una imagen primero");
+      return;
+    }
     try {
+      const canvas = cropperRef.current?.cropper?.getCroppedCanvas();
+      if (!canvas) {
+        alert("Error al procesar la imagen");
+        return;
+      }
+      const croppedBase64 = canvas.toDataURL("image/jpeg");
       const payload = {
-        images: imageForm,
+        userId: editingImage._id,
+        imageBase64: croppedBase64,
         role: "coach",
       };
-      await dispatch(
-        updateUser({ id: editingImage._id, user: payload }),
-      ).unwrap();
-      await loadCoachesFromGroups();
-      closeImageModal();
+      const response = await userService.uploadCoachImage(payload);
+      if (response.code === 200) {
+        await loadCoachesFromGroups();
+        closeImageModal();
+      } else {
+        alert("Error al procesar la imagen");
+      }
     } catch (err: any) {
       alert((err && (err.message || err)) || "Error al actualizar imagen");
+    }
+  };
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setUploadedImageBase64(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
   const validate = () => {
@@ -175,7 +193,7 @@ export const Coaches = () => {
                           }}
                         >
                           {u.images?.small ? (
-                            <img
+                            <Image
                               src={u.images.small}
                               alt={u.name}
                               style={{
@@ -374,11 +392,14 @@ export const Coaches = () => {
 
       {showImageModal && (
         <div
-          className="modal"
+          className="modal modal-lg"
           style={{ display: "block", backgroundColor: "rgba(0,0,0,.5)" }}
           onClick={closeImageModal}
         >
-          <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="modal-dialog modal-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="modal-content">
               <div className="modal-header">
                 <h4 className="modal-title">Editar Foto de Perfil</h4>
@@ -389,102 +410,76 @@ export const Coaches = () => {
               <div className="modal-body">
                 <form onSubmit={handleImageSubmit}>
                   <div className="form-group">
-                    <label>Preview Foto (medium)</label>
-                    <div style={{ marginBottom: "10px", textAlign: "center" }}>
-                      {imageForm.medium ? (
-                        <img
-                          src={imageForm.medium}
-                          alt="Preview"
-                          style={{
-                            maxWidth: "150px",
-                            maxHeight: "150px",
-                            borderRadius: "8px",
-                            border: "1px solid #ddd",
-                            padding: "4px",
-                          }}
-                        />
-                      ) : (
-                        <div
-                          style={{
-                            width: "150px",
-                            height: "150px",
-                            backgroundColor: "#f0f0f0",
-                            borderRadius: "8px",
-                            border: "1px solid #ddd",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            margin: "0 auto",
-                            color: "#999",
-                          }}
-                        >
-                          <i
-                            className="fa fa-image"
-                            style={{ fontSize: "40px" }}
-                          ></i>
+                    <label>Seleccionar Imagen</label>
+                    <input
+                      type="file"
+                      className="form-control"
+                      accept="image/*"
+                      onChange={handleImageFileChange}
+                    />
+                  </div>
+
+                  {uploadedImageBase64 && (
+                    <>
+                      <div className="form-group">
+                        <label>Recortar Imagen</label>
+                        <div style={{ maxHeight: "400px", overflow: "auto" }}>
+                          <Cropper
+                            ref={cropperRef}
+                            src={uploadedImageBase64}
+                            guides
+                            responsive
+                            autoCropArea={1}
+                            aspectRatio={1}
+                            viewMode={1}
+                            style={{ maxWidth: "100%", maxHeight: "400px" }}
+                          />
                         </div>
-                      )}
+                      </div>
+
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "flex-end",
+                          gap: 8,
+                        }}
+                      >
+                        <button
+                          type="button"
+                          className="btn btn-xs btn-default"
+                          onClick={closeImageModal}
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          type="submit"
+                          className="btn btn-xs btn-primary"
+                          disabled={loading}
+                        >
+                          Guardar Imagen
+                        </button>
+                      </div>
+                    </>
+                  )}
+
+                  {!uploadedImageBase64 && (
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        gap: 8,
+                        marginTop: "10px",
+                      }}
+                    >
+                      <button
+                        type="button"
+                        className="btn btn-xs btn-default"
+                        onClick={closeImageModal}
+                      >
+                        Cancelar
+                      </button>
                     </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label>URL Imagen (small)</label>
-                    <input
-                      className="form-control"
-                      placeholder="https://..."
-                      value={imageForm.small}
-                      onChange={(e) =>
-                        setImageForm({ ...imageForm, small: e.target.value })
-                      }
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>URL Imagen (medium)</label>
-                    <input
-                      className="form-control"
-                      placeholder="https://..."
-                      value={imageForm.medium}
-                      onChange={(e) =>
-                        setImageForm({ ...imageForm, medium: e.target.value })
-                      }
-                    />
-                  </div>
-
-                  <div className="form-group">
-                    <label>URL Imagen (large)</label>
-                    <input
-                      className="form-control"
-                      placeholder="https://..."
-                      value={imageForm.large}
-                      onChange={(e) =>
-                        setImageForm({ ...imageForm, large: e.target.value })
-                      }
-                    />
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "flex-end",
-                      gap: 8,
-                    }}
-                  >
-                    <button
-                      type="button"
-                      className="btn btn-xs btn-default"
-                      onClick={closeImageModal}
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      type="submit"
-                      className="btn btn-xs btn-primary"
-                      disabled={loading}
-                    >
-                      Guardar Imagen
-                    </button>
-                  </div>
+                  )}
                 </form>
               </div>
             </div>

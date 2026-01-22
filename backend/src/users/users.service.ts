@@ -26,6 +26,7 @@ import {
   NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { User } from './schemas/user.schema';
 import { Roles } from './enum/roles.enum';
 import { CreateUserDto, UpdateUserDto } from './dto';
@@ -54,6 +55,7 @@ export class UsersService {
    * @param userRepository - Repositorio para acceder a datos de usuarios
    * @param userValidator - Servicio para validar usuarios
    * @param userPasswordService - Servicio para hashear contraseñas
+   * @param configService - Servicio de configuración
    */
   constructor(
     @Inject('UserRepository') private readonly userRepository: IUserRepository,
@@ -61,6 +63,7 @@ export class UsersService {
     private readonly userPasswordService: UserPasswordService,
     private readonly assignmentsService: AssignmentsService,
     @InjectModel(Group.name) private readonly groupModel: Model<Group>,
+    private readonly configService: ConfigService,
   ) {}
 
   /** Carpeta donde se almacenan las fotos de perfil de usuarios */
@@ -477,6 +480,130 @@ export class UsersService {
     } catch (error) {
       console.error('Error al obtener coaches desde grupos:', error);
       return [];
+    }
+  }
+
+  /**
+   * Carga y procesa una imagen de usuario mediante image-processor
+   * Recibe imagen en base64, la envía al servicio image-processor
+   * y guarda las URLs de las imágenes procesadas
+   */
+  async uploadUserImage(payload: any): Promise<any> {
+    try {
+      const { userId, imageBase64, role } = payload;
+
+      if (!userId || !imageBase64) {
+        throw new Error('userId e imageBase64 son requeridos');
+      }
+
+      console.log('Iniciando carga de imagen para usuario:', userId);
+
+      // Procesar la imagen con image-processor
+      const imageUrls = await this.processImageWithImageProcessor(imageBase64);
+
+      console.log('Imagen procesada, URLs obtenidas:', imageUrls);
+
+      // Actualizar el usuario con las URLs de imagen
+      const updateData: UpdateUserDto = {
+        images: imageUrls,
+        role: (role || 'coach') as any,
+      };
+
+      const updatedUser = await this.userRepository.updateById(
+        userId,
+        updateData,
+      );
+
+      console.log('Usuario actualizado correctamente');
+
+      return {
+        code: 200,
+        message: 'Imagen cargada exitosamente',
+        data: updatedUser,
+      };
+    } catch (error: any) {
+      console.error('Error completo al cargar imagen:', error);
+      const errorMessage =
+        error?.message || 'Error desconocido al procesar la imagen';
+      console.error('Mensaje de error:', errorMessage);
+      throw new ServiceUnavailableException(
+        `Error al procesar la imagen: ${errorMessage}`,
+      );
+    }
+  }
+
+  /**
+   * Procesa la imagen con el servicio image-processor
+   * Simula o realiza la comunicación con image-processor
+   */
+  private async processImageWithImageProcessor(
+    imageBase64: string,
+  ): Promise<any> {
+    try {
+      const axios = require('axios');
+      const imageProcessorApi = this.configService.get<string>(
+        'IMAGE_PROCESSOR_API',
+      );
+
+      if (!imageProcessorApi) {
+        throw new Error('IMAGE_PROCESSOR_API no configurada');
+      }
+
+      // Primero, procesa la imagen (redimensiona, optimiza, etc.)
+      console.log('Llamando a image-processor en:', imageProcessorApi);
+      console.log('Enviando imagen a procesar...');
+      const processResponse = await axios.post(
+        `${imageProcessorApi}/api/process`,
+        {
+          image: imageBase64,
+        },
+      );
+
+      console.log('Respuesta del procesamiento:', processResponse.status);
+
+      if (!processResponse.data || !processResponse.data.image) {
+        throw new Error(
+          'Respuesta inválida del procesador: ' +
+            JSON.stringify(processResponse.data),
+        );
+      }
+
+      // Luego, guarda las variantes (small, medium, large)
+      console.log('Guardando variantes de imagen...');
+      const saveResponse = await axios.post(
+        `${imageProcessorApi}/api/process/save`,
+        {
+          folder: this.folder,
+          image: processResponse.data.image,
+        },
+      );
+
+      console.log('Respuesta del guardado:', saveResponse.status);
+
+      if (
+        !saveResponse.data ||
+        !saveResponse.data.images ||
+        !saveResponse.data.images.small ||
+        !saveResponse.data.images.medium ||
+        !saveResponse.data.images.large
+      ) {
+        throw new Error(
+          'Error al guardar variantes de imagen: ' +
+            JSON.stringify(saveResponse.data),
+        );
+      }
+
+      console.log('Variantes guardadas correctamente');
+      return saveResponse.data.images;
+    } catch (error: any) {
+      console.error('Error al comunicarse con image-processor:', error);
+      console.error('Error details:', {
+        message: error?.message,
+        code: error?.code,
+        status: error?.response?.status,
+        data: error?.response?.data,
+      });
+      throw error;
     }
   }
 }

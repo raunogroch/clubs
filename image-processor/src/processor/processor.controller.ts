@@ -1,32 +1,62 @@
-import { Controller, Post, Body } from "@nestjs/common";
+import {
+  Controller,
+  Post,
+  Body,
+  BadRequestException,
+  HttpCode,
+  Logger,
+} from "@nestjs/common";
 import { ProcessorService } from "./processor.service";
 
 @Controller("process")
 export class ProcessorController {
+  private readonly logger = new Logger(ProcessorController.name);
+
   constructor(private readonly service: ProcessorService) {}
 
   @Post()
+  @HttpCode(200)
   async process(@Body() body: any) {
-    const resultBase64 = await this.service.process(body);
-    return { image: resultBase64 };
+    try {
+      if (!body?.image) {
+        throw new BadRequestException("Missing or empty image in body");
+      }
+      const resultBase64 = await this.service.process(body);
+      return { image: resultBase64 };
+    } catch (error: any) {
+      this.logger.error(`Error in process: ${error.message}`);
+      throw error;
+    }
   }
 
   @Post("save")
+  @HttpCode(200)
   async save(@Body() body: any) {
-    const folder = body.folder || "profile";
-    if (!body || !body.image) {
-      return { error: "Missing image" };
+    try {
+      if (!body?.image) {
+        throw new BadRequestException("Missing or empty image in body");
+      }
+      const folder = body.folder || "profile";
+      const paths = await this.service.saveVariants(folder, body.image);
+      return { images: paths };
+    } catch (error: any) {
+      this.logger.error(`Error in save: ${error.message}`);
+      throw error;
     }
-    const paths = await this.service.saveVariants(folder, body.image);
-    return paths;
   }
 
   @Post("delete")
+  @HttpCode(200)
   async delete(@Body() body: any) {
-    const folder = body.folder;
-    const imagePath = body.imagePath;
-    if (!folder || !imagePath) return { error: "Missing folder or imagePath" };
-    await this.service.deleteVariants(folder, imagePath);
-    return { ok: true };
+    try {
+      if (!body?.folder || !body?.imagePath) {
+        throw new BadRequestException("Missing folder or imagePath");
+      }
+      await this.service.deleteVariants(body.folder, body.imagePath);
+      return { ok: true };
+    } catch (error: any) {
+      this.logger.error(`Error in delete: ${error.message}`);
+      throw error;
+    }
   }
 }
