@@ -309,17 +309,39 @@ export const AthletesAdmin = () => {
           role: "parent",
         };
 
-        if (parentId) {
-          // Actualizar parent existente
-          await dispatch(
-            updateUser({ id: parentId, user: parentPayload }),
-          ).unwrap();
+        // Verificar si el nuevo tutor existe en el sistema
+        const allParents = await userService.fetchByRole("parent");
+        const existingParent = allParents?.data?.find(
+          (p: any) => p.ci?.toLowerCase() === parent.ci.toLowerCase(),
+        );
+
+        if (existingParent) {
+          // Si el tutor existe y es diferente al actual, solo cambiar el parent_id
+          if (editing?.parent_id && editing.parent_id !== existingParent._id) {
+            parentId = existingParent._id;
+          } else if (!parentId) {
+            // Si no había parent antes, usar el existente
+            parentId = existingParent._id;
+          } else if (parentId === existingParent._id) {
+            // Si es el mismo tutor, actualizar sus datos
+            await dispatch(
+              updateUser({ id: parentId, user: parentPayload }),
+            ).unwrap();
+          }
         } else {
-          // Crear nuevo parent
-          const createResponse = await dispatch(
-            createUser({ role: "parent", user: parentPayload }),
-          ).unwrap();
-          parentId = createResponse.data?._id || createResponse._id;
+          // Tutor no existe, crear uno nuevo
+          if (parentId) {
+            // Si hay un parent anterior, actualizarlo con los nuevos datos
+            await dispatch(
+              updateUser({ id: parentId, user: parentPayload }),
+            ).unwrap();
+          } else {
+            // Crear nuevo parent
+            const createResponse = await dispatch(
+              createUser({ role: "parent", user: parentPayload }),
+            ).unwrap();
+            parentId = createResponse.data?._id || createResponse._id;
+          }
         }
       }
 
