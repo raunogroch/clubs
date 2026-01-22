@@ -496,12 +496,8 @@ export class UsersService {
         throw new Error('userId e imageBase64 son requeridos');
       }
 
-      console.log('Iniciando carga de imagen para usuario:', userId);
-
       // Procesar la imagen con image-processor
       const imageUrls = await this.processImageWithImageProcessor(imageBase64);
-
-      console.log('Imagen procesada, URLs obtenidas:', imageUrls);
 
       // Actualizar el usuario con las URLs de imagen
       const updateData: UpdateUserDto = {
@@ -514,18 +510,14 @@ export class UsersService {
         updateData,
       );
 
-      console.log('Usuario actualizado correctamente');
-
       return {
         code: 200,
         message: 'Imagen cargada exitosamente',
         data: updatedUser,
       };
     } catch (error: any) {
-      console.error('Error completo al cargar imagen:', error);
       const errorMessage =
         error?.message || 'Error desconocido al procesar la imagen';
-      console.error('Mensaje de error:', errorMessage);
       throw new ServiceUnavailableException(
         `Error al procesar la imagen: ${errorMessage}`,
       );
@@ -539,27 +531,24 @@ export class UsersService {
   private async processImageWithImageProcessor(
     imageBase64: string,
   ): Promise<any> {
-    try {
-      const axios = require('axios');
-      const imageProcessorApi = this.configService.get<string>(
-        'IMAGE_PROCESSOR_API',
-      );
+    const axios = require('axios');
+    const imageProcessorApi = this.configService.get<string>(
+      'IMAGE_PROCESSOR_API',
+    );
 
-      if (!imageProcessorApi) {
-        throw new Error('IMAGE_PROCESSOR_API no configurada');
-      }
+    if (!imageProcessorApi) {
+      throw new Error('IMAGE_PROCESSOR_API no configurada');
+    }
+
+    try {
 
       // Primero, procesa la imagen (redimensiona, optimiza, etc.)
-      console.log('Llamando a image-processor en:', imageProcessorApi);
-      console.log('Enviando imagen a procesar...');
       const processResponse = await axios.post(
         `${imageProcessorApi}/api/process`,
         {
           image: imageBase64,
         },
       );
-
-      console.log('Respuesta del procesamiento:', processResponse.status);
 
       if (!processResponse.data || !processResponse.data.image) {
         throw new Error(
@@ -569,7 +558,6 @@ export class UsersService {
       }
 
       // Luego, guarda las variantes (small, medium, large)
-      console.log('Guardando variantes de imagen...');
       const saveResponse = await axios.post(
         `${imageProcessorApi}/api/process/save`,
         {
@@ -577,8 +565,6 @@ export class UsersService {
           image: processResponse.data.image,
         },
       );
-
-      console.log('Respuesta del guardado:', saveResponse.status);
 
       if (
         !saveResponse.data ||
@@ -593,17 +579,24 @@ export class UsersService {
         );
       }
 
-      console.log('Variantes guardadas correctamente');
       return saveResponse.data.images;
     } catch (error: any) {
-      console.error('Error al comunicarse con image-processor:', error);
-      console.error('Error details:', {
-        message: error?.message,
-        code: error?.code,
-        status: error?.response?.status,
-        data: error?.response?.data,
-      });
-      throw error;
+      // Lanzar error más informativo
+      if (error?.response?.status) {
+        throw new Error(
+          `Image Processor error (${error.response.status}): ${
+            error.response.data?.message || error.message
+          }`,
+        );
+      } else if (error?.code === 'ECONNREFUSED') {
+        throw new Error(
+          `No se puede conectar a Image Processor en ${imageProcessorApi}. Verifique que el servicio esté corriendo.`,
+        );
+      } else {
+        throw new Error(
+          `Error al procesar imagen: ${error?.message || 'Error desconocido'}`,
+        );
+      }
     }
   }
 }

@@ -27,11 +27,12 @@ import {
   Delete,
   UseGuards,
   Query,
+  HttpCode,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Roles as Role } from 'src/users/enum/roles.enum';
@@ -202,6 +203,7 @@ export class UsersController {
    * Recibe imagen en base64 y la procesa con image-processor
    */
   @Post('upload-image')
+  @HttpCode(200)
   @Roles(Role.SUPERADMIN, Role.ADMIN, Role.ASSISTANT, Role.COACH)
   async uploadImage(@Body() payload: any) {
     return this.usersService.uploadUserImage(payload);

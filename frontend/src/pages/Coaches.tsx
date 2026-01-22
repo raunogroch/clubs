@@ -102,10 +102,14 @@ export const Coaches = () => {
         await loadCoachesFromGroups();
         closeImageModal();
       } else {
-        alert("Error al procesar la imagen");
+        const errorMsg = response.message || "Error al procesar la imagen";
+        console.error("Error al cargar imagen:", response);
+        alert(errorMsg);
       }
     } catch (err: any) {
-      alert((err && (err.message || err)) || "Error al actualizar imagen");
+      const errorMsg = err?.message || "Error al actualizar imagen";
+      console.error("Error en handleImageSubmit:", err);
+      alert(errorMsg);
     }
   };
   const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
