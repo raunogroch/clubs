@@ -541,7 +541,6 @@ export class UsersService {
     }
 
     try {
-
       // Primero, procesa la imagen (redimensiona, optimiza, etc.)
       const processResponse = await axios.post(
         `${imageProcessorApi}/api/process`,

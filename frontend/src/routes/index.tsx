@@ -65,10 +65,10 @@ export const roleRoutes: RoleRoutes = {
       children: [
         {
           path: "/users/assistants",
-          label: "Assistants",
+          label: "Secretarios",
           element: <Assistants />,
         },
-        { path: "/users/coaches", label: "Coaches", element: <Coaches /> },
+        { path: "/users/coaches", label: "Entrenadores", element: <Coaches /> },
       ],
     },
   ],

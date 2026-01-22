@@ -154,7 +154,7 @@ export const Coaches = () => {
 
   return (
     <div>
-      <NavHeader name="Users - Coaches" pageCreate="Crear" />
+      <NavHeader name="Entrenadores" pageCreate="Crear" />
       <div className="wrapper wrapper-content">
         <div className="ibox">
           <div className="ibox-content">
@@ -396,93 +396,212 @@ export const Coaches = () => {
 
       {showImageModal && (
         <div
-          className="modal modal-lg"
-          style={{ display: "block", backgroundColor: "rgba(0,0,0,.5)" }}
+          className="modal fade show"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,.5)",
+            animation: "fadeIn 0.3s ease-in-out",
+            zIndex: 1050,
+          }}
           onClick={closeImageModal}
         >
           <div
-            className="modal-dialog modal-lg"
+            className="modal-dialog"
             onClick={(e) => e.stopPropagation()}
+            style={{
+              margin: 0,
+              maxWidth: "480px",
+              width: "90%",
+              animation: "slideUp 0.3s ease-out",
+            }}
           >
-            <div className="modal-content">
-              <div className="modal-header">
-                <h4 className="modal-title">Editar Foto de Perfil</h4>
-                <button className="close" onClick={closeImageModal}>
-                  &times;
+            <div
+              className="modal-content"
+              style={{
+                borderRadius: "12px",
+                border: "none",
+                boxShadow: "0 8px 24px rgba(0,0,0,.15)",
+                overflow: "hidden",
+              }}
+            >
+              {/* Header */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "20px 24px",
+                  borderBottom: "1px solid #e8e8e8",
+                  backgroundColor: "#fafafa",
+                }}
+              >
+                <h5
+                  style={{
+                    margin: 0,
+                    fontSize: "18px",
+                    fontWeight: "600",
+                    color: "#333",
+                  }}
+                >
+                  Actualizar Foto de Perfil
+                </h5>
+                <button
+                  onClick={closeImageModal}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    fontSize: "20px",
+                    cursor: "pointer",
+                    color: "#999",
+                    transition: "color 0.2s",
+                    padding: "4px 8px",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#333")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "#999")}
+                >
+                  ✕
                 </button>
               </div>
-              <div className="modal-body">
-                <form onSubmit={handleImageSubmit}>
-                  <div className="form-group">
-                    <label>Seleccionar Imagen</label>
-                    <input
-                      type="file"
-                      className="form-control"
-                      accept="image/*"
-                      onChange={handleImageFileChange}
-                    />
-                  </div>
 
+              {/* Body */}
+              <div style={{ padding: "24px" }}>
+                <form onSubmit={handleImageSubmit}>
+                  {/* File Input */}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageFileChange}
+                    style={{
+                      display: "none",
+                    }}
+                    id="imageInput"
+                  />
+                  <label
+                    htmlFor="imageInput"
+                    style={{
+                      display: "block",
+                      border: "2px dashed #d0d0d0",
+                      borderRadius: "8px",
+                      padding: "28px 20px",
+                      textAlign: "center",
+                      cursor: "pointer",
+                      transition: "all 0.2s",
+                      backgroundColor: "#fafafa",
+                      marginBottom: uploadedImageBase64 ? "20px" : 0,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = "#3498db";
+                      e.currentTarget.style.backgroundColor = "#f0f8ff";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = "#d0d0d0";
+                      e.currentTarget.style.backgroundColor = "#fafafa";
+                    }}
+                  >
+                    <div style={{ color: "#3498db", fontWeight: "600" }}>
+                      Seleccionar imagen
+                    </div>
+                    <div
+                      style={{
+                        color: "#999",
+                        fontSize: "12px",
+                        marginTop: "4px",
+                      }}
+                    >
+                      PNG, JPG o GIF (máx. 5MB)
+                    </div>
+                  </label>
+
+                  {/* Cropper */}
                   {uploadedImageBase64 && (
                     <>
-                      <div className="form-group">
-                        <label>Recortar Imagen</label>
-                        <div style={{ maxHeight: "400px", overflow: "auto" }}>
-                          <Cropper
-                            ref={cropperRef}
-                            src={uploadedImageBase64}
-                            guides
-                            responsive
-                            autoCropArea={1}
-                            aspectRatio={1}
-                            viewMode={1}
-                            style={{ maxWidth: "100%", maxHeight: "400px" }}
-                          />
-                        </div>
+                      <div
+                        style={{
+                          marginBottom: "20px",
+                          borderRadius: "8px",
+                          overflow: "hidden",
+                          border: "1px solid #e0e0e0",
+                        }}
+                      >
+                        <Cropper
+                          ref={cropperRef}
+                          src={uploadedImageBase64}
+                          guides
+                          responsive
+                          autoCropArea={1}
+                          aspectRatio={1}
+                          viewMode={1}
+                          style={{ maxHeight: "380px" }}
+                        />
                       </div>
 
+                      {/* Buttons */}
                       <div
                         style={{
                           display: "flex",
+                          gap: "8px",
                           justifyContent: "flex-end",
-                          gap: 8,
                         }}
                       >
                         <button
                           type="button"
-                          className="btn btn-xs btn-default"
                           onClick={closeImageModal}
+                          style={{
+                            padding: "8px 18px",
+                            borderRadius: "6px",
+                            border: "1px solid #d0d0d0",
+                            backgroundColor: "white",
+                            color: "#333",
+                            fontWeight: "500",
+                            fontSize: "14px",
+                            cursor: "pointer",
+                            transition: "all 0.2s",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = "#f5f5f5";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = "white";
+                          }}
                         >
                           Cancelar
                         </button>
                         <button
                           type="submit"
-                          className="btn btn-xs btn-primary"
                           disabled={loading}
+                          style={{
+                            padding: "8px 20px",
+                            borderRadius: "6px",
+                            border: "none",
+                            backgroundColor: loading ? "#ccc" : "#3498db",
+                            color: "white",
+                            fontWeight: "500",
+                            fontSize: "14px",
+                            cursor: loading ? "not-allowed" : "pointer",
+                            transition: "all 0.2s",
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!loading) {
+                              e.currentTarget.style.backgroundColor = "#2980b9";
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!loading) {
+                              e.currentTarget.style.backgroundColor = "#3498db";
+                            }
+                          }}
                         >
-                          Guardar Imagen
+                          {loading ? "Guardando..." : "Guardar"}
                         </button>
                       </div>
                     </>
-                  )}
-
-                  {!uploadedImageBase64 && (
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "flex-end",
-                        gap: 8,
-                        marginTop: "10px",
-                      }}
-                    >
-                      <button
-                        type="button"
-                        className="btn btn-xs btn-default"
-                        onClick={closeImageModal}
-                      >
-                        Cancelar
-                      </button>
-                    </div>
                   )}
                 </form>
               </div>
@@ -490,6 +609,38 @@ export const Coaches = () => {
           </div>
         </div>
       )}
+
+      <style>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes slideUp {
+          from {
+            transform: translateY(30px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+
+        .form-control:focus {
+          border-color: #2980b9 !important;
+          box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25) !important;
+        }
+
+        .btn:hover {
+          transform: translateY(-2px);
+          transition: all 0.3s ease;
+        }
+      `}</style>
     </div>
   );
 };
