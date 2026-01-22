@@ -154,7 +154,7 @@ export const Coaches = () => {
 
   return (
     <div>
-      <NavHeader name="Entrenadores" pageCreate="Crear" />
+      <NavHeader name="Entrenadores" />
       <div className="wrapper wrapper-content">
         <div className="ibox">
           <div className="ibox-content">

@@ -28,6 +28,32 @@ export const userService = {
     }
   },
 
+  async getCoaches(limit = 200): Promise<ApiResponse<any[]>> {
+    try {
+      const response = await api.get("/users", {
+        params: { role: "coach", page: 1, limit },
+      });
+      // backend returns a paginated UsersResponse { data: User[] }
+      const data = response.data?.data || response.data;
+      return { code: response.status, message: "Coaches obtenidos", data };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  },
+
+  async getAthletes(limit = 200): Promise<ApiResponse<any[]>> {
+    try {
+      const response = await api.get("/users", {
+        params: { role: "athlete", page: 1, limit },
+      });
+      // backend returns a paginated UsersResponse { data: User[] }
+      const data = response.data?.data || response.data;
+      return { code: response.status, message: "Athletes obtenidos", data };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  },
+
   async findAthleteByCi(ci: string): Promise<ApiResponse<any>> {
     try {
       const response = await api.get(`/users/search/by-ci/${ci}`);

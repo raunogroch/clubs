@@ -7,7 +7,7 @@ import { userService } from "../services/userService";
 import Cropper from "react-cropper";
 import "cropperjs/dist/cropper.css";
 
-export const Athletes = () => {
+export const Admins = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [showModal, setShowModal] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
@@ -23,27 +23,27 @@ export const Athletes = () => {
     images: { small: "", medium: "", large: "" },
   });
   const [formError, setFormError] = useState<string | null>(null);
-  const [athletes, setAthletes] = useState<any[]>([]);
+  const [admins, setAdmins] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploadedImageBase64, setUploadedImageBase64] = useState<string>("");
   const cropperRef = useRef<any>(null);
 
   useEffect(() => {
-    loadAthletes();
+    loadAdmins();
   }, []);
 
-  const loadAthletes = async () => {
+  const loadAdmins = async () => {
     try {
       setLoading(true);
-      const response = await userService.getAthletes();
+      const response = await userService.getAdmins();
       if (response.code === 200 && Array.isArray(response.data)) {
-        setAthletes(response.data);
+        setAdmins(response.data);
       } else {
-        setAthletes([]);
+        setAdmins([]);
       }
     } catch (error) {
-      console.error("Error al cargar atletas:", error);
-      setAthletes([]);
+      console.error("Error al cargar admins:", error);
+      setAdmins([]);
     } finally {
       setLoading(false);
     }
@@ -100,11 +100,11 @@ export const Athletes = () => {
       const payload = {
         userId: editingImage._id,
         imageBase64: croppedBase64,
-        role: "athlete",
+        role: "admin",
       };
       const response = await userService.uploadCoachImage(payload);
       if (response.code === 200) {
-        await loadAthletes();
+        await loadAdmins();
         closeImageModal();
       } else {
         const errorMsg = response.message || "Error al procesar la imagen";
@@ -134,8 +134,6 @@ export const Athletes = () => {
     if (!form.lastname || !form.lastname.trim())
       return "El apellido es requerido";
     if (!form.ci || !form.ci.trim()) return "El CI es requerido";
-    if (!form.username || !form.username.trim())
-      return "El username es requerido";
     return null;
   };
 
@@ -148,12 +146,14 @@ export const Athletes = () => {
     }
     setFormError(null);
     try {
-      const payload = { ...form, role: "athlete" };
+      // No enviar username y password - el backend los genera automáticamente
+      const { username, phone, ...payload } = form;
+      const payloadToSend = { ...payload, role: "admin", phone };
       if (editing)
-        await dispatch(updateUser({ id: editing._id, user: payload })).unwrap();
+        await dispatch(updateUser({ id: editing._id, user: payloadToSend })).unwrap();
       else
-        await dispatch(createUser({ role: "athlete", user: payload })).unwrap();
-      await loadAthletes();
+        await dispatch(createUser({ role: "admin", user: payloadToSend })).unwrap();
+      await loadAdmins();
       closeModal();
     } catch (err: any) {
       setFormError((err && (err.message || err)) || "Error inesperado");
@@ -162,7 +162,22 @@ export const Athletes = () => {
 
   return (
     <div>
-      <NavHeader name="Users - Athletes" pageCreate="Crear" />
+      <NavHeader
+        name="Administradores"
+        pageCreate="Crear administrador"
+        onCreateClick={() => {
+          setEditing(null);
+          setForm({
+            name: "",
+            lastname: "",
+            username: "",
+            ci: "",
+            phone: "",
+          });
+          setFormError(null);
+          setShowModal(true);
+        }}
+      />
       <div className="wrapper wrapper-content">
         <div className="ibox">
           <div className="ibox-content">
@@ -188,7 +203,7 @@ export const Athletes = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {athletes.map((u: any) => (
+                  {admins.map((u: any) => (
                     <tr key={u._id}>
                       <td
                         style={{
@@ -313,7 +328,7 @@ export const Athletes = () => {
             <div className="modal-content">
               <div className="modal-header">
                 <h4 className="modal-title">
-                  {editing ? "Editar Atleta" : "Crear Atleta"}
+                  {editing ? "Editar Admin" : "Crear Admin"}
                 </h4>
                 <button className="close" onClick={closeModal}>
                   &times;
@@ -329,9 +344,11 @@ export const Athletes = () => {
                     <input
                       className="form-control"
                       value={form.name}
-                      onChange={(e) =>
-                        setForm({ ...form, name: e.target.value })
-                      }
+                      onChange={(e) => {
+                        const name = e.target.value;
+                        const username = `${name.toLowerCase().split(" ")[0]}.${form.lastname.toLowerCase().split(" ")[0]}`;
+                        setForm({ ...form, name, username });
+                      }}
                     />
                   </div>
                   <div className="form-group">
@@ -339,9 +356,11 @@ export const Athletes = () => {
                     <input
                       className="form-control"
                       value={form.lastname}
-                      onChange={(e) =>
-                        setForm({ ...form, lastname: e.target.value })
-                      }
+                      onChange={(e) => {
+                        const lastname = e.target.value;
+                        const username = `${form.name.toLowerCase().split(" ")[0]}.${lastname.toLowerCase().split(" ")[0]}`;
+                        setForm({ ...form, lastname, username });
+                      }}
                     />
                   </div>
                   <div className="form-group">
@@ -350,16 +369,6 @@ export const Athletes = () => {
                       className="form-control"
                       value={form.ci}
                       onChange={(e) => setForm({ ...form, ci: e.target.value })}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>Username</label>
-                    <input
-                      className="form-control"
-                      value={form.username}
-                      onChange={(e) =>
-                        setForm({ ...form, username: e.target.value })
-                      }
                     />
                   </div>
                   <div className="form-group">
@@ -653,4 +662,4 @@ export const Athletes = () => {
   );
 };
 
-export default Athletes;
+export default Admins;

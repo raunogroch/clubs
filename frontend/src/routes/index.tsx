@@ -3,8 +3,11 @@ import {
   Dashboard,
   Assignments,
   Clubs,
+  Admins,
   Assistants,
   Coaches,
+  CoachesSuperadmin,
+  Athletes,
   Sports,
 } from "../pages";
 
@@ -31,6 +34,29 @@ export const roleRoutes: RoleRoutes = {
       icon: "fa-trophy",
       label: "Deportes",
       element: <Sports />,
+    },
+    {
+      path: "/users",
+      icon: "fa-users",
+      label: "Users",
+      children: [
+        {
+          path: "/users/admins",
+          label: "Admins",
+          element: <Admins />,
+        },
+        {
+          path: "/users/assistants",
+          label: "Secretarios",
+          element: <Assistants />,
+        },
+        {
+          path: "/users/coaches",
+          label: "Entrenadores",
+          element: <CoachesSuperadmin />,
+        },
+        { path: "/users/athletes", label: "Atletas", element: <Athletes /> },
+      ],
     },
     {
       path: "/assignments",
@@ -94,6 +120,25 @@ export const roleRoutes: RoleRoutes = {
       icon: "fa-home",
       label: "Principal",
       element: <Dashboard />,
+    },
+    {
+      path: "/users",
+      icon: "fa-users",
+      label: "Users",
+      children: [
+        {
+          path: "/users/admins",
+          label: "Admins",
+          element: <Admins />,
+        },
+        {
+          path: "/users/assistants",
+          label: "Secretarios",
+          element: <Assistants />,
+        },
+        { path: "/users/coaches", label: "Entrenadores", element: <Coaches /> },
+        { path: "/users/athletes", label: "Atletas", element: <Athletes /> },
+      ],
     },
   ],
   parent: [

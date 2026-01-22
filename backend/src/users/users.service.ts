@@ -91,7 +91,7 @@ export class UsersService {
       [Roles.PARENT]: ['name', 'lastname'],
       [Roles.COACH]: ['username', 'password', 'name', 'lastname'],
       [Roles.ASSISTANT]: ['username', 'password', 'name', 'lastname'],
-      [Roles.ADMIN]: ['username', 'password', 'name', 'lastname'],
+      [Roles.ADMIN]: ['name', 'lastname', 'ci'],
       [Roles.SUPERADMIN]: ['username', 'password', 'name', 'lastname'],
     };
 
@@ -139,6 +139,26 @@ export class UsersService {
       createUserDto.password =
         Math.random().toString(36).substring(2, 10) +
         Math.random().toString(36).substring(2, 10);
+    }
+
+    // Para ADMIN, generar username y password automáticamente
+    if (createUserDto.role === Roles.ADMIN) {
+      // Generar username de estructura: firstname.lastname
+      const firstName = createUserDto.name?.toLowerCase().split(' ')[0] || 'admin';
+      const lastName = createUserDto.lastname?.toLowerCase().split(' ')[0] || 'user';
+      const baseUsername = `${firstName}.${lastName}`;
+      let username = baseUsername;
+      let counter = 1;
+
+      // Asegurar que el username sea único
+      while (await this.userValidator.usernameExists(username)) {
+        username = `${baseUsername}${counter}`;
+        counter++;
+      }
+      createUserDto.username = username;
+
+      // Usar CI como password
+      createUserDto.password = createUserDto.ci;
     }
 
     // Validar username único solo si el rol requiere username

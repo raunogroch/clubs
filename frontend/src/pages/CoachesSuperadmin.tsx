@@ -7,7 +7,7 @@ import { userService } from "../services/userService";
 import Cropper from "react-cropper";
 import "cropperjs/dist/cropper.css";
 
-export const Athletes = () => {
+export const CoachesSuperadmin = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [showModal, setShowModal] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
@@ -23,32 +23,31 @@ export const Athletes = () => {
     images: { small: "", medium: "", large: "" },
   });
   const [formError, setFormError] = useState<string | null>(null);
-  const [athletes, setAthletes] = useState<any[]>([]);
+  const [coaches, setCoaches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploadedImageBase64, setUploadedImageBase64] = useState<string>("");
   const cropperRef = useRef<any>(null);
 
   useEffect(() => {
-    loadAthletes();
+    loadCoachesFromGroups();
   }, []);
 
-  const loadAthletes = async () => {
+  const loadCoachesFromGroups = async () => {
     try {
       setLoading(true);
-      const response = await userService.getAthletes();
+      const response = await userService.getCoaches();
       if (response.code === 200 && Array.isArray(response.data)) {
-        setAthletes(response.data);
+        setCoaches(response.data);
       } else {
-        setAthletes([]);
+        setCoaches([]);
       }
     } catch (error) {
-      console.error("Error al cargar atletas:", error);
-      setAthletes([]);
+      console.error("Error al cargar coaches:", error);
+      setCoaches([]);
     } finally {
       setLoading(false);
     }
   };
-
   const openEdit = (u: any) => {
     setEditing(u);
     setForm({
@@ -67,23 +66,19 @@ export const Athletes = () => {
     setFormError(null);
     setShowModal(true);
   };
-
   const closeModal = () => {
     setShowModal(false);
     setFormError(null);
   };
-
   const openImageEdit = (u: any) => {
     setEditingImage(u);
     setUploadedImageBase64("");
     setShowImageModal(true);
   };
-
   const closeImageModal = () => {
     setShowImageModal(false);
     setEditingImage(null);
   };
-
   const handleImageSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!uploadedImageBase64) {
@@ -100,11 +95,11 @@ export const Athletes = () => {
       const payload = {
         userId: editingImage._id,
         imageBase64: croppedBase64,
-        role: "athlete",
+        role: "coach",
       };
       const response = await userService.uploadCoachImage(payload);
       if (response.code === 200) {
-        await loadAthletes();
+        await loadCoachesFromGroups();
         closeImageModal();
       } else {
         const errorMsg = response.message || "Error al procesar la imagen";
@@ -117,7 +112,6 @@ export const Athletes = () => {
       alert(errorMsg);
     }
   };
-
   const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -128,7 +122,6 @@ export const Athletes = () => {
       reader.readAsDataURL(file);
     }
   };
-
   const validate = () => {
     if (!form.name || !form.name.trim()) return "El nombre es requerido";
     if (!form.lastname || !form.lastname.trim())
@@ -138,7 +131,6 @@ export const Athletes = () => {
       return "El username es requerido";
     return null;
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const v = validate();
@@ -148,12 +140,12 @@ export const Athletes = () => {
     }
     setFormError(null);
     try {
-      const payload = { ...form, role: "athlete" };
+      const payload = { ...form, role: "coach" };
       if (editing)
         await dispatch(updateUser({ id: editing._id, user: payload })).unwrap();
       else
-        await dispatch(createUser({ role: "athlete", user: payload })).unwrap();
-      await loadAthletes();
+        await dispatch(createUser({ role: "coach", user: payload })).unwrap();
+      await loadCoachesFromGroups();
       closeModal();
     } catch (err: any) {
       setFormError((err && (err.message || err)) || "Error inesperado");
@@ -162,7 +154,7 @@ export const Athletes = () => {
 
   return (
     <div>
-      <NavHeader name="Users - Athletes" pageCreate="Crear" />
+      <NavHeader name="Entrenadores" />
       <div className="wrapper wrapper-content">
         <div className="ibox">
           <div className="ibox-content">
@@ -188,7 +180,7 @@ export const Athletes = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {athletes.map((u: any) => (
+                  {coaches.map((u: any) => (
                     <tr key={u._id}>
                       <td
                         style={{
@@ -313,7 +305,7 @@ export const Athletes = () => {
             <div className="modal-content">
               <div className="modal-header">
                 <h4 className="modal-title">
-                  {editing ? "Editar Atleta" : "Crear Atleta"}
+                  {editing ? "Editar Coach" : "Crear Coach"}
                 </h4>
                 <button className="close" onClick={closeModal}>
                   &times;
@@ -652,5 +644,3 @@ export const Athletes = () => {
     </div>
   );
 };
-
-export default Athletes;
