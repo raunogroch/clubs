@@ -152,6 +152,19 @@ export const userService = {
       return handleApiError(error);
     }
   },
+  async getUserById(id: string): Promise<ApiResponse<any>> {
+    try {
+      const response = await api.get(`/users/${id}`);
+      const data = response.data?.data || response.data;
+      return {
+        code: response.status,
+        message: "Usuario obtenido",
+        data,
+      };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  },
 };
 
 export default userService;

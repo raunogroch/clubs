@@ -6,11 +6,18 @@ import { createUser, updateUser } from "../store/usersThunk";
 import { userService } from "../services/userService";
 import Cropper from "react-cropper";
 import "cropperjs/dist/cropper.css";
+import { ParentTooltip } from "../components/ParentTooltip";
 
 export const Athletes = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [showModal, setShowModal] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
+  const [showCredentialsModal, setShowCredentialsModal] = useState(false);
+  const [generatedCredentials, setGeneratedCredentials] = useState<{
+    username: string;
+    password: string;
+    name: string;
+  } | null>(null);
   const [editing, setEditing] = useState<any | null>(null);
   const [editingImage, setEditingImage] = useState<any | null>(null);
   const [form, setForm] = useState<any>({
@@ -23,6 +30,12 @@ export const Athletes = () => {
     birth_date: "",
     active: true,
     images: { small: "", medium: "", large: "" },
+    parent: {
+      name: "",
+      lastname: "",
+      ci: "",
+      phone: "",
+    },
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [athletes, setAthletes] = useState<any[]>([]);
@@ -70,6 +83,12 @@ export const Athletes = () => {
         small: (u.images && u.images.small) || "",
         medium: (u.images && u.images.medium) || "",
         large: (u.images && u.images.large) || "",
+      },
+      parent: {
+        name: "",
+        lastname: "",
+        ci: "",
+        phone: "",
       },
     });
     setFormError(null);
@@ -142,14 +161,27 @@ export const Athletes = () => {
     if (!form.lastname || !form.lastname.trim())
       return "El apellido es requerido";
     if (!form.ci || !form.ci.trim()) return "El CI es requerido";
-    if (!form.phone || !form.phone.trim()) return "El teléfono es requerido";
     if (!form.gender) return "El género es requerido";
     if (!form.birth_date) return "La fecha de nacimiento es requerida";
+
+    const age = calculateAge(form.birth_date);
+    if (age < 18) {
+      if (!form.parent.name || !form.parent.name.trim())
+        return "El nombre del tutor es requerido para menores de edad";
+      if (!form.parent.lastname || !form.parent.lastname.trim())
+        return "El apellido del tutor es requerido para menores de edad";
+      if (!form.parent.ci || !form.parent.ci.trim())
+        return "El CI del tutor es requerido para menores de edad";
+      if (!form.parent.phone || !form.parent.phone.trim())
+        return "El teléfono del tutor es requerido para menores de edad";
+    } else {
+      if (!form.phone || !form.phone.trim()) return "El teléfono es requerido";
+    }
     return null;
   };
 
   const calculateAge = (birthDate: string | Date) => {
-    if (!birthDate) return "-";
+    if (!birthDate) return 0;
     const today = new Date();
     const birth = new Date(birthDate);
     let age = today.getFullYear() - birth.getFullYear();
@@ -160,7 +192,7 @@ export const Athletes = () => {
     ) {
       age--;
     }
-    return age >= 0 ? age : "-";
+    return age >= 0 ? age : 0;
   };
 
   const genderLabel = (g: string | undefined | null) => {
@@ -168,8 +200,9 @@ export const Athletes = () => {
     const map: Record<string, string> = {
       male: "Masculino",
       female: "Femenino",
+      other: "Otro",
     };
-    return map[g] || g || "-";
+    return map[g] || "-";
   };
 
   const onCreateClick = () => {
@@ -184,6 +217,12 @@ export const Athletes = () => {
       birth_date: "",
       active: true,
       images: { small: "", medium: "", large: "" },
+      parent: {
+        name: "",
+        lastname: "",
+        ci: "",
+        phone: "",
+      },
     });
     setFormError(null);
     setShowModal(true);
@@ -199,20 +238,79 @@ export const Athletes = () => {
     setFormError(null);
     try {
       console.log("Form data:", form);
-      const { username, ...payload } = form;
+      const { parent, ...payload } = form;
+      const age = calculateAge(form.birth_date);
+
+      // Generar username automáticamente si es creación
+      let generatedUsername = form.username;
+      if (!editing) {
+        // username = primera letra del nombre + apellido completo, en minúsculas
+        generatedUsername = ((form.name?.charAt(0) || "") + form.lastname || "")
+          .toLowerCase()
+          .replace(/\s/g, "");
+      }
+
+      // Generar password automático (8 caracteres aleatorios)
+      const generatePassword = () => {
+        return Math.random().toString(36).substring(2, 10);
+      };
+      const generatedPassword = generatePassword();
+
+      // Si es menor de edad, crear/actualizar parent primero
+      let parentId = editing?.parent_id || null;
+      if (age < 18) {
+        const parentPayload = {
+          name: parent.name,
+          lastname: parent.lastname,
+          ci: parent.ci,
+          phone: parent.phone,
+          role: "parent",
+        };
+
+        if (parentId) {
+          // Actualizar parent existente
+          await dispatch(
+            updateUser({ id: parentId, user: parentPayload }),
+          ).unwrap();
+        } else {
+          // Crear nuevo parent
+          const createResponse = await dispatch(
+            createUser({ role: "parent", user: parentPayload }),
+          ).unwrap();
+          parentId = createResponse.data?._id || createResponse._id;
+        }
+      }
+
+      // Ahora guardar/actualizar athlete
       const payloadToSend = {
         ...payload,
+        username: generatedUsername,
+        password: generatedPassword,
         role: "athlete",
+        ...(age < 18 && parentId && { parent_id: parentId }),
+        // Si es mayor de edad, eliminar parent_id si existe
+        ...(age >= 18 && { parent_id: null }),
       };
       console.log("Payload to send:", payloadToSend);
       if (editing)
         await dispatch(
           updateUser({ id: editing._id, user: payloadToSend }),
         ).unwrap();
-      else
+      else {
         await dispatch(
           createUser({ role: "athlete", user: payloadToSend }),
         ).unwrap();
+        // Mostrar credenciales generadas
+        setGeneratedCredentials({
+          username: generatedUsername,
+          password: generatedPassword,
+          name: `${form.name} ${form.lastname}`,
+        });
+        setShowCredentialsModal(true);
+        await loadAthletes();
+        closeModal();
+        return;
+      }
       console.log("Success! Reloading athletes...");
       await loadAthletes();
       closeModal();
@@ -245,6 +343,7 @@ export const Athletes = () => {
                     <th style={{ verticalAlign: "middle" }}>Nombre</th>
                     <th style={{ verticalAlign: "middle" }}>Username</th>
                     <th style={{ verticalAlign: "middle" }}>CI</th>
+                    <th style={{ verticalAlign: "middle" }}>Teléfono</th>
                     <th style={{ verticalAlign: "middle" }}>Género</th>
                     <th style={{ verticalAlign: "middle" }}>Edad</th>
                     <th
@@ -333,6 +432,34 @@ export const Athletes = () => {
                       <td style={{ verticalAlign: "middle" }}>{u.username}</td>
                       <td style={{ verticalAlign: "middle" }}>
                         {u.ci || (
+                          <span title="Sin dato">
+                            <i
+                              className="fa fa-exclamation-triangle"
+                              style={{ color: "red" }}
+                            ></i>
+                          </span>
+                        )}
+                      </td>
+                      <td style={{ verticalAlign: "middle" }}>
+                        {u.parent_id ? (
+                          <ParentTooltip parentId={u.parent_id}>
+                            <span
+                              style={{
+                                fontWeight: "600",
+                                color: "#667eea",
+                                cursor: "pointer",
+                                padding: "4px 8px",
+                                backgroundColor: "rgba(102, 126, 234, 0.1)",
+                                borderRadius: "4px",
+                                display: "inline-block",
+                              }}
+                            >
+                              <i className="fa fa-user"></i> Responsable
+                            </span>
+                          </ParentTooltip>
+                        ) : u.phone ? (
+                          u.phone
+                        ) : (
                           <span title="Sin dato">
                             <i
                               className="fa fa-exclamation-triangle"
@@ -460,7 +587,45 @@ export const Athletes = () => {
                         onChange={(e) =>
                           setForm({ ...form, phone: e.target.value })
                         }
+                        disabled={
+                          !form.birth_date || calculateAge(form.birth_date) < 18
+                        }
+                        style={{
+                          backgroundColor:
+                            !form.birth_date ||
+                            calculateAge(form.birth_date) < 18
+                              ? "#f5f5f5"
+                              : "white",
+                          cursor:
+                            !form.birth_date ||
+                            calculateAge(form.birth_date) < 18
+                              ? "not-allowed"
+                              : "auto",
+                        }}
                       />
+                      {!form.birth_date && (
+                        <small
+                          style={{
+                            color: "#999",
+                            marginTop: "4px",
+                            display: "block",
+                          }}
+                        >
+                          Ingresa la fecha de nacimiento primero
+                        </small>
+                      )}
+                      {form.birth_date &&
+                        calculateAge(form.birth_date) < 18 && (
+                          <small
+                            style={{
+                              color: "#999",
+                              marginTop: "4px",
+                              display: "block",
+                            }}
+                          >
+                            Usa el teléfono del tutor (menor de edad)
+                          </small>
+                        )}
                     </div>
                   </div>
                   {!editing && (
@@ -534,6 +699,106 @@ export const Athletes = () => {
                       />
                     </div>
                   </div>
+
+                  {form.birth_date && calculateAge(form.birth_date) < 18 && (
+                    <div
+                      style={{
+                        backgroundColor: "#f0f8ff",
+                        border: "1px solid #90c8f5",
+                        borderRadius: "4px",
+                        padding: "12px",
+                        marginBottom: "12px",
+                      }}
+                    >
+                      <h5
+                        style={{
+                          marginTop: 0,
+                          marginBottom: "12px",
+                          color: "#1565c0",
+                        }}
+                      >
+                        Información del Tutor (Menor de Edad)
+                      </h5>
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "1fr 1fr",
+                          gap: "12px",
+                          marginBottom: "12px",
+                        }}
+                      >
+                        <div className="form-group" style={{ margin: 0 }}>
+                          <label>Nombre del Tutor</label>
+                          <input
+                            className="form-control"
+                            value={form.parent.name}
+                            onChange={(e) =>
+                              setForm({
+                                ...form,
+                                parent: {
+                                  ...form.parent,
+                                  name: e.target.value,
+                                },
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="form-group" style={{ margin: 0 }}>
+                          <label>Apellido del Tutor</label>
+                          <input
+                            className="form-control"
+                            value={form.parent.lastname}
+                            onChange={(e) =>
+                              setForm({
+                                ...form,
+                                parent: {
+                                  ...form.parent,
+                                  lastname: e.target.value,
+                                },
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "1fr 1fr",
+                          gap: "12px",
+                        }}
+                      >
+                        <div className="form-group" style={{ margin: 0 }}>
+                          <label>CI del Tutor</label>
+                          <input
+                            className="form-control"
+                            value={form.parent.ci}
+                            onChange={(e) =>
+                              setForm({
+                                ...form,
+                                parent: { ...form.parent, ci: e.target.value },
+                              })
+                            }
+                          />
+                        </div>
+                        <div className="form-group" style={{ margin: 0 }}>
+                          <label>Teléfono del Tutor</label>
+                          <input
+                            className="form-control"
+                            value={form.parent.phone}
+                            onChange={(e) =>
+                              setForm({
+                                ...form,
+                                parent: {
+                                  ...form.parent,
+                                  phone: e.target.value,
+                                },
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   <div
                     style={{
@@ -776,6 +1041,196 @@ export const Athletes = () => {
                   )}
                 </form>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showCredentialsModal && generatedCredentials && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1050,
+          }}
+          onClick={() => setShowCredentialsModal(false)}
+        >
+          <div
+            style={{
+              backgroundColor: "white",
+              borderRadius: "8px",
+              padding: "24px",
+              maxWidth: "500px",
+              boxShadow: "0 2px 12px rgba(0,0,0,0.2)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h4
+              style={{ marginTop: 0, marginBottom: "16px", color: "#2c3e50" }}
+            >
+              ✓ Atleta Creado Exitosamente
+            </h4>
+            <div
+              style={{
+                marginBottom: "20px",
+                backgroundColor: "#f0f8ff",
+                padding: "12px",
+                borderRadius: "4px",
+                borderLeft: "4px solid #3498db",
+              }}
+            >
+              <p
+                style={{
+                  margin: "0 0 8px 0",
+                  fontWeight: "600",
+                  color: "#333",
+                }}
+              >
+                {generatedCredentials.name}
+              </p>
+              <p style={{ margin: 0, color: "#666", fontSize: "14px" }}>
+                Por favor, proporcione estas credenciales al atleta
+              </p>
+            </div>
+
+            <div style={{ marginBottom: "12px" }}>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "4px",
+                  fontWeight: "600",
+                  color: "#333",
+                }}
+              >
+                Usuario:
+              </label>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  backgroundColor: "#f5f5f5",
+                  padding: "10px",
+                  borderRadius: "4px",
+                  border: "1px solid #e0e0e0",
+                }}
+              >
+                <code style={{ flex: 1, fontWeight: "500" }}>
+                  {generatedCredentials.username}
+                </code>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(
+                      generatedCredentials.username,
+                    );
+                  }}
+                  style={{
+                    padding: "4px 8px",
+                    backgroundColor: "#3498db",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    fontSize: "12px",
+                  }}
+                >
+                  Copiar
+                </button>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: "20px" }}>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "4px",
+                  fontWeight: "600",
+                  color: "#333",
+                }}
+              >
+                Contraseña:
+              </label>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  backgroundColor: "#f5f5f5",
+                  padding: "10px",
+                  borderRadius: "4px",
+                  border: "1px solid #e0e0e0",
+                }}
+              >
+                <code
+                  style={{ flex: 1, fontWeight: "500", letterSpacing: "1px" }}
+                >
+                  {generatedCredentials.password}
+                </code>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(
+                      generatedCredentials.password,
+                    );
+                  }}
+                  style={{
+                    padding: "4px 8px",
+                    backgroundColor: "#27ae60",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    fontSize: "12px",
+                  }}
+                >
+                  Copiar
+                </button>
+              </div>
+            </div>
+
+            <div
+              style={{
+                backgroundColor: "#fff3cd",
+                border: "1px solid #ffc107",
+                borderRadius: "4px",
+                padding: "12px",
+                marginBottom: "20px",
+                fontSize: "13px",
+                color: "#856404",
+              }}
+            >
+              <strong>⚠️ Importante:</strong> Comparta estas credenciales de
+              forma segura. El atleta debe cambiar su contraseña en el primer
+              acceso.
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "8px",
+              }}
+            >
+              <button
+                onClick={() => setShowCredentialsModal(false)}
+                style={{
+                  padding: "8px 20px",
+                  backgroundColor: "#3498db",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontWeight: "500",
+                }}
+              >
+                Cerrar
+              </button>
             </div>
           </div>
         </div>

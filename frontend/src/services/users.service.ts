@@ -11,23 +11,48 @@ export interface UserDTO {
 
 class UsersService {
   async fetchByRole(role: string) {
-    const res = await api.get(`/users?role=${role}`);
-    return res.data;
+    try {
+      const res = await api.get(`/users?role=${role}`);
+      return res.data;
+    } catch (err) {
+      throw err;
+    }
   }
 
   async create(user: Partial<UserDTO>) {
-    const res = await api.post(`/users`, user);
-    return res.data;
+    try {
+      const res = await api.post(`/users`, user);
+      return res.data;
+    } catch (err) {
+      throw err;
+    }
   }
 
   async update(id: string, user: Partial<UserDTO>) {
-    const res = await api.patch(`/users/${id}`, user);
-    return res.data;
+    try {
+      const res = await api.patch(`/users/${id}`, user);
+      return res.data;
+    } catch (err) {
+      throw err;
+    }
   }
 
   async remove(id: string) {
-    const res = await api.delete(`/users/${id}`);
-    return res.data;
+    try {
+      const res = await api.delete(`/users/${id}`);
+      return res.data;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async getUserById(id: string) {
+    try {
+      const res = await api.get(`/users/${id}`);
+      return res.data;
+    } catch (err) {
+      throw err;
+    }
   }
 }
 
