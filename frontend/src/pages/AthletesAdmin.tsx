@@ -41,6 +41,9 @@ export const AthletesAdmin = () => {
   const [athletes, setAthletes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploadedImageBase64, setUploadedImageBase64] = useState<string>("");
+  const [parentCISearch, setParentCISearch] = useState<string>("");
+  const [searchingParent, setSearchingParent] = useState(false);
+  const [parentNotFound, setParentNotFound] = useState(false);
   const cropperRef = useRef<any>(null);
 
   useEffect(() => {
@@ -50,26 +53,90 @@ export const AthletesAdmin = () => {
   const loadAthletes = async () => {
     try {
       setLoading(true);
-      console.log("Loading athletes from groups...");
       const response = await userService.getAthletesFromGroups();
-      console.log("Athletes response:", response);
       if (response.code === 200 && Array.isArray(response.data)) {
-        console.log("Athletes loaded successfully:", response.data);
         setAthletes(response.data);
       } else {
-        console.warn("No athletes found or invalid response format");
         setAthletes([]);
       }
     } catch (error) {
-      console.error("Error al cargar atletas:", error);
       setAthletes([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const openEdit = (u: any) => {
+  const searchParentByCI = async (ci: string) => {
+    if (!ci.trim()) {
+      setParentNotFound(false);
+      return;
+    }
+
+    setSearchingParent(true);
+    try {
+      const allUsers = await userService.fetchByRole("parent");
+      const foundParent = allUsers?.data?.find(
+        (u: any) => u.ci?.toLowerCase() === ci.toLowerCase(),
+      );
+
+      if (foundParent) {
+        setForm({
+          ...form,
+          parent: {
+            name: foundParent.name || "",
+            lastname: foundParent.lastname || "",
+            ci: foundParent.ci || "",
+            phone: foundParent.phone || "",
+          },
+        });
+        setParentNotFound(false);
+      } else {
+        setParentNotFound(true);
+        setForm({
+          ...form,
+          parent: {
+            name: "",
+            lastname: "",
+            ci: ci,
+            phone: "",
+          },
+        });
+      }
+    } catch (error) {
+      console.error("Error al buscar tutor:", error);
+      setParentNotFound(true);
+    } finally {
+      setSearchingParent(false);
+    }
+  };
+
+  const openEdit = async (u: any) => {
     setEditing(u);
+    let parentData = {
+      name: "",
+      lastname: "",
+      ci: "",
+      phone: "",
+    };
+
+    // Si existe parent_id, cargar los datos del parent
+    if (u.parent_id) {
+      try {
+        const response = await userService.getUserById(u.parent_id);
+        const parentInfo = response?.data || response;
+        if (parentInfo) {
+          parentData = {
+            name: parentInfo.name || "",
+            lastname: parentInfo.lastname || "",
+            ci: parentInfo.ci || "",
+            phone: parentInfo.phone || "",
+          };
+        }
+      } catch (error) {
+        console.error("Error al cargar datos del parent:", error);
+      }
+    }
+
     setForm({
       name: u.name || "",
       lastname: u.lastname || "",
@@ -84,20 +151,19 @@ export const AthletesAdmin = () => {
         medium: (u.images && u.images.medium) || "",
         large: (u.images && u.images.large) || "",
       },
-      parent: {
-        name: "",
-        lastname: "",
-        ci: "",
-        phone: "",
-      },
+      parent: parentData,
     });
     setFormError(null);
+    setParentCISearch(parentData.ci || "");
+    setParentNotFound(false);
     setShowModal(true);
   };
 
   const closeModal = () => {
     setShowModal(false);
     setFormError(null);
+    setParentCISearch("");
+    setParentNotFound(false);
   };
 
   const openImageEdit = (u: any) => {
@@ -205,29 +271,6 @@ export const AthletesAdmin = () => {
     return map[g] || "-";
   };
 
-  const onCreateClick = () => {
-    setEditing(null);
-    setForm({
-      name: "",
-      lastname: "",
-      username: "",
-      ci: "",
-      phone: "",
-      gender: "",
-      birth_date: "",
-      active: true,
-      images: { small: "", medium: "", large: "" },
-      parent: {
-        name: "",
-        lastname: "",
-        ci: "",
-        phone: "",
-      },
-    });
-    setFormError(null);
-    setShowModal(true);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const v = validate();
@@ -237,7 +280,6 @@ export const AthletesAdmin = () => {
     }
     setFormError(null);
     try {
-      console.log("Form data:", form);
       const { parent, ...payload } = form;
       const age = calculateAge(form.birth_date);
 
@@ -291,7 +333,6 @@ export const AthletesAdmin = () => {
         // Si es mayor de edad, eliminar parent_id si existe
         ...(age >= 18 && { parent_id: null }),
       };
-      console.log("Payload to send:", payloadToSend);
       if (editing)
         await dispatch(
           updateUser({ id: editing._id, user: payloadToSend }),
@@ -311,22 +352,16 @@ export const AthletesAdmin = () => {
         closeModal();
         return;
       }
-      console.log("Success! Reloading athletes...");
       await loadAthletes();
       closeModal();
     } catch (err: any) {
-      console.error("Error in handleSubmit:", err);
       setFormError((err && (err.message || err)) || "Error inesperado");
     }
   };
 
   return (
     <div>
-      <NavHeader
-        name="Atletas del Club"
-        pageCreate="Crear Atleta"
-        onCreateClick={onCreateClick}
-      />
+      <NavHeader name="Atletas del Club" />
       <div className="wrapper wrapper-content">
         <div className="ibox">
           <div className="ibox-content">
@@ -446,7 +481,6 @@ export const AthletesAdmin = () => {
                             <span
                               style={{
                                 fontWeight: "600",
-                                color: "#667eea",
                                 cursor: "pointer",
                                 padding: "4px 8px",
                                 backgroundColor: "rgba(102, 126, 234, 0.1)",
@@ -469,10 +503,11 @@ export const AthletesAdmin = () => {
                         )}
                       </td>
                       <td style={{ verticalAlign: "middle" }}>
-                        {u.gender ? (
+                        {u.gender &&
+                        (u.gender === "male" || u.gender === "female") ? (
                           genderLabel(u.gender)
                         ) : (
-                          <span title="Sin dato">
+                          <span title="Género inválido o no especificado">
                             <i
                               className="fa fa-exclamation-triangle"
                               style={{ color: "red" }}
@@ -674,17 +709,36 @@ export const AthletesAdmin = () => {
                     }}
                   >
                     <div className="form-group" style={{ margin: 0 }}>
-                      <label>Género</label>
+                      <label>
+                        Género
+                        {!form.gender && (
+                          <span
+                            title="Campo requerido"
+                            style={{ color: "red", marginLeft: "4px" }}
+                          >
+                            <i className="fa fa-exclamation-triangle"></i>
+                          </span>
+                        )}
+                      </label>
                       <select
                         className="form-control"
                         value={form.gender}
                         onChange={(e) =>
                           setForm({ ...form, gender: e.target.value })
                         }
+                        style={
+                          !form.gender
+                            ? {
+                                borderColor: "#ffcccc",
+                                backgroundColor: "#fff5f5",
+                              }
+                            : {}
+                        }
                       >
                         <option value="">Seleccionar...</option>
                         <option value="male">Masculino</option>
                         <option value="female">Femenino</option>
+                        <option value="other">Otro</option>
                       </select>
                     </div>
                     <div className="form-group" style={{ margin: 0 }}>
@@ -719,6 +773,52 @@ export const AthletesAdmin = () => {
                       >
                         Información del Tutor (Menor de Edad)
                       </h5>
+                      {/* CI Search Section */}
+                      <div
+                        className="form-group"
+                        style={{ marginBottom: "16px" }}
+                      >
+                        <label>
+                          <strong>🔍 Buscar Tutor por CI</strong>
+                        </label>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "8px",
+                            alignItems: "flex-end",
+                          }}
+                        >
+                          <input
+                            className="form-control"
+                            placeholder="Ingrese CI del tutor"
+                            value={parentCISearch}
+                            onChange={(e) => setParentCISearch(e.target.value)}
+                            onBlur={() =>
+                              parentCISearch && searchParentByCI(parentCISearch)
+                            }
+                          />
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-info"
+                            onClick={() => searchParentByCI(parentCISearch)}
+                            disabled={searchingParent || !parentCISearch}
+                          >
+                            {searchingParent ? "Buscando..." : "Buscar"}
+                          </button>
+                        </div>
+                        {parentNotFound && (
+                          <div
+                            style={{
+                              color: "#ff9800",
+                              fontSize: "12px",
+                              marginTop: "6px",
+                            }}
+                          >
+                            ⚠️ Tutor no registrado. Complete la información para
+                            crear un nuevo tutor.
+                          </div>
+                        )}
+                      </div>
                       <div
                         style={{
                           display: "grid",
@@ -772,12 +872,14 @@ export const AthletesAdmin = () => {
                           <input
                             className="form-control"
                             value={form.parent.ci}
-                            onChange={(e) =>
+                            onChange={(e) => {
+                              const ci = e.target.value;
                               setForm({
                                 ...form,
-                                parent: { ...form.parent, ci: e.target.value },
-                              })
-                            }
+                                parent: { ...form.parent, ci: ci },
+                              });
+                              setParentCISearch(ci);
+                            }}
                           />
                         </div>
                         <div className="form-group" style={{ margin: 0 }}>

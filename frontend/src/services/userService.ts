@@ -165,6 +165,22 @@ export const userService = {
       return handleApiError(error);
     }
   },
+
+  async fetchByRole(role: string, limit = 200): Promise<ApiResponse<any[]>> {
+    try {
+      const response = await api.get("/users", {
+        params: { role, page: 1, limit },
+      });
+      const data = response.data?.data || response.data;
+      return {
+        code: response.status,
+        message: `Usuarios de rol ${role} obtenidos`,
+        data: Array.isArray(data) ? data : [],
+      };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  },
 };
 
 export default userService;
