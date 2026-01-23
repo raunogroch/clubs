@@ -9,7 +9,8 @@ export const Dashboard = ({ name }: pageParamProps) => {
   // Verificar si el admin tiene assignment_id
   const hasAssignment =
     user?.role === "admin"
-      ? (user as any)?.assignment_id !== null && (user as any)?.assignment_id !== undefined
+      ? (user as any)?.assignment_id !== null &&
+        (user as any)?.assignment_id !== undefined
       : true; // Superadmin y otros roles siempre tienen acceso
 
   // Si es admin sin assignment_id, mostrar mensaje especial

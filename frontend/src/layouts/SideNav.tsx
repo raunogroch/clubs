@@ -45,7 +45,12 @@ export const SideNav = () => {
     if (role === "admin") {
       // El admin necesita tener un assignment_id no nulo
       const assignmentId = (user as any)?.assignment_id;
-      return assignmentId && assignmentId !== null && assignmentId !== undefined && assignmentId !== '';
+      return (
+        assignmentId &&
+        assignmentId !== null &&
+        assignmentId !== undefined &&
+        assignmentId !== ""
+      );
     }
     // Superadmin y otros roles siempre tienen acceso
     return true;

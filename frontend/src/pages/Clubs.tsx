@@ -231,7 +231,8 @@ export const Clubs = ({ name }: { name?: string }) => {
   // Verificar si el usuario tiene assignment_id
   const hasAssignment =
     user?.role === "admin"
-      ? (user as any)?.assignment_id !== null && (user as any)?.assignment_id !== undefined
+      ? (user as any)?.assignment_id !== null &&
+        (user as any)?.assignment_id !== undefined
       : true;
 
   // Si es admin sin assignment_id, mostrar mensaje
