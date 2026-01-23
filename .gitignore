@@ -2,16 +2,19 @@ backend/node_modules/
 backend/dist/
 backend/.env
 backend/images/
+backend/package-lock.json
 
 
 frontend/node_modules
 frontend/.vite
 frontend/.env
 frontend/dist/
+frontend/package-lock.json
 
 image-processor/node_modules/
 image-processor/dist/
 image-processor/images/
+image-processor/package-lock.json
 
 images-data/
 mongo-data/
@@ -26,3 +29,4 @@ create-superadmins.sh
 
 backend_back
 frontend_back
+

@@ -4,7 +4,8 @@
  * Maneja todas las llamadas HTTP relacionadas con deportes
  */
 
-const API_URL = import.meta.env.VITE_BACKEND_URI;
+const BASE_URL = import.meta.env.VITE_BACKEND_URI || '';
+const API_URL = BASE_URL.endsWith('/api') ? BASE_URL : `${BASE_URL}/api`;
 
 export interface Sport {
   _id: string;
@@ -49,13 +50,11 @@ async function safeParseJson(response: Response) {
 }
 
 class SportsService {
-  private baseUrl = `${API_URL}/sports`;
-
   /**
    * Obtiene todos los deportes
    */
   async getAll(): Promise<Sport[]> {
-    const response = await fetch(this.baseUrl, {
+    const response = await fetch(`${API_URL}/sports`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
@@ -75,7 +74,7 @@ class SportsService {
    * Obtiene un deporte por ID
    */
   async getById(id: string): Promise<Sport> {
-    const response = await fetch(`${this.baseUrl}/${id}`, {
+    const response = await fetch(`${API_URL}/sports/${id}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
@@ -95,7 +94,7 @@ class SportsService {
    * Crea un nuevo deporte
    */
   async create(data: CreateSportRequest): Promise<Sport> {
-    const response = await fetch(this.baseUrl, {
+    const response = await fetch(`${API_URL}/sports`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -118,7 +117,7 @@ class SportsService {
    * Actualiza un deporte existente
    */
   async update(id: string, data: UpdateSportRequest): Promise<Sport> {
-    const response = await fetch(`${this.baseUrl}/${id}`, {
+    const response = await fetch(`${API_URL}/sports/${id}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -141,7 +140,7 @@ class SportsService {
    * Elimina un deporte
    */
   async delete(id: string): Promise<void> {
-    const response = await fetch(`${this.baseUrl}/${id}`, {
+    const response = await fetch(`${API_URL}/sports/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -160,7 +159,7 @@ class SportsService {
    * Restaura un deporte (reactiva)
    */
   async restore(id: string): Promise<Sport> {
-    const response = await fetch(`${this.baseUrl}/${id}/restore`, {
+    const response = await fetch(`${API_URL}/sports/${id}/restore`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,

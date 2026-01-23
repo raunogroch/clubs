@@ -5,7 +5,8 @@
  * Solo los administradores con assignments asignados pueden acceder
  */
 
-const API_URL = import.meta.env.VITE_BACKEND_URI;
+const BASE_URL = import.meta.env.VITE_BACKEND_URI || '';
+const API_URL = BASE_URL.endsWith('/api') ? BASE_URL : `${BASE_URL}/api`;
 
 export interface Club {
   _id: string;

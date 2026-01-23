@@ -5,7 +5,8 @@
  * Solo el superadmin puede usar estos endpoints
  */
 
-const API_URL = import.meta.env.VITE_BACKEND_URI;
+const BASE_URL = import.meta.env.VITE_BACKEND_URI || '';
+const API_URL = BASE_URL.endsWith('/api') ? BASE_URL : `${BASE_URL}/api`;
 
 export interface Assignment {
   _id: string;
