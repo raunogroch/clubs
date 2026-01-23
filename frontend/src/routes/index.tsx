@@ -62,7 +62,7 @@ export const roleRoutes: RoleRoutes = {
     },
     {
       path: "/assignments",
-      icon: "fa-list-check",
+      icon: "fa-list",
       label: "Asignaciones",
       element: <Assignments />,
     },

@@ -338,13 +338,13 @@ export const Clubs = ({ name }: { name?: string }) => {
                                 </button>
                               </td>
                               <td style={{ verticalAlign: "middle" }}>
-                                <span className="badge badge-primary">
+                                <span>
                                   Registrados ( &nbsp;
                                   {clubMembers[club._id]?.athletes || 0} &nbsp;)
                                 </span>
                               </td>
                               <td style={{ verticalAlign: "middle" }}>
-                                <span className="badge badge-info">
+                                <span>
                                   Registrados ( &nbsp;
                                   {clubMembers[club._id]?.coaches || 0} &nbsp;)
                                 </span>
