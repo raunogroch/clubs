@@ -21,6 +21,12 @@ export const PrivateRoute = ({ children, allowedRoles }: PrivateRouteProps) => {
     return <Navigate to="/" replace />;
   }
 
+  // Validar que admins tengan un assignment_id asignado
+  // Si es admin sin assignment_id, solo permitir dashboard (/) y perfil (/profile)
+  if (user?.role === "admin" && !user?.assignment_id && location.pathname !== "/" && location.pathname !== "/profile") {
+    return <Navigate to="/" replace />;
+  }
+
   return (
     <div className="app-container">
       <Navigation>

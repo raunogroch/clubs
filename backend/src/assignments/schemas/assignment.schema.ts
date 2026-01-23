@@ -11,8 +11,8 @@ export class Assignment extends mongoose.Document {
   @Prop({ required: true })
   module_name: string;
 
-  /** Array de IDs de administradores asignados al módulo */
-  @Prop({ required: true, type: [mongoose.Schema.Types.ObjectId], default: [] })
+  /** Array de IDs de administradores asignados al módulo (puede estar vacío inicialmente) */
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], default: [] })
   assigned_admins: mongoose.Types.ObjectId[];
 
   /** Array de IDs de clubs pertenecientes a este assignment */

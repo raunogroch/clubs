@@ -39,26 +39,25 @@ export const SideNav = () => {
     {},
   );
 
-  // Verificar si el admin tiene assignments asignados
-  // El campo assignments viene del usuario cuando inicia sesión
-  const hasAssignments = React.useMemo(() => {
+  // Verificar si el admin tiene assignment_id asignado
+  // El campo assignment_id viene del usuario cuando inicia sesión
+  const hasAssignment = React.useMemo(() => {
     if (role === "admin") {
-      return (
-        Array.isArray((user as any)?.assignments) &&
-        (user as any).assignments.length > 0
-      );
+      // El admin necesita tener un assignment_id no nulo
+      const assignmentId = (user as any)?.assignment_id;
+      return assignmentId && assignmentId !== null && assignmentId !== undefined && assignmentId !== '';
     }
     // Superadmin y otros roles siempre tienen acceso
     return true;
-  }, [role, (user as any)?.assignments]);
+  }, [role, (user as any)?.assignment_id]);
 
-  // Filtrar el menú: si es admin sin assignments, mostrar solo dashboard
+  // Filtrar el menú: si es admin sin assignment_id, mostrar solo dashboard
   const menuItems = React.useMemo(() => {
-    if (role === "admin" && !hasAssignments) {
+    if (role === "admin" && !hasAssignment) {
       return baseMenuItems.filter((item) => item.path === "/");
     }
     return baseMenuItems;
-  }, [role, hasAssignments, baseMenuItems]);
+  }, [role, hasAssignment, baseMenuItems]);
 
   // Sincronizar menus abiertos cuando cambia la ruta o los items del menú
   React.useEffect(() => {

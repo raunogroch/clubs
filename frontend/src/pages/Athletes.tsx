@@ -133,8 +133,7 @@ export const Athletes = () => {
                   <tr>
                     <th style={{ verticalAlign: "middle" }}>Foto de Perfil</th>
                     <th style={{ verticalAlign: "middle" }}>Nombre</th>
-                    <th style={{ verticalAlign: "middle" }}>Username</th>
-                    <th style={{ verticalAlign: "middle" }}>CI</th>
+                    <th style={{ verticalAlign: "middle" }}>Cédula</th>
                     <th style={{ verticalAlign: "middle" }}>Teléfono</th>
                     <th style={{ verticalAlign: "middle" }}>Género</th>
                     <th style={{ verticalAlign: "middle" }}>Edad</th>
@@ -216,7 +215,6 @@ export const Athletes = () => {
                       <td style={{ verticalAlign: "middle" }}>
                         {u.name} {u.lastname || ""}
                       </td>
-                      <td style={{ verticalAlign: "middle" }}>{u.username}</td>
                       <td style={{ verticalAlign: "middle" }}>
                         {u.ci || (
                           <span title="Sin dato">

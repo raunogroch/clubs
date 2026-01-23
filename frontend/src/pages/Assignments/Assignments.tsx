@@ -158,11 +158,6 @@ const Assignments = () => {
       return;
     }
 
-    if (formData.assigned_admins.length === 0) {
-      toastr.warning("Debes asignar al menos un administrador");
-      return;
-    }
-
     try {
       setLoading(true);
 

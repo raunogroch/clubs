@@ -20,7 +20,7 @@ export class CreateUserDto {
 
   // ========== CAMPOS COMUNES A MÚLTIPLES ROLES ==========
 
-  /** Nombre de usuario (ATHLETE, COACH, ASSISTANT, ADMIN, SUPERADMIN) */
+  /** Nombre de usuario (COACH, ASSISTANT, ADMIN, SUPERADMIN - NO ATHLETE ni PARENT) */
   @ValidateIf((o) =>
     [Roles.COACH, Roles.ASSISTANT, Roles.ADMIN, Roles.SUPERADMIN].includes(
       o.role,
@@ -33,7 +33,7 @@ export class CreateUserDto {
   @IsOptional()
   username?: string;
 
-  /** Contraseña (ATHLETE, COACH, ASSISTANT, ADMIN, SUPERADMIN) */
+  /** Contraseña (COACH, ASSISTANT, ADMIN, SUPERADMIN - NO ATHLETE ni PARENT) */
   @ValidateIf((o) =>
     [Roles.COACH, Roles.ASSISTANT, Roles.ADMIN, Roles.SUPERADMIN].includes(
       o.role,
@@ -168,4 +168,12 @@ export class CreateUserDto {
   /** Estado del usuario (activo/inactivo) */
   @IsOptional()
   active?: boolean = true;
+
+  // ========== ADMIN-SPECIFIC FIELDS ==========
+
+  /** ID de asignación (SOLO PARA ADMIN) */
+  @ValidateIf((o) => [Roles.ADMIN, Roles.SUPERADMIN].includes(o.role))
+  @IsOptional()
+  @IsString()
+  assignment_id?: string;
 }

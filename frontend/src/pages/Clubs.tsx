@@ -228,14 +228,14 @@ export const Clubs = ({ name }: { name?: string }) => {
     }
   };
 
-  // Verificar si el usuario tiene asignaciones
-  const hasAssignments =
-    user?.role === "admin" &&
-    Array.isArray((user as any)?.assignments) &&
-    (user as any).assignments.length > 0;
+  // Verificar si el usuario tiene assignment_id
+  const hasAssignment =
+    user?.role === "admin"
+      ? (user as any)?.assignment_id !== null && (user as any)?.assignment_id !== undefined
+      : true;
 
-  // Si es admin sin asignaciones, mostrar mensaje
-  if (user?.role === "admin" && !hasAssignments) {
+  // Si es admin sin assignment_id, mostrar mensaje
+  if (user?.role === "admin" && !hasAssignment) {
     return (
       <>
         <NavHeader name={name} />

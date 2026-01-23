@@ -11,11 +11,11 @@ export class User extends mongoose.Document {
 
   // ========== CAMPOS COMUNES A MÚLTIPLES ROLES ==========
 
-  /** Nombre de usuario (ATHLETE, COACH, ASSISTANT, ADMIN, SUPERADMIN) */
+  /** Nombre de usuario (COACH, ASSISTANT, ADMIN, SUPERADMIN - NO ATHLETE ni PARENT) */
   @Prop({ required: false, unique: true, sparse: true })
   username?: string;
 
-  /** Contraseña encriptada (ATHLETE, COACH, ASSISTANT, ADMIN, SUPERADMIN) */
+  /** Contraseña encriptada (COACH, ASSISTANT, ADMIN, SUPERADMIN - NO ATHLETE ni PARENT) */
   @Prop({ required: false })
   password?: string;
 
@@ -75,12 +75,22 @@ export class User extends mongoose.Document {
     large: string;
   };
 
-  /** Array de IDs de asignaciones para admins */
+  /** ID de asignación del administrador (SOLO PARA ADMIN) */
   @Prop({
-    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Assignment' }],
-    default: [],
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Assignment',
     required: false,
+    validate: {
+      validator: function (value: any) {
+        // Solo permite assignment_id si el rol es ADMIN
+        if (value && this.role !== Roles.ADMIN) {
+          return false;
+        }
+        return true;
+      },
+      message: 'Solo los ADMIN pueden tener una asignación',
+    },
   })
-  assignments?: mongoose.Types.ObjectId[];
+  assignment_id?: mongoose.Types.ObjectId;
 }
 export const UserSchema = SchemaFactory.createForClass(User);

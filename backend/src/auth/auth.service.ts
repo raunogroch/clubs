@@ -100,8 +100,8 @@ export class AuthService {
           role: user.role,
           // Return the images object (preferred) - keep backward compatibility by including image? not included
           images: (user as any)?.images || undefined,
-          // Array de IDs de asignaciones para admins
-          assignments: (user as any)?.assignments || [],
+          // assignment_id para admins (singular)
+          assignment_id: (user as any)?.assignment_id || null,
         },
       },
     };

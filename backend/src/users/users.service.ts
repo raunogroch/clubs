@@ -119,29 +119,6 @@ export class UsersService {
     // Validar campos requeridos según el rol
     this.validateRequiredFieldsByRole(createUserDto);
 
-    // Para ATHLETE sin username, generar automáticamente
-    if (createUserDto.role === Roles.ATHLETE && !createUserDto.username) {
-      const baseUsername = `${createUserDto.name?.toLowerCase() || 'athlete'}.${
-        createUserDto.lastname?.toLowerCase() || 'user'
-      }`.replace(/\s+/g, '');
-      let username = baseUsername;
-      let counter = 1;
-
-      // Asegurar que el username sea único
-      while (await this.userValidator.usernameExists(username)) {
-        username = `${baseUsername}${counter}`;
-        counter++;
-      }
-      createUserDto.username = username;
-    }
-
-    // Para ATHLETE sin password, generar automáticamente
-    if (createUserDto.role === Roles.ATHLETE && !createUserDto.password) {
-      createUserDto.password =
-        Math.random().toString(36).substring(2, 10) +
-        Math.random().toString(36).substring(2, 10);
-    }
-
     // Para ADMIN, generar username y password automáticamente
     if (createUserDto.role === Roles.ADMIN) {
       // Generar username de estructura: firstname.lastname
@@ -364,7 +341,9 @@ export class UsersService {
    */
   async softRemove(id: string): Promise<User | null> {
     await this.userValidator.validateExistence(id);
-    return this.userRepository.updateById(id, { active: false } as User);
+    return this.userRepository.updateById(id, {
+      active: false,
+    } as UpdateUserDto);
   }
 
   /**
@@ -372,7 +351,9 @@ export class UsersService {
    */
   async restore(id: string): Promise<User | null> {
     await this.userValidator.validateExistence(id);
-    return this.userRepository.updateById(id, { active: true } as User);
+    return this.userRepository.updateById(id, {
+      active: true,
+    } as UpdateUserDto);
   }
 
   /**
@@ -756,7 +737,9 @@ export class UsersService {
    * @returns { code: 200, message: "Contraseña actualizada a su CI" }
    * @throws NotFoundException si el usuario no existe
    */
-  async resetPassword(userId: string): Promise<{ code: number; message: string }> {
+  async resetPassword(
+    userId: string,
+  ): Promise<{ code: number; message: string }> {
     try {
       // Obtener el usuario por ID
       const user = await this.userRepository.findById(userId);

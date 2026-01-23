@@ -16,9 +16,9 @@ export class CreateAssignmentDto {
   @IsString()
   module_name: string;
 
-  /** Array de IDs de administradores a asignar al módulo */
-  @IsNotEmpty()
+  /** Array de IDs de administradores a asignar al módulo (opcional - puede agregarse después) */
+  @IsOptional()
   @IsArray()
   @IsMongoId({ each: true })
-  assigned_admins: string[];
+  assigned_admins?: string[];
 }

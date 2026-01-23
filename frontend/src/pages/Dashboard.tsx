@@ -6,15 +6,14 @@ import type { pageParamProps } from "../interfaces/pageParamProps";
 export const Dashboard = ({ name }: pageParamProps) => {
   const user = useSelector((state: RootState) => state.auth.user);
 
-  // Verificar si el admin tiene assignments
-  const hasAssignments =
+  // Verificar si el admin tiene assignment_id
+  const hasAssignment =
     user?.role === "admin"
-      ? Array.isArray((user as any)?.assignments) &&
-        (user as any).assignments.length > 0
+      ? (user as any)?.assignment_id !== null && (user as any)?.assignment_id !== undefined
       : true; // Superadmin y otros roles siempre tienen acceso
 
-  // Si es admin sin assignments, mostrar mensaje especial
-  if (user?.role === "admin" && !hasAssignments) {
+  // Si es admin sin assignment_id, mostrar mensaje especial
+  if (user?.role === "admin" && !hasAssignment) {
     return (
       <>
         <NavHeader name={name} />
