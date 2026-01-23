@@ -79,12 +79,6 @@ export const roleRoutes: RoleRoutes = {
       element: <Dashboard />,
     },
     {
-      path: "/sports",
-      icon: "fa-trophy",
-      label: "Deportes",
-      element: <Sports />,
-    },
-    {
       path: "/clubs",
       icon: "fa-object-group",
       label: "Clubs",
