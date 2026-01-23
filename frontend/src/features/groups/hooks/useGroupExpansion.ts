@@ -2,32 +2,32 @@
  * Hook para manejar el estado de expansión de grupos
  *
  * Gestiona qué grupos están abiertos/cerrados
+ * Solo permite un grupo expandido a la vez (comportamiento de acordeón)
  */
 
 import { useState, useCallback } from "react";
 
 export function useGroupExpansion() {
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [expandedGroupId, setExpandedGroupId] = useState<string | null>(null);
 
   const toggleGroupExpansion = useCallback((groupId: string) => {
-    setExpandedGroups((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(groupId)) {
-        newSet.delete(groupId);
-      } else {
-        newSet.add(groupId);
+    setExpandedGroupId((prev) => {
+      // Si el grupo ya está expandido, lo cierra
+      if (prev === groupId) {
+        return null;
       }
-      return newSet;
+      // Si es otro grupo, lo expande (cerrando el anterior)
+      return groupId;
     });
   }, []);
 
   const isExpanded = useCallback(
-    (groupId: string) => expandedGroups.has(groupId),
-    [expandedGroups],
+    (groupId: string) => expandedGroupId === groupId,
+    [expandedGroupId],
   );
 
   return {
-    expandedGroups,
+    expandedGroupId,
     toggleGroupExpansion,
     isExpanded,
   };

@@ -46,7 +46,11 @@ export const GroupCard: React.FC<GroupCardProps> = ({
                 } chevron-icon`}
               ></i>
               <h4>
-                <strong>{group.name}</strong>
+                <strong>{group.name}</strong>{" "}
+                <span className="ml-3">
+                  <i className="fa fa-users"></i> {group.athletes?.length || 0}{" "}
+                  Atletas registrados
+                </span>
               </h4>
             </button>
 
