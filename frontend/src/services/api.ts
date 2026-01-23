@@ -17,6 +17,13 @@ import axios from "axios";
 // Obtener la URL del backend desde las variables de entorno
 const backendUri = import.meta.env.VITE_BACKEND_URI;
 
+// Asegurar que las peticiones vayan al prefijo `/api` del backend
+const normalizedBase = (() => {
+  if (!backendUri) return '/api';
+  const trimmed = backendUri.replace(/\/$/, '');
+  return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
+})();
+
 /**
  * Instancia de Axios configurada para comunicar con la API del backend
  * 
@@ -25,7 +32,7 @@ const backendUri = import.meta.env.VITE_BACKEND_URI;
  * - headers: Content-Type JSON por defecto
  */
 const api = axios.create({
-  baseURL: backendUri,
+  baseURL: normalizedBase,
   headers: {
     "Content-Type": "application/json",
   },
