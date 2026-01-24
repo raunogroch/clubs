@@ -87,8 +87,6 @@ export const AthletesAdmin = () => {
     }
   };
 
-  console.log("AthletesAdmin render, athletes:", athletes);
-
   const searchParentByCI = async (ci: string) => {
     if (!ci.trim()) {
       setParentNotFound(false);
@@ -409,7 +407,7 @@ export const AthletesAdmin = () => {
       // Manejar inscriptionDate
       if (enableCustomInscription && form.inscriptionDate) {
         // Convertir string YYYY-MM-DD a Date respetando zona horaria local
-        const [year, month, day] = form.inscriptionDate.split('-').map(Number);
+        const [year, month, day] = form.inscriptionDate.split("-").map(Number);
         payloadToSend.inscriptionDate = new Date(year, month - 1, day);
       } else if (enableCustomInscription && !form.inscriptionDate) {
         setFormError(
@@ -894,9 +892,10 @@ export const AthletesAdmin = () => {
                           })
                         }
                         style={{
-                          cursor: editing && !!editing.inscriptionDate
-                            ? "not-allowed"
-                            : "pointer",
+                          cursor:
+                            editing && !!editing.inscriptionDate
+                              ? "not-allowed"
+                              : "pointer",
                           width: "18px",
                           height: "18px",
                         }}
@@ -904,12 +903,14 @@ export const AthletesAdmin = () => {
                       <label
                         htmlFor="enableCustomInscription"
                         style={{
-                          cursor: editing && !!editing.inscriptionDate
-                            ? "not-allowed"
-                            : "pointer",
+                          cursor:
+                            editing && !!editing.inscriptionDate
+                              ? "not-allowed"
+                              : "pointer",
                           margin: 0,
                           fontWeight: "600",
-                          opacity: editing && !!editing.inscriptionDate ? 0.6 : 1,
+                          opacity:
+                            editing && !!editing.inscriptionDate ? 0.6 : 1,
                         }}
                       >
                         ✏️ Modificar Fecha de Inscripción
@@ -927,34 +928,35 @@ export const AthletesAdmin = () => {
                       )}
                     </div>
 
-                    {form.enableCustomInscription && !editing?.inscriptionDate && (
-                      <div>
-                        <div className="form-group" style={{ margin: 0 }}>
-                          <label>Fecha de Inscripción</label>
-                          <input
-                            type="date"
-                            className="form-control"
-                            value={form.inscriptionDate}
-                            onChange={(e) =>
-                              setForm({
-                                ...form,
-                                inscriptionDate: e.target.value,
-                              })
-                            }
-                            max={new Date().toISOString().split("T")[0]}
-                          />
-                          <small
-                            style={{
-                              color: "#666",
-                              marginTop: "4px",
-                              display: "block",
-                            }}
-                          >
-                            La fecha debe ser igual o anterior a hoy
-                          </small>
+                    {form.enableCustomInscription &&
+                      !editing?.inscriptionDate && (
+                        <div>
+                          <div className="form-group" style={{ margin: 0 }}>
+                            <label>Fecha de Inscripción</label>
+                            <input
+                              type="date"
+                              className="form-control"
+                              value={form.inscriptionDate}
+                              onChange={(e) =>
+                                setForm({
+                                  ...form,
+                                  inscriptionDate: e.target.value,
+                                })
+                              }
+                              max={new Date().toISOString().split("T")[0]}
+                            />
+                            <small
+                              style={{
+                                color: "#666",
+                                marginTop: "4px",
+                                display: "block",
+                              }}
+                            >
+                              La fecha debe ser igual o anterior a hoy
+                            </small>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
                   </div>
 
                   {form.birth_date && calculateAge(form.birth_date) < 18 && (
