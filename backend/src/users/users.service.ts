@@ -480,6 +480,7 @@ export class UsersService {
           large: c.images?.large || null,
         },
         _id: c._id,
+        createdAt: c.createdAt || null,
       }));
 
       return result;
@@ -551,6 +552,8 @@ export class UsersService {
           large: a.images?.large || null,
         },
         _id: a._id,
+        createdAt: a.createdAt || null,
+        inscriptionDate: a.inscriptionDate || null,
       }));
 
       return result;

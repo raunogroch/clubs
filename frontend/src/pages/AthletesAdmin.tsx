@@ -8,6 +8,24 @@ import Cropper from "react-cropper";
 import "cropperjs/dist/cropper.css";
 import { ParentTooltip } from "../components/ParentTooltip";
 
+// Función helper para formatear fechas con mes literal (YYYY, D de MMM)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const formatDateWithLiteralMonth = (dateString: string): string => {
+  const date = new Date(dateString);
+  const options: Intl.DateTimeFormatOptions = {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  };
+  const formatted = date.toLocaleDateString("es-ES", options);
+  // Convierte "24 ene 2025" a "2025, 24 de ene"
+  const parts = formatted.split(" ");
+  if (parts.length === 3) {
+    return `${parts[2]}, ${parts[0]} de ${parts[1]}`;
+  }
+  return formatted;
+};
+
 export const AthletesAdmin = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [showModal, setShowModal] = useState(false);
@@ -28,6 +46,8 @@ export const AthletesAdmin = () => {
     phone: "",
     gender: "",
     birth_date: "",
+    inscriptionDate: "",
+    enableCustomInscription: false,
     active: true,
     images: { small: "", medium: "", large: "" },
     parent: {
@@ -36,6 +56,7 @@ export const AthletesAdmin = () => {
       ci: "",
       phone: "",
     },
+    createdAt: "",
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [athletes, setAthletes] = useState<any[]>([]);
@@ -65,6 +86,8 @@ export const AthletesAdmin = () => {
       setLoading(false);
     }
   };
+
+  console.log("AthletesAdmin render, athletes:", athletes);
 
   const searchParentByCI = async (ci: string) => {
     if (!ci.trim()) {
@@ -145,6 +168,12 @@ export const AthletesAdmin = () => {
       phone: u.phone || "",
       gender: u.gender || "",
       birth_date: u.birth_date ? u.birth_date.split("T")[0] : "",
+      inscriptionDate: u.inscriptionDate
+        ? u.inscriptionDate.split("T")[0]
+        : u.createdAt
+          ? new Date(u.createdAt).toISOString().split("T")[0]
+          : "",
+      enableCustomInscription: !!u.inscriptionDate,
       active: typeof u.active === "boolean" ? u.active : true,
       images: {
         small: (u.images && u.images.small) || "",
@@ -164,6 +193,26 @@ export const AthletesAdmin = () => {
     setFormError(null);
     setParentCISearch("");
     setParentNotFound(false);
+    setForm({
+      name: "",
+      lastname: "",
+      username: "",
+      ci: "",
+      phone: "",
+      gender: "",
+      birth_date: "",
+      inscriptionDate: "",
+      enableCustomInscription: false,
+      active: true,
+      images: { small: "", medium: "", large: "" },
+      parent: {
+        name: "",
+        lastname: "",
+        ci: "",
+        phone: "",
+      },
+    });
+    setEditing(null);
   };
 
   const openImageEdit = (u: any) => {
@@ -280,7 +329,8 @@ export const AthletesAdmin = () => {
     }
     setFormError(null);
     try {
-      const { parent, ...payload } = form;
+      const { parent, enableCustomInscription, inscriptionDate, ...payload } =
+        form;
       const age = calculateAge(form.birth_date);
 
       // Generar username automáticamente si es creación
@@ -346,7 +396,7 @@ export const AthletesAdmin = () => {
       }
 
       // Ahora guardar/actualizar athlete
-      const payloadToSend = {
+      const payloadToSend: any = {
         ...payload,
         username: generatedUsername,
         password: generatedPassword,
@@ -355,6 +405,27 @@ export const AthletesAdmin = () => {
         // Si es mayor de edad, eliminar parent_id si existe
         ...(age >= 18 && { parent_id: null }),
       };
+
+      // Manejar inscriptionDate
+      if (enableCustomInscription && form.inscriptionDate) {
+        // Convertir string YYYY-MM-DD a Date respetando zona horaria local
+        const [year, month, day] = form.inscriptionDate.split('-').map(Number);
+        payloadToSend.inscriptionDate = new Date(year, month - 1, day);
+      } else if (enableCustomInscription && !form.inscriptionDate) {
+        setFormError(
+          "La fecha de inscripción es requerida cuando activas esta opción",
+        );
+        return;
+      } else if (editing && !enableCustomInscription) {
+        // Si estamos editando y NO marcamos el checkbox,
+        // preservar la fecha existente (no enviar nada)
+        // La fecha se mostrará como createdAt si no tiene inscriptionDate
+      } else if (!editing) {
+        // Si es creación y no se habilita inscripción personalizada,
+        // el backend asignará automáticamente la fecha actual
+        delete payloadToSend.inscriptionDate;
+      }
+
       if (editing)
         await dispatch(
           updateUser({ id: editing._id, user: payloadToSend }),
@@ -402,6 +473,9 @@ export const AthletesAdmin = () => {
                     <th style={{ verticalAlign: "middle" }}>Teléfono</th>
                     <th style={{ verticalAlign: "middle" }}>Género</th>
                     <th style={{ verticalAlign: "middle" }}>Edad</th>
+                    <th style={{ verticalAlign: "middle" }}>
+                      Fecha de Inscripción
+                    </th>
                     <th
                       style={{ textAlign: "center", verticalAlign: "middle" }}
                     >
@@ -543,6 +617,20 @@ export const AthletesAdmin = () => {
                             <i
                               className="fa fa-exclamation-triangle"
                               style={{ color: "red" }}
+                            ></i>
+                          </span>
+                        )}
+                      </td>
+                      <td style={{ verticalAlign: "middle" }}>
+                        {u.inscriptionDate ? (
+                          formatDateWithLiteralMonth(u.inscriptionDate)
+                        ) : u.createdAt ? (
+                          formatDateWithLiteralMonth(u.createdAt)
+                        ) : (
+                          <span title="Sin fecha de inscripción registrada">
+                            <i
+                              className="fa fa-info-circle"
+                              style={{ color: "#999" }}
                             ></i>
                           </span>
                         )}
@@ -771,6 +859,102 @@ export const AthletesAdmin = () => {
                         }
                       />
                     </div>
+                  </div>
+
+                  {/* Campo de Inscripción Personalizada */}
+                  <div
+                    style={{
+                      backgroundColor: "#f5f5f5",
+                      border: "1px solid #ddd",
+                      borderRadius: "4px",
+                      padding: "12px",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                        marginBottom: "12px",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        id="enableCustomInscription"
+                        checked={form.enableCustomInscription}
+                        disabled={editing && !!editing.inscriptionDate}
+                        onChange={(e) =>
+                          setForm({
+                            ...form,
+                            enableCustomInscription: e.target.checked,
+                            inscriptionDate: e.target.checked
+                              ? form.inscriptionDate || ""
+                              : "",
+                          })
+                        }
+                        style={{
+                          cursor: editing && !!editing.inscriptionDate
+                            ? "not-allowed"
+                            : "pointer",
+                          width: "18px",
+                          height: "18px",
+                        }}
+                      />
+                      <label
+                        htmlFor="enableCustomInscription"
+                        style={{
+                          cursor: editing && !!editing.inscriptionDate
+                            ? "not-allowed"
+                            : "pointer",
+                          margin: 0,
+                          fontWeight: "600",
+                          opacity: editing && !!editing.inscriptionDate ? 0.6 : 1,
+                        }}
+                      >
+                        ✏️ Modificar Fecha de Inscripción
+                      </label>
+                      {editing && !!editing.inscriptionDate && (
+                        <span
+                          style={{
+                            fontSize: "12px",
+                            color: "#999",
+                            marginLeft: "auto",
+                          }}
+                        >
+                          (ya modificada)
+                        </span>
+                      )}
+                    </div>
+
+                    {form.enableCustomInscription && !editing?.inscriptionDate && (
+                      <div>
+                        <div className="form-group" style={{ margin: 0 }}>
+                          <label>Fecha de Inscripción</label>
+                          <input
+                            type="date"
+                            className="form-control"
+                            value={form.inscriptionDate}
+                            onChange={(e) =>
+                              setForm({
+                                ...form,
+                                inscriptionDate: e.target.value,
+                              })
+                            }
+                            max={new Date().toISOString().split("T")[0]}
+                          />
+                          <small
+                            style={{
+                              color: "#666",
+                              marginTop: "4px",
+                              display: "block",
+                            }}
+                          >
+                            La fecha debe ser igual o anterior a hoy
+                          </small>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {form.birth_date && calculateAge(form.birth_date) < 18 && (

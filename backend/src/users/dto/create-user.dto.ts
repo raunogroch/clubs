@@ -116,6 +116,12 @@ export class CreateUserDto {
   @IsDate()
   birth_date?: Date;
 
+  /** Fecha de inscripción personalizada (ATHLETE) - debe ser anterior a createdAt */
+  @ValidateIf((o) => o.role === Roles.ATHLETE)
+  @IsOptional()
+  @IsDate()
+  inscriptionDate?: Date;
+
   // ========== CAMPOS ESPECÍFICOS DE PARENT ==========
 
   /** Teléfono (PARENT) */
