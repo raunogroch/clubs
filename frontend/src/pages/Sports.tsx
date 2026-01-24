@@ -232,7 +232,6 @@ export const Sports = ({ name }: { name?: string }) => {
         <div
           className="modal"
           style={{ display: "block", backgroundColor: "rgba(0,0,0,.5)" }}
-          onClick={handleCloseModal}
         >
           <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
             <div className="modal-content">

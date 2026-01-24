@@ -333,7 +333,6 @@ const Assignments = () => {
             bottom: 0,
             zIndex: 1000,
           }}
-          onClick={handleCloseModal}
         >
           <div
             className="modal-dialog"
