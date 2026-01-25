@@ -38,6 +38,7 @@ services:
       - "${IMAGE_PROCESSOR_PORT}:4000"
     volumes:
       - ./images-data:/usr/src/app/images
+      - ./files-data:/usr/src/app/files
 
   frontend:
     build:
@@ -46,11 +47,13 @@ services:
       args:
         VITE_BACKEND_URI: ${VITE_BACKEND_URI}
         VITE_IMAGE_PROCESSOR_API: ${VITE_IMAGE_PROCESSOR_API}
+        VITE_FILES_PROCESSOR_API: ${VITE_FILES_PROCESSOR_API}
     restart: unless-stopped
     env_file: .env
     environment:
       - VITE_BACKEND_URI=${VITE_BACKEND_URI}
       - VITE_IMAGE_PROCESSOR_API=${VITE_IMAGE_PROCESSOR_API}
+      - VITE_FILES_PROCESSOR_API=${VITE_FILES_PROCESSOR_API}
     ports:
       - "${FRONTEND_PORT}:80"
     depends_on:
