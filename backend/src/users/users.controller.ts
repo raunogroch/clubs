@@ -216,6 +216,20 @@ export class UsersController {
   }
 
   /**
+   * POST /api/users/upload-ci
+   * Cargar PDF de Carnet de Identidad del atleta
+   *
+   * @param payload - { userId: string, pdfBase64: string, role: string }
+   * @returns { message: string, code: number, data: { documentPath: string } }
+   */
+  @Post('upload-ci')
+  @HttpCode(200)
+  @Roles(Role.SUPERADMIN, Role.ADMIN, Role.ASSISTANT, Role.COACH, Role.ATHLETE)
+  async uploadCI(@Body() payload: any) {
+    return this.usersService.uploadAthleteCI(payload);
+  }
+
+  /**
    * POST /api/users/change-password
    * Cambiar la contraseña del usuario autenticado
    *

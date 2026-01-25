@@ -65,7 +65,7 @@ export class UserRepository implements IUserRepository {
   }
 
   /**
-   * Devuelve usuarios paginados y filtrados por nombre, username, cédula, etc.
+   * Devuelve usuarios paginados y filtrados por nombre, username, Carnet, etc.
    */
   async findAllPaginated(
     skip = 0,

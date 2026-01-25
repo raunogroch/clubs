@@ -152,6 +152,20 @@ export const userService = {
       return handleApiError(error);
     }
   },
+
+  async uploadAthleteCI(payload: any): Promise<ApiResponse<any>> {
+    try {
+      const response = await api.post("/users/upload-ci", payload);
+      return {
+        code: response.status,
+        message: "CI cargado exitosamente",
+        data: response.data,
+      };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  },
+
   async getUserById(id: string): Promise<ApiResponse<any>> {
     try {
       const response = await api.get(`/users/${id}`);

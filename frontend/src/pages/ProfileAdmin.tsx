@@ -251,7 +251,7 @@ export const ProfileAdmin = () => {
                             className="fa fa-id-card"
                             style={{ marginRight: "8px" }}
                           ></i>
-                          Cédula:
+                          Carnet:
                         </strong>
                       </div>
                       <div className="col-sm-8">

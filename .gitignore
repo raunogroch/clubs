@@ -14,6 +14,7 @@ frontend/package-lock.json
 image-processor/node_modules/
 image-processor/dist/
 image-processor/images/
+image-processor/files/
 image-processor/package-lock.json
 
 images-data/

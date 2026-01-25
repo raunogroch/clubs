@@ -554,6 +554,8 @@ export class UsersService {
         _id: a._id,
         createdAt: a.createdAt || null,
         inscriptionDate: a.inscriptionDate || null,
+        documentPath: a.documentPath || null,
+        fileIdentifier: a.fileIdentifier || null,
       }));
 
       return result;
@@ -674,6 +676,116 @@ export class UsersService {
       } else {
         throw new Error(
           `Error al procesar imagen: ${error?.message || 'Error desconocido'}`,
+        );
+      }
+    }
+  }
+
+  /**
+   * Cargar PDF de Carnet de Identidad para un atleta
+   * Envía el PDF a image-processor y guarda la ruta en la base de datos
+   */
+  async uploadAthleteCI(payload: any): Promise<any> {
+    try {
+      const { userId, pdfBase64, role } = payload;
+
+      if (!userId || !pdfBase64) {
+        throw new Error('userId y pdfBase64 son requeridos');
+      }
+
+      // Procesar el PDF con image-processor
+      const pdfResponse = await this.processCIWithImageProcessor(
+        pdfBase64,
+        userId,
+      );
+
+      // Actualizar el usuario con la ruta del PDF
+      const updateData: UpdateUserDto = {
+        documentPath: pdfResponse.pdfPath,
+        role: (role || 'athlete') as any,
+      };
+
+      const updatedUser = await this.userRepository.updateById(
+        userId,
+        updateData,
+      );
+
+      return {
+        code: 200,
+        message: 'CI cargado exitosamente',
+        data: {
+          documentPath: pdfResponse.pdfPath,
+          fileIdentifier: pdfResponse.fileIdentifier,
+        },
+      };
+    } catch (error: any) {
+      const errorMessage =
+        error?.message || 'Error desconocido al procesar el CI';
+      throw new ServiceUnavailableException(
+        `Error al procesar el CI: ${errorMessage}`,
+      );
+    }
+  }
+
+  /**
+   * Procesa el PDF del CI con el servicio image-processor
+   */
+  private async processCIWithImageProcessor(
+    pdfBase64: string,
+    userId: string,
+  ): Promise<{ pdfPath: string; fileIdentifier: string }> {
+    const axios = require('axios');
+    const imageProcessorApi = this.configService.get<string>(
+      'IMAGE_PROCESSOR_API',
+    );
+
+    if (!imageProcessorApi) {
+      throw new Error('IMAGE_PROCESSOR_API no configurada');
+    }
+
+    try {
+      // Obtener el fileIdentifier del usuario si existe
+      const user = await this.userRepository.findById(userId);
+      const fileIdentifier = user?.fileIdentifier;
+
+      // Guardar el PDF en image-processor
+      const saveResponse = await axios.post(
+        `${imageProcessorApi}/api/process/save-pdf`,
+        {
+          pdf: pdfBase64,
+          folder: 'pdfs',
+          fileIdentifier: fileIdentifier,
+        },
+      );
+
+      if (!saveResponse.data || !saveResponse.data.pdfPath) {
+        throw new Error(
+          'Respuesta inválida del procesador: ' +
+            JSON.stringify(saveResponse.data),
+        );
+      }
+
+      // Construir URL absoluta del PDF
+      const absolutePdfUrl = `${imageProcessorApi}${saveResponse.data.pdfPath}`;
+
+      return {
+        pdfPath: absolutePdfUrl,
+        fileIdentifier: saveResponse.data.fileIdentifier,
+      };
+    } catch (error: any) {
+      if (error?.response?.status) {
+        throw new Error(
+          `Image Processor error (${error.response.status}): ${
+            error.response.data?.message || error.message
+          }`,
+        );
+      } else if (error?.code === 'ECONNREFUSED') {
+        throw new Error(
+          `No se puede conectar a Image Processor en ${imageProcessorApi}. Verifique que el servicio esté corriendo.`,
+        );
+      } else {
+        throw new Error(
+          `Error al procesar CI: ${error?.message || 'Error desconocido'}`,
         );
       }
     }

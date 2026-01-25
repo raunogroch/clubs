@@ -28,8 +28,14 @@ async function bootstrap() {
    * Las imágenes estarán disponibles en: http://localhost:PORT/images/...
    * (sin el prefijo /api para evitar 404)
    */
-  app.use("/storage", express.static(join(__dirname, "../storage")));
-  app.use("/images", express.static(join(__dirname, "../images")));
+  const staticImagesPath = join(process.cwd(), "images");
+  const staticFilesPath = join(process.cwd(), "files");
+  app.use("/storage", express.static(join(process.cwd(), "storage")));
+  app.use("/images", express.static(staticImagesPath));
+  app.use("/files", express.static(staticFilesPath));
+
+  logger.log(`📁 Sirviendo imágenes desde: ${staticImagesPath}`);
+  logger.log(`📁 Sirviendo archivos desde: ${staticFilesPath}`);
 
   /**
    * Aplicar prefijo global solo a los endpoints de la API

@@ -88,7 +88,7 @@ export class CreateUserDto {
   @IsString()
   lastname?: string;
 
-  /** Cédula de identidad (ATHLETE, PARENT, COACH, ASSISTANT, ADMIN) */
+  /** Carnet de identidad (ATHLETE, PARENT, COACH, ASSISTANT, ADMIN) */
   @ValidateIf((o) =>
     [
       Roles.ATHLETE,
@@ -168,6 +168,17 @@ export class CreateUserDto {
     medium: string;
     large: string;
   };
+
+  /** Identificador único compartido entre foto y PDF */
+  @IsOptional()
+  @IsString()
+  fileIdentifier?: string;
+
+  /** Ruta del PDF de Carnet de Identidad */
+  @ValidateIf((o) => o.role === Roles.ATHLETE)
+  @IsOptional()
+  @IsString()
+  documentPath?: string;
 
   // ========== ESTADO DEL USUARIO ==========
 

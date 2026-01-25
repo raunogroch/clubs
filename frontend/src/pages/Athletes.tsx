@@ -133,7 +133,7 @@ export const Athletes = () => {
                   <tr>
                     <th style={{ verticalAlign: "middle" }}>Foto de Perfil</th>
                     <th style={{ verticalAlign: "middle" }}>Nombre</th>
-                    <th style={{ verticalAlign: "middle" }}>Cédula</th>
+                    <th style={{ verticalAlign: "middle" }}>Carnet</th>
                     <th style={{ verticalAlign: "middle" }}>Teléfono</th>
                     <th style={{ verticalAlign: "middle" }}>Género</th>
                     <th style={{ verticalAlign: "middle" }}>Edad</th>

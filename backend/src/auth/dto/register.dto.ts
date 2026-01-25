@@ -92,7 +92,7 @@ export class RegisterDto {
   @IsString()
   lastname?: string;
 
-  /** Cédula de identidad (ATHLETE, PARENT, COACH, ASSISTANT, ADMIN) */
+  /** Carnet de identidad (ATHLETE, PARENT, COACH, ASSISTANT, ADMIN) */
   @ValidateIf((o) =>
     [
       Roles.ATHLETE,

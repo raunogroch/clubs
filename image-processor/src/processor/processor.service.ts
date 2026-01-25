@@ -160,6 +160,94 @@ export class ProcessorService {
     }
   }
 
+  /**
+   * Guarda un archivo PDF manteniendo el mismo identificador si se proporciona
+   * Si no se proporciona fileIdentifier, genera uno nuevo basado en UUID
+   * Los PDFs se organizan en carpetas por fileIdentifier
+   */
+  async savePdf(
+    folder: string,
+    pdfBase64: string,
+    fileIdentifier?: string,
+  ): Promise<{ fileIdentifier: string; pdfPath: string }> {
+    try {
+      if (!pdfBase64 || typeof pdfBase64 !== "string") {
+        throw new BadRequestException("Missing or invalid PDF");
+      }
+
+      const match = pdfBase64.match(
+        /^data:(application\/pdf|application\/octet-stream);base64,(.+)$/i,
+      );
+      if (!match) {
+        throw new BadRequestException(
+          "Invalid base64 PDF format. Expected format: data:application/pdf;base64,...",
+        );
+      }
+
+      const [, , data] = match;
+      let buffer: Buffer;
+
+      try {
+        buffer = Buffer.from(data, "base64");
+      } catch (error) {
+        throw new BadRequestException("Invalid base64 encoding");
+      }
+
+      if (buffer.length === 0) {
+        throw new BadRequestException("Empty PDF buffer");
+      }
+
+      // Generar o usar fileIdentifier existente
+      const identifier = fileIdentifier || uuidv4();
+
+      // Crear carpeta pdfs dentro de files
+      const baseDir = path.join(__dirname, "../../files/pdfs");
+      if (!fs.existsSync(baseDir)) {
+        fs.mkdirSync(baseDir, { recursive: true });
+      }
+
+      // Guardar PDF con nombre = fileIdentifier.pdf
+      const pdfFilename = `${identifier}.pdf`;
+      const pdfPath = path.join(baseDir, pdfFilename);
+
+      await fs.promises.writeFile(pdfPath, buffer);
+      this.logger.debug(`PDF saved at ${pdfPath}`);
+
+      return {
+        fileIdentifier: identifier,
+        pdfPath: `/files/pdfs/${pdfFilename}`,
+      };
+    } catch (error: any) {
+      this.logger.error(`Error in savePdf: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Elimina un PDF de la carpeta pdfs
+   */
+  async deletePdf(folder: string, fileIdentifier: string): Promise<void> {
+    try {
+      if (!fileIdentifier) {
+        throw new BadRequestException("Missing fileIdentifier");
+      }
+
+      const pdfPath = path.join(
+        __dirname,
+        "../../files/pdfs",
+        `${fileIdentifier}.pdf`,
+      );
+
+      if (fs.existsSync(pdfPath)) {
+        await fs.promises.unlink(pdfPath);
+        this.logger.debug(`Deleted PDF file: ${pdfPath}`);
+      }
+    } catch (error: any) {
+      this.logger.error(`Error in deletePdf: ${error.message}`);
+      throw error;
+    }
+  }
+
   async processImage(
     folder: string,
     imageBuffer: Buffer,

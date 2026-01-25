@@ -26,7 +26,7 @@ export class User extends mongoose.Document {
   @Prop({ required: false })
   lastname?: string;
 
-  /** Cédula de identidad (ATHLETE, PARENT, COACH, ASSISTANT, ADMIN) */
+  /** Carnet de identidad (ATHLETE, PARENT, COACH, ASSISTANT, ADMIN) */
   @Prop({ required: false })
   ci?: string;
 
@@ -96,6 +96,16 @@ export class User extends mongoose.Document {
     },
   })
   assignment_id?: mongoose.Types.ObjectId;
+
+  // ========== CAMPOS PARA DOCUMENTOS ==========
+
+  /** ID único para identificar archivos en image-processor (ATHLETE) */
+  @Prop({ required: false, unique: true, sparse: true })
+  fileIdentifier?: string;
+
+  /** Ruta del documento CI en image-processor (ATHLETE) */
+  @Prop({ required: false })
+  documentPath?: string;
 }
 export const UserSchema = SchemaFactory.createForClass(User);
 

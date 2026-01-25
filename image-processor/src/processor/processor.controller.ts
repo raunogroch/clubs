@@ -45,6 +45,27 @@ export class ProcessorController {
     }
   }
 
+  @Post("save-pdf")
+  @HttpCode(200)
+  async savePdf(@Body() body: any) {
+    try {
+      if (!body?.pdf) {
+        throw new BadRequestException("Missing or empty PDF in body");
+      }
+      const folder = body.folder || "pdfs";
+      const fileIdentifier = body.fileIdentifier || null;
+      const result = await this.service.savePdf(
+        folder,
+        body.pdf,
+        fileIdentifier,
+      );
+      return result;
+    } catch (error: any) {
+      this.logger.error(`Error in savePdf: ${error.message}`);
+      throw error;
+    }
+  }
+
   @Post("delete")
   @HttpCode(200)
   async delete(@Body() body: any) {
@@ -56,6 +77,21 @@ export class ProcessorController {
       return { ok: true };
     } catch (error: any) {
       this.logger.error(`Error in delete: ${error.message}`);
+      throw error;
+    }
+  }
+
+  @Post("delete-pdf")
+  @HttpCode(200)
+  async deletePdf(@Body() body: any) {
+    try {
+      if (!body?.folder || !body?.fileIdentifier) {
+        throw new BadRequestException("Missing folder or fileIdentifier");
+      }
+      await this.service.deletePdf(body.folder, body.fileIdentifier);
+      return { ok: true };
+    } catch (error: any) {
+      this.logger.error(`Error in deletePdf: ${error.message}`);
       throw error;
     }
   }

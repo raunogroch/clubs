@@ -58,7 +58,7 @@ export const GenericUserPersonalInfo = ({
 
       <div className="form-group row">
         <label htmlFor="ci" className="col-sm-2 col-form-label">
-          Cédula de identidad
+          Carnet de identidad
         </label>
         <div className="col-sm-10">
           <Input

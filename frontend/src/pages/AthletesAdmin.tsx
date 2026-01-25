@@ -26,10 +26,45 @@ const formatDateWithLiteralMonth = (dateString: string): string => {
   return formatted;
 };
 
+// Función para descargar PDF
+const downloadPDF = async (
+  pdfPath: string,
+  fileName: string = "documento.pdf",
+) => {
+  try {
+    // Si la ruta es relativa, construir URL absoluta
+    let absoluteUrl = pdfPath;
+    if (!pdfPath.startsWith("http")) {
+      const filesProcessorApi =
+        import.meta.env.VITE_FILES_PROCESSOR_API || "http://localhost:4001";
+      absoluteUrl = `${filesProcessorApi}${pdfPath}`;
+    }
+    const response = await fetch(absoluteUrl);
+    if (!response.ok) {
+      throw new Error(`Error al descargar el archivo: ${response.statusText}`);
+    }
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    alert(`Error al descargar el archivo: ${error}`);
+  }
+};
+
 export const AthletesAdmin = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [showModal, setShowModal] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
+  const [showCIModal, setShowCIModal] = useState(false);
+  const [showPDFPreviewModal, setShowPDFPreviewModal] = useState(false);
+  const [pdfPreviewPath, setPDFPreviewPath] = useState<string>("");
+  const [pdfPreviewFileName, setPDFPreviewFileName] = useState<string>("");
   const [showCredentialsModal, setShowCredentialsModal] = useState(false);
   const [generatedCredentials, setGeneratedCredentials] = useState<{
     username: string;
@@ -38,6 +73,7 @@ export const AthletesAdmin = () => {
   } | null>(null);
   const [editing, setEditing] = useState<any | null>(null);
   const [editingImage, setEditingImage] = useState<any | null>(null);
+  const [editingCI, setEditingCI] = useState<any | null>(null);
   const [form, setForm] = useState<any>({
     name: "",
     lastname: "",
@@ -50,6 +86,7 @@ export const AthletesAdmin = () => {
     enableCustomInscription: false,
     active: true,
     images: { small: "", medium: "", large: "" },
+    documentPath: "",
     parent: {
       name: "",
       lastname: "",
@@ -62,6 +99,7 @@ export const AthletesAdmin = () => {
   const [athletes, setAthletes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploadedImageBase64, setUploadedImageBase64] = useState<string>("");
+  const [uploadedCIBase64, setUploadedCIBase64] = useState<string>("");
   const [parentCISearch, setParentCISearch] = useState<string>("");
   const [searchingParent, setSearchingParent] = useState(false);
   const [parentNotFound, setParentNotFound] = useState(false);
@@ -269,6 +307,88 @@ export const AthletesAdmin = () => {
     }
   };
 
+  const openCIEdit = (u: any) => {
+    setEditingCI(u);
+    setUploadedCIBase64("");
+    setShowCIModal(true);
+  };
+
+  const closeCIModal = () => {
+    setShowCIModal(false);
+    setEditingCI(null);
+    setUploadedCIBase64("");
+  };
+
+  const openPDFPreview = (pdfPath: string, fileName: string) => {
+    // Si la ruta es relativa, construir URL absoluta
+    let absoluteUrl = pdfPath;
+    if (!pdfPath.startsWith("http")) {
+      const filesProcessorApi =
+        import.meta.env.VITE_FILES_PROCESSOR_API || "http://localhost:4001";
+      absoluteUrl = `${filesProcessorApi}${pdfPath}`;
+    }
+
+    setPDFPreviewPath(absoluteUrl);
+    setPDFPreviewFileName(fileName);
+    setShowPDFPreviewModal(true);
+  };
+
+  const closePDFPreview = () => {
+    setShowPDFPreviewModal(false);
+    setPDFPreviewPath("");
+    setPDFPreviewFileName("");
+  };
+
+  const handleDownloadFromPreview = async () => {
+    await downloadPDF(pdfPreviewPath, pdfPreviewFileName);
+    closePDFPreview();
+  };
+
+  const handleCISubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!uploadedCIBase64) {
+      alert("Por favor sube un PDF del CI primero");
+      return;
+    }
+    try {
+      setLoading(true);
+      // Enviar PDF al backend para que lo procese
+      const payload = {
+        userId: editingCI._id,
+        pdfBase64: uploadedCIBase64,
+        role: "athlete",
+      };
+      const response = await userService.uploadAthleteCI(payload);
+      if (response.code === 200) {
+        await loadAthletes();
+        closeCIModal();
+      } else {
+        const errorMsg = response.message || "Error al procesar el PDF";
+        console.error("Error al cargar CI:", response);
+        alert(errorMsg);
+      }
+    } catch (err: any) {
+      const errorMsg = err?.message || "Error al actualizar CI";
+      console.error("Error en handleCISubmit:", err);
+      alert(errorMsg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCIFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type === "application/pdf") {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setUploadedCIBase64(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      alert("Por favor selecciona un archivo PDF válido");
+    }
+  };
+
   const validate = () => {
     if (!form.name || !form.name.trim()) return "El nombre es requerido";
     if (!form.lastname || !form.lastname.trim())
@@ -467,7 +587,8 @@ export const AthletesAdmin = () => {
                   <tr>
                     <th style={{ verticalAlign: "middle" }}>Foto de Perfil</th>
                     <th style={{ verticalAlign: "middle" }}>Nombre</th>
-                    <th style={{ verticalAlign: "middle" }}>Cédula</th>
+                    <th style={{ verticalAlign: "middle" }}>Carnet</th>
+                    <th style={{ verticalAlign: "middle" }}>Carnet - PDF</th>
                     <th style={{ verticalAlign: "middle" }}>Teléfono</th>
                     <th style={{ verticalAlign: "middle" }}>Género</th>
                     <th style={{ verticalAlign: "middle" }}>Edad</th>
@@ -565,6 +686,40 @@ export const AthletesAdmin = () => {
                               style={{ color: "red" }}
                             ></i>
                           </span>
+                        )}
+                      </td>
+                      <td style={{ verticalAlign: "middle" }}>
+                        {u.documentPath ? (
+                          <div>
+                            <button
+                              onClick={() =>
+                                openPDFPreview(
+                                  u.documentPath,
+                                  `CI_${u.ci || u._id}.pdf`,
+                                )
+                              }
+                              title="Ver PDF"
+                              style={{
+                                textDecoration: "none",
+                                background: "none",
+                                border: "none",
+                                cursor: "pointer",
+                                color: "#676a6c",
+                                padding: "0",
+                                font: "inherit",
+                              }}
+                            >
+                              <i className="fa fa-search"></i> Previsualizar
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            className="btn btn-xs btn-primary"
+                            onClick={() => openCIEdit(u)}
+                            title="Cargar Carnet"
+                          >
+                            <i className="fa fa-upload"></i> Cargar archivo
+                          </button>
                         )}
                       </td>
                       <td style={{ verticalAlign: "middle" }}>
@@ -1353,6 +1508,202 @@ export const AthletesAdmin = () => {
         </div>
       )}
 
+      {showCIModal && (
+        <div
+          className="modal fade show"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0,0,0,.5)",
+            animation: "fadeIn 0.3s ease-in-out",
+            zIndex: 1050,
+          }}
+          onClick={closeCIModal}
+        >
+          <div
+            className="modal-dialog"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              margin: 0,
+              maxWidth: "480px",
+              width: "90%",
+              animation: "slideUp 0.3s ease-out",
+            }}
+          >
+            <div
+              className="modal-content"
+              style={{
+                borderRadius: "12px",
+                border: "none",
+                boxShadow: "0 8px 24px rgba(0,0,0,.15)",
+                overflow: "hidden",
+              }}
+            >
+              {/* Header */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "20px 24px",
+                  borderBottom: "1px solid #e8e8e8",
+                  backgroundColor: "#fafafa",
+                }}
+              >
+                <h5
+                  style={{
+                    margin: 0,
+                    fontSize: "18px",
+                    fontWeight: "600",
+                    color: "#333",
+                  }}
+                >
+                  Cargar (Carnet de Identidad)
+                </h5>
+                <button
+                  onClick={closeCIModal}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    fontSize: "20px",
+                    cursor: "pointer",
+                    color: "#999",
+                    transition: "color 0.2s",
+                    padding: "4px 8px",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "#333")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = "#999")}
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Body */}
+              <div style={{ padding: "24px" }}>
+                <form onSubmit={handleCISubmit}>
+                  <div style={{ marginBottom: "20px" }}>
+                    <label
+                      style={{
+                        display: "block",
+                        marginBottom: "8px",
+                        fontSize: "14px",
+                        fontWeight: "500",
+                        color: "#333",
+                      }}
+                    >
+                      Selecciona archivo PDF
+                    </label>
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      onChange={handleCIFileChange}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        padding: "10px",
+                        borderRadius: "6px",
+                        border: "2px dashed #d0d0d0",
+                        backgroundColor: "#fafafa",
+                        cursor: "pointer",
+                        fontSize: "14px",
+                      }}
+                    />
+                    {uploadedCIBase64 && (
+                      <div
+                        style={{
+                          marginTop: "12px",
+                          padding: "10px",
+                          backgroundColor: "#e8f5e9",
+                          borderRadius: "6px",
+                          color: "#2e7d32",
+                          fontSize: "13px",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                        }}
+                      >
+                        <i className="fa fa-check-circle"></i>
+                        PDF seleccionado correctamente
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Buttons */}
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "8px",
+                      justifyContent: "flex-end",
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={closeCIModal}
+                      style={{
+                        padding: "8px 18px",
+                        borderRadius: "6px",
+                        border: "1px solid #d0d0d0",
+                        backgroundColor: "white",
+                        color: "#333",
+                        fontWeight: "500",
+                        fontSize: "14px",
+                        cursor: "pointer",
+                        transition: "all 0.2s",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = "#f5f5f5";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = "white";
+                      }}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={loading || !uploadedCIBase64}
+                      style={{
+                        padding: "8px 20px",
+                        borderRadius: "6px",
+                        border: "none",
+                        backgroundColor:
+                          loading || !uploadedCIBase64 ? "#ccc" : "#3498db",
+                        color: "white",
+                        fontWeight: "500",
+                        fontSize: "14px",
+                        cursor:
+                          loading || !uploadedCIBase64
+                            ? "not-allowed"
+                            : "pointer",
+                        transition: "all 0.2s",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!loading && uploadedCIBase64) {
+                          e.currentTarget.style.backgroundColor = "#2980b9";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!loading && uploadedCIBase64) {
+                          e.currentTarget.style.backgroundColor = "#3498db";
+                        }
+                      }}
+                    >
+                      {loading ? "Guardando..." : "Guardar"}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showCredentialsModal && generatedCredentials && (
         <div
           style={{
@@ -1537,6 +1888,151 @@ export const AthletesAdmin = () => {
                 }}
               >
                 Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Preview de PDF */}
+      {showPDFPreviewModal && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 9999,
+          }}
+          onClick={closePDFPreview}
+        >
+          <div
+            style={{
+              backgroundColor: "white",
+              borderRadius: "8px",
+              padding: "0",
+              maxWidth: "1000px",
+              width: "95%",
+              height: "85vh",
+              boxShadow: "0 2px 12px rgba(0,0,0,0.2)",
+              display: "flex",
+              flexDirection: "column",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "16px 24px",
+                borderBottom: "1px solid #e0e0e0",
+                flexShrink: 0,
+              }}
+            >
+              <h4 style={{ margin: 0, color: "#2c3e50" }}>
+                Previsualización de PDF
+              </h4>
+              <button
+                onClick={closePDFPreview}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: "24px",
+                  cursor: "pointer",
+                  color: "#999",
+                  padding: "0",
+                  width: "24px",
+                  height: "24px",
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* PDF Viewer */}
+            <div
+              style={{
+                flex: 1,
+                overflow: "auto",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "#f5f5f5",
+              }}
+            >
+              <iframe
+                src={`${pdfPreviewPath}#toolbar=0`}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  border: "none",
+                }}
+                title="PDF Preview"
+              />
+            </div>
+
+            {/* Footer with Buttons */}
+            <div
+              style={{
+                display: "flex",
+                gap: "12px",
+                justifyContent: "flex-end",
+                padding: "16px 24px",
+                borderTop: "1px solid #e0e0e0",
+                backgroundColor: "#f9f9f9",
+                flexShrink: 0,
+              }}
+            >
+              <button
+                onClick={closePDFPreview}
+                style={{
+                  padding: "8px 18px",
+                  borderRadius: "6px",
+                  border: "1px solid #d0d0d0",
+                  backgroundColor: "white",
+                  color: "#333",
+                  fontWeight: "500",
+                  fontSize: "14px",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#f5f5f5";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "white";
+                }}
+              >
+                Cerrar
+              </button>
+              <button
+                onClick={handleDownloadFromPreview}
+                style={{
+                  padding: "8px 18px",
+                  borderRadius: "6px",
+                  border: "1px solid #666ffe",
+                  backgroundColor: "#666ffe",
+                  color: "white",
+                  fontWeight: "500",
+                  fontSize: "14px",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#5555dd";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "#666ffe";
+                }}
+              >
+                <i className="fa fa-download"></i> Descargar
               </button>
             </div>
           </div>
