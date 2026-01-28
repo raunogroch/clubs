@@ -177,11 +177,6 @@ export const Clubs = ({ name }: { name?: string }) => {
       return;
     }
 
-    if (!formData.assignment_id) {
-      toastr.warning("Debes seleccionar una asignación");
-      return;
-    }
-
     try {
       setLoading(true);
 
@@ -442,22 +437,7 @@ export const Clubs = ({ name }: { name?: string }) => {
                   />
                 </div>
 
-                <div className="form-group">
-                  <label>Asignación *</label>
-                  <select
-                    className="form-control"
-                    name="assignment_id"
-                    value={formData.assignment_id}
-                    onChange={handleChange}
-                  >
-                    <option value="">-- Selecciona una asignación --</option>
-                    {assignments.map((assignment) => (
-                      <option key={assignment._id} value={assignment._id}>
-                        {assignment.module_name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {/* Campo assignment_id se asigna automáticamente */}
               </div>
               <div className="modal-footer">
                 <button
