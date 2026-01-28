@@ -82,8 +82,6 @@ export const AthletesAdmin = () => {
     phone: "",
     gender: "",
     birth_date: "",
-    inscriptionDate: "",
-    enableCustomInscription: false,
     active: true,
     images: { small: "", medium: "", large: "" },
     documentPath: "",
@@ -204,12 +202,6 @@ export const AthletesAdmin = () => {
       phone: u.phone || "",
       gender: u.gender || "",
       birth_date: u.birth_date ? u.birth_date.split("T")[0] : "",
-      inscriptionDate: u.inscriptionDate
-        ? u.inscriptionDate.split("T")[0]
-        : u.createdAt
-          ? new Date(u.createdAt).toISOString().split("T")[0]
-          : "",
-      enableCustomInscription: !!u.inscriptionDate,
       active: typeof u.active === "boolean" ? u.active : true,
       images: {
         small: (u.images && u.images.small) || "",
@@ -237,8 +229,6 @@ export const AthletesAdmin = () => {
       phone: "",
       gender: "",
       birth_date: "",
-      inscriptionDate: "",
-      enableCustomInscription: false,
       active: true,
       images: { small: "", medium: "", large: "" },
       parent: {
@@ -447,8 +437,7 @@ export const AthletesAdmin = () => {
     }
     setFormError(null);
     try {
-      const { parent, enableCustomInscription, inscriptionDate, ...payload } =
-        form;
+      const { parent, ...payload } = form;
       const age = calculateAge(form.birth_date);
 
       // Generar username automáticamente si es creación
@@ -524,25 +513,7 @@ export const AthletesAdmin = () => {
         ...(age >= 18 && { parent_id: null }),
       };
 
-      // Manejar inscriptionDate
-      if (enableCustomInscription && form.inscriptionDate) {
-        // Convertir string YYYY-MM-DD a Date respetando zona horaria local
-        const [year, month, day] = form.inscriptionDate.split("-").map(Number);
-        payloadToSend.inscriptionDate = new Date(year, month - 1, day);
-      } else if (enableCustomInscription && !form.inscriptionDate) {
-        setFormError(
-          "La fecha de inscripción es requerida cuando activas esta opción",
-        );
-        return;
-      } else if (editing && !enableCustomInscription) {
-        // Si estamos editando y NO marcamos el checkbox,
-        // preservar la fecha existente (no enviar nada)
-        // La fecha se mostrará como createdAt si no tiene inscriptionDate
-      } else if (!editing) {
-        // Si es creación y no se habilita inscripción personalizada,
-        // el backend asignará automáticamente la fecha actual
-        delete payloadToSend.inscriptionDate;
-      }
+      // inscriptionDate removed: backend will use createdAt/default behavior
 
       if (editing)
         await dispatch(
@@ -775,9 +746,7 @@ export const AthletesAdmin = () => {
                         )}
                       </td>
                       <td style={{ verticalAlign: "middle" }}>
-                        {u.inscriptionDate ? (
-                          formatDateWithLiteralMonth(u.inscriptionDate)
-                        ) : u.createdAt ? (
+                        {u.createdAt ? (
                           formatDateWithLiteralMonth(u.createdAt)
                         ) : (
                           <span title="Sin fecha de inscripción registrada">
@@ -1018,106 +987,6 @@ export const AthletesAdmin = () => {
                         }
                       />
                     </div>
-                  </div>
-
-                  {/* Campo de Inscripción Personalizada */}
-                  <div
-                    style={{
-                      backgroundColor: "#f5f5f5",
-                      border: "1px solid #ddd",
-                      borderRadius: "4px",
-                      padding: "12px",
-                      marginBottom: "12px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "12px",
-                        marginBottom: "12px",
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        id="enableCustomInscription"
-                        checked={form.enableCustomInscription}
-                        disabled={editing && !!editing.inscriptionDate}
-                        onChange={(e) =>
-                          setForm({
-                            ...form,
-                            enableCustomInscription: e.target.checked,
-                            inscriptionDate: e.target.checked
-                              ? form.inscriptionDate || ""
-                              : "",
-                          })
-                        }
-                        style={{
-                          cursor:
-                            editing && !!editing.inscriptionDate
-                              ? "not-allowed"
-                              : "pointer",
-                          width: "18px",
-                          height: "18px",
-                        }}
-                      />
-                      <label
-                        htmlFor="enableCustomInscription"
-                        style={{
-                          cursor:
-                            editing && !!editing.inscriptionDate
-                              ? "not-allowed"
-                              : "pointer",
-                          margin: 0,
-                          fontWeight: "600",
-                          opacity:
-                            editing && !!editing.inscriptionDate ? 0.6 : 1,
-                        }}
-                      >
-                        ✏️ Modificar Fecha de Inscripción
-                      </label>
-                      {editing && !!editing.inscriptionDate && (
-                        <span
-                          style={{
-                            fontSize: "12px",
-                            color: "#999",
-                            marginLeft: "auto",
-                          }}
-                        >
-                          (ya modificada)
-                        </span>
-                      )}
-                    </div>
-
-                    {form.enableCustomInscription &&
-                      !editing?.inscriptionDate && (
-                        <div>
-                          <div className="form-group" style={{ margin: 0 }}>
-                            <label>Fecha de Inscripción</label>
-                            <input
-                              type="date"
-                              className="form-control"
-                              value={form.inscriptionDate}
-                              onChange={(e) =>
-                                setForm({
-                                  ...form,
-                                  inscriptionDate: e.target.value,
-                                })
-                              }
-                              max={new Date().toISOString().split("T")[0]}
-                            />
-                            <small
-                              style={{
-                                color: "#666",
-                                marginTop: "4px",
-                                display: "block",
-                              }}
-                            >
-                              La fecha debe ser igual o anterior a hoy
-                            </small>
-                          </div>
-                        </div>
-                      )}
                   </div>
 
                   {form.birth_date && calculateAge(form.birth_date) < 18 && (

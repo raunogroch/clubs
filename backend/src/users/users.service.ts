@@ -553,7 +553,6 @@ export class UsersService {
         },
         _id: a._id,
         createdAt: a.createdAt || null,
-        inscriptionDate: a.inscriptionDate || null,
         documentPath: a.documentPath || null,
         fileIdentifier: a.fileIdentifier || null,
       }));

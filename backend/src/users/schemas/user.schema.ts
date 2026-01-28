@@ -40,10 +40,6 @@ export class User extends mongoose.Document {
   @Prop({ required: false })
   birth_date?: Date;
 
-  /** Fecha de inscripción personalizada (ATHLETE) - debe ser anterior a createdAt */
-  @Prop({ required: false })
-  inscriptionDate?: Date;
-
   /** ID del padre/tutor (ATHLETE) */
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
@@ -109,12 +105,4 @@ export class User extends mongoose.Document {
 }
 export const UserSchema = SchemaFactory.createForClass(User);
 
-// Hook pre-save para atletas: si no tienen inscriptionDate, asignar fecha actual
-UserSchema.pre('save', function (next) {
-  const doc = this as any;
-  if (doc.role === Roles.ATHLETE && !doc.inscriptionDate) {
-    // Asignar la fecha actual como inscriptionDate
-    doc.inscriptionDate = new Date();
-  }
-  next();
-});
+// note: inscriptionDate removed from schema — backend will use createdAt
