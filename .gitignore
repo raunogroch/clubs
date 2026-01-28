@@ -31,3 +31,6 @@ create-superadmins.sh
 backend_back
 frontend_back
 
+.DS_Store
+
+

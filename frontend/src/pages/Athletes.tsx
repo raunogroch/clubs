@@ -124,7 +124,7 @@ export const Athletes = () => {
           <div className="ibox-content">
             {loading ? (
               <p>Cargando...</p>
-            ) : (
+            ) : athletes.length > 0 ? (
               <table
                 className="table table-striped"
                 style={{ verticalAlign: "middle" }}
@@ -281,6 +281,12 @@ export const Athletes = () => {
                   ))}
                 </tbody>
               </table>
+            ) : (
+              <div
+                style={{ padding: "20px", textAlign: "center", color: "#999" }}
+              >
+                <p>Aún no hay atletas registrados</p>
+              </div>
             )}
           </div>
         </div>

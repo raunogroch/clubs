@@ -207,7 +207,7 @@ export const Admins = () => {
           <div className="ibox-content">
             {loading ? (
               <p>Cargando...</p>
-            ) : (
+            ) : admins.length > 0 ? (
               <table
                 className="table table-striped"
                 style={{ verticalAlign: "middle" }}
@@ -337,6 +337,12 @@ export const Admins = () => {
                   ))}
                 </tbody>
               </table>
+            ) : (
+              <div
+                style={{ padding: "20px", textAlign: "center", color: "#999" }}
+              >
+                <p>Aún no hay administradores registrados</p>
+              </div>
             )}
           </div>
         </div>
