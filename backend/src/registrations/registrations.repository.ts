@@ -25,18 +25,26 @@ export class RegistrationsRepository {
   }
 
   async findByGroup(groupId: string): Promise<Registration[]> {
-    return this.registrationModel
+    return (await this.registrationModel
       .find({ group_id: new Types.ObjectId(groupId) })
-      .populate('athlete_id', 'name lastname ci role')
-      .exec();
+      .populate(
+        'athlete_id',
+        'name lastname ci role phone images createdAt birth_date gender username parent_id documentPath fileIdentifier',
+      )
+      .lean()
+      .exec()) as any;
   }
 
   async findByGroups(groupIds: string[]): Promise<Registration[]> {
     const ids = groupIds.map((g) => new Types.ObjectId(g));
-    return this.registrationModel
+    return (await this.registrationModel
       .find({ group_id: { $in: ids } })
-      .populate('athlete_id', 'name lastname ci role')
-      .exec();
+      .populate(
+        'athlete_id',
+        'name lastname ci role phone images createdAt birth_date gender username parent_id documentPath fileIdentifier',
+      )
+      .lean()
+      .exec()) as any;
   }
 
   async findByGroupAndAthlete(

@@ -106,7 +106,6 @@ export const AthletesAdmin = () => {
   useEffect(() => {
     loadAthletes();
   }, []);
-
   const loadAthletes = async () => {
     try {
       setLoading(true);
@@ -117,6 +116,7 @@ export const AthletesAdmin = () => {
         setAthletes([]);
       }
     } catch (error) {
+      console.error("[FRONTEND DEBUG] Error loading athletes:", error);
       setAthletes([]);
     } finally {
       setLoading(false);
@@ -574,8 +574,8 @@ export const AthletesAdmin = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {athletes.map((u: any) => (
-                    <tr key={u._id}>
+                  {athletes.map((u: any, idx: number) => (
+                    <tr key={u._id || `ath-${idx}`}>
                       <td
                         style={{
                           textAlign: "center",
@@ -746,8 +746,8 @@ export const AthletesAdmin = () => {
                         )}
                       </td>
                       <td style={{ verticalAlign: "middle" }}>
-                        {u.createdAt ? (
-                          formatDateWithLiteralMonth(u.createdAt)
+                        {u.registration_date ? (
+                          formatDateWithLiteralMonth(u.registration_date)
                         ) : (
                           <span title="Sin fecha de inscripción registrada">
                             <i

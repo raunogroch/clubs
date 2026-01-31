@@ -23,7 +23,7 @@ export const Athletes = () => {
   const loadAthletes = async () => {
     try {
       setLoading(true);
-      const response = await userService.getAthletes();
+      const response = await userService.getAthletesFromGroups();
       if (response.code === 200 && Array.isArray(response.data)) {
         setAthletes(response.data);
       } else {
@@ -137,6 +137,9 @@ export const Athletes = () => {
                     <th style={{ verticalAlign: "middle" }}>Teléfono</th>
                     <th style={{ verticalAlign: "middle" }}>Género</th>
                     <th style={{ verticalAlign: "middle" }}>Edad</th>
+                    <th style={{ verticalAlign: "middle" }}>
+                      Fecha de Inscripción
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -273,6 +276,25 @@ export const Athletes = () => {
                             <i
                               className="fa fa-exclamation-triangle"
                               style={{ color: "red" }}
+                            ></i>
+                          </span>
+                        )}
+                      </td>
+                      <td style={{ verticalAlign: "middle" }}>
+                        {u.registration_date || u.createdAt ? (
+                          // reuse format helper from AthletesAdmin (same file uses none)
+                          new Date(
+                            u.registration_date || u.createdAt,
+                          ).toLocaleDateString("es-ES", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })
+                        ) : (
+                          <span title="Sin fecha de inscripción registrada">
+                            <i
+                              className="fa fa-info-circle"
+                              style={{ color: "#999" }}
                             ></i>
                           </span>
                         )}

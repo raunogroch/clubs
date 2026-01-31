@@ -533,7 +533,13 @@ export class UsersService {
         if (athlete && athlete._id) {
           const athleteId = athlete._id.toString();
           uniqueAthleteIds.add(athleteId);
-          athletesMap.set(athleteId, athlete as any);
+          // Store athlete data along with the registration date so frontend can show it
+          const regDate =
+            (reg as any).registration_date || (reg as any).createdAt || null;
+          athletesMap.set(athleteId, {
+            ...(athlete as any),
+            registration_date: regDate,
+          });
         }
       }
 
@@ -557,6 +563,7 @@ export class UsersService {
         },
         _id: a._id,
         createdAt: a.createdAt || null,
+        registration_date: a.registration_date || null,
         documentPath: a.documentPath || null,
         fileIdentifier: a.fileIdentifier || null,
       }));

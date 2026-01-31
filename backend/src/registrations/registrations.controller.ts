@@ -33,6 +33,16 @@ export class RegistrationsController {
     return this.registrationsService.findByGroup(groupId);
   }
 
+  @Get('debug/all')
+  async debugAll() {
+    try {
+      const registrations = await this.registrationsService.findByGroups([]);
+      return { total: registrations.length, data: registrations };
+    } catch (error: any) {
+      return { error: error.message, registrations: [] };
+    }
+  }
+
   @Put(':id')
   async update(@Param('id') id: string, @Body() body: UpdateRegistrationDto) {
     return this.registrationsService.update(id, body);
