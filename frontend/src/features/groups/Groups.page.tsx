@@ -424,6 +424,48 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
     }
   };
 
+  /**
+   * Remover entrenador de un grupo
+   */
+  const handleRemoveCoach = async (groupId: string, coachId: string) => {
+    if (!window.confirm("¿Estás seguro de que deseas remover este entrenador?")) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const updatedGroup = await groupsService.removeCoach(groupId, coachId);
+      setGroups((prev) => prev.map((g) => (g._id === groupId ? updatedGroup : g)));
+      toastr.success("Entrenador eliminado correctamente");
+    } catch (error: any) {
+      console.error("Error al remover entrenador:", error);
+      toastr.error(error.message || "Error al remover el entrenador");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Remover deportista de un grupo
+   */
+  const handleRemoveAthlete = async (groupId: string, athleteId: string) => {
+    if (!window.confirm("¿Estás seguro de que deseas remover este deportista?")) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const updatedGroup = await groupsService.removeAthlete(groupId, athleteId);
+      setGroups((prev) => prev.map((g) => (g._id === groupId ? updatedGroup : g)));
+      toastr.success("Deportista eliminado correctamente");
+    } catch (error: any) {
+      console.error("Error al remover deportista:", error);
+      toastr.error(error.message || "Error al remover el deportista");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // ============================================
   // OPERACIONES CRUD - HORARIOS
   // ============================================
@@ -600,9 +642,9 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
                             onAddMember={() =>
                               addMemberModal.openModal(group._id, "coach")
                             }
-                            onRemoveMember={() => {
-                              // TODO: Implementar remover coach
-                            }}
+                            onRemoveMember={(memberId: string) =>
+                              handleRemoveCoach(group._id, memberId)
+                            }
                             isLoading={loading}
                           />
 
@@ -616,9 +658,9 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
                             onAddMember={() =>
                               addMemberModal.openModal(group._id, "athlete")
                             }
-                            onRemoveMember={() => {
-                              // TODO: Implementar remover athlete
-                            }}
+                            onRemoveMember={(memberId: string) =>
+                              handleRemoveAthlete(group._id, memberId)
+                            }
                             isLoading={loading}
                           />
                         </div>
