@@ -110,8 +110,10 @@ export function buildMemberDetailsMap(
   const details: Record<string, MemberDetail> = {};
 
   groups.forEach((group) => {
-    // Procesar atletas
-    (group.athletes || []).forEach((athlete: any) => {
+    // Procesar atletas desde athletes_added (registro de inscripción)
+    (group.athletes_added || []).forEach((registration: any) => {
+      // registration puede venir poblado con athlete_id o solo como id
+      const athlete = registration?.athlete_id || registration;
       const detail = extractMemberDetail(athlete);
       if (detail && (athlete._id || typeof athlete === "string")) {
         const id = typeof athlete === "string" ? athlete : athlete._id;
@@ -149,8 +151,18 @@ export function buildMemberDetailsMap(
 export function extractMemberIds(memberIds: any[]): string[] {
   return memberIds
     .map((member) => {
+      // Puede ser un registration con campo athlete_id poblado
       if (typeof member === "string") return member;
-      if (typeof member === "object" && member._id) return member._id;
+      if (typeof member === "object") {
+        if (member._id) return member._id;
+        if (
+          member.athlete_id &&
+          (member.athlete_id._id || typeof member.athlete_id === "string")
+        )
+          return typeof member.athlete_id === "string"
+            ? member.athlete_id
+            : member.athlete_id._id;
+      }
       return null;
     })
     .filter((id): id is string => id !== null);

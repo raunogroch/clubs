@@ -8,6 +8,7 @@ import { UserValidatorService } from './user-validator.service';
 import { UserPasswordService } from './user-password.service';
 import { AssignmentsModule } from '../assignments/assignments.module';
 import { Group, GroupSchema } from '../clubs/schemas/group.schema';
+import { RegistrationsModule } from '../registrations/registrations.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { Group, GroupSchema } from '../clubs/schemas/group.schema';
       { name: Group.name, schema: GroupSchema },
     ]),
     AssignmentsModule,
+    RegistrationsModule,
   ],
   controllers: [UsersController],
   providers: [

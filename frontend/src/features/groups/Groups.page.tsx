@@ -150,8 +150,11 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
         const allMemberIds = Array.from(
           new Set(
             groupsData.flatMap((g) => [
-              ...(g.athletes || []),
               ...(g.coaches || []),
+              // extraer athlete ids desde athletes_added (registration.athlete_id)
+              ...((g as any).athletes_added || []).map((r: any) =>
+                r && r.athlete_id ? r.athlete_id._id || r.athlete_id : r,
+              ),
               ...(g.members || []),
             ]),
           ),
@@ -663,9 +666,19 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
                             title="Deportistas"
                             icon="fa-person-running"
                             badge="badge-primary"
-                            members={group.athletes || []}
+                            members={
+                              (group as any).athletes_added
+                                ? (group as any).athletes_added.map((r: any) =>
+                                    r && r.athlete_id
+                                      ? r.athlete_id._id || r.athlete_id
+                                      : r,
+                                  )
+                                : []
+                            }
                             memberDetails={memberDetails}
-                            memberCount={group.athletes?.length || 0}
+                            memberCount={
+                              (group as any).athletes_added?.length || 0
+                            }
                             onAddMember={() =>
                               addMemberModal.openModal(group._id, "athlete")
                             }

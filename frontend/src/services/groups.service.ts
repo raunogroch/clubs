@@ -14,7 +14,19 @@ export interface Group {
   description?: string;
   club_id: string;
   created_by: string;
-  athletes: string[];
+  athletes?: string[];
+  athletes_added?: Array<{
+    _id: string;
+    athlete_id?:
+      | {
+          _id: string;
+          name?: string;
+          lastname?: string;
+          role?: string;
+          ci?: string;
+        }
+      | string;
+  }>;
   coaches: string[];
   members?: string[]; // legacy support
   schedule?: Array<{

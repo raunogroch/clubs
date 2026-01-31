@@ -48,8 +48,8 @@ export const GroupCard: React.FC<GroupCardProps> = ({
               <h4>
                 <strong>{group.name}</strong>{" "}
                 <span className="ml-3">
-                  <i className="fa fa-users"></i> {group.athletes?.length || 0}{" "}
-                  Atletas registrados
+                  <i className="fa fa-users"></i>{" "}
+                  {(group as any).athletes_added?.length || group.athletes?.length || 0} Atletas registrados
                 </span>
               </h4>
             </button>

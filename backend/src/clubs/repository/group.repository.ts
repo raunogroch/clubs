@@ -36,7 +36,10 @@ export class GroupRepository {
         club_id: new Types.ObjectId(clubId),
       })
       .populate('created_by', 'name')
-      .populate('athletes', 'name role ci lastname')
+      .populate({
+        path: 'athletes_added',
+        populate: { path: 'athlete_id', select: 'name role ci lastname' },
+      })
       .populate('coaches', 'name role ci lastname')
       .sort({ createdAt: -1 })
       .exec();
@@ -49,7 +52,10 @@ export class GroupRepository {
     return this.groupModel
       .findById(groupId)
       .populate('created_by', 'name')
-      .populate('athletes', 'name role ci lastname')
+      .populate({
+        path: 'athletes_added',
+        populate: { path: 'athlete_id', select: 'name role ci lastname' },
+      })
       .populate('coaches', 'name role ci lastname')
       .populate('club_id', 'name')
       .exec();
@@ -127,11 +133,14 @@ export class GroupRepository {
       return await this.groupModel
         .findByIdAndUpdate(
           groupId,
-          { $addToSet: { athletes: new Types.ObjectId(athleteId) } },
+          { $addToSet: { athletes_added: new Types.ObjectId(athleteId) } },
           { new: true },
         )
         .populate('created_by', 'name')
-        .populate('athletes', 'name role ci lastname')
+        .populate({
+          path: 'athletes_added',
+          populate: { path: 'athlete_id', select: 'name role ci lastname' },
+        })
         .populate('coaches', 'name role ci lastname')
         .populate('club_id', 'name')
         .exec();
@@ -152,11 +161,14 @@ export class GroupRepository {
       return await this.groupModel
         .findByIdAndUpdate(
           groupId,
-          { $pull: { athletes: new Types.ObjectId(athleteId) } },
+          { $pull: { athletes_added: new Types.ObjectId(athleteId) } },
           { new: true },
         )
         .populate('created_by', 'name')
-        .populate('athletes', 'name role ci lastname')
+        .populate({
+          path: 'athletes_added',
+          populate: { path: 'athlete_id', select: 'name role ci lastname' },
+        })
         .populate('coaches', 'name role ci lastname')
         .populate('club_id', 'name')
         .exec();
@@ -178,7 +190,10 @@ export class GroupRepository {
           { new: true },
         )
         .populate('created_by', 'name')
-        .populate('athletes', 'name role ci lastname')
+        .populate({
+          path: 'athletes_added',
+          populate: { path: 'athlete_id', select: 'name role ci lastname' },
+        })
         .populate('coaches', 'name role ci lastname')
         .populate('club_id', 'name')
         .exec();
@@ -200,7 +215,10 @@ export class GroupRepository {
           { new: true },
         )
         .populate('created_by', 'name')
-        .populate('athletes', 'name role ci lastname')
+        .populate({
+          path: 'athletes_added',
+          populate: { path: 'athlete_id', select: 'name role ci lastname' },
+        })
         .populate('coaches', 'name role ci lastname')
         .populate('club_id', 'name')
         .exec();
@@ -252,7 +270,7 @@ export class GroupRepository {
           groupId,
           {
             $pull: {
-              athletes: new Types.ObjectId(memberId),
+              athletes_added: new Types.ObjectId(memberId),
               coaches: new Types.ObjectId(memberId),
             },
           },
@@ -281,7 +299,10 @@ export class GroupRepository {
           { new: true },
         )
         .populate('created_by', 'name')
-        .populate('athletes', 'name role ci lastname')
+        .populate({
+          path: 'athletes_added',
+          populate: { path: 'athlete_id', select: 'name role ci lastname' },
+        })
         .populate('coaches', 'name role ci lastname')
         .populate('club_id', 'name')
         .exec();
@@ -306,17 +327,18 @@ export class GroupRepository {
       // Removemos el horario por índice
       if (group.schedule && group.schedule.length > scheduleIndex) {
         group.schedule.splice(scheduleIndex, 1);
-        return group
-          .save()
-          .then(() =>
-            this.groupModel
-              .findById(groupId)
-              .populate('created_by', 'name')
-              .populate('athletes', 'name role ci lastname')
-              .populate('coaches', 'name role ci lastname')
-              .populate('club_id', 'name')
-              .exec(),
-          );
+        return group.save().then(() =>
+          this.groupModel
+            .findById(groupId)
+            .populate('created_by', 'name')
+            .populate({
+              path: 'athletes_added',
+              populate: { path: 'athlete_id', select: 'name role ci lastname' },
+            })
+            .populate('coaches', 'name role ci lastname')
+            .populate('club_id', 'name')
+            .exec(),
+        );
       }
 
       return group;

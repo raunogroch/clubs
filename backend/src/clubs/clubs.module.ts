@@ -16,6 +16,7 @@ import { GroupsService } from './groups/groups.service';
 import { GroupsController } from './groups/groups.controller';
 import { AssignmentsModule } from '../assignments/assignments.module';
 import { SportsModule } from '../sports/sports.module';
+import { RegistrationsModule } from '../registrations/registrations.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { SportsModule } from '../sports/sports.module';
     ]),
     AssignmentsModule,
     SportsModule,
+    RegistrationsModule,
   ],
   controllers: [ClubsController, GroupsController],
   providers: [

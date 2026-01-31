@@ -38,6 +38,7 @@ import { AssignmentsService } from '../assignments/assignments.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Group } from '../clubs/schemas/group.schema';
+import { RegistrationsService } from '../registrations/registrations.service';
 import bcrypt from 'bcryptjs';
 
 /**
@@ -65,6 +66,7 @@ export class UsersService {
     private readonly assignmentsService: AssignmentsService,
     @InjectModel(Group.name) private readonly groupModel: Model<Group>,
     private readonly configService: ConfigService,
+    private readonly registrationsService?: RegistrationsService,
   ) {}
 
   /** Carpeta donde se almacenan las fotos de perfil de usuarios */
@@ -511,25 +513,27 @@ export class UsersService {
         return [];
       }
 
-      // Obtener todos los grupos de esos clubes
+      // Obtener todos los grupos de esos clubes y sus IDs
       const groups = await this.groupModel
         .find({ club_id: { $in: clubIds } })
-        .populate('athletes')
         .exec();
+      const groupIds = groups.map((g) => (g as any)._id.toString());
 
-      // Extraer athletes únicos
+      // Obtener registros (registrations) para esos grupos
+      const registrations = this.registrationsService
+        ? await this.registrationsService.findByGroups(groupIds)
+        : [];
+
+      // Extraer athletes únicos desde los registros
       const uniqueAthleteIds = new Set<string>();
       const athletesMap = new Map<string, User>();
 
-      for (const group of groups) {
-        if (group.athletes && Array.isArray(group.athletes)) {
-          for (const athlete of group.athletes) {
-            if (athlete && (athlete as any)._id) {
-              const athleteId = (athlete as any)._id.toString();
-              uniqueAthleteIds.add(athleteId);
-              athletesMap.set(athleteId, athlete as any);
-            }
-          }
+      for (const reg of registrations) {
+        const athlete = (reg as any).athlete_id;
+        if (athlete && athlete._id) {
+          const athleteId = athlete._id.toString();
+          uniqueAthleteIds.add(athleteId);
+          athletesMap.set(athleteId, athlete as any);
         }
       }
 
@@ -827,8 +831,9 @@ export class UsersService {
       }
 
       // Hashear la nueva contraseña
-      const hashedPassword =
-        await this.userPasswordService.hashPassword(newPassword);
+      const hashedPassword = await this.userPasswordService.hashPassword(
+        newPassword,
+      );
 
       // Actualizar la contraseña
       await this.userRepository.updateById(userId, {

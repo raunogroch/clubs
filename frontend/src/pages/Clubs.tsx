@@ -90,7 +90,9 @@ export const Clubs = ({ name }: { name?: string }) => {
         try {
           const groups = await groupsService.getByClub(club._id);
           const totalAthletes = groups.reduce(
-            (sum, g) => sum + (g.athletes?.length || 0),
+            (sum, g) =>
+              sum +
+              ((g as any).athletes_added?.length || g.athletes?.length || 0),
             0,
           );
           const totalCoaches = groups.reduce(

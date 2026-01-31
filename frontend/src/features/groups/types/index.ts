@@ -19,10 +19,10 @@ export interface Sport {
  */
 export interface User {
   _id: string;
-  name: string;
-  lastname: string;
-  username: string;
-  role: string;
+  name?: string;
+  lastname?: string;
+  username?: string;
+  role?: string;
   ci?: string;
 }
 
@@ -55,7 +55,11 @@ export interface Group {
   club_id: string;
   monthly_fee?: number;
   created_by: string;
-  athletes: string[];
+  athletes?: string[];
+  athletes_added?: Array<{
+    _id: string;
+    athlete_id?: User | string;
+  }>;
   coaches: string[];
   members?: string[]; // legacy support
   schedule?: Schedule[];

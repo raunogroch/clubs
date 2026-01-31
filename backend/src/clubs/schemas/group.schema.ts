@@ -54,14 +54,15 @@ export class Group extends Document {
 
   /**
    * Array de atletas del grupo
-   * Contiene IDs de usuarios con rol 'athlete'
+   * Contiene IDs de registros (registrations) creados para los atletas
+   * Cada elemento hace referencia al documento del módulo `Registration`
    */
   @Prop({
     type: [Types.ObjectId],
-    ref: 'User',
+    ref: 'Registration',
     default: [],
   })
-  athletes: Types.ObjectId[];
+  athletes_added: Types.ObjectId[];
 
   /**
    * Array de entrenadores del grupo

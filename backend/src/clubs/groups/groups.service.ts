@@ -18,6 +18,7 @@ import { AssignmentsService } from '../../assignments/assignments.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from '../../users/schemas/user.schema';
+import { RegistrationsService } from '../../registrations/registrations.service';
 
 @Injectable()
 export class GroupsService {
@@ -26,6 +27,7 @@ export class GroupsService {
     private clubRepository: ClubRepository,
     private assignmentsService: AssignmentsService,
     @InjectModel(User.name) private userModel: Model<User>,
+    private registrationsService?: RegistrationsService,
   ) {}
 
   /**
@@ -234,8 +236,24 @@ export class GroupsService {
       // Verificar acceso al club
       await this.verifyClubAccess(clubId, userId);
 
-      // Agregar atleta
-      const updated = await this.groupRepository.addAthlete(groupId, athleteId);
+      // Crear un registro (registration) y asociarlo al grupo
+      if (!this.registrationsService) {
+        throw new Error('RegistrationsService no disponible');
+      }
+
+      const registration = await this.registrationsService.createRegistration({
+        group_id: groupId,
+        athlete_id: athleteId,
+        registration_date: new Date().toISOString(),
+        registration_pay: false,
+        monthly_payments: [],
+      });
+
+      // Agregar el id del registro al grupo (athletes_added)
+      const updated = await this.groupRepository.addAthlete(
+        groupId,
+        registration._id.toString(),
+      );
       if (!updated) {
         throw new NotFoundException(`Grupo con ID ${groupId} no encontrado`);
       }
@@ -274,9 +292,29 @@ export class GroupsService {
       // Verificar acceso al club
       await this.verifyClubAccess(clubId, userId);
 
+      if (!this.registrationsService) {
+        throw new Error('RegistrationsService no disponible');
+      }
+
+      // Buscar el registro asociado a este athlete en el grupo
+      const registration =
+        await this.registrationsService.findByGroupAndAthlete(
+          groupId,
+          athleteId,
+        );
+
+      if (!registration) {
+        throw new NotFoundException(
+          `Registro de athlete ${athleteId} en grupo ${groupId} no encontrado`,
+        );
+      }
+
+      // Eliminar el registro y remover su id del grupo
+      await this.registrationsService.delete(registration._id.toString());
+
       const updated = await this.groupRepository.removeAthlete(
         groupId,
-        athleteId,
+        registration._id.toString(),
       );
       if (!updated) {
         throw new NotFoundException(`Grupo con ID ${groupId} no encontrado`);
