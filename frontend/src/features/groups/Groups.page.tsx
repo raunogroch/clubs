@@ -418,31 +418,13 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
     try {
       addMemberModal.setSearchLoading(true);
 
-      // Generar username automáticamente: primera palabra del nombre +
-      // primera palabra del apellido, separados por punto, en minúsculas y sin acentos
-      const normalizeWord = (s: string) =>
-        s
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .replace(/[^a-zA-Z0-9]/g, "")
-          .toLowerCase();
-
-      const firstNameWord = normalizeWord(name.trim().split(/\s+/)[0] || "");
-      const firstLastnameWord = normalizeWord(
-        lastname.trim().split(/\s+/)[0] || "",
-      );
-      const generatedUsername = `${firstNameWord}.${firstLastnameWord}`;
-
-      // Usar CI como contraseña
-      const generatedPassword = ci.trim();
-
       const newUser = await userService.createAthlete({
         name,
         lastname,
         ci,
-        username: generatedUsername,
-        password: generatedPassword,
         role: addMemberModal.memberType,
+        // Para athletes: no enviamos username, el backend lo generará
+        // Para coaches: tampoco enviamos, lo generará el backend de forma única
       });
 
       if (newUser.code === 201 || newUser.code === 200) {

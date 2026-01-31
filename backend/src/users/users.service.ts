@@ -118,8 +118,7 @@ export class UsersService {
    * SRP: validación, imagen y password delegados a servicios
    */
   async create(createUserDto: CreateUserDto): Promise<any> {
-    // Validar campos requeridos según el rol
-    this.validateRequiredFieldsByRole(createUserDto);
+    // Primero generar username y password según el rol, ANTES de validar
 
     // Para ADMIN, generar username y password automáticamente
     if (createUserDto.role === Roles.ADMIN) {
@@ -132,7 +131,7 @@ export class UsersService {
       let username = baseUsername;
       let counter = 1;
 
-      // Asegurar que el username sea único
+      // Asegurar que el username sea único (independientemente del role)
       while (await this.userValidator.usernameExists(username)) {
         username = `${baseUsername}${counter}`;
         counter++;
@@ -143,10 +142,66 @@ export class UsersService {
       createUserDto.password = createUserDto.ci;
     }
 
-    // Validar username único solo si el rol requiere username
-    if (createUserDto.username) {
-      await this.userValidator.validateUniqueUsername(createUserDto.username);
+    // Para COACH, generar username y password automáticamente
+    if (createUserDto.role === Roles.COACH) {
+      // Generar username de estructura: firstname.lastname
+      const firstName =
+        createUserDto.name?.toLowerCase().split(' ')[0] || 'coach';
+      const lastName =
+        createUserDto.lastname?.toLowerCase().split(' ')[0] || 'user';
+      const baseUsername = `${firstName}.${lastName}`;
+      let username = baseUsername;
+      let counter = 1;
+
+      // Asegurar que el username sea único (independientemente del role)
+      while (await this.userValidator.usernameExists(username)) {
+        username = `${baseUsername}${counter}`;
+        counter++;
+      }
+      createUserDto.username = username;
+
+      // Usar CI como password
+      createUserDto.password = createUserDto.ci;
     }
+
+    // Para ASSISTANT, generar username y password automáticamente
+    if (createUserDto.role === Roles.ASSISTANT) {
+      // Generar username de estructura: firstname.lastname
+      const firstName =
+        createUserDto.name?.toLowerCase().split(' ')[0] || 'assistant';
+      const lastName =
+        createUserDto.lastname?.toLowerCase().split(' ')[0] || 'user';
+      const baseUsername = `${firstName}.${lastName}`;
+      let username = baseUsername;
+      let counter = 1;
+
+      // Asegurar que el username sea único (independientemente del role)
+      while (await this.userValidator.usernameExists(username)) {
+        username = `${baseUsername}${counter}`;
+        counter++;
+      }
+      createUserDto.username = username;
+
+      // Usar CI como password
+      createUserDto.password = createUserDto.ci;
+    }
+
+    // Para ATHLETE, generar username único si se proporciona
+    if (createUserDto.role === Roles.ATHLETE && createUserDto.username) {
+      const baseUsername = createUserDto.username;
+      let username = baseUsername;
+      let counter = 1;
+
+      // Asegurar que el username sea único (independientemente del role)
+      while (await this.userValidator.usernameExists(username)) {
+        username = `${baseUsername}${counter}`;
+        counter++;
+      }
+      createUserDto.username = username;
+    }
+
+    // Validar campos requeridos según el rol, DESPUÉS de generar username/password
+    this.validateRequiredFieldsByRole(createUserDto);
 
     let imageProcessingSkipped = false;
 
