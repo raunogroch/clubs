@@ -24,6 +24,12 @@ export interface User {
   username?: string;
   role?: string;
   ci?: string;
+  phone?: string;
+  images?: {
+    small?: string;
+    medium?: string;
+    large?: string;
+  };
 }
 
 /**

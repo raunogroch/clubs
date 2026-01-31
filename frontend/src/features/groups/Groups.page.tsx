@@ -276,6 +276,41 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
 
       if (response.code === 200 && response.data) {
         if (response.data.role === addMemberModal.memberType) {
+          // Verificar si el usuario ya está en el grupo
+          const currentGroup = groups.find(
+            (g) => g._id === addMemberModal.selectedGroupId,
+          );
+          if (currentGroup) {
+            // Verificar en coaches
+            if (
+              addMemberModal.memberType === "coach" &&
+              currentGroup.coaches?.includes(response.data._id)
+            ) {
+              toastr.warning("Este entrenador ya está registrado en el grupo");
+              addMemberModal.setShowCreateUserForm(false);
+              addMemberModal.setSearchResult(null);
+              return;
+            }
+
+            // Verificar en athletes_added
+            if (addMemberModal.memberType === "athlete") {
+              const isAthleteInGroup = (
+                currentGroup as any
+              ).athletes_added?.some(
+                (reg: any) =>
+                  (reg.athlete_id?._id || reg.athlete_id) === response.data._id,
+              );
+              if (isAthleteInGroup) {
+                toastr.warning(
+                  "Este deportista ya está registrado en el grupo",
+                );
+                addMemberModal.setShowCreateUserForm(false);
+                addMemberModal.setSearchResult(null);
+                return;
+              }
+            }
+          }
+
           addMemberModal.setSearchResult(response.data);
         } else {
           // Rol no coincide, mostrar opción de crear

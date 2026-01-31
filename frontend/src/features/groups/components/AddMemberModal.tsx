@@ -6,6 +6,7 @@
 
 import React from "react";
 import type { User, MemberType, CreateUserData } from "../types";
+import { Image } from "../../../components";
 
 interface AddMemberModalProps {
   isOpen: boolean;
@@ -65,15 +66,15 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
           <div className="modal-body">
             {/* Búsqueda de usuario */}
             <div className="form-group">
-              <label htmlFor="search-ci">Buscar por Carnet (CI)</label>
+              <label htmlFor="search-ci">Buscar por Carnet</label>
               <div className="input-group">
                 <input
                   id="search-ci"
                   type="text"
                   className="form-control"
                   value={searchCi}
+                  placeholder="ingresa el numero de carnet..."
                   onChange={(e) => onSearchCiChange(e.target.value)}
-                  placeholder="Ingresa el carnet (CI)"
                   onKeyPress={(e) => {
                     if (e.key === "Enter") {
                       onSearch();
@@ -83,7 +84,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
                 />
                 <span className="input-group-btn">
                   <button
-                    className="btn btn-xs btn-primary"
+                    className="btn btn-primary"
                     type="button"
                     onClick={onSearch}
                     disabled={loading || !searchCi.trim()}
@@ -96,18 +97,101 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
 
             {/* Usuario encontrado */}
             {searchResult && (
-              <div className="alert alert-info">
-                <h5>Usuario encontrado:</h5>
-                <p>
-                  <strong>Nombre:</strong> {searchResult.name}{" "}
-                  {searchResult.lastname}
-                </p>
-                <p>
-                  <strong>Usuario:</strong> {searchResult.username}
-                </p>
-                <p>
-                  <strong>Rol:</strong> {searchResult.role}
-                </p>
+              <div
+                style={{
+                  border: "1px solid #e0e0e0",
+                  borderRadius: "12px",
+                  padding: "16px",
+                  backgroundColor: "#f9f9f9",
+                  marginBottom: "16px",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "16px",
+                    alignItems: "stretch",
+                  }}
+                >
+                  {/* Imagen del atleta - ocupa altura total */}
+                  <div style={{ flexShrink: 0 }}>
+                    {searchResult.images?.small ? (
+                      <Image
+                        src={searchResult.images.small}
+                        alt={`${searchResult.name} ${searchResult.lastname}`}
+                        style={{
+                          width: "100px",
+                          height: "100%",
+                          borderRadius: "8px",
+                          objectFit: "cover",
+                          border: "2px solid #3498db",
+                        }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          width: "100px",
+                          height: "100%",
+                          borderRadius: "8px",
+                          backgroundColor: "#e8e8e8",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          border: "2px solid #ccc",
+                          minHeight: "120px",
+                        }}
+                      >
+                        <i
+                          className="fa fa-user"
+                          style={{ fontSize: "40px", color: "#999" }}
+                        ></i>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Información del atleta */}
+                  <div style={{ flex: 1 }}>
+                    <p
+                      style={{
+                        margin: "4px 0",
+                        color: "#666",
+                        fontSize: "13px",
+                      }}
+                    >
+                      <strong>Nombres:</strong> {searchResult.name || "-"}
+                    </p>
+                    <p
+                      style={{
+                        margin: "4px 0",
+                        color: "#666",
+                        fontSize: "13px",
+                      }}
+                    >
+                      <strong>Apellidos:</strong> {searchResult.lastname || "-"}
+                    </p>
+                    <p
+                      style={{
+                        margin: "4px 0",
+                        color: "#666",
+                        fontSize: "13px",
+                      }}
+                    >
+                      <strong>Carnet:</strong> {searchResult.ci || "-"}
+                    </p>
+                    {searchResult.phone && (
+                      <p
+                        style={{
+                          margin: "4px 0",
+                          color: "#666",
+                          fontSize: "13px",
+                        }}
+                      >
+                        <strong>Teléfono:</strong> {searchResult.phone}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
 
