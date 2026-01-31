@@ -428,14 +428,18 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
    * Remover entrenador de un grupo
    */
   const handleRemoveCoach = async (groupId: string, coachId: string) => {
-    if (!window.confirm("¿Estás seguro de que deseas remover este entrenador?")) {
+    if (
+      !window.confirm("¿Estás seguro de que deseas remover este entrenador?")
+    ) {
       return;
     }
 
     try {
       setLoading(true);
       const updatedGroup = await groupsService.removeCoach(groupId, coachId);
-      setGroups((prev) => prev.map((g) => (g._id === groupId ? updatedGroup : g)));
+      setGroups((prev) =>
+        prev.map((g) => (g._id === groupId ? updatedGroup : g)),
+      );
       toastr.success("Entrenador eliminado correctamente");
     } catch (error: any) {
       console.error("Error al remover entrenador:", error);
@@ -449,14 +453,21 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
    * Remover deportista de un grupo
    */
   const handleRemoveAthlete = async (groupId: string, athleteId: string) => {
-    if (!window.confirm("¿Estás seguro de que deseas remover este deportista?")) {
+    if (
+      !window.confirm("¿Estás seguro de que deseas remover este deportista?")
+    ) {
       return;
     }
 
     try {
       setLoading(true);
-      const updatedGroup = await groupsService.removeAthlete(groupId, athleteId);
-      setGroups((prev) => prev.map((g) => (g._id === groupId ? updatedGroup : g)));
+      const updatedGroup = await groupsService.removeAthlete(
+        groupId,
+        athleteId,
+      );
+      setGroups((prev) =>
+        prev.map((g) => (g._id === groupId ? updatedGroup : g)),
+      );
       toastr.success("Deportista eliminado correctamente");
     } catch (error: any) {
       console.error("Error al remover deportista:", error);
