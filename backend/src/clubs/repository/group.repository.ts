@@ -38,6 +38,7 @@ export class GroupRepository {
       .populate('created_by', 'name')
       .populate({
         path: 'athletes_added',
+        select: 'athlete_id registration_pay registration_date',
         populate: { path: 'athlete_id', select: 'name role ci lastname' },
       })
       .populate('coaches', 'name role ci lastname')
@@ -54,6 +55,7 @@ export class GroupRepository {
       .populate('created_by', 'name')
       .populate({
         path: 'athletes_added',
+        select: 'athlete_id registration_pay registration_date',
         populate: { path: 'athlete_id', select: 'name role ci lastname' },
       })
       .populate('coaches', 'name role ci lastname')
@@ -139,6 +141,7 @@ export class GroupRepository {
         .populate('created_by', 'name')
         .populate({
           path: 'athletes_added',
+          select: 'athlete_id registration_pay registration_date',
           populate: { path: 'athlete_id', select: 'name role ci lastname' },
         })
         .populate('coaches', 'name role ci lastname')
@@ -167,6 +170,7 @@ export class GroupRepository {
         .populate('created_by', 'name')
         .populate({
           path: 'athletes_added',
+          select: 'athlete_id registration_pay registration_date',
           populate: { path: 'athlete_id', select: 'name role ci lastname' },
         })
         .populate('coaches', 'name role ci lastname')
@@ -192,6 +196,7 @@ export class GroupRepository {
         .populate('created_by', 'name')
         .populate({
           path: 'athletes_added',
+          select: 'athlete_id registration_pay registration_date',
           populate: { path: 'athlete_id', select: 'name role ci lastname' },
         })
         .populate('coaches', 'name role ci lastname')
@@ -217,6 +222,7 @@ export class GroupRepository {
         .populate('created_by', 'name')
         .populate({
           path: 'athletes_added',
+          select: 'athlete_id registration_pay registration_date',
           populate: { path: 'athlete_id', select: 'name role ci lastname' },
         })
         .populate('coaches', 'name role ci lastname')
@@ -276,6 +282,14 @@ export class GroupRepository {
           },
           { new: true },
         )
+        .populate('created_by', 'name')
+        .populate({
+          path: 'athletes_added',
+          select: 'athlete_id registration_pay registration_date',
+          populate: { path: 'athlete_id', select: 'name role ci lastname' },
+        })
+        .populate('coaches', 'name role ci lastname')
+        .populate('club_id', 'name')
         .exec();
       return result;
     } catch (error) {

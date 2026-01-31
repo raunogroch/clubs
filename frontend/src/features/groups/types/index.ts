@@ -65,6 +65,8 @@ export interface Group {
   athletes_added?: Array<{
     _id: string;
     athlete_id?: User | string;
+    registration_pay?: boolean;
+    registration_date?: string;
   }>;
   coaches: string[];
   members?: string[]; // legacy support

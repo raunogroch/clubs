@@ -76,6 +76,9 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
   const [memberDetails, setMemberDetails] = useState<
     Record<string, MemberDetail>
   >({});
+  const [athleteRegistrationInfo, setAthleteRegistrationInfo] = useState<
+    Record<string, Record<string, { registration_pay: boolean }>>
+  >({});
 
   // Formulario de grupo
   const groupForm = useGroupForm(clubId);
@@ -144,6 +147,25 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
     try {
       // Intentar extraer detalles desde datos poblados
       let details = buildMemberDetailsMap(groupsData);
+
+      // Construir mapa de información de registro por grupo y atleta
+      const regInfo: Record<
+        string,
+        Record<string, { registration_pay: boolean }>
+      > = {};
+      groupsData.forEach((group) => {
+        regInfo[group._id] = {};
+        ((group as any).athletes_added || []).forEach((registration: any) => {
+          const athleteId =
+            registration.athlete_id?._id || registration.athlete_id;
+          if (athleteId) {
+            regInfo[group._id][athleteId] = {
+              registration_pay: registration.registration_pay ?? true,
+            };
+          }
+        });
+      });
+      setAthleteRegistrationInfo(regInfo);
 
       // Si no hay detalles, hacer llamada a API
       if (Object.keys(details).length === 0) {
@@ -695,6 +717,9 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
                             memberDetails={memberDetails}
                             memberCount={
                               (group as any).athletes_added?.length || 0
+                            }
+                            registrationInfo={
+                              athleteRegistrationInfo[group._id] || {}
                             }
                             onAddMember={() =>
                               addMemberModal.openModal(group._id, "athlete")
