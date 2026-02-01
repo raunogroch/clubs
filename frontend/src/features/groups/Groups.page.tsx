@@ -87,7 +87,11 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
 
   const dispatch = useDispatch<AppDispatch>();
   const groupsData = useSelector((state: RootState) => state.groups);
-  const groupsStatus = groupsData.status as "idle" | "loading" | "succeeded" | "failed";
+  const groupsStatus = groupsData.status as
+    | "idle"
+    | "loading"
+    | "succeeded"
+    | "failed";
   const groups = groupsData.items;
   const { items: clubs } = useSelector((state: RootState) => state.clubs);
   const { items: sports } = useSelector((state: RootState) => state.sports);
