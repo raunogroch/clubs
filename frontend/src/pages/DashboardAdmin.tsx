@@ -1,5 +1,5 @@
 import { useSelector } from "react-redux";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import type { RootState } from "../store/store";
 import { NavHeader } from "../components/NavHeader";
 import type { pageParamProps } from "../interfaces/pageParamProps";
@@ -43,9 +43,7 @@ export const DashboardAdmin = ({ name }: pageParamProps) => {
   return (
     <>
       <NavHeader name={name} />
-      <div className="wrapper wrapper-content">
-        <DashboardAssignments />
-      </div>
+      <DashboardAssignments user={user} />
     </>
   );
 };
@@ -77,14 +75,13 @@ const calculateUnpaidAthletes = (breakdown: any): number => {
   }, 0);
 };
 
-const DashboardAssignments = () => {
+const DashboardAssignments = ({ user }: { user: any }) => {
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<Array<any>>([]);
   const [breakdown, setBreakdown] = useState<any>(null);
   const [showUnpaidModal, setShowUnpaidModal] = useState(false);
   const [unpaidAthletes, setUnpaidAthletes] = useState<Array<any>>([]);
   const [unpaidLoading, setUnpaidLoading] = useState(false);
-  const user = useSelector((state: RootState) => state.auth.user);
 
   useEffect(() => {
     const load = async () => {
@@ -92,24 +89,35 @@ const DashboardAssignments = () => {
       const userService = (await import("../services/userService.ts"))
         .userService;
 
-      // Cargar conteos
-      const res = await userService.getUnpaidByAssignment();
-      if (res.code === 200) {
-        setItems(res.data || []);
-      } else {
+      // Ejecutar ambas llamadas en paralelo para reducir tiempo de espera
+      try {
+        const [res, breakdownRes] = await Promise.all([
+          userService.getUnpaidByAssignment(),
+          userService.getAthletesBreakdownByAssignment(),
+        ]);
+
+        if (res?.code === 200) setItems(res.data || []);
+        else setItems([]);
+
+        if (breakdownRes?.code === 200) setBreakdown(breakdownRes.data);
+      } catch (e) {
         setItems([]);
+      } finally {
+        setLoading(false);
       }
-
-      // Cargar desglose detallado
-      const breakdownRes = await userService.getAthletesBreakdownByAssignment();
-      if (breakdownRes.code === 200) {
-        setBreakdown(breakdownRes.data);
-      }
-
-      setLoading(false);
     };
     load();
   }, [user]);
+
+  // Memoizar cálculos costosos para evitar recalcular en cada render
+  const totalAthletes = useMemo(
+    () => calculateTotalAthletes(breakdown),
+    [breakdown],
+  );
+  const unpaidCount = useMemo(
+    () => calculateUnpaidAthletes(breakdown),
+    [breakdown],
+  );
 
   // Cargar registrations para el modal
   const handleOpenUnpaidModal = async () => {
@@ -165,9 +173,7 @@ const DashboardAssignments = () => {
                   <h5>Atletas inscritos</h5>
                 </div>
                 <div className="ibox-content text-center">
-                  <h2 className="font-bold text-primary">
-                    {calculateTotalAthletes(breakdown)}
-                  </h2>
+                  <h2 className="font-bold text-primary">{totalAthletes}</h2>
                 </div>
               </div>
             </div>
@@ -186,9 +192,7 @@ const DashboardAssignments = () => {
                   </div>
                 </div>
                 <div className="ibox-content text-center">
-                  <h2 className="font-bold text-danger">
-                    {calculateUnpaidAthletes(breakdown)}
-                  </h2>
+                  <h2 className="font-bold text-danger">{unpaidCount}</h2>
                 </div>
               </div>
             </div>
