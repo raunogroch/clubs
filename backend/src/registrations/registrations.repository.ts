@@ -58,6 +58,35 @@ export class RegistrationsRepository {
       .exec()) as any;
   }
 
+  async findByAssignment(assignmentId: string): Promise<Registration[]> {
+    return (await this.registrationModel
+      .find({ assignment_id: new Types.ObjectId(assignmentId) })
+      .populate(
+        'athlete_id',
+        'name lastname ci role phone images createdAt birth_date gender username parent_id documentPath fileIdentifier',
+      )
+      .lean()
+      .exec()) as any;
+  }
+
+  async findByGroupsAndAssignment(
+    groupIds: string[],
+    assignmentId: string,
+  ): Promise<Registration[]> {
+    const ids = groupIds.map((g) => new Types.ObjectId(g));
+    return (await this.registrationModel
+      .find({
+        group_id: { $in: ids },
+        assignment_id: new Types.ObjectId(assignmentId),
+      })
+      .populate(
+        'athlete_id',
+        'name lastname ci role phone images createdAt birth_date gender username parent_id documentPath fileIdentifier',
+      )
+      .lean()
+      .exec()) as any;
+  }
+
   async findByGroupAndAthlete(
     groupId: string,
     athleteId: string,

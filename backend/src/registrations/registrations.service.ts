@@ -46,6 +46,17 @@ export class RegistrationsService {
     return this.registrationsRepository.findByGroups(groupIds);
   }
 
+  async findByAssignment(assignmentId: string) {
+    return this.registrationsRepository.findByAssignment(assignmentId);
+  }
+
+  async findByGroupsAndAssignment(groupIds: string[], assignmentId: string) {
+    return this.registrationsRepository.findByGroupsAndAssignment(
+      groupIds,
+      assignmentId,
+    );
+  }
+
   async findByGroupAndAthlete(groupId: string, athleteId: string) {
     return this.registrationsRepository.findByGroupAndAthlete(
       groupId,

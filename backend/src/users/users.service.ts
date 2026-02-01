@@ -678,9 +678,11 @@ export class UsersService {
           continue;
         }
 
-        // Obtener registros para esos grupos
+        // Obtener registros para el assignment directamente desde la colección
         const registrations = this.registrationsService
-          ? await this.registrationsService.findByGroups(groupIds)
+          ? await this.registrationsService.findByAssignment(
+              (assignment as any)._id?.toString?.(),
+            )
           : [];
 
         // Contar atletas únicos con registration_pay === false y total registrados
@@ -688,8 +690,6 @@ export class UsersService {
         const allAthletes = new Set<string>();
         for (const reg of registrations) {
           const regObj: any = reg as any;
-
-          // athlete_id may be populated object or raw id
           const athleteField = regObj.athlete_id;
           let athleteId: string | null = null;
           if (!athleteField) {
@@ -708,7 +708,6 @@ export class UsersService {
 
           if (athleteId) {
             allAthletes.add(athleteId);
-            // consider unpaid when registration_pay is not explicitly true
             const isUnpaid = regObj.registration_pay !== true;
             if (isUnpaid) unpaidAthletes.add(athleteId);
           }
@@ -779,9 +778,12 @@ export class UsersService {
           const groupId = (group as any)._id.toString();
           const groupName = (group as any).name || 'Grupo sin nombre';
 
-          // Obtener registrations del grupo
+          // Obtener registrations del grupo, filtrando por assignment
           const registrations = this.registrationsService
-            ? await this.registrationsService.findByGroups([groupId])
+            ? await this.registrationsService.findByGroupsAndAssignment(
+                [groupId],
+                (adminAssignments[0] as any)._id?.toString?.(),
+              )
             : [];
 
           // Contar atletas únicos en este grupo y cuántos tienen pago pendiente
