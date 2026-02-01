@@ -5,7 +5,7 @@
 export class GroupResponseDto {
   _id: string;
   name: string;
-    // description removed
+  // description removed
   club_id: string;
   monthly_fee?: number;
   created_by: {

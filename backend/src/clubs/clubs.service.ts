@@ -75,8 +75,9 @@ export class ClubsService {
    */
   async getMyClubs(userId: string) {
     // Obtener las asignaciones del usuario
-    const assignments =
-      await this.assignmentsService.getUserAssignments(userId);
+    const assignments = await this.assignmentsService.getUserAssignments(
+      userId,
+    );
 
     if (!assignments || assignments.length === 0) {
       return [];

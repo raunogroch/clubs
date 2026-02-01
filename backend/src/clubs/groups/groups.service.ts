@@ -294,7 +294,8 @@ export class GroupsService {
         monthly_payments: [],
         // Infer assignment_id from group if available
         assignment_id:
-          typeof group.assignment_id === 'object' && group.assignment_id !== null
+          typeof group.assignment_id === 'object' &&
+          group.assignment_id !== null
             ? (group.assignment_id as any)._id?.toString?.() ||
               (group.assignment_id as any)?.toString?.()
             : (group.assignment_id as any)?.toString?.(),

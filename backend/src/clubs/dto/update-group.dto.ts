@@ -12,7 +12,6 @@ export class UpdateGroupDto {
   @IsString()
   name?: string;
 
-
   /**
    * Precio/Mensualidad del grupo (opcional)
    * Costo en Bs. (Bolivianos)

@@ -69,9 +69,7 @@ export const GroupFormModal: React.FC<GroupFormModalProps> = ({
               />
             </div>
 
-            <div className="form-group">
-              {/* description removed */}
-            </div>
+            <div className="form-group">{/* description removed */}</div>
 
             <div className="form-group">
               <label htmlFor="group-monthly-fee">Precio Mensual (Bs.)</label>
