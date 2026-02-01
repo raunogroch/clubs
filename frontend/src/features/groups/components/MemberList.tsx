@@ -72,6 +72,7 @@ export const MemberList: React.FC<MemberListProps> = ({
                 const memberDetail = memberDetails[memberId];
                 const regInfo = registrationInfo[memberId];
                 const isUnpaid = regInfo && !regInfo.registration_pay;
+                const isPaid = regInfo && regInfo.registration_pay;
 
                 if (!memberDetail) {
                   return null;
@@ -88,9 +89,9 @@ export const MemberList: React.FC<MemberListProps> = ({
                       padding: "8px 12px",
                       borderRadius: "3px",
                       marginBottom: "5px",
-                      backgroundColor: isUnpaid ? "#fff3cd" : "#f9f9f9",
-                      border: isUnpaid ? "1px solid #ffc107" : "1px solid #ddd",
-                      opacity: isUnpaid ? 0.7 : 1,
+                      backgroundColor: isPaid ? "#d4edda" : "#f9f9f9",
+                      border: isPaid ? "1px solid #28a745" : "1px solid #ddd",
+                      opacity: 1,
                     }}
                   >
                     <span
@@ -100,27 +101,35 @@ export const MemberList: React.FC<MemberListProps> = ({
                         gap: "8px",
                       }}
                     >
+                      {isPaid && (
+                        <i
+                          className="fa fa-check-circle"
+                          style={{ color: "#28a745", fontSize: "16px" }}
+                          title="Matrícula pagada"
+                        ></i>
+                      )}
                       {isUnpaid && (
                         <i
                           className="fa fa-exclamation-triangle"
                           style={{ color: "#ff9800", fontSize: "16px" }}
-                          title="Pago de inscripción pendiente"
+                          title="Matrícula pendiente de pago"
                         ></i>
                       )}
                       <strong>{formatMemberDisplay(memberDetail)}</strong>
                     </span>
-                    <button
-                      className="btn btn-danger btn-xs"
-                      onClick={() => onRemoveMember(memberId)}
-                      title={MESSAGES.REMOVE_TOOLTIP}
-                      disabled={isLoading || isUnpaid}
-                      style={{
-                        opacity: isUnpaid ? 0.5 : 1,
-                        cursor: isUnpaid ? "not-allowed" : "pointer",
-                      }}
-                    >
-                      <i className="fa fa-trash"></i>
-                    </button>
+                    {!isPaid && (
+                      <button
+                        className="btn btn-danger btn-xs"
+                        onClick={() => onRemoveMember(memberId)}
+                        title={MESSAGES.REMOVE_TOOLTIP}
+                        disabled={isLoading}
+                        style={{
+                          cursor: "pointer",
+                        }}
+                      >
+                        <i className="fa fa-trash"></i>
+                      </button>
+                    )}
                   </li>
                 );
               })}
