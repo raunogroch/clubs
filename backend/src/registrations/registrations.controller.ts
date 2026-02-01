@@ -7,6 +7,7 @@ import {
   Delete,
   Put,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RegistrationsService } from './registrations.service';
@@ -23,16 +24,6 @@ export class RegistrationsController {
     return this.registrationsService.createRegistration(body);
   }
 
-  @Get(':id')
-  async getById(@Param('id') id: string) {
-    return this.registrationsService.findById(id);
-  }
-
-  @Get('group/:groupId')
-  async getByGroup(@Param('groupId') groupId: string) {
-    return this.registrationsService.findByGroup(groupId);
-  }
-
   @Get('debug/all')
   async debugAll() {
     try {
@@ -41,6 +32,31 @@ export class RegistrationsController {
     } catch (error: any) {
       return { error: error.message, registrations: [] };
     }
+  }
+
+  @Get('assignment/:assignmentId')
+  async getByAssignment(
+    @Param('assignmentId') assignmentId: string,
+    @Query('registration_pay') registrationPay?: string,
+  ) {
+    if (registrationPay === 'false') {
+      // Retornar solo sin pagar
+      const registrations =
+        await this.registrationsService.findByAssignment(assignmentId);
+      return registrations.filter((reg) => !reg.registration_pay);
+    }
+    // Retornar todos
+    return this.registrationsService.findByAssignment(assignmentId);
+  }
+
+  @Get('group/:groupId')
+  async getByGroup(@Param('groupId') groupId: string) {
+    return this.registrationsService.findByGroup(groupId);
+  }
+
+  @Get(':id')
+  async getById(@Param('id') id: string) {
+    return this.registrationsService.findById(id);
   }
 
   @Put(':id')

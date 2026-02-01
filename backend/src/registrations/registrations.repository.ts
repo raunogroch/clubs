@@ -65,6 +65,7 @@ export class RegistrationsRepository {
         'athlete_id',
         'name lastname ci role phone images createdAt birth_date gender username parent_id documentPath fileIdentifier',
       )
+      .populate('group_id', 'name')
       .lean()
       .exec()) as any;
   }
