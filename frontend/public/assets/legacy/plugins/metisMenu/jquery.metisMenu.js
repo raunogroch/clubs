@@ -49,10 +49,10 @@
     }
 
     var Util = function ($$$1) {
-        // eslint-disable-line no-shadow
+         
         var TRANSITION_END = 'transitionend';
         var Util = {
-            // eslint-disable-line no-shadow
+             
             TRANSITION_END: 'mmTransitionEnd',
             triggerTransitionEnd: function triggerTransitionEnd(element) {
                 $$$1(element).trigger(TRANSITION_END);
@@ -68,7 +68,7 @@
                 delegateType: TRANSITION_END,
                 handle: function handle(event) {
                     if ($$$1(event.target).is(this)) {
-                        return event.handleObj.handler.apply(this, arguments); // eslint-disable-line prefer-rest-params
+                        return event.handleObj.handler.apply(this, arguments);  
                     }
 
                     return undefined;
@@ -92,8 +92,8 @@
         }
 
         function setTransitionEndSupport() {
-            $$$1.fn.mmEmulateTransitionEnd = transitionEndEmulator; // eslint-disable-line no-param-reassign
-            // eslint-disable-next-line no-param-reassign
+            $$$1.fn.mmEmulateTransitionEnd = transitionEndEmulator;  
+             
 
             $$$1.event.special[Util.TRANSITION_END] = getSpecialTransitionEndEvent();
         }
@@ -103,7 +103,7 @@
     }($);
 
     var MetisMenu = function ($$$1) {
-        // eslint-disable-line no-shadow
+         
         var NAME = 'metisMenu';
         var DATA_KEY = 'metisMenu';
         var EVENT_KEY = "." + DATA_KEY;
@@ -132,7 +132,7 @@
         var MetisMenu =
             /*#__PURE__*/
             function () {
-                // eslint-disable-line no-shadow
+                 
                 function MetisMenu(element, config) {
                     this.element = element;
                     this.config = _objectSpread({}, Default, config);
@@ -148,7 +148,7 @@
                     $$$1(this.element).find(conf.parentTrigger + "." + conf.activeClass).has(conf.subMenu).children(conf.subMenu).attr('aria-expanded', true).addClass(conf.collapseClass + " " + conf.collapseInClass);
                     $$$1(this.element).find(conf.parentTrigger).not("." + conf.activeClass).has(conf.subMenu).children(conf.subMenu).attr('aria-expanded', false).addClass(conf.collapseClass);
                     $$$1(this.element).find(conf.parentTrigger).has(conf.subMenu).children(conf.triggerElement).on(Event.CLICK_DATA_API, function (e) {
-                        // eslint-disable-line func-names
+                         
                         var eTar = $$$1(this);
                         var paRent = eTar.parent(conf.parentTrigger);
                         var sibLings = paRent.siblings(conf.parentTrigger).children(conf.triggerElement);
@@ -240,7 +240,7 @@
                         return;
                     }
 
-                    elem.parent(this.config.parentTrigger).removeClass(this.config.activeClass); // eslint-disable-next-line no-unused-expressions
+                    elem.parent(this.config.parentTrigger).removeClass(this.config.activeClass);  
 
                     elem.height(elem.height())[0].offsetHeight;
                     elem.addClass(this.config.collapsingClass).removeClass(this.config.collapseClass).removeClass(this.config.collapseInClass);
@@ -287,7 +287,7 @@
                 };
 
                 MetisMenu.jQueryInterface = function jQueryInterface(config) {
-                    // eslint-disable-next-line func-names
+                     
                     return this.each(function () {
                         var $this = $$$1(this);
                         var data = $this.data(DATA_KEY);
@@ -322,13 +322,13 @@
          */
 
 
-        $$$1.fn[NAME] = MetisMenu.jQueryInterface; // eslint-disable-line no-param-reassign
+        $$$1.fn[NAME] = MetisMenu.jQueryInterface;  
 
-        $$$1.fn[NAME].Constructor = MetisMenu; // eslint-disable-line no-param-reassign
+        $$$1.fn[NAME].Constructor = MetisMenu;  
 
         $$$1.fn[NAME].noConflict = function () {
-            // eslint-disable-line no-param-reassign
-            $$$1.fn[NAME] = JQUERY_NO_CONFLICT; // eslint-disable-line no-param-reassign
+             
+            $$$1.fn[NAME] = JQUERY_NO_CONFLICT;  
 
             return MetisMenu.jQueryInterface;
         };

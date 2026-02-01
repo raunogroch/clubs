@@ -20,7 +20,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/schemas/user.schema';
 import { LoginDto } from './dto/login.dto';
-import * as bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { Roles } from 'src/users/enum/roles.enum';
 import { randomBytes } from 'crypto';
 
@@ -48,7 +48,7 @@ export class AuthService {
     const user = await this.usersService.findOneByUsername(username);
 
     // Comparar contraseña en texto plano con hash usando bcrypt
-    if (user && (await bcrypt.compare(pass, user.password))) {
+    if (user && user.password && (await bcrypt.compare(pass, user.password))) {
       // No devolver la contraseña en la respuesta (separar del objeto user)
       const { password, ...result } = user.toObject();
       return result;

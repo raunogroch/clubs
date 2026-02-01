@@ -10,11 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@popperjs/core": "^2.11.8",
     "@reduxjs/toolkit": "^2.9.0",
     "axios": "^1.11.0",
     "cropperjs": "1.5.1",
-    "jquery": "^3.7.1",
     "jwt-decode": "^4.0.0",
     "react": "^19.1.1",
     "react-cropper": "^2.3.3",

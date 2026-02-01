@@ -36,8 +36,6 @@ export function useGroupForm(clubId: string) {
         name: group.name,
         club_id: clubId,
         monthly_fee: group.monthly_fee,
-        club_id: clubId,
-        monthly_fee: group.monthly_fee,
       });
     },
     [clubId],

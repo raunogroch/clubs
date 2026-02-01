@@ -213,9 +213,8 @@ export class GroupsService {
     // Cascade delete: eliminar registrations asociados y quitar referencia en club
     // 1) Eliminar registrations del grupo
     try {
-      if (this.registrationsService) {
+        if (this.registrationsService) {
         await this.registrationsService.deleteByGroup(groupId);
-        console.log('Registrations asociados al grupo eliminados:', groupId);
       }
     } catch (e) {
       console.error('Error al eliminar registrations del grupo:', e);

@@ -146,7 +146,7 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
   const loadMembersDetails = async (groupsData: Group[]) => {
     try {
       // Intentar extraer detalles desde datos poblados
-      let details = buildMemberDetailsMap(groupsData);
+      const details = buildMemberDetailsMap(groupsData);
 
       // Construir mapa de información de registro por grupo y atleta
       const regInfo: Record<

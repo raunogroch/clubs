@@ -9,7 +9,7 @@ import "cropperjs/dist/cropper.css";
 import { ParentTooltip } from "../components/ParentTooltip";
 
 // Función helper para formatear fechas con mes literal (YYYY, D de MMM)
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 const formatDateWithLiteralMonth = (dateString: string): string => {
   const date = new Date(dateString);
   const options: Intl.DateTimeFormatOptions = {
