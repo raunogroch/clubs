@@ -125,6 +125,18 @@ export class UsersController {
     return this.usersService.getAthletesFromGroups(user);
   }
 
+  @Get('athletes/unpaid/by-assignment')
+  @Roles(Role.SUPERADMIN, Role.ADMIN, Role.ASSISTANT)
+  async getUnpaidByAssignment(@CurrentUser() user: currentAuth) {
+    return this.usersService.getUnpaidAthletesCountByAssignment(user);
+  }
+
+  @Get('athletes/breakdown/by-assignment')
+  @Roles(Role.SUPERADMIN, Role.ADMIN, Role.ASSISTANT)
+  async getAthletesBreakdownByAssignment(@CurrentUser() user: currentAuth) {
+    return this.usersService.getAthletesBreakdownByAssignment(user);
+  }
+
   @Get()
   @Roles(Role.SUPERADMIN, Role.ADMIN, Role.ASSISTANT, Role.COACH)
   findAll(

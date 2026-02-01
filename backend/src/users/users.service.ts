@@ -631,6 +631,199 @@ export class UsersService {
   }
 
   /**
+   * Devuelve, por cada assignment del admin, la cantidad de atletas (únicos)
+   * dentro del assignment cuyo `registration_pay` es `false`.
+   * Resultado: [{ assignment_id, assignment_name, unpaidCount }]
+   */
+  async getUnpaidAthletesCountByAssignment(
+    requestingUser: currentAuth,
+  ): Promise<any[]> {
+    try {
+      const adminAssignments =
+        await this.assignmentsService.getAssignmentsByAdmin(requestingUser.sub);
+
+      if (!adminAssignments || adminAssignments.length === 0) {
+        return [];
+      }
+
+      const results: any[] = [];
+
+      for (const assignment of adminAssignments) {
+        const clubIds: string[] = Array.isArray((assignment as any).clubs)
+          ? (assignment as any).clubs.map((c: any) => c.toString())
+          : [];
+        if (!clubIds || clubIds.length === 0) {
+          results.push({ assignment_id: (assignment as any)._id || null, assignment_name: (assignment as any).module_name || null, unpaidCount: 0, totalRegistered: 0 });
+          continue;
+        }
+
+        // Obtener todos los grupos para esos clubes
+        const groups = await this.groupModel.find({ club_id: { $in: clubIds } }).exec();
+        const groupIds = groups.map((g) => (g as any)._id.toString());
+
+        if (groupIds.length === 0) {
+          results.push({ assignment_id: (assignment as any)._id || null, assignment_name: (assignment as any).module_name || null, unpaidCount: 0, totalRegistered: 0 });
+          continue;
+        }
+
+        // Obtener registros para esos grupos
+        const registrations = this.registrationsService
+          ? await this.registrationsService.findByGroups(groupIds)
+          : [];
+
+        // Contar atletas únicos con registration_pay === false y total registrados
+        const unpaidAthletes = new Set<string>();
+        const allAthletes = new Set<string>();
+        for (const reg of registrations) {
+          const regObj: any = reg as any;
+
+          // athlete_id may be populated object or raw id
+          const athleteField = regObj.athlete_id;
+          let athleteId: string | null = null;
+          if (!athleteField) {
+            athleteId = null;
+          } else if (typeof athleteField === 'string') {
+            athleteId = athleteField;
+          } else if (athleteField._id) {
+            athleteId = (athleteField._id || athleteField).toString();
+          } else {
+            try {
+              athleteId = athleteField.toString();
+            } catch (e) {
+              athleteId = null;
+            }
+          }
+
+          if (athleteId) {
+            allAthletes.add(athleteId);
+            // consider unpaid when registration_pay is not explicitly true
+            const isUnpaid = regObj.registration_pay !== true;
+            if (isUnpaid) unpaidAthletes.add(athleteId);
+          }
+        }
+
+        results.push({
+          assignment_id: (assignment as any)._id || null,
+          assignment_name: (assignment as any).module_name || null,
+          unpaidCount: unpaidAthletes.size,
+          totalRegistered: allAthletes.size,
+        });
+      }
+
+      return results;
+    } catch (error) {
+      console.error('Error al obtener conteos de pagos pendientes por assignment:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Devuelve desglose detallado de atletas registrados por club y grupo del assignment
+   * Resultado: { total: number, clubs: [{ clubId, clubName, groups: [{ groupId, groupName, athleteCount, athletes: [...] }] }] }
+   */
+  async getAthletesBreakdownByAssignment(
+    requestingUser: currentAuth,
+  ): Promise<any> {
+    try {
+      const adminAssignments =
+        await this.assignmentsService.getAssignmentsByAdmin(requestingUser.sub);
+
+      if (!adminAssignments || adminAssignments.length === 0) {
+        return { total: 0, clubs: [] };
+      }
+
+      const clubIds: string[] = Array.isArray((adminAssignments[0] as any).clubs)
+        ? (adminAssignments[0] as any).clubs.map((c: any) => c.toString())
+        : [];
+
+      if (!clubIds || clubIds.length === 0) {
+        return { total: 0, clubs: [] };
+      }
+
+      // Obtener clubes
+      const clubModel = this.groupModel.db.model('Club');
+      const clubs = await clubModel.find({ _id: { $in: clubIds } }).exec();
+
+      const clubsBreakdown: any[] = [];
+      let totalAthletes = 0;
+
+      for (const club of clubs) {
+        const clubId = (club as any)._id.toString();
+        const clubName = (club as any).name || 'Club sin nombre';
+
+        // Obtener grupos del club
+        const groups = await this.groupModel
+          .find({ club_id: new (require('mongoose').Types.ObjectId)(clubId) })
+          .exec();
+
+        const groupsBreakdown: any[] = [];
+
+        for (const group of groups) {
+          const groupId = (group as any)._id.toString();
+          const groupName = (group as any).name || 'Grupo sin nombre';
+
+          // Obtener registrations del grupo
+          const registrations = this.registrationsService
+            ? await this.registrationsService.findByGroups([groupId])
+            : [];
+
+          // Contar atletas únicos en este grupo y cuántos tienen pago pendiente
+          const athleteIds = new Set<string>();
+          const unpaidAthleteIds = new Set<string>();
+          for (const reg of registrations) {
+            const athleteField = (reg as any).athlete_id;
+            let athleteId: string | null = null;
+            if (!athleteField) {
+              athleteId = null;
+            } else if (typeof athleteField === 'string') {
+              athleteId = athleteField;
+            } else if (athleteField._id) {
+              athleteId = (athleteField._id || athleteField).toString();
+            } else {
+              try {
+                athleteId = athleteField.toString();
+              } catch (e) {
+                athleteId = null;
+              }
+            }
+            if (athleteId) {
+              athleteIds.add(athleteId);
+              // Contar como unpaid si registration_pay no es true
+              const isUnpaid = (reg as any).registration_pay !== true;
+              if (isUnpaid) {
+                unpaidAthleteIds.add(athleteId);
+              }
+            }
+          }
+
+          if (athleteIds.size > 0) {
+            groupsBreakdown.push({
+              groupId,
+              groupName,
+              athleteCount: athleteIds.size,
+              unpaidCount: unpaidAthleteIds.size,
+            });
+            totalAthletes += athleteIds.size;
+          }
+        }
+
+        if (groupsBreakdown.length > 0) {
+          clubsBreakdown.push({
+            clubId,
+            clubName,
+            groups: groupsBreakdown,
+          });
+        }
+      }
+
+      return { total: totalAthletes, clubs: clubsBreakdown };
+    } catch (error) {
+      console.error('Error al obtener desglose de atletas por assignment:', error);
+      return { total: 0, clubs: [] };
+    }
+  }
+
+  /**
    * Carga y procesa una imagen de usuario mediante image-processor
    * Recibe imagen en base64, la envía al servicio image-processor
    * y guarda las URLs de las imágenes procesadas

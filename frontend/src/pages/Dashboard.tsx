@@ -1,4 +1,5 @@
 import { useSelector } from "react-redux";
+import { useState, useEffect } from "react";
 import type { RootState } from "../store/store";
 import { NavHeader } from "../components/NavHeader";
 import type { pageParamProps } from "../interfaces/pageParamProps";
@@ -42,12 +43,84 @@ export const Dashboard = ({ name }: pageParamProps) => {
     <>
       <NavHeader name={name} />
       <div className="wrapper wrapper-content">
-        <div className="middle-box text-center animated fadeInRightBig">
-          <h3 className="font-bold">Página en construcción</h3>
-          <div className="error-desc">
-            Actualmente no tienes informacion en esta pagina. Esta sección se
-            encuentra en construcción, pronto podrás gestionar informacion
-            general aquí.
+        <DashboardAssignments />
+      </div>
+    </>
+  );
+};
+
+const DashboardAssignments = () => {
+  const [loading, setLoading] = useState(true);
+  const [items, setItems] = useState<Array<any>>([]);
+  const [breakdown, setBreakdown] = useState<any>(null);
+  const user = useSelector((state: RootState) => state.auth.user);
+
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true);
+      const userService = (await import("../services/userService")).userService;
+
+      // Cargar conteos
+      const res = await userService.getUnpaidByAssignment();
+      if (res.code === 200) {
+        setItems(res.data || []);
+      } else {
+        setItems([]);
+      }
+
+      // Cargar desglose detallado
+      const breakdownRes = await userService.getAthletesBreakdownByAssignment();
+      if (breakdownRes.code === 200) {
+        setBreakdown(breakdownRes.data);
+      }
+
+      setLoading(false);
+    };
+    load();
+  }, [user]);
+
+  if (loading) {
+    return (
+      <div className="middle-box text-center animated fadeInRightBig">
+        <div className="spinner-border text-primary" role="status"></div>
+      </div>
+    );
+  }
+
+  if (!items || items.length === 0) {
+    return (
+      <div className="middle-box text-center animated fadeInRightBig">
+        <h5>No hay datos disponibles</h5>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="row mb-3">
+        <div className="col-md-4">
+          <div className="ibox">
+            <div className="ibox-title">
+              <h5>Resumen General</h5>
+            </div>
+            <div className="ibox-content text-center">
+              <h2 className="font-bold text-danger">
+                {breakdown && breakdown.clubs
+                  ? breakdown.clubs.reduce((totalUnpaid: number, club: any) => {
+                      return (
+                        totalUnpaid +
+                        (club.groups || []).reduce(
+                          (clubUnpaid: number, group: any) => {
+                            return clubUnpaid + (group.unpaidCount || 0);
+                          },
+                          0,
+                        )
+                      );
+                    }, 0)
+                  : 0}
+              </h2>
+              <div>Atletas sin matricula</div>
+            </div>
           </div>
         </div>
       </div>
