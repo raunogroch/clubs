@@ -653,16 +653,28 @@ export class UsersService {
           ? (assignment as any).clubs.map((c: any) => c.toString())
           : [];
         if (!clubIds || clubIds.length === 0) {
-          results.push({ assignment_id: (assignment as any)._id || null, assignment_name: (assignment as any).module_name || null, unpaidCount: 0, totalRegistered: 0 });
+          results.push({
+            assignment_id: (assignment as any)._id || null,
+            assignment_name: (assignment as any).module_name || null,
+            unpaidCount: 0,
+            totalRegistered: 0,
+          });
           continue;
         }
 
         // Obtener todos los grupos para esos clubes
-        const groups = await this.groupModel.find({ club_id: { $in: clubIds } }).exec();
+        const groups = await this.groupModel
+          .find({ club_id: { $in: clubIds } })
+          .exec();
         const groupIds = groups.map((g) => (g as any)._id.toString());
 
         if (groupIds.length === 0) {
-          results.push({ assignment_id: (assignment as any)._id || null, assignment_name: (assignment as any).module_name || null, unpaidCount: 0, totalRegistered: 0 });
+          results.push({
+            assignment_id: (assignment as any)._id || null,
+            assignment_name: (assignment as any).module_name || null,
+            unpaidCount: 0,
+            totalRegistered: 0,
+          });
           continue;
         }
 
@@ -712,7 +724,10 @@ export class UsersService {
 
       return results;
     } catch (error) {
-      console.error('Error al obtener conteos de pagos pendientes por assignment:', error);
+      console.error(
+        'Error al obtener conteos de pagos pendientes por assignment:',
+        error,
+      );
       return [];
     }
   }
@@ -732,7 +747,9 @@ export class UsersService {
         return { total: 0, clubs: [] };
       }
 
-      const clubIds: string[] = Array.isArray((adminAssignments[0] as any).clubs)
+      const clubIds: string[] = Array.isArray(
+        (adminAssignments[0] as any).clubs,
+      )
         ? (adminAssignments[0] as any).clubs.map((c: any) => c.toString())
         : [];
 
@@ -818,7 +835,10 @@ export class UsersService {
 
       return { total: totalAthletes, clubs: clubsBreakdown };
     } catch (error) {
-      console.error('Error al obtener desglose de atletas por assignment:', error);
+      console.error(
+        'Error al obtener desglose de atletas por assignment:',
+        error,
+      );
       return { total: 0, clubs: [] };
     }
   }

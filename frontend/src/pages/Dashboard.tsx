@@ -97,29 +97,59 @@ const DashboardAssignments = () => {
 
   return (
     <>
-      <div className="row mb-3">
-        <div className="col-md-4">
-          <div className="ibox">
-            <div className="ibox-title">
-              <h5>Resumen General</h5>
+      <div className="wrapper wrapper-content">
+        <div className="animated fadeInRightBig">
+          <div className="row">
+            <div className="col-md-4">
+              <div className="ibox">
+                <div className="ibox-title">
+                  <h5>Atletas inscritos</h5>
+                </div>
+                <div className="ibox-content text-center">
+                  <h2 className="font-bold text-primary">
+                    {breakdown?.total ??
+                      (breakdown && breakdown.clubs
+                        ? breakdown.clubs.reduce((total: number, club: any) => {
+                            return (
+                              total +
+                              (club.groups || []).reduce(
+                                (gTotal: number, group: any) =>
+                                  gTotal + (group.athleteCount || 0),
+                                0,
+                              )
+                            );
+                          }, 0)
+                        : 0)}
+                  </h2>
+                </div>
+              </div>
             </div>
-            <div className="ibox-content text-center">
-              <h2 className="font-bold text-danger">
-                {breakdown && breakdown.clubs
-                  ? breakdown.clubs.reduce((totalUnpaid: number, club: any) => {
-                      return (
-                        totalUnpaid +
-                        (club.groups || []).reduce(
-                          (clubUnpaid: number, group: any) => {
-                            return clubUnpaid + (group.unpaidCount || 0);
+            <div className="col-md-4">
+              <div className="ibox">
+                <div className="ibox-title">
+                  <h5>Atletas sin matricula</h5>
+                </div>
+                <div className="ibox-content text-center">
+                  <h2 className="font-bold text-danger">
+                    {breakdown && breakdown.clubs
+                      ? breakdown.clubs.reduce(
+                          (totalUnpaid: number, club: any) => {
+                            return (
+                              totalUnpaid +
+                              (club.groups || []).reduce(
+                                (clubUnpaid: number, group: any) => {
+                                  return clubUnpaid + (group.unpaidCount || 0);
+                                },
+                                0,
+                              )
+                            );
                           },
                           0,
                         )
-                      );
-                    }, 0)
-                  : 0}
-              </h2>
-              <div>Atletas sin matricula</div>
+                      : 0}
+                  </h2>
+                </div>
+              </div>
             </div>
           </div>
         </div>

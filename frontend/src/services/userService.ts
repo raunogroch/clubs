@@ -142,9 +142,13 @@ export const userService = {
 
   async getUnpaidByAssignment(): Promise<ApiResponse<any[]>> {
     try {
-      const response = await api.get('/users/athletes/unpaid/by-assignment');
+      const response = await api.get("/users/athletes/unpaid/by-assignment");
       const data = response.data?.data || response.data;
-      return { code: response.status, message: 'Unpaid counts obtained', data: Array.isArray(data) ? data : [] };
+      return {
+        code: response.status,
+        message: "Unpaid counts obtained",
+        data: Array.isArray(data) ? data : [],
+      };
     } catch (error: any) {
       return handleApiError(error);
     }
@@ -152,9 +156,13 @@ export const userService = {
 
   async getAthletesBreakdownByAssignment(): Promise<ApiResponse<any>> {
     try {
-      const response = await api.get('/users/athletes/breakdown/by-assignment');
+      const response = await api.get("/users/athletes/breakdown/by-assignment");
       const data = response.data?.data || response.data;
-      return { code: response.status, message: 'Athletes breakdown obtained', data };
+      return {
+        code: response.status,
+        message: "Athletes breakdown obtained",
+        data,
+      };
     } catch (error: any) {
       return handleApiError(error);
     }
