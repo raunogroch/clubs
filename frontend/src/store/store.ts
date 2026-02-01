@@ -2,6 +2,10 @@ import { configureStore } from "@reduxjs/toolkit";
 import messageReducer from "./messageSlice";
 import authReducer, { login } from "./authSlice";
 import usersReducer from "./usersSlice";
+import clubsReducer from "./clubsSlice";
+import groupsReducer from "./groupsSlice";
+import sportsReducer from "./sportsSlice";
+import assignmentsReducer from "./assignmentsSlice";
 import { tokenSessionMiddleware } from "./middleware/tokenSessionMiddleware";
 
 export const store = configureStore({
@@ -9,6 +13,10 @@ export const store = configureStore({
     message: messageReducer,
     auth: authReducer,
     users: usersReducer,
+    clubs: clubsReducer,
+    groups: groupsReducer,
+    sports: sportsReducer,
+    assignments: assignmentsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(tokenSessionMiddleware),

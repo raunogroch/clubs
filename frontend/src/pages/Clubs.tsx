@@ -13,44 +13,38 @@
 
 import { useState, useEffect } from "react";
 import toastr from "toastr";
-import { useSelector } from "react-redux";
-import type { RootState } from "../store/store";
+import { useSelector, useDispatch } from "react-redux";
+import type { RootState, AppDispatch } from "../store/store";
+import {
+  fetchAllClubs,
+  createClub,
+  updateClub,
+  deleteClub,
+} from "../store/clubsThunk";
+import { fetchMyAssignments } from "../store/assignmentsThunk";
+import { fetchAllSports } from "../store/sportsThunk";
+import { fetchGroupsByClub } from "../store/groupsThunk";
 
 import type { Club, CreateClubRequest } from "../services/clubs.service";
-import clubsService from "../services/clubs.service";
-import assignmentsService from "../services/assignments.service";
-import { sportService } from "../services/sportService";
-import groupsService from "../services/groups.service";
 import { NavHeader } from "../components";
 import { Groups } from "./Groups";
 
-interface Assignment {
-  _id: string;
-  module_name: string;
-  assigned_admins: string[];
-  assigned_by: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-interface Sport {
-  _id: string;
-  name: string;
-  active: boolean;
-}
-
 export const Clubs = ({ name }: { name?: string }) => {
+  const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.auth.user);
+  const { items: clubs, status: clubsStatus } = useSelector(
+    (state: RootState) => state.clubs,
+  );
+  const { items: assignments } = useSelector(
+    (state: RootState) => state.assignments,
+  );
+  const { items: sports } = useSelector((state: RootState) => state.sports);
+  const { items: groups } = useSelector((state: RootState) => state.groups);
 
-  // Estado
-  const [clubs, setClubs] = useState<Club[]>([]);
-  const [assignments, setAssignments] = useState<Assignment[]>([]);
-  const [sports, setSports] = useState<Sport[]>([]);
+  // Estado local
   const [clubMembers, setClubMembers] = useState<
     Record<string, { athletes: number; coaches: number }>
   >({});
-  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedClubForGroups, setSelectedClubForGroups] = useState<
@@ -66,55 +60,43 @@ export const Clubs = ({ name }: { name?: string }) => {
 
   // Cargar datos al montar
   useEffect(() => {
-    loadData();
-  }, []);
+    dispatch(fetchAllClubs());
+    dispatch(fetchMyAssignments());
+    dispatch(fetchAllSports());
+  }, [dispatch]);
 
-  // Cargar clubs, asignaciones y deportes
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const [clubsData, assignmentsData, sportsData] = await Promise.all([
-        clubsService.getAll(),
-        assignmentsService.getMyAssignments(),
-        sportService.getAll(),
-      ]);
-      setClubs(clubsData);
-      setAssignments(assignmentsData);
-      setSports(sportsData || []);
-
-      // Cargar miembros (athletes y coaches) de cada club
+  // Actualizar miembros cuando cambian los grupos
+  useEffect(() => {
+    if (clubs.length > 0 && groups.length > 0) {
       const membersData: Record<string, { athletes: number; coaches: number }> =
         {};
-      for (const club of clubsData) {
-        try {
-          const groups = await groupsService.getByClub(club._id);
-          const totalAthletes = groups.reduce(
-            (sum, g) =>
-              sum +
-              ((g as any).athletes_added?.length || g.athletes?.length || 0),
-            0,
-          );
-          const totalCoaches = groups.reduce(
-            (sum, g) => sum + (g.coaches?.length || 0),
-            0,
-          );
-          membersData[club._id] = {
-            athletes: totalAthletes,
-            coaches: totalCoaches,
-          };
-        } catch (error) {
-          console.error(`Error al cargar grupos del club ${club._id}:`, error);
-          membersData[club._id] = { athletes: 0, coaches: 0 };
-        }
+      for (const club of clubs) {
+        const clubGroups = groups.filter((g: any) => g.club_id === club._id);
+        const totalAthletes = clubGroups.reduce(
+          (sum, g: any) =>
+            sum +
+            ((g as any).athletes_added?.length || g.athletes?.length || 0),
+          0,
+        );
+        const totalCoaches = clubGroups.reduce(
+          (sum, g: any) => sum + (g.coaches?.length || 0),
+          0,
+        );
+        membersData[club._id] = {
+          athletes: totalAthletes,
+          coaches: totalCoaches,
+        };
       }
       setClubMembers(membersData);
-    } catch (error: any) {
-      console.error("Error al cargar datos:", error);
-      toastr.error(error.message || "Error al cargar los datos");
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [clubs, groups]);
+
+  // Cargar grupos cuando se selecciona un club
+  useEffect(() => {
+    if (selectedClubForGroups) {
+      dispatch(fetchGroupsByClub(selectedClubForGroups));
+    }
+  }, [selectedClubForGroups, dispatch]);
 
   // Obtener nombre del deporte por ID
   const getSportName = (sportId: string): string => {
@@ -175,30 +157,17 @@ export const Clubs = ({ name }: { name?: string }) => {
       return;
     }
 
-    try {
-      setLoading(true);
-
-      if (editingId) {
-        // Actualizar
-        const updated = await clubsService.update(editingId, {
-          location: formData.location,
-        });
-        setClubs(clubs.map((c) => (c._id === editingId ? updated : c)));
-        toastr.success("Club actualizado correctamente");
-      } else {
-        // Crear
-        const created = await clubsService.create(formData);
-        setClubs([...clubs, created]);
-        toastr.success("Club creado correctamente");
-      }
-
-      handleCloseModal();
-    } catch (error: any) {
-      console.error("Error al guardar club:", error);
-      toastr.error(error.message || "Error al guardar el club");
-    } finally {
-      setLoading(false);
+    if (editingId) {
+      // Actualizar
+      await dispatch(
+        updateClub({ id: editingId, club: { location: formData.location } }),
+      );
+    } else {
+      // Crear
+      await dispatch(createClub(formData));
     }
+
+    handleCloseModal();
   };
 
   // Eliminar club
@@ -207,17 +176,7 @@ export const Clubs = ({ name }: { name?: string }) => {
       return;
     }
 
-    try {
-      setLoading(true);
-      await clubsService.delete(clubId);
-      setClubs(clubs.filter((c) => c._id !== clubId));
-      toastr.success("Club eliminado correctamente");
-    } catch (error: any) {
-      console.error("Error al eliminar club:", error);
-      toastr.error(error.message || "Error al eliminar el club");
-    } finally {
-      setLoading(false);
-    }
+    await dispatch(deleteClub(clubId));
   };
 
   // Verificar si el usuario tiene assignment_id
@@ -269,14 +228,14 @@ export const Clubs = ({ name }: { name?: string }) => {
                     <button
                       className="btn btn-xs btn-primary"
                       onClick={handleOpenCreate}
-                      disabled={loading}
+                      disabled={clubsStatus === "loading"}
                     >
                       <i className="fa fa-plus"></i> Crear Club
                     </button>
                   </div>
                 </div>
                 <div className="ibox-content">
-                  {loading ? (
+                  {clubsStatus === "loading" ? (
                     <div className="text-center">
                       <p>Cargando clubs...</p>
                     </div>
@@ -346,7 +305,7 @@ export const Clubs = ({ name }: { name?: string }) => {
                               <td style={{ verticalAlign: "middle" }}>
                                 <button
                                   className="btn btn-primary btn-xs"
-                                  onClick={() => handleOpenEdit(club)}
+                                  onClick={() => handleOpenEdit(club as any)}
                                   title="Editar"
                                 >
                                   <i className="fa fa-edit"></i> Editar
@@ -438,7 +397,7 @@ export const Clubs = ({ name }: { name?: string }) => {
                   type="button"
                   className="btn btn-xs btn-primary"
                   onClick={handleSave}
-                  disabled={loading}
+                  disabled={clubsStatus === "loading"}
                 >
                   {editingId ? "Actualizar" : "Crear"}
                 </button>

@@ -12,14 +12,20 @@
 
 import { useState, useEffect } from "react";
 import toastr from "toastr";
+import { useSelector, useDispatch } from "react-redux";
+import type { RootState, AppDispatch } from "../../store/store";
+import {
+  fetchAllAssignments,
+  createAssignment,
+  updateAssignment,
+  deleteAssignment,
+} from "../../store/assignmentsThunk";
+import { fetchUsersByRole } from "../../store/usersThunk";
 
 import type {
-  Assignment,
   CreateAssignmentRequest,
   UpdateAssignmentRequest,
 } from "../../services/assignments.service";
-import assignmentsService from "../../services/assignments.service";
-import userService from "../../services/userService";
 import { NavHeader } from "../../components";
 
 interface User {
@@ -31,9 +37,11 @@ interface User {
 }
 
 const Assignments = () => {
-  const [assignments, setAssignments] = useState<Assignment[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch<AppDispatch>();
+  const { items: assignments, status: assignmentsStatus } = useSelector(
+    (state: RootState) => state.assignments,
+  );
+  const { items: users } = useSelector((state: RootState) => state.users);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [filteredAdmins, setFilteredAdmins] = useState<User[]>([]);
@@ -46,30 +54,13 @@ const Assignments = () => {
 
   // Cargar datos al montar
   useEffect(() => {
-    loadData();
-  }, []);
-
-  // Cargar asignaciones y usuarios
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const [assignmentsData, usersData] = await Promise.all([
-        assignmentsService.getAll(),
-        userService.getAdmins(),
-      ]);
-      setAssignments(assignmentsData);
-      setUsers(usersData.data || []);
-    } catch (error: any) {
-      console.error("Error al cargar datos:", error);
-      toastr.error(error.message || "Error al cargar los datos");
-    } finally {
-      setLoading(false);
-    }
-  };
+    dispatch(fetchAllAssignments());
+    dispatch(fetchUsersByRole("admin"));
+  }, [dispatch]);
 
   // Obtener nombre completo del usuario por ID
   const getUserName = (userId: string): string => {
-    const user = users.find((u) => u._id === userId);
+    const user = (users as User[]).find((u) => u._id === userId);
     if (!user) return "Desconocido";
 
     const fullName = [user.name, user.lastname].filter(Boolean).join(" ");
@@ -88,7 +79,7 @@ const Assignments = () => {
   };
 
   // Abrir modal para editar
-  const handleOpenEdit = (assignment: Assignment) => {
+  const handleOpenEdit = (assignment: any) => {
     setEditingId(assignment._id);
     setFormData({
       module_name: assignment.module_name,
@@ -158,32 +149,23 @@ const Assignments = () => {
       return;
     }
 
-    try {
-      setLoading(true);
-
-      if (editingId) {
-        const updateData: UpdateAssignmentRequest = {
-          module_name: formData.module_name,
-          assigned_admins: formData.assigned_admins,
-        };
-        await assignmentsService.update(editingId, updateData);
-        toastr.success("Asignación actualizada correctamente");
-      } else {
-        const createData: CreateAssignmentRequest = {
-          module_name: formData.module_name,
-          assigned_admins: formData.assigned_admins,
-        };
-        await assignmentsService.create(createData);
-        toastr.success("Asignación creada correctamente");
-      }
-
-      handleCloseModal();
-      loadData();
-    } catch (error: any) {
-      toastr.error(error.message || "Error al guardar la asignación");
-    } finally {
-      setLoading(false);
+    if (editingId) {
+      const updateData: UpdateAssignmentRequest = {
+        module_name: formData.module_name,
+        assigned_admins: formData.assigned_admins,
+      };
+      await dispatch(
+        updateAssignment({ id: editingId, assignment: updateData }),
+      );
+    } else {
+      const createData: CreateAssignmentRequest = {
+        module_name: formData.module_name,
+        assigned_admins: formData.assigned_admins,
+      };
+      await dispatch(createAssignment(createData));
     }
+
+    handleCloseModal();
   };
 
   // Eliminar asignación
@@ -194,19 +176,10 @@ const Assignments = () => {
       return;
     }
 
-    try {
-      setLoading(true);
-      await assignmentsService.delete(id);
-      toastr.success("Asignación eliminada correctamente");
-      loadData();
-    } catch (error: any) {
-      toastr.error(error.message || "Error al eliminar la asignación");
-    } finally {
-      setLoading(false);
-    }
+    await dispatch(deleteAssignment(id));
   };
 
-  if (loading && assignments.length === 0) {
+  if (assignmentsStatus === "loading" && assignments.length === 0) {
     return (
       <div className="wrapper wrapper-content">
         <div className="text-center p-5">

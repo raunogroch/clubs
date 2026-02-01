@@ -13,33 +13,31 @@
 
 import { useState, useEffect } from "react";
 import toastr from "toastr";
+import { useSelector, useDispatch } from "react-redux";
+import type { RootState, AppDispatch } from "../store/store";
+import {
+  fetchAllSports,
+  createSport,
+  updateSport,
+  deleteSport,
+  restoreSport,
+} from "../store/sportsThunk";
 import { NavHeader } from "../components";
-import { sportService, type Sport } from "../services/sportService";
+import type { Sport } from "../services/sportService";
 
 export const Sports = ({ name }: { name?: string }) => {
-  const [sports, setSports] = useState<Sport[]>([]);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch<AppDispatch>();
+  const { items: sports, status: sportsStatus } = useSelector(
+    (state: RootState) => state.sports,
+  );
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({ name: "" });
 
   // Cargar datos al montar
   useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const data = await sportService.getAll();
-      setSports(data);
-    } catch (error: any) {
-      console.error("Error al cargar deportes:", error);
-      toastr.error(error.message || "Error al cargar los deportes");
-    } finally {
-      setLoading(false);
-    }
-  };
+    dispatch(fetchAllSports());
+  }, [dispatch]);
 
   const handleOpenCreate = () => {
     setEditingId(null);
@@ -75,32 +73,17 @@ export const Sports = ({ name }: { name?: string }) => {
       return;
     }
 
-    try {
-      setLoading(true);
-
-      if (editingId) {
-        // Actualizar
-        const updated = await sportService.update(editingId, {
-          name: formData.name,
-        });
-        setSports(sports.map((s) => (s._id === editingId ? updated : s)));
-        toastr.success("Deporte actualizado correctamente");
-      } else {
-        // Crear
-        const created = await sportService.create({
-          name: formData.name,
-        });
-        setSports([...sports, created]);
-        toastr.success("Deporte creado correctamente");
-      }
-
-      handleCloseModal();
-    } catch (error: any) {
-      console.error("Error al guardar deporte:", error);
-      toastr.error(error.message || "Error al guardar el deporte");
-    } finally {
-      setLoading(false);
+    if (editingId) {
+      // Actualizar
+      await dispatch(
+        updateSport({ id: editingId, sport: { name: formData.name } }),
+      );
+    } else {
+      // Crear
+      await dispatch(createSport({ name: formData.name }));
     }
+
+    handleCloseModal();
   };
 
   const handleDelete = async (sportId: string) => {
@@ -108,31 +91,11 @@ export const Sports = ({ name }: { name?: string }) => {
       return;
     }
 
-    try {
-      setLoading(true);
-      await sportService.delete(sportId);
-      setSports(sports.filter((s) => s._id !== sportId));
-      toastr.success("Deporte eliminado correctamente");
-    } catch (error: any) {
-      console.error("Error al eliminar deporte:", error);
-      toastr.error(error.message || "Error al eliminar el deporte");
-    } finally {
-      setLoading(false);
-    }
+    await dispatch(deleteSport(sportId));
   };
 
   const handleRestore = async (sportId: string) => {
-    try {
-      setLoading(true);
-      const restored = await sportService.restore(sportId);
-      setSports(sports.map((s) => (s._id === sportId ? restored : s)));
-      toastr.success("Deporte reactivado correctamente");
-    } catch (error: any) {
-      console.error("Error al reactivar deporte:", error);
-      toastr.error(error.message || "Error al reactivar el deporte");
-    } finally {
-      setLoading(false);
-    }
+    await dispatch(restoreSport(sportId));
   };
 
   return (
@@ -151,7 +114,7 @@ export const Sports = ({ name }: { name?: string }) => {
                 <h5>Gestión de Deportes</h5>
               </div>
               <div className="ibox-content">
-                {loading ? (
+                {sportsStatus === "loading" ? (
                   <div className="text-center">
                     <p>Cargando deportes...</p>
                   </div>
@@ -192,7 +155,7 @@ export const Sports = ({ name }: { name?: string }) => {
                             <td>
                               <button
                                 className="btn btn-primary btn-xs"
-                                onClick={() => handleOpenEdit(sport)}
+                                onClick={() => handleOpenEdit(sport as any)}
                                 title="Editar"
                               >
                                 <i className="fa fa-edit"></i> Editar
@@ -272,7 +235,7 @@ export const Sports = ({ name }: { name?: string }) => {
                   type="button"
                   className="btn btn-xs btn-primary"
                   onClick={handleSave}
-                  disabled={loading}
+                  disabled={sportsStatus === "loading"}
                 >
                   {editingId ? "Actualizar" : "Crear"}
                 </button>
