@@ -85,6 +85,10 @@ const DashboardAssignments = ({ user }: { user: any }) => {
   const [editingDateId, setEditingDateId] = useState<string | null>(null);
   const [editingDateValue, setEditingDateValue] = useState<string>("");
   const [savingDateId, setSavingDateId] = useState<string | null>(null);
+  const [showPayModal, setShowPayModal] = useState(false);
+  const [selectedRegistration, setSelectedRegistration] = useState<any>(null);
+  const [paymentAmount, setPaymentAmount] = useState<string>("");
+  const [payingId, setPayingId] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -206,6 +210,53 @@ const DashboardAssignments = ({ user }: { user: any }) => {
   const handleCancelEdit = () => {
     setEditingDateId(null);
     setEditingDateValue("");
+  };
+
+  const handleOpenPayModal = (reg: any) => {
+    setSelectedRegistration(reg);
+    setPaymentAmount("");
+    setShowPayModal(true);
+  };
+
+  const handleProcessPayment = async () => {
+    if (!selectedRegistration || !paymentAmount) {
+      alert("Por favor ingresa un monto");
+      return;
+    }
+
+    setPayingId(selectedRegistration._id);
+    try {
+      const registrationService = (
+        await import("../services/registrationsService.ts")
+      ).registrationsService;
+
+      // Obtener la fecha y hora actual en formato ISO
+      const now = new Date();
+
+      const res = await registrationService.update(
+        selectedRegistration._id,
+        {
+          registration_pay: now.toISOString(),
+          registration_amount: parseFloat(paymentAmount),
+        },
+      );
+
+      if (res.code === 200) {
+        // Actualizar la lista local
+        setUnpaidAthletes(
+          unpaidAthletes.filter((r: any) => r._id !== selectedRegistration._id),
+        );
+        setShowPayModal(false);
+        setSelectedRegistration(null);
+        setPaymentAmount("");
+        alert("Pago registrado exitosamente");
+      }
+    } catch (e) {
+      console.error("Error al procesar el pago:", e);
+      alert("Error al procesar el pago");
+    } finally {
+      setPayingId(null);
+    }
   };
 
   if (loading) {
@@ -386,7 +437,10 @@ const DashboardAssignments = ({ user }: { user: any }) => {
                             </td>
                             <td className="text-center">
                               {reg.registration_pay === null && (
-                                <button className="btn btn-sm btn-primary">
+                                <button
+                                  className="btn btn-sm btn-primary"
+                                  onClick={() => handleOpenPayModal(reg)}
+                                >
                                   Pagar matrícula
                                 </button>
                               )}
@@ -405,6 +459,97 @@ const DashboardAssignments = ({ user }: { user: any }) => {
                   onClick={() => setShowUnpaidModal(false)}
                 >
                   Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Pago de Matrícula */}
+      {showPayModal && selectedRegistration && (
+        <div
+          className="modal"
+          style={{ display: "block", backgroundColor: "rgba(0,0,0,.5)" }}
+          onClick={() => setShowPayModal(false)}
+        >
+          <div
+            className="modal-dialog"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-content">
+              <div className="modal-header">
+                <h4 className="modal-title">Registrar Pago de Matrícula</h4>
+                <button
+                  type="button"
+                  className="close"
+                  onClick={() => setShowPayModal(false)}
+                >
+                  &times;
+                </button>
+              </div>
+              <div className="modal-body">
+                <div style={{ marginBottom: "15px" }}>
+                  <p>
+                    <strong>Atleta:</strong> {selectedRegistration.athlete_id?.name}{" "}
+                    {selectedRegistration.athlete_id?.lastname}
+                  </p>
+                  <p>
+                    <strong>Club/Grupo:</strong> {selectedRegistration.group_id?.name}
+                  </p>
+                </div>
+                <div style={{ marginBottom: "15px" }}>
+                  <label style={{ display: "block", marginBottom: "5px" }}>
+                    <strong>Monto a Pagar:</strong>
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="Ingresa el monto"
+                    value={paymentAmount}
+                    onChange={(e) => setPaymentAmount(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "8px",
+                      borderRadius: "3px",
+                      border: "1px solid #ccc",
+                      fontSize: "14px",
+                    }}
+                    min="0"
+                    step="0.01"
+                    disabled={payingId === selectedRegistration._id}
+                  />
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-default"
+                  onClick={() => setShowPayModal(false)}
+                  disabled={payingId === selectedRegistration._id}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleProcessPayment}
+                  disabled={payingId === selectedRegistration._id}
+                >
+                  {payingId === selectedRegistration._id ? (
+                    <>
+                      <span
+                        className="spinner-border spinner-border-sm"
+                        role="status"
+                        aria-hidden="true"
+                        style={{ marginRight: "5px" }}
+                      ></span>
+                      Procesando...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fa fa-check"></i> Pagar
+                    </>
+                  )}
                 </button>
               </div>
             </div>
