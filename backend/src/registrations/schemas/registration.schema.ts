@@ -18,8 +18,8 @@ export class Registration extends Document {
   @Prop({ type: Date, required: true })
   registration_date: Date;
 
-  @Prop({ type: Boolean, default: false })
-  registration_pay?: boolean;
+  @Prop({ type: Date, default: null })
+  registration_pay?: Date | null;
 
   @Prop({ type: [Types.ObjectId], ref: 'Payment', default: [] })
   monthly_payments?: Types.ObjectId[];

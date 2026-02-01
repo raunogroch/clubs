@@ -40,7 +40,7 @@ export class RegistrationsController {
     @Query('registration_pay') registrationPay?: string,
   ) {
     if (registrationPay === 'false') {
-      // Retornar solo sin pagar
+      // Retornar solo sin pagar (donde registration_pay es null)
       const registrations =
         await this.registrationsService.findByAssignment(assignmentId);
       return registrations.filter((reg) => !reg.registration_pay);

@@ -213,7 +213,7 @@ export class GroupsService {
     // Cascade delete: eliminar registrations asociados y quitar referencia en club
     // 1) Eliminar registrations del grupo
     try {
-        if (this.registrationsService) {
+      if (this.registrationsService) {
         await this.registrationsService.deleteByGroup(groupId);
       }
     } catch (e) {
@@ -289,7 +289,7 @@ export class GroupsService {
         group_id: groupId,
         athlete_id: athleteId,
         registration_date: new Date().toISOString(),
-        registration_pay: false,
+        registration_pay: null,
         monthly_payments: [],
         // Infer assignment_id from group if available
         assignment_id:

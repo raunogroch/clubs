@@ -632,7 +632,7 @@ export class UsersService {
 
   /**
    * Devuelve, por cada assignment del admin, la cantidad de atletas (únicos)
-   * dentro del assignment cuyo `registration_pay` es `false`.
+   * dentro del assignment cuyo `registration_pay` es `null` (no pagado).
    * Resultado: [{ assignment_id, assignment_name, unpaidCount }]
    */
   async getUnpaidAthletesCountByAssignment(
@@ -685,7 +685,7 @@ export class UsersService {
             )
           : [];
 
-        // Contar atletas únicos con registration_pay === false y total registrados
+        // Contar atletas únicos con registration_pay === null (no pagado) y total registrados
         const unpaidAthletes = new Set<string>();
         const allAthletes = new Set<string>();
         for (const reg of registrations) {
@@ -708,7 +708,7 @@ export class UsersService {
 
           if (athleteId) {
             allAthletes.add(athleteId);
-            const isUnpaid = regObj.registration_pay !== true;
+            const isUnpaid = !regObj.registration_pay; // unpaid if registration_pay is null
             if (isUnpaid) unpaidAthletes.add(athleteId);
           }
         }
@@ -807,8 +807,8 @@ export class UsersService {
             }
             if (athleteId) {
               athleteIds.add(athleteId);
-              // Contar como unpaid si registration_pay no es true
-              const isUnpaid = (reg as any).registration_pay !== true;
+              // Contar como unpaid si registration_pay es null
+              const isUnpaid = !(reg as any).registration_pay;
               if (isUnpaid) {
                 unpaidAthleteIds.add(athleteId);
               }
@@ -1108,9 +1108,8 @@ export class UsersService {
       }
 
       // Hashear la nueva contraseña
-      const hashedPassword = await this.userPasswordService.hashPassword(
-        newPassword,
-      );
+      const hashedPassword =
+        await this.userPasswordService.hashPassword(newPassword);
 
       // Actualizar la contraseña
       await this.userRepository.updateById(userId, {

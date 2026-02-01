@@ -180,7 +180,7 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
             registration.athlete_id?._id || registration.athlete_id;
           if (athleteId) {
             regInfo[group._id][athleteId] = {
-              registration_pay: registration.registration_pay ?? true,
+              registration_pay: registration.registration_pay || null,
             };
           }
         });

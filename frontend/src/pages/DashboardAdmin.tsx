@@ -82,6 +82,9 @@ const DashboardAssignments = ({ user }: { user: any }) => {
   const [showUnpaidModal, setShowUnpaidModal] = useState(false);
   const [unpaidAthletes, setUnpaidAthletes] = useState<Array<any>>([]);
   const [unpaidLoading, setUnpaidLoading] = useState(false);
+  const [editingDateId, setEditingDateId] = useState<string | null>(null);
+  const [editingDateValue, setEditingDateValue] = useState<string>("");
+  const [savingDateId, setSavingDateId] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -144,6 +147,65 @@ const DashboardAssignments = ({ user }: { user: any }) => {
     } finally {
       setUnpaidLoading(false);
     }
+  };
+
+  const formatDateLocal = (dateString: string): string => {
+    if (!dateString) return "-";
+
+    // Parsing UTC date string para obtener componentes UTC
+    const date = new Date(dateString);
+
+    // Obtener componentes en UTC (no local)
+    const day = String(date.getUTCDate()).padStart(2, "0");
+    const month = date.toLocaleDateString("es-ES", { month: "long" });
+    const year = date.getUTCFullYear();
+
+    return `${day}/${month}/${year}`;
+  };
+
+  const handleEditDate = (reg: any) => {
+    const date = new Date(reg.registration_date);
+    // Usar UTC para obtener la fecha correcta
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(date.getUTCDate()).padStart(2, "0");
+    const localDate = `${year}-${month}-${day}`;
+    setEditingDateId(reg._id);
+    setEditingDateValue(localDate);
+  };
+
+  const handleSaveDate = async (regId: string) => {
+    setSavingDateId(regId);
+    try {
+      const registrationService = (
+        await import("../services/registrationsService.ts")
+      ).registrationsService;
+
+      // Enviar la fecha como string YYYY-MM-DD para evitar problemas de zona horaria
+      const res = await registrationService.update(regId, {
+        registration_date: editingDateValue,
+      });
+
+      if (res.code === 200) {
+        // Actualizar la lista local
+        setUnpaidAthletes(
+          unpaidAthletes.map((r: any) =>
+            r._id === regId ? { ...r, registration_date: editingDateValue } : r,
+          ),
+        );
+        setEditingDateId(null);
+        setEditingDateValue("");
+      }
+    } catch (e) {
+      console.error("Error al guardar la fecha:", e);
+    } finally {
+      setSavingDateId(null);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingDateId(null);
+    setEditingDateValue("");
   };
 
   if (loading) {
@@ -213,7 +275,7 @@ const DashboardAssignments = ({ user }: { user: any }) => {
           >
             <div className="modal-content">
               <div className="modal-header">
-                <h4 className="modal-title">Usuarios registrados</h4>
+                <h4 className="modal-title">Atletas registrados</h4>
                 <button
                   type="button"
                   className="close"
@@ -241,7 +303,10 @@ const DashboardAssignments = ({ user }: { user: any }) => {
                           <th>Nombre</th>
                           <th>Apellido</th>
                           <th>Club</th>
-                          <th>Estado de pago</th>
+                          <th className="text-center">
+                            Inscripción del atleta
+                          </th>
+                          <th className="text-center">Estado de pago</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -250,12 +315,77 @@ const DashboardAssignments = ({ user }: { user: any }) => {
                             <td>{reg.athlete_id?.name || "-"}</td>
                             <td>{reg.athlete_id?.lastname || "-"}</td>
                             <td>{reg.group_id?.name || "-"}</td>
-                            <td>
-                              {reg.registration_pay ? (
-                                <span className="badge badge-success">
-                                  Pagado
-                                </span>
+                            <td className="text-center">
+                              {editingDateId === reg._id ? (
+                                <div style={{ display: "flex", gap: "5px" }}>
+                                  <input
+                                    type="date"
+                                    value={editingDateValue}
+                                    onChange={(e) =>
+                                      setEditingDateValue(e.target.value)
+                                    }
+                                    style={{
+                                      padding: "5px",
+                                      borderRadius: "3px",
+                                      border: "1px solid #ccc",
+                                      flex: 1,
+                                    }}
+                                  />
+                                  <button
+                                    className="btn btn-xs btn-success"
+                                    onClick={() => handleSaveDate(reg._id)}
+                                    disabled={savingDateId === reg._id}
+                                  >
+                                    {savingDateId === reg._id ? (
+                                      <>
+                                        <span
+                                          className="spinner-border spinner-border-sm"
+                                          role="status"
+                                          aria-hidden="true"
+                                          style={{ marginRight: "5px" }}
+                                        ></span>
+                                        Guardando...
+                                      </>
+                                    ) : (
+                                      <>
+                                        <i className="fa fa-check"></i> Guardar
+                                      </>
+                                    )}
+                                  </button>
+                                  <button
+                                    className="btn btn-xs btn-secondary"
+                                    onClick={handleCancelEdit}
+                                  >
+                                    <i className="fa fa-times"></i> Cancelar
+                                  </button>
+                                </div>
                               ) : (
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                  }}
+                                >
+                                  <span>
+                                    {reg.registration_date
+                                      ? formatDateLocal(reg.registration_date)
+                                      : "-"}
+                                  </span>
+                                  {reg.registration_pay === null && (
+                                    <button
+                                      className="btn btn-xs btn-warning"
+                                      onClick={() => handleEditDate(reg)}
+                                      title="Editar fecha de inscripción"
+                                    >
+                                      <i className="fa fa-edit"></i>
+                                    </button>
+                                  )}
+                                </div>
+                              )}
+                            </td>
+                            <td className="text-center">
+                              {reg.registration_pay === null && (
                                 <button className="btn btn-sm btn-primary">
                                   Pagar matrícula
                                 </button>

@@ -28,7 +28,9 @@ export class RegistrationsService {
       registration_date: createDto.registration_date
         ? new Date(createDto.registration_date)
         : new Date(),
-      registration_pay: !!createDto.registration_pay,
+      registration_pay: createDto.registration_pay
+        ? new Date(createDto.registration_pay)
+        : null,
       monthly_payments: createDto.monthly_payments || [],
       assignment_id: createDto.assignment_id,
     } as any);
@@ -65,7 +67,49 @@ export class RegistrationsService {
   }
 
   async update(id: string, payload: UpdateRegistrationDto) {
-    return this.registrationsRepository.update(id, payload as any);
+    // Get current registration to validate
+    const registration = await this.registrationsRepository.findById(id);
+    if (!registration) {
+      throw new NotFoundException(`Registro con ID ${id} no encontrado`);
+    }
+
+    // If trying to update registration_date and registration_pay is already set, throw error
+    if (payload.registration_date && registration.registration_pay) {
+      throw new Error(
+        'No se puede modificar el fecha de registro cuando el pago ya ha sido registrado',
+      );
+    }
+
+    // If updating registration_pay, set it to current date
+    const updatePayload: any = { ...payload };
+    if (
+      payload.registration_pay !== undefined &&
+      payload.registration_pay !== null
+    ) {
+      updatePayload.registration_pay = new Date();
+    }
+
+    // Si se actualiza registration_date, procesar correctamente evitando problemas de zona horaria
+    if (
+      payload.registration_date &&
+      typeof payload.registration_date === 'string'
+    ) {
+      // Si viene en formato YYYY-MM-DD, crear fecha a las 12:00 UTC
+      if (payload.registration_date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        const [year, month, day] = payload.registration_date
+          .split('-')
+          .map(Number);
+        // Crear fecha a las 12:00 UTC (mediodía) para evitar offset de zona horaria
+        updatePayload.registration_date = new Date(
+          Date.UTC(year, month - 1, day, 12, 0, 0),
+        );
+      } else {
+        // Si es ISO string, convertir a Date
+        updatePayload.registration_date = new Date(payload.registration_date);
+      }
+    }
+
+    return this.registrationsRepository.update(id, updatePayload);
   }
 
   async delete(id: string) {

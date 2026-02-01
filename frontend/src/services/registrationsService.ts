@@ -71,7 +71,7 @@ export const registrationsService = {
    */
   async update(id: string, data: any): Promise<ApiResponse<any>> {
     try {
-      const response = await api.patch(`/registrations/${id}`, data);
+      const response = await api.put(`/registrations/${id}`, data);
       const resData = response.data?.data || response.data;
       return {
         code: response.status,
