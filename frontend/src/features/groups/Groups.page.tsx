@@ -225,7 +225,6 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
         // Actualizar grupo existente
         const updated = await groupsService.update(groupForm.editingId, {
           name: groupForm.formData.name,
-          description: groupForm.formData.description,
         });
         setGroups(
           groups.map((g) => (g._id === groupForm.editingId ? updated : g)),

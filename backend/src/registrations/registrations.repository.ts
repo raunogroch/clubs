@@ -11,13 +11,24 @@ export class RegistrationsRepository {
   ) {}
 
   async create(data: Partial<Registration>): Promise<Registration> {
-    const reg = new this.registrationModel({
+    const payload: any = {
       ...data,
       group_id: new Types.ObjectId((data as any).group_id),
       athlete_id: new Types.ObjectId((data as any).athlete_id),
       monthly_payments: (data as any).monthly_payments || [],
-    });
+    };
+    if ((data as any).assignment_id) {
+      payload.assignment_id = new Types.ObjectId((data as any).assignment_id);
+    }
+    const reg = new this.registrationModel(payload);
     return reg.save();
+  }
+
+  async deleteByGroup(groupId: string): Promise<number> {
+    const res = await this.registrationModel.deleteMany({
+      group_id: new Types.ObjectId(groupId),
+    });
+    return res.deletedCount || 0;
   }
 
   async findById(id: string): Promise<Registration | null> {

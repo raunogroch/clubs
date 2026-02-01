@@ -61,9 +61,9 @@ export class ClubsService {
     return {
       _id: club._id,
       sport_id: club.sport_id,
-      description: club.description,
       location: club.location,
       assignment_id: club.assignment_id,
+      groups: club.groups || [],
       created_by: club.created_by,
       createdAt: club.createdAt,
       updatedAt: club.updatedAt,

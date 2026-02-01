@@ -5,7 +5,7 @@
 export class ClubResponseDto {
   _id: string;
   name: string;
-  description?: string;
+  groups?: string[];
   location?: string;
   assignment_id: string;
   created_by: string;

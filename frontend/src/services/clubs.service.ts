@@ -27,14 +27,12 @@ export interface Club {
 
 export interface CreateClubRequest {
   sport_id: string;
-  description?: string;
   location?: string;
   assignment_id: string;
 }
 
 export interface UpdateClubRequest {
   sport_id?: string;
-  description?: string;
   location?: string;
 }
 

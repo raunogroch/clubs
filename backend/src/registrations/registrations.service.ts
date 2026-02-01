@@ -30,6 +30,7 @@ export class RegistrationsService {
         : new Date(),
       registration_pay: !!createDto.registration_pay,
       monthly_payments: createDto.monthly_payments || [],
+      assignment_id: createDto.assignment_id,
     } as any);
   }
 
@@ -58,5 +59,9 @@ export class RegistrationsService {
 
   async delete(id: string) {
     return this.registrationsRepository.delete(id);
+  }
+
+  async deleteByGroup(groupId: string) {
+    return this.registrationsRepository.deleteByGroup(groupId);
   }
 }

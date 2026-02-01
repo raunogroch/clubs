@@ -22,8 +22,7 @@ export class Club extends Document {
   /**
    * Descripción del club
    */
-  @Prop()
-  description?: string;
+  // description removed per request
 
   /**
    * Ubicación/lugar del club
@@ -41,6 +40,16 @@ export class Club extends Document {
     required: true,
   })
   assignment_id: Types.ObjectId;
+
+  /**
+   * Array de IDs de grupos que pertenecen al club
+   */
+  @Prop({
+    type: [Types.ObjectId],
+    ref: 'Group',
+    default: [],
+  })
+  groups?: Types.ObjectId[];
 
   /**
    * ID del administrador que creó el club

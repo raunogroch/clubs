@@ -18,11 +18,7 @@ export class CreateGroupDto {
   name: string;
 
   /**
-   * Descripción del grupo (opcional)
-   */
-  @IsOptional()
-  @IsString()
-  description?: string;
+    * (description removed)
 
   /**
    * ID del club al que pertenece
@@ -30,6 +26,13 @@ export class CreateGroupDto {
    */
   @IsMongoId()
   club_id: string;
+
+  /**
+   * Assignment al que pertenece el grupo (opcional - se puede inferir del club)
+   */
+  @IsOptional()
+  @IsMongoId()
+  assignment_id?: string;
 
   /**
    * Precio/Mensualidad del grupo (opcional)

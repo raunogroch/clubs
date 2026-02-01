@@ -28,8 +28,7 @@ export class Group extends Document {
   /**
    * Descripción del grupo
    */
-  @Prop()
-  description?: string;
+  // description removed per request
 
   /**
    * ID del club al que pertenece este grupo
@@ -41,6 +40,15 @@ export class Group extends Document {
     required: true,
   })
   club_id: Types.ObjectId;
+
+  /**
+   * ID de la asignación a la que pertenece el grupo
+   */
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'Assignment',
+  })
+  assignment_id?: Types.ObjectId;
 
   /**
    * ID del administrador que creó el grupo
@@ -122,3 +130,4 @@ export const GroupSchema = SchemaFactory.createForClass(Group);
 GroupSchema.index({ club_id: 1, name: 1 }, { unique: true });
 GroupSchema.index({ club_id: 1 });
 GroupSchema.index({ created_by: 1 });
+GroupSchema.index({ assignment_id: 1 });

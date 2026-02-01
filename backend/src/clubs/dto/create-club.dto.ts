@@ -2,7 +2,7 @@
  * DTO para crear un club
  */
 
-import { IsString, IsOptional, IsMongoId } from 'class-validator';
+import { IsString, IsOptional, IsMongoId, IsArray } from 'class-validator';
 
 export class CreateClubDto {
   /**
@@ -11,13 +11,6 @@ export class CreateClubDto {
    */
   @IsMongoId()
   sport_id: string;
-
-  /**
-   * Descripción del club (opcional)
-   */
-  @IsOptional()
-  @IsString()
-  description?: string;
 
   /**
    * Ubicación del club (opcional)
@@ -32,4 +25,12 @@ export class CreateClubDto {
    */
   @IsMongoId()
   assignment_id: string;
+
+  /**
+   * Lista opcional de grupos (IDs) que pertenecen al club
+   */
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  groups?: string[];
 }

@@ -12,12 +12,6 @@ export class UpdateGroupDto {
   @IsString()
   name?: string;
 
-  /**
-   * Descripción del grupo (opcional)
-   */
-  @IsOptional()
-  @IsString()
-  description?: string;
 
   /**
    * Precio/Mensualidad del grupo (opcional)

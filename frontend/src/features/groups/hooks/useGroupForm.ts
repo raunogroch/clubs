@@ -12,7 +12,6 @@ export function useGroupForm(clubId: string) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<GroupFormState>({
     name: "",
-    description: "",
     club_id: clubId,
     monthly_fee: undefined,
   });
@@ -21,7 +20,6 @@ export function useGroupForm(clubId: string) {
     setEditingId(null);
     setFormData({
       name: "",
-      description: "",
       club_id: clubId,
       monthly_fee: undefined,
     });
@@ -36,7 +34,8 @@ export function useGroupForm(clubId: string) {
       setEditingId(group._id);
       setFormData({
         name: group.name,
-        description: group.description || "",
+        club_id: clubId,
+        monthly_fee: group.monthly_fee,
         club_id: clubId,
         monthly_fee: group.monthly_fee,
       });

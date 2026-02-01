@@ -6,6 +6,12 @@ export class Registration extends Document {
   @Prop({ type: Types.ObjectId, ref: 'Group', required: true })
   group_id: Types.ObjectId;
 
+  /**
+   * Assignment al que pertenece esta inscripción
+   */
+  @Prop({ type: Types.ObjectId, ref: 'Assignment' })
+  assignment_id?: Types.ObjectId;
+
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   athlete_id: Types.ObjectId;
 
@@ -29,3 +35,4 @@ export const RegistrationSchema = SchemaFactory.createForClass(Registration);
 
 RegistrationSchema.index({ group_id: 1 });
 RegistrationSchema.index({ athlete_id: 1 });
+RegistrationSchema.index({ assignment_id: 1 });

@@ -40,13 +40,11 @@ export interface Group {
 
 export interface CreateGroupRequest {
   name: string;
-  description?: string;
   club_id: string;
 }
 
 export interface UpdateGroupRequest {
   name?: string;
-  description?: string;
 }
 
 /**

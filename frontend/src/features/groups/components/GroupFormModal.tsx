@@ -70,15 +70,7 @@ export const GroupFormModal: React.FC<GroupFormModalProps> = ({
             </div>
 
             <div className="form-group">
-              <label htmlFor="group-description">Descripción</label>
-              <textarea
-                id="group-description"
-                className="form-control"
-                value={formData.description}
-                onChange={(e) => onFieldChange("description", e.target.value)}
-                placeholder="Ej: Descripción del grupo"
-                rows={3}
-              />
+              {/* description removed */}
             </div>
 
             <div className="form-group">

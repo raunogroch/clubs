@@ -78,8 +78,30 @@ export class GroupsService {
     // Verificar acceso al club
     await this.verifyClubAccess(createGroupDto.club_id, userId);
 
+    // Infer assignment_id from club (if not provided)
+    const club = await this.clubRepository.findById(createGroupDto.club_id);
+    if (club && !createGroupDto.assignment_id) {
+      (createGroupDto as any).assignment_id =
+        typeof club.assignment_id === 'object' && club.assignment_id !== null
+          ? (club.assignment_id as any)._id?.toString?.() ||
+            (club.assignment_id as any)?.toString?.()
+          : (club.assignment_id as any)?.toString?.();
+    }
+
     // Crear el grupo
-    return this.groupRepository.create(createGroupDto, userId);
+    const created = await this.groupRepository.create(createGroupDto, userId);
+
+    // Añadir referencia del grupo al club
+    try {
+      await this.clubRepository.addGroupToClub(
+        createGroupDto.club_id,
+        (created._id as any).toString(),
+      );
+    } catch (e) {
+      console.error('No se pudo agregar groupId al club.groups:', e);
+    }
+
+    return created;
   }
 
   /**
@@ -188,6 +210,29 @@ export class GroupsService {
     // Verificar acceso al club
     await this.verifyClubAccess(clubId, userId);
 
+    // Cascade delete: eliminar registrations asociados y quitar referencia en club
+    // 1) Eliminar registrations del grupo
+    try {
+      if (this.registrationsService) {
+        await this.registrationsService.deleteByGroup(groupId);
+        console.log('Registrations asociados al grupo eliminados:', groupId);
+      }
+    } catch (e) {
+      console.error('Error al eliminar registrations del grupo:', e);
+    }
+
+    // 2) Remover el groupId del club.groups
+    try {
+      const clubIdStr =
+        typeof group.club_id === 'object' && group.club_id !== null
+          ? (group.club_id as any)._id?.toString?.() || String(group.club_id)
+          : String(group.club_id);
+      await this.clubRepository.removeGroupFromClub(clubIdStr, groupId);
+    } catch (e) {
+      console.error('Error al remover groupId del club:', e);
+    }
+
+    // 3) Eliminar el grupo
     const deleted = await this.groupRepository.delete(groupId);
     if (!deleted) {
       throw new NotFoundException(`Grupo con ID ${groupId} no encontrado`);
@@ -247,6 +292,12 @@ export class GroupsService {
         registration_date: new Date().toISOString(),
         registration_pay: false,
         monthly_payments: [],
+        // Infer assignment_id from group if available
+        assignment_id:
+          typeof group.assignment_id === 'object' && group.assignment_id !== null
+            ? (group.assignment_id as any)._id?.toString?.() ||
+              (group.assignment_id as any)?.toString?.()
+            : (group.assignment_id as any)?.toString?.(),
       });
 
       // Agregar el id del registro al grupo (athletes_added)

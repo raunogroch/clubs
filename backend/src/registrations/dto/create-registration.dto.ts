@@ -4,4 +4,5 @@ export class CreateRegistrationDto {
   registration_date?: string; // ISO date string
   registration_pay?: boolean;
   monthly_payments?: string[];
+  assignment_id?: string;
 }

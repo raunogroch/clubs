@@ -28,6 +28,26 @@ export class ClubRepository {
   }
 
   /**
+   * Añadir un grupo al campo `groups` del club
+   */
+  async addGroupToClub(clubId: string, groupId: string): Promise<void> {
+    await this.clubModel.updateOne(
+      { _id: new Types.ObjectId(clubId) },
+      { $addToSet: { groups: new Types.ObjectId(groupId) } },
+    );
+  }
+
+  /**
+   * Remover un grupo del campo `groups` del club
+   */
+  async removeGroupFromClub(clubId: string, groupId: string): Promise<void> {
+    await this.clubModel.updateOne(
+      { _id: new Types.ObjectId(clubId) },
+      { $pull: { groups: new Types.ObjectId(groupId) } },
+    );
+  }
+
+  /**
    * Obtener todos los clubs de una asignación
    */
   async findByAssignment(assignmentId: string): Promise<Club[]> {

@@ -57,7 +57,6 @@ export interface Schedule {
 export interface Group {
   _id: string;
   name: string;
-  description?: string;
   club_id: string;
   monthly_fee?: number;
   created_by: string;
@@ -80,7 +79,6 @@ export interface Group {
  */
 export interface CreateGroupRequest {
   name: string;
-  description?: string;
   club_id: string;
   monthly_fee?: number;
 }
@@ -90,7 +88,6 @@ export interface CreateGroupRequest {
  */
 export interface UpdateGroupRequest {
   name?: string;
-  description?: string;
   monthly_fee?: number;
 }
 
@@ -99,7 +96,6 @@ export interface UpdateGroupRequest {
  */
 export interface GroupFormState {
   name: string;
-  description: string;
   club_id: string;
   monthly_fee?: number;
 }

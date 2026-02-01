@@ -57,12 +57,7 @@ export const GroupCard: React.FC<GroupCardProps> = ({
               </h4>
             </button>
 
-            {/* Descripción */}
-            <div>
-              <small className="text-muted">
-                {group.description || "Sin descripción"}
-              </small>
-            </div>
+            {/* description removed */}
 
             {/* Precio mensual */}
             {group.monthly_fee !== undefined && group.monthly_fee > 0 && (

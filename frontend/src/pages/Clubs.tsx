@@ -60,7 +60,6 @@ export const Clubs = ({ name }: { name?: string }) => {
   // Formulario
   const [formData, setFormData] = useState<CreateClubRequest>({
     sport_id: "",
-    description: "",
     location: "",
     assignment_id: "",
   });
@@ -128,7 +127,6 @@ export const Clubs = ({ name }: { name?: string }) => {
     setEditingId(null);
     setFormData({
       sport_id: "",
-      description: "",
       location: "",
       assignment_id: assignments[0]?._id || "",
     });
@@ -140,7 +138,6 @@ export const Clubs = ({ name }: { name?: string }) => {
     setEditingId(club._id);
     setFormData({
       sport_id: club.sport_id,
-      description: club.description || "",
       location: club.location || "",
       assignment_id: club.assignment_id,
     });
@@ -153,7 +150,6 @@ export const Clubs = ({ name }: { name?: string }) => {
     setEditingId(null);
     setFormData({
       sport_id: "",
-      description: "",
       location: "",
       assignment_id: assignments[0]?._id || "",
     });
@@ -185,7 +181,6 @@ export const Clubs = ({ name }: { name?: string }) => {
       if (editingId) {
         // Actualizar
         const updated = await clubsService.update(editingId, {
-          description: formData.description,
           location: formData.location,
         });
         setClubs(clubs.map((c) => (c._id === editingId ? updated : c)));
@@ -415,17 +410,7 @@ export const Clubs = ({ name }: { name?: string }) => {
                   </select>
                 </div>
 
-                <div className="form-group">
-                  <label>Descripción</label>
-                  <textarea
-                    className="form-control"
-                    name="description"
-                    value={formData.description || ""}
-                    onChange={handleChange}
-                    placeholder="Ej: Club de tenis profesional"
-                    rows={3}
-                  />
-                </div>
+                {/* description field removed */}
 
                 <div className="form-group">
                   <label>Ubicación</label>
