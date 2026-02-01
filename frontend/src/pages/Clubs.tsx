@@ -24,6 +24,8 @@ import {
 import { fetchMyAssignments } from "../store/assignmentsThunk";
 import { fetchAllSports } from "../store/sportsThunk";
 import { fetchGroupsByClub } from "../store/groupsThunk";
+import groupsService from "../services/groups.service";
+import clubsService from "../services/clubs.service";
 
 import type { Club, CreateClubRequest } from "../services/clubs.service";
 import { NavHeader } from "../components";
@@ -39,12 +41,12 @@ export const Clubs = ({ name }: { name?: string }) => {
     (state: RootState) => state.assignments,
   );
   const { items: sports } = useSelector((state: RootState) => state.sports);
-  const { items: groups } = useSelector((state: RootState) => state.groups);
 
   // Estado local
   const [clubMembers, setClubMembers] = useState<
     Record<string, { athletes: number; coaches: number }>
   >({});
+  const [membersLoading, setMembersLoading] = useState<boolean>(true);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedClubForGroups, setSelectedClubForGroups] = useState<
@@ -58,38 +60,114 @@ export const Clubs = ({ name }: { name?: string }) => {
     assignment_id: "",
   });
 
-  // Cargar datos al montar
+  // Cargar todo en un solo useEffect: dispatchs + conteos por club
   useEffect(() => {
-    dispatch(fetchAllClubs());
-    dispatch(fetchMyAssignments());
-    dispatch(fetchAllSports());
-  }, [dispatch]);
+    let mounted = true;
 
-  // Actualizar miembros cuando cambian los grupos
-  useEffect(() => {
-    if (clubs.length > 0 && groups.length > 0) {
-      const membersData: Record<string, { athletes: number; coaches: number }> =
-        {};
-      for (const club of clubs) {
-        const clubGroups = groups.filter((g: any) => g.club_id === club._id);
-        const totalAthletes = clubGroups.reduce(
-          (sum, g: any) =>
-            sum +
-            ((g as any).athletes_added?.length || g.athletes?.length || 0),
-          0,
-        );
-        const totalCoaches = clubGroups.reduce(
-          (sum, g: any) => sum + (g.coaches?.length || 0),
-          0,
-        );
-        membersData[club._id] = {
-          athletes: totalAthletes,
-          coaches: totalCoaches,
-        };
+    const loadAll = async () => {
+      setMembersLoading(true);
+
+      try {
+        // Mantener store sincronizado
+        dispatch(fetchAllClubs());
+        dispatch(fetchMyAssignments());
+        dispatch(fetchAllSports());
+
+        // Obtener clubs directamente para cálculo (no dependemos del store)
+        const clubsData = await clubsService.getAll();
+
+        const membersData: Record<
+          string,
+          { athletes: number; coaches: number }
+        > = {};
+
+        const maxRetries = 5;
+        for (let attempt = 1; attempt <= maxRetries && mounted; attempt++) {
+          const results = await Promise.allSettled(
+            clubsData.map((c) => groupsService.getByClub(c._id)),
+          );
+
+          const allFulfilled = results.every((r) => r.status === "fulfilled");
+
+          if (allFulfilled) {
+            for (let i = 0; i < clubsData.length; i++) {
+              const club = clubsData[i];
+              const clubGroups =
+                (results[i] as PromiseFulfilledResult<any>).value || [];
+
+              const athleteIds = new Set<string>();
+              const coachIds = new Set<string>();
+
+              for (const g of clubGroups) {
+                if (Array.isArray((g as any).athletes)) {
+                  for (const a of (g as any).athletes)
+                    if (a) athleteIds.add(String(a));
+                }
+
+                if (Array.isArray((g as any).athletes_added)) {
+                  for (const entry of (g as any).athletes_added) {
+                    const idField = entry?.athlete_id;
+                    const id =
+                      typeof idField === "string" ? idField : idField?._id;
+                    if (id) athleteIds.add(String(id));
+                  }
+                }
+
+                if (Array.isArray((g as any).coaches)) {
+                  for (const c of (g as any).coaches) {
+                    if (!c) continue;
+                    if (typeof c === "string") coachIds.add(c);
+                    else if (c._id) coachIds.add(String(c._id));
+                  }
+                }
+
+                if (Array.isArray((g as any).members)) {
+                  for (const m of (g as any).members) {
+                    if (m) {
+                      coachIds.add(String(m));
+                      athleteIds.add(String(m));
+                    }
+                  }
+                }
+              }
+
+              membersData[club._id] = {
+                athletes: athleteIds.size,
+                coaches: coachIds.size,
+              };
+            }
+
+            break;
+          }
+
+          const delayMs = 1000 * Math.pow(2, attempt - 1);
+          await new Promise((res) => setTimeout(res, delayMs));
+        }
+
+        // Rellenar con 0s si falta info
+        for (const c of clubsData) {
+          if (!membersData[c._id])
+            membersData[c._id] = { athletes: 0, coaches: 0 };
+        }
+
+        if (mounted) {
+          setClubMembers(membersData);
+          setMembersLoading(false);
+        }
+      } catch (e) {
+        if (mounted) {
+          setClubMembers({});
+          setMembersLoading(false);
+        }
       }
-      setClubMembers(membersData);
-    }
-  }, [clubs, groups]);
+    };
+
+    loadAll();
+
+    return () => {
+      mounted = false;
+    };
+  }, [dispatch]);
 
   // Cargar grupos cuando se selecciona un club
   useEffect(() => {
@@ -150,26 +228,6 @@ export const Clubs = ({ name }: { name?: string }) => {
     });
   };
 
-  // Guardar club (crear o actualizar)
-  const handleSave = async () => {
-    if (!formData.sport_id.trim()) {
-      toastr.warning("Debes seleccionar un deporte");
-      return;
-    }
-
-    if (editingId) {
-      // Actualizar
-      await dispatch(
-        updateClub({ id: editingId, club: { location: formData.location } }),
-      );
-    } else {
-      // Crear
-      await dispatch(createClub(formData));
-    }
-
-    handleCloseModal();
-  };
-
   // Eliminar club
   const handleDelete = async (clubId: string) => {
     if (!window.confirm("¿Estás seguro de que deseas eliminar este club?")) {
@@ -207,6 +265,26 @@ export const Clubs = ({ name }: { name?: string }) => {
     );
   }
 
+  // Guardar club (crear o actualizar)
+  const handleSave = async () => {
+    if (!formData.sport_id.trim()) {
+      toastr.warning("Debes seleccionar un deporte");
+      return;
+    }
+
+    if (editingId) {
+      // Actualizar
+      await dispatch(
+        updateClub({ id: editingId, club: { location: formData.location } }),
+      );
+    } else {
+      // Crear
+      await dispatch(createClub(formData));
+    }
+
+    handleCloseModal();
+  };
+
   return (
     <>
       <NavHeader name={"Clubs"} />
@@ -235,9 +313,9 @@ export const Clubs = ({ name }: { name?: string }) => {
                   </div>
                 </div>
                 <div className="ibox-content">
-                  {clubsStatus === "loading" ? (
+                  {clubsStatus === "loading" || membersLoading ? (
                     <div className="text-center">
-                      <p>Cargando clubs...</p>
+                      <p>Cargando información...</p>
                     </div>
                   ) : clubs.length === 0 ? (
                     <div className="text-center">
