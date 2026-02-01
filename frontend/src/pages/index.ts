@@ -1,4 +1,5 @@
 export * from "./Dashboard";
+export * from "./DashboardAdmin";
 export * from "./Login";
 export * from "./NotFound";
 export * from "./Navigation";

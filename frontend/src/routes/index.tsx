@@ -11,6 +11,7 @@ import {
   AthletesAdmin,
   Sports,
   ProfileAdmin,
+  DashboardAdmin,
 } from "../pages";
 
 export type MenuRoute = {
@@ -76,7 +77,7 @@ export const roleRoutes: RoleRoutes = {
       path: "/",
       icon: "fa-home",
       label: "Principal",
-      element: <Dashboard />,
+      element: <DashboardAdmin />,
     },
     {
       path: "/clubs",

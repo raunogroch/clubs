@@ -4,7 +4,7 @@ import type { RootState } from "../store/store";
 import { NavHeader } from "../components/NavHeader";
 import type { pageParamProps } from "../interfaces/pageParamProps";
 
-export const Dashboard = ({ name }: pageParamProps) => {
+export const DashboardAdmin = ({ name }: pageParamProps) => {
   const user = useSelector((state: RootState) => state.auth.user);
 
   // Verificar si el admin tiene assignment_id
@@ -49,19 +49,44 @@ export const Dashboard = ({ name }: pageParamProps) => {
   );
 };
 
+const calculateTotalAthletes = (breakdown: any): number => {
+  if (!breakdown?.clubs) return 0;
+  return breakdown.clubs.reduce((total: number, club: any) => {
+    return (
+      total +
+      (club.groups || []).reduce(
+        (gTotal: number, group: any) => gTotal + (group.athleteCount || 0),
+        0,
+      )
+    );
+  }, 0);
+};
+
+const calculateUnpaidAthletes = (breakdown: any): number => {
+  if (!breakdown?.clubs) return 0;
+  return breakdown.clubs.reduce((totalUnpaid: number, club: any) => {
+    return (
+      totalUnpaid +
+      (club.groups || []).reduce(
+        (clubUnpaid: number, group: any) =>
+          clubUnpaid + (group.unpaidCount || 0),
+        0,
+      )
+    );
+  }, 0);
+};
+
 const DashboardAssignments = () => {
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<Array<any>>([]);
   const [breakdown, setBreakdown] = useState<any>(null);
-  const [totalCoaches, setTotalCoaches] = useState<number>(0);
-  const [totalAthletesFromGroups, setTotalAthletesFromGroups] =
-    useState<number>(0);
   const user = useSelector((state: RootState) => state.auth.user);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      const userService = (await import("../services/userService")).userService;
+      const userService = (await import("../services/userService.ts"))
+        .userService;
 
       // Cargar conteos
       const res = await userService.getUnpaidByAssignment();
@@ -76,14 +101,6 @@ const DashboardAssignments = () => {
       if (breakdownRes.code === 200) {
         setBreakdown(breakdownRes.data);
       }
-
-      // Cargar coaches y atletas desde grupos para calcular totales de usuario
-      const coachesRes = await userService.getCoachesFromGroups();
-      if (coachesRes.code === 200) setTotalCoaches(coachesRes.data.length || 0);
-
-      const athletesRes = await userService.getAthletesFromGroups();
-      if (athletesRes.code === 200)
-        setTotalAthletesFromGroups(athletesRes.data.length || 0);
 
       setLoading(false);
     };
@@ -118,19 +135,7 @@ const DashboardAssignments = () => {
                 </div>
                 <div className="ibox-content text-center">
                   <h2 className="font-bold text-primary">
-                    {breakdown?.total ??
-                      (breakdown && breakdown.clubs
-                        ? breakdown.clubs.reduce((total: number, club: any) => {
-                            return (
-                              total +
-                              (club.groups || []).reduce(
-                                (gTotal: number, group: any) =>
-                                  gTotal + (group.athleteCount || 0),
-                                0,
-                              )
-                            );
-                          }, 0)
-                        : 0)}
+                    {calculateTotalAthletes(breakdown)}
                   </h2>
                 </div>
               </div>
@@ -142,36 +147,8 @@ const DashboardAssignments = () => {
                 </div>
                 <div className="ibox-content text-center">
                   <h2 className="font-bold text-danger">
-                    {breakdown && breakdown.clubs
-                      ? breakdown.clubs.reduce(
-                          (totalUnpaid: number, club: any) => {
-                            return (
-                              totalUnpaid +
-                              (club.groups || []).reduce(
-                                (clubUnpaid: number, group: any) => {
-                                  return clubUnpaid + (group.unpaidCount || 0);
-                                },
-                                0,
-                              )
-                            );
-                          },
-                          0,
-                        )
-                      : 0}
+                    {calculateUnpaidAthletes(breakdown)}
                   </h2>
-                </div>
-              </div>
-              <div className="col-md-4">
-                <div className="ibox">
-                  <div className="ibox-title">
-                    <h5>Usuarios en assignment</h5>
-                  </div>
-                  <div className="ibox-content text-center">
-                    <h2 className="font-bold text-success">
-                      {(breakdown?.total || totalAthletesFromGroups) +
-                        totalCoaches}
-                    </h2>
-                  </div>
                 </div>
               </div>
             </div>
