@@ -37,6 +37,36 @@ export const MonthlyPayments = () => {
   const [showMonthModal, setShowMonthModal] = useState(false);
   const [selectedReg, setSelectedReg] = useState<any>(null);
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
+  const [showPayModal, setShowPayModal] = useState(false);
+  const [selectedRegistrationPay, setSelectedRegistrationPay] =
+    useState<any>(null);
+  const [paymentAmount, setPaymentAmount] = useState<string>("");
+  const [payingRegistration, setPayingRegistration] = useState<string | null>(
+    null,
+  );
+
+  const [paymentsMap, setPaymentsMap] = useState<Record<string, any[]>>({});
+
+  const loadPaymentsForRegistration = async (reg: any) => {
+    try {
+      const athleteId = reg?.athlete_id?._id || reg?.athlete_id;
+      if (!athleteId) return;
+      const res = await paymentsService.getByAthlete(athleteId);
+      if (res.code === 200 && res.data) {
+        const gid = reg?.group_id?._id || reg?.group_id;
+        const filteredPayments = (res.data as any[]).filter((p: any) => {
+          const pgid = p.group_id?._id || p.group_id;
+          return pgid?.toString?.() === gid?.toString?.();
+        });
+        setPaymentsMap((prev) => ({
+          ...prev,
+          [reg._id]: filteredPayments,
+        }));
+      }
+    } catch (e) {
+      console.error("Error cargando pagos:", e);
+    }
+  };
 
   const user = useSelector((state: RootState) => state.auth.user);
 
@@ -103,9 +133,62 @@ export const MonthlyPayments = () => {
   };
 
   const openMonthModal = (reg: any) => {
+    if (!reg.registration_pay) {
+      alert("Debe pagar la matrícula antes de pagar la mensualidad");
+      return;
+    }
     setSelectedReg(reg);
     setSelectedMonth(null);
     setShowMonthModal(true);
+    loadPaymentsForRegistration(reg);
+  };
+
+  const handlePayRegistration = async (reg: any) => {
+    setSelectedRegistrationPay(reg);
+    setPaymentAmount("");
+    setShowPayModal(true);
+  };
+
+  const handleProcessPayment = async () => {
+    if (!selectedRegistrationPay || !paymentAmount) {
+      alert("Por favor ingresa un monto");
+      return;
+    }
+
+    setPayingRegistration(selectedRegistrationPay._id);
+    try {
+      const res = await registrationsService.update(
+        selectedRegistrationPay._id,
+        {
+          registration_pay: new Date().toISOString(),
+          registration_amount: parseFloat(paymentAmount),
+        },
+      );
+
+      if (res.code === 200 || res.code === 201) {
+        alert("Matrícula pagada");
+        setRegistrations((prev) =>
+          prev.map((r) =>
+            r._id === selectedRegistrationPay._id
+              ? {
+                  ...r,
+                  registration_pay: new Date().toISOString(),
+                }
+              : r,
+          ),
+        );
+        setShowPayModal(false);
+        setSelectedRegistrationPay(null);
+        setPaymentAmount("");
+      } else {
+        alert("Error pagando matrícula");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error pagando matrícula");
+    } finally {
+      setPayingRegistration(null);
+    }
   };
 
   const getMonthDateRange = (monthIndex: number) => {
@@ -319,30 +402,56 @@ export const MonthlyPayments = () => {
                         <thead>
                           <tr>
                             <th>Grupo</th>
-                            <th>Monto</th>
+                            <th>Mensualidad</th>
+                            <th>Matrícula</th>
                             <th>Pagos registrados</th>
-                            <th></th>
+                            <th className="text-center">Acciones</th>
                           </tr>
                         </thead>
                         <tbody>
                           {registrations.map((r) => {
                             const gid = r.group_id?._id || r.group_id;
                             const g = groupsInfo[gid] || {};
+                            const hasRegistrationPay =
+                              r.registration_pay != null;
                             return (
                               <tr key={r._id}>
                                 <td>{g.name || r.group_id?.name || "-"}</td>
-                                <td>{(g.monthly_fee ?? 0).toString()}</td>
-                                <td>{(r.monthly_payments || []).length}</td>
+                                <td>{(g.monthly_fee ?? 0).toString()} Bs</td>
                                 <td>
-                                  <button
-                                    className="btn btn-sm btn-success"
-                                    onClick={() => openMonthModal(r)}
-                                    disabled={paying === r._id}
-                                  >
-                                    {paying === r._id
-                                      ? "Procesando..."
-                                      : "Pagar"}
-                                  </button>
+                                  {hasRegistrationPay ? (
+                                    <span style={{ color: "green" }}>
+                                      ✓ Pagada
+                                    </span>
+                                  ) : (
+                                    <span style={{ color: "red" }}>
+                                      ✗ No pagada
+                                    </span>
+                                  )}
+                                </td>
+                                <td>{(r.monthly_payments || []).length}</td>
+                                <td className="text-center">
+                                  {!hasRegistrationPay ? (
+                                    <button
+                                      className="btn btn-sm btn-warning"
+                                      onClick={() => handlePayRegistration(r)}
+                                      disabled={payingRegistration === r._id}
+                                    >
+                                      {payingRegistration === r._id
+                                        ? "Procesando..."
+                                        : "Pagar matrícula"}
+                                    </button>
+                                  ) : (
+                                    <button
+                                      className="btn btn-sm btn-success"
+                                      onClick={() => openMonthModal(r)}
+                                      disabled={paying === r._id}
+                                    >
+                                      {paying === r._id
+                                        ? "Procesando..."
+                                        : "Pagar mensualidad"}
+                                    </button>
+                                  )}
                                 </td>
                               </tr>
                             );
@@ -400,22 +509,32 @@ export const MonthlyPayments = () => {
                       const regYear = registrationDate.getFullYear();
                       const currentYear = new Date().getFullYear();
 
-                      // Un mes está pagado si hay pagos registrados
-                      const isPaid =
-                        selectedReg.monthly_payments &&
-                        selectedReg.monthly_payments.length > 0;
+                      // Calcular mes y año del pago para este índice
+                      let paymentMonth = regMonth + idx;
+                      let paymentYear = regYear;
+                      while (paymentMonth >= 12) {
+                        paymentMonth -= 12;
+                        paymentYear += 1;
+                      }
 
                       // Desactivar meses antes del mes de registro
                       const isBeforeRegistration =
                         idx < regMonth && regYear === currentYear;
-                      const isPastMonth =
-                        idx < new Date().getMonth() && regYear === currentYear;
 
                       // El mes está disponible si es >= mes de registro y <= mes actual
                       const isDisabled = isBeforeRegistration;
 
-                      // Determinar si este mes específico está pagado
-                      const isMonthPaid = isPaid && isPastMonth;
+                      // Verificar si este mes específico está pagado
+                      const payments = paymentsMap[selectedReg._id] || [];
+                      const isMonthPaid = payments.some((p: any) => {
+                        const payStart = new Date(p.payment_start);
+                        const startMonth = payStart.getMonth();
+                        const startYear = payStart.getFullYear();
+                        return (
+                          startMonth === paymentMonth &&
+                          startYear === paymentYear
+                        );
+                      });
 
                       return (
                         <button
@@ -489,6 +608,102 @@ export const MonthlyPayments = () => {
                     {paying === selectedReg._id
                       ? "Procesando..."
                       : "Confirmar pago"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de Pago de Matrícula */}
+        {showPayModal && selectedRegistrationPay && (
+          <div
+            className="modal"
+            style={{ display: "block", backgroundColor: "rgba(0,0,0,.5)" }}
+            onClick={() => setShowPayModal(false)}
+          >
+            <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h4 className="modal-title">Registrar Pago de Matrícula</h4>
+                  <button
+                    type="button"
+                    className="close"
+                    onClick={() => setShowPayModal(false)}
+                  >
+                    &times;
+                  </button>
+                </div>
+                <div className="modal-body">
+                  <div style={{ marginBottom: "15px" }}>
+                    <p>
+                      <strong>Atleta:</strong>{" "}
+                      {selectedRegistrationPay.athlete_id?.name}{" "}
+                      {selectedRegistrationPay.athlete_id?.lastname}
+                    </p>
+                    <p>
+                      <strong>Club/Grupo:</strong>{" "}
+                      {selectedRegistrationPay.group_id?.name}
+                    </p>
+                  </div>
+                  <div style={{ marginBottom: "15px" }}>
+                    <label style={{ display: "block", marginBottom: "5px" }}>
+                      <strong>Monto a Pagar:</strong>
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="Ingresa el monto"
+                      value={paymentAmount}
+                      onChange={(e) => setPaymentAmount(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "8px",
+                        borderRadius: "3px",
+                        border: "1px solid #ccc",
+                        fontSize: "14px",
+                      }}
+                      min="0"
+                      step="0.01"
+                      disabled={
+                        payingRegistration === selectedRegistrationPay._id
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-default"
+                    onClick={() => setShowPayModal(false)}
+                    disabled={
+                      payingRegistration === selectedRegistrationPay._id
+                    }
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleProcessPayment}
+                    disabled={
+                      payingRegistration === selectedRegistrationPay._id
+                    }
+                  >
+                    {payingRegistration === selectedRegistrationPay._id ? (
+                      <>
+                        <span
+                          className="spinner-border spinner-border-sm"
+                          role="status"
+                          aria-hidden="true"
+                          style={{ marginRight: "5px" }}
+                        ></span>
+                        Procesando...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fa fa-check"></i> Pagar
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
