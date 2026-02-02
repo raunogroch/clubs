@@ -17,6 +17,7 @@ import { UsersModule } from './users/users.module';
 import { AssignmentsModule } from './assignments/assignments.module';
 import { ClubsModule } from './clubs/clubs.module';
 import { SportsModule } from './sports/sports.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -58,6 +59,8 @@ import { SportsModule } from './sports/sports.module';
 
     // Módulo de clubs (crear y gestionar clubs por asignación)
     ClubsModule,
+    // Módulo de payments (mensualidades)
+    PaymentsModule,
   ],
 })
 export class AppModule {}

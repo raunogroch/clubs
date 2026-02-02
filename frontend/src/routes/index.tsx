@@ -12,6 +12,7 @@ import {
   Sports,
   ProfileAdmin,
   DashboardAdmin,
+  MonthlyPayments,
 } from "../pages";
 
 export type MenuRoute = {
@@ -67,6 +68,12 @@ export const roleRoutes: RoleRoutes = {
       label: "Asignaciones",
       element: <Assignments />,
     },
+    {
+      path: "/mensualidad",
+      icon: "fa-money",
+      label: "Mensualidad",
+      element: <MonthlyPayments />,
+    },
   ],
   admin: [
     {
@@ -84,6 +91,12 @@ export const roleRoutes: RoleRoutes = {
       icon: "fa-object-group",
       label: "Clubs",
       element: <Clubs />,
+    },
+    {
+      path: "/mensualidad",
+      icon: "fa-money",
+      label: "Mensualidad",
+      element: <MonthlyPayments />,
     },
     {
       path: "/users",

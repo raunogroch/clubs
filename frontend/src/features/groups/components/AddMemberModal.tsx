@@ -116,9 +116,9 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
                 >
                   {/* Imagen del atleta - ocupa altura total */}
                   <div style={{ flexShrink: 0 }}>
-                    {searchResult.images?.small ? (
+                    {searchResult.images?.medium ? (
                       <Image
-                        src={searchResult.images.small}
+                        src={searchResult.images.medium}
                         alt={`${searchResult.name} ${searchResult.lastname}`}
                         style={{
                           width: "100px",
