@@ -13,15 +13,25 @@ export const SideNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] =
+    React.useState(false);
 
   const handleLogout = async (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
+    setIsProfileDropdownOpen(false);
     try {
       await dispatch(logoutAction());
       navigate("/login", { replace: true });
     } catch {
       navigate("/login", { replace: true });
     }
+  };
+
+  const handleProfileDropdownToggle = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+  ) => {
+    e.preventDefault();
+    setIsProfileDropdownOpen(!isProfileDropdownOpen);
   };
 
   const isActive = (path: string) => {
@@ -168,7 +178,11 @@ export const SideNav = () => {
               ) : (
                 "Sin Imagen"
               )}
-              <Link data-toggle="dropdown" className="dropdown-toggle" to="#">
+              <a
+                href="#"
+                onClick={handleProfileDropdownToggle}
+                className="dropdown-toggle"
+              >
                 <span className="block m-t-xs font-bold">
                   {user
                     ? `${(user as any).name} ${(user as any).lastname}`
@@ -177,18 +191,24 @@ export const SideNav = () => {
                 <span className="text-muted text-xs block">
                   {Role[(user as any)?.role]} <b className="caret"></b>
                 </span>
-              </Link>
-              <ul className="dropdown-menu animated fadeInRight m-t-xs">
+              </a>
+              <ul
+                className={`dropdown-menu animated fadeInRight m-t-xs${isProfileDropdownOpen ? " show" : ""}`}
+              >
                 <li>
-                  <Link className="dropdown-item" to="/profile">
+                  <Link
+                    className="dropdown-item"
+                    to="/profile"
+                    onClick={() => setIsProfileDropdownOpen(false)}
+                  >
                     Perfil de usuario
                   </Link>
                 </li>
                 <li className="dropdown-divider"></li>
                 <li>
-                  <Link className="dropdown-item" to="/" onClick={handleLogout}>
+                  <a className="dropdown-item" href="#" onClick={handleLogout}>
                     Cerrar Sesión
-                  </Link>
+                  </a>
                 </li>
               </ul>
             </div>

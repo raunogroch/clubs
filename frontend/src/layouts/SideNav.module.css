@@ -20,3 +20,7 @@
   flex-direction: column;
   flex: 1 1 auto;
 }
+
+:global(.dropdown-menu.show) {
+  display: block !important;
+}

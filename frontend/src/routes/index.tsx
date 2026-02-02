@@ -68,12 +68,6 @@ export const roleRoutes: RoleRoutes = {
       label: "Asignaciones",
       element: <Assignments />,
     },
-    {
-      path: "/mensualidad",
-      icon: "fa-money",
-      label: "Mensualidad",
-      element: <MonthlyPayments />,
-    },
   ],
   admin: [
     {
