@@ -71,10 +71,20 @@ export class GroupRepository {
     updateGroupDto: UpdateGroupDto,
   ): Promise<Group | null> {
     try {
-      return await this.groupModel.findByIdAndUpdate(groupId, updateGroupDto, {
-        new: true,
-        runValidators: true,
-      });
+      return await this.groupModel
+        .findByIdAndUpdate(groupId, updateGroupDto, {
+          new: true,
+          runValidators: true,
+        })
+        .populate('created_by', 'name')
+        .populate({
+          path: 'athletes_added',
+          select: 'athlete_id registration_pay registration_date',
+          populate: { path: 'athlete_id', select: 'name role ci lastname' },
+        })
+        .populate('coaches', 'name role ci lastname')
+        .populate('club_id', 'name')
+        .exec();
     } catch (error) {
       console.error('Error en update del repository:', error);
       throw error;

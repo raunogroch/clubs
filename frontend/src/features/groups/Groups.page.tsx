@@ -245,10 +245,14 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
 
     if (groupForm.editingId) {
       // Actualizar grupo existente
+      const updateData: any = { name: groupForm.formData.name };
+      if (groupForm.formData.monthly_fee !== undefined) {
+        updateData.monthly_fee = groupForm.formData.monthly_fee;
+      }
       await dispatch(
         updateGroup({
           id: groupForm.editingId,
-          group: { name: groupForm.formData.name },
+          group: updateData,
         }),
       );
     } else {
