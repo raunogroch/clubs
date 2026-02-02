@@ -5,9 +5,18 @@ import { Roles } from '../enum/roles.enum';
 // Esquema de User para Mongoose
 @Schema({ timestamps: true })
 export class User extends mongoose.Document {
-  /** Rol del usuario (ATHLETE, PARENT, COACH, ASSISTANT, ADMIN, SUPERADMIN) */
-  @Prop({ required: true, enum: Roles })
-  role: Roles;
+  /** Rol del usuario (ATHLETE, PARENT, COACH, ASSISTANT, ADMIN, SUPERADMIN) - Deprecated: usar roles[] */
+  @Prop({ required: false, enum: Roles })
+  role?: Roles;
+
+  /** Array de roles del usuario (para soportar múltiples roles) */
+  @Prop({
+    type: [String],
+    enum: Object.values(Roles),
+    required: false,
+    default: [],
+  })
+  roles?: Roles[];
 
   // ========== CAMPOS COMUNES A MÚLTIPLES ROLES ==========
 

@@ -37,6 +37,20 @@ export class AuthService {
   ) {}
 
   /**
+   * Valida si un usuario tiene rol de parent o athlete
+   * Estos roles no tienen acceso a login mediante usuario y contraseña
+   * @param user - El usuario a validar
+   * @returns true si el usuario tiene rol de parent o athlete
+   */
+  private hasRestrictedRoles(user: any): boolean {
+    const userRoles = user.roles || (user.role ? [user.role] : []);
+    const rolesArray = Array.isArray(userRoles) ? userRoles : [userRoles];
+    return (
+      rolesArray.includes(Roles.PARENT) || rolesArray.includes(Roles.ATHLETE)
+    );
+  }
+
+  /**
    * Valida las credenciales de un usuario
    * Compara la contraseña enviada con la contraseña hasheada en la BD
    *
@@ -49,6 +63,10 @@ export class AuthService {
 
     // Comparar contraseña en texto plano con hash usando bcrypt
     if (user && user.password && (await bcrypt.compare(pass, user.password))) {
+      // Bloquear login para usuarios con rol de parent o athlete
+      if (this.hasRestrictedRoles(user)) {
+        return null; // Bloquear login
+      }
       // No devolver la contraseña en la respuesta (separar del objeto user)
       const { password, ...result } = user.toObject();
       return result;
@@ -81,13 +99,17 @@ export class AuthService {
      * Payload del JWT contiene:
      * - username: Usuario que se autenticó
      * - sub: ID del usuario (Standard JWT claim)
-     * - role: Rol del usuario (para autorización)
+     * - role: Rol principal del usuario (para autorización - backward compatibility)
+     * - roles: Array de roles del usuario
      * - jti: ID único del token (para revocación)
      */
+    const userRole =
+      user.roles && user.roles.length > 0 ? user.roles[0] : user.role;
     const payload = {
       username: user.username,
       sub: user._id,
-      role: user.role,
+      role: userRole,
+      roles: user.roles || (user.role ? [user.role] : []),
       jti,
     };
     return {
@@ -97,7 +119,8 @@ export class AuthService {
           code: user._id,
           name: user.name,
           lastname: user.lastname,
-          role: user.role,
+          role: userRole,
+          roles: user.roles || (user.role ? [user.role] : []),
           // Return the images object (preferred) - keep backward compatibility by including image? not included
           images: (user as any)?.images || undefined,
           // assignment_id para admins (singular)
