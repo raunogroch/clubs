@@ -2,8 +2,21 @@ import { useSelector } from "react-redux";
 import { useState, useEffect, useMemo } from "react";
 import type { RootState } from "../store/store";
 import { NavHeader } from "../components/NavHeader";
+import { Calendar, dateFnsLocalizer } from "react-big-calendar";
+import {
+  format,
+  parse,
+  startOfWeek,
+  getDay,
+  addDays,
+  addMonths,
+} from "date-fns";
+import { es } from "date-fns/locale";
+import "react-big-calendar/lib/css/react-big-calendar.css";
 import type { pageParamProps } from "../interfaces/pageParamProps";
 import { registrationsService } from "../services/registrationsService";
+import clubsService from "../services/clubs.service";
+import groupsService from "../services/groups.service";
 
 export const DashboardAdmin = ({ name }: pageParamProps) => {
   const user = useSelector((state: RootState) => state.auth.user);
@@ -89,6 +102,55 @@ const DashboardAssignments = ({ user }: { user: any }) => {
   const [selectedRegistration, setSelectedRegistration] = useState<any>(null);
   const [paymentAmount, setPaymentAmount] = useState<string>("");
   const [payingId, setPayingId] = useState<string | null>(null);
+  // Calendar state for react-big-calendar
+  const localizer = dateFnsLocalizer({
+    format,
+    parse,
+    startOfWeek,
+    getDay,
+    addDays,
+    addMonths,
+    locales: { es },
+  });
+
+  const formats = {
+    dateFormat: "dd",
+    dayFormat: "EEE dd",
+    weekdayFormat: "EEE",
+    monthHeaderFormat: "MMMM yyyy",
+    dayHeaderFormat: "EEEE dd MMMM",
+    dayRangeHeaderFormat: ({ start, end }: { start: Date; end: Date }) =>
+      `${format(start, "dd MMM", { locale: es })} - ${format(end, "dd MMM yyyy", { locale: es })}`,
+    agendaHeaderFormat: ({ start, end }: { start: Date; end: Date }) =>
+      `${format(start, "dd MMM", { locale: es })} - ${format(end, "dd MMM yyyy", { locale: es })}`,
+    agendaDateFormat: "EEE MMM dd",
+    agendaTimeFormat: "HH:mm",
+    agendaTimeRangeFormat: ({ start, end }: { start: Date; end: Date }) =>
+      `${format(start, "HH:mm", { locale: es })} - ${format(end, "HH:mm", { locale: es })}`,
+    timeGutterFormat: "HH:mm",
+    eventTimeRangeFormat: ({ start, end }: { start: Date; end: Date }) =>
+      `${format(start, "HH:mm", { locale: es })} - ${format(end, "HH:mm", { locale: es })}`,
+  };
+
+  const messages = {
+    today: "Hoy",
+    previous: "Atrás",
+    next: "Siguiente",
+    yesterday: "Ayer",
+    tomorrow: "Mañana",
+    month: "Mes",
+    week: "Semana",
+    day: "Día",
+    agenda: "Agenda",
+    date: "Fecha",
+    time: "Hora",
+    event: "Evento",
+    noEventsInRange: "No hay eventos en este rango",
+    showMore: (total: number) => `+${total} más`,
+  };
+
+  const [calendarGroups, setCalendarGroups] = useState<any[]>([]);
+  const [calendarLoading, setCalendarLoading] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -114,6 +176,45 @@ const DashboardAssignments = ({ user }: { user: any }) => {
       }
     };
     load();
+  }, [user]);
+
+  // Load groups and build calendar events for the assignment
+  useEffect(() => {
+    const loadGroupsForCalendar = async () => {
+      setCalendarLoading(true);
+      try {
+        const assignmentId = (user as any)?.assignment_id;
+        if (!assignmentId) {
+          setCalendarGroups([]);
+          return;
+        }
+
+        const clubs = await clubsService.getAll();
+        // Filter clubs by assignment_id if available on club
+        const myClubs = clubs.filter(
+          (c: any) => c.assignment_id === assignmentId,
+        );
+        const groupsPerClub = await Promise.all(
+          myClubs.map(async (c: any) => {
+            try {
+              const gs = await groupsService.getByClub(c._id);
+              return gs.map((g: any) => ({ ...g, club: c }));
+            } catch (e) {
+              return [];
+            }
+          }),
+        );
+
+        const allGroups = groupsPerClub.flat();
+        setCalendarGroups(allGroups);
+      } catch (e) {
+        setCalendarGroups([]);
+      } finally {
+        setCalendarLoading(false);
+      }
+    };
+
+    loadGroupsForCalendar();
   }, [user]);
 
   // Memoizar cálculos costosos para evitar recalcular en cada render
@@ -233,13 +334,10 @@ const DashboardAssignments = ({ user }: { user: any }) => {
       // Obtener la fecha y hora actual en formato ISO
       const now = new Date();
 
-      const res = await registrationService.update(
-        selectedRegistration._id,
-        {
-          registration_pay: now.toISOString(),
-          registration_amount: parseFloat(paymentAmount),
-        },
-      );
+      const res = await registrationService.update(selectedRegistration._id, {
+        registration_pay: now.toISOString(),
+        registration_amount: parseFloat(paymentAmount),
+      });
 
       if (res.code === 200) {
         // Actualizar la lista local
@@ -257,6 +355,138 @@ const DashboardAssignments = ({ user }: { user: any }) => {
     } finally {
       setPayingId(null);
     }
+  };
+
+  // --- ProCalendar (reusing the same react-big-calendar setup as ScheduleCoach) ---
+  interface CalendarEvent {
+    id: string;
+    title: string;
+    start: Date;
+    end: Date;
+    resource?: {
+      club: string;
+      group: string;
+    };
+  }
+
+  const dayNameMap: Record<string, number> = {
+    Sunday: 0,
+    Monday: 1,
+    Tuesday: 2,
+    Wednesday: 3,
+    Thursday: 4,
+    Friday: 5,
+    Saturday: 6,
+  };
+
+  const ProCalendar = ({ groups }: { groups: any[] }) => {
+    const [events, setEvents] = useState<CalendarEvent[]>([]);
+    const [date, setDate] = useState<Date>(new Date());
+    const [view, setView] = useState<"month" | "week" | "day" | "agenda">(
+      "week",
+    );
+
+    useEffect(() => {
+      const calendarEvents: CalendarEvent[] = [];
+      const weekStart = startOfWeek(date, { weekStartsOn: 1 });
+
+      groups.forEach((group) => {
+        if (group.schedule && group.schedule.length > 0) {
+          group.schedule.forEach((sched: any) => {
+            const [startHour, startMin] = sched.startTime
+              .split(":")
+              .map(Number);
+            const [endHour, endMin] = sched.endTime.split(":").map(Number);
+
+            // Filtrar horarios entre 12:00 y 14:00 (misma lógica que ScheduleCoach)
+            if (
+              (startHour >= 12 && startHour < 14) ||
+              (endHour > 12 && endHour <= 14)
+            ) {
+              return;
+            }
+
+            const dayOffset = dayNameMap[sched.day] || 0;
+            const eventDate = new Date(weekStart);
+            eventDate.setDate(
+              eventDate.getDate() + (dayOffset === 0 ? 6 : dayOffset - 1),
+            );
+
+            const startTime = new Date(eventDate);
+            startTime.setHours(startHour, startMin, 0, 0);
+
+            const endTime = new Date(eventDate);
+            endTime.setHours(endHour, endMin, 0, 0);
+
+            calendarEvents.push({
+              id: `${group._id}-${sched.day}-${sched.startTime}`,
+              title: group.name,
+              start: startTime,
+              end: endTime,
+              resource: {
+                club: group.club?.name || "",
+                group: group.name,
+              },
+            });
+          });
+        }
+      });
+
+      setEvents(calendarEvents);
+    }, [groups, date]);
+
+    const eventStyleGetter = (event: CalendarEvent) => {
+      const colors = [
+        "#3174ad",
+        "#f50057",
+        "#ff9800",
+        "#4caf50",
+        "#2196f3",
+        "#9c27b0",
+      ];
+      const backgroundColor = colors[event.title.charCodeAt(0) % colors.length];
+
+      return {
+        style: {
+          backgroundColor,
+          borderRadius: "5px",
+          opacity: 0.8,
+          color: "white",
+          border: "0px",
+          display: "block",
+        },
+      };
+    };
+
+    return (
+      <div className="mb-4">
+        <div style={{ height: "600px" }}>
+          <Calendar
+            localizer={localizer}
+            events={events}
+            startAccessor="start"
+            endAccessor="end"
+            style={{ height: "100%" }}
+            view={view}
+            onView={(v: any) => setView(v)}
+            date={date}
+            onNavigate={(d: any) => setDate(d)}
+            defaultView="week"
+            eventPropGetter={eventStyleGetter}
+            popup
+            selectable
+            min={new Date(2024, 0, 1, 8, 0, 0)}
+            max={new Date(2024, 0, 1, 22, 0, 0)}
+            step={30}
+            showMultiDayTimes
+            views={["month", "week", "day", "agenda"]}
+            culture="es"
+            formats={formats}
+            messages={messages}
+          />
+        </div>
+      </div>
+    );
   };
 
   if (loading) {
@@ -306,6 +536,32 @@ const DashboardAssignments = ({ user }: { user: any }) => {
                 </div>
                 <div className="ibox-content text-center">
                   <h2 className="font-bold text-danger">{unpaidCount}</h2>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Calendario (react-big-calendar) */}
+      <div className="wrapper wrapper-content">
+        <div className="animated fadeInRightBig">
+          <div className="row">
+            <div className="col-md-12">
+              <div className="ibox">
+                <div className="ibox-title">
+                  <h5>Calendario de Horarios de Grupos</h5>
+                </div>
+                <div className="ibox-content">
+                  {calendarLoading ? (
+                    <div className="text-center">Cargando calendario...</div>
+                  ) : calendarGroups.length === 0 ? (
+                    <div className="text-center text-muted">
+                      No hay grupos con horarios en esta asignación.
+                    </div>
+                  ) : (
+                    <ProCalendar groups={calendarGroups} />
+                  )}
                 </div>
               </div>
             </div>
@@ -473,10 +729,7 @@ const DashboardAssignments = ({ user }: { user: any }) => {
           style={{ display: "block", backgroundColor: "rgba(0,0,0,.5)" }}
           onClick={() => setShowPayModal(false)}
         >
-          <div
-            className="modal-dialog"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
             <div className="modal-content">
               <div className="modal-header">
                 <h4 className="modal-title">Registrar Pago de Matrícula</h4>
@@ -491,11 +744,13 @@ const DashboardAssignments = ({ user }: { user: any }) => {
               <div className="modal-body">
                 <div style={{ marginBottom: "15px" }}>
                   <p>
-                    <strong>Atleta:</strong> {selectedRegistration.athlete_id?.name}{" "}
+                    <strong>Atleta:</strong>{" "}
+                    {selectedRegistration.athlete_id?.name}{" "}
                     {selectedRegistration.athlete_id?.lastname}
                   </p>
                   <p>
-                    <strong>Club/Grupo:</strong> {selectedRegistration.group_id?.name}
+                    <strong>Club/Grupo:</strong>{" "}
+                    {selectedRegistration.group_id?.name}
                   </p>
                 </div>
                 <div style={{ marginBottom: "15px" }}>
