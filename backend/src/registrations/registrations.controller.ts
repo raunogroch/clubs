@@ -54,6 +54,11 @@ export class RegistrationsController {
     return this.registrationsService.findByGroup(groupId);
   }
 
+  @Get('group/:groupId/paid-athletes')
+  async getPaidAthletesByGroup(@Param('groupId') groupId: string) {
+    return this.registrationsService.getPaidAthletesByGroup(groupId);
+  }
+
   @Get(':id')
   async getById(@Param('id') id: string) {
     return this.registrationsService.findById(id);

@@ -119,4 +119,8 @@ export class RegistrationsService {
   async deleteByGroup(groupId: string) {
     return this.registrationsRepository.deleteByGroup(groupId);
   }
+
+  async getPaidAthletesByGroup(groupId: string) {
+    return this.registrationsRepository.getPaidAthletesByGroup(groupId);
+  }
 }

@@ -112,4 +112,23 @@ export class RegistrationsRepository {
   async delete(id: string): Promise<Registration | null> {
     return this.registrationModel.findByIdAndDelete(id).exec();
   }
+
+  async getPaidAthletesByGroup(groupId: string): Promise<any> {
+    return (await this.registrationModel
+      .find({
+        group_id: new Types.ObjectId(groupId),
+        registration_pay: { $ne: null },
+      })
+      .populate(
+        'athlete_id',
+        'name lastname ci role phone images createdAt birth_date gender username parent_id documentPath fileIdentifier',
+      )
+      .populate({
+        path: 'monthly_payments',
+        model: 'Payment',
+        select: 'amount payment_date payment_start payment_end',
+      })
+      .lean()
+      .exec()) as any;
+  }
 }
