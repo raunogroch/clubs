@@ -14,6 +14,8 @@ import {
   DashboardAdmin,
   MonthlyPayments,
   ProfileCoach,
+  DashboardCoach,
+  ScheduleCoach,
 } from "../pages";
 
 export type MenuRoute = {
@@ -129,7 +131,13 @@ export const roleRoutes: RoleRoutes = {
       path: "/",
       icon: "fa-home",
       label: "Principal",
-      element: <Dashboard />,
+      element: <DashboardCoach />,
+    },
+    {
+      path: "/schedule",
+      icon: "fa-schedule",
+      label: "Hoararios",
+      element: <ScheduleCoach />,
     },
   ],
   athlete: [

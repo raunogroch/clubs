@@ -1,5 +1,6 @@
 export * from "./Dashboard";
 export * from "./DashboardAdmin";
+export * from "./DashboardCoach";
 export * from "./Login";
 export * from "./NotFound";
 export * from "./Navigation";
@@ -17,3 +18,4 @@ export * from "./Sports";
 export * from "./ProfileAdmin";
 export * from "./ProfileCoach";
 export * from "./MonthlyPayments";
+export * from "./ScheduleCoach";
