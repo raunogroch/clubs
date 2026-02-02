@@ -137,3 +137,10 @@ export enum DayName {
   Saturday = "Sábado",
   Sunday = "Domingo",
 }
+
+export enum MemberRole {
+  "superadmin" = "Superadministrador(a)",
+  "admin" = "Administrador(a)",
+  "coach" = "Entrenador(a)",
+  "assistant" = "Asistente(a)",
+}

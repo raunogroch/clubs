@@ -15,4 +15,5 @@ export * from "./Athletes";
 export * from "./AthletesAdmin";
 export * from "./Sports";
 export * from "./ProfileAdmin";
+export * from "./ProfileCoach";
 export * from "./MonthlyPayments";

@@ -13,6 +13,7 @@ import {
   ProfileAdmin,
   DashboardAdmin,
   MonthlyPayments,
+  ProfileCoach,
 } from "../pages";
 
 export type MenuRoute = {
@@ -120,6 +121,10 @@ export const roleRoutes: RoleRoutes = {
     },
   ],
   coach: [
+    {
+      path: "/profile",
+      element: <ProfileCoach />,
+    },
     {
       path: "/",
       icon: "fa-home",
