@@ -110,6 +110,17 @@ export class Group extends Document {
   schedule?: Schedule[];
 
   /**
+   * Array de eventos del grupo
+   * Contiene IDs de eventos creados para este grupo
+   */
+  @Prop({
+    type: [Types.ObjectId],
+    ref: 'Event',
+    default: [],
+  })
+  events_added?: Types.ObjectId[];
+
+  /**
    * Timestamp de creación (automático)
    */
   @Prop()

@@ -385,12 +385,22 @@ const DashboardAssignments = ({ user }: { user: any }) => {
     const [view, setView] = useState<"month" | "week" | "day" | "agenda">(
       "week",
     );
+    const [groupsWithEvents, setGroupsWithEvents] = useState<any[]>([]);
+
+    // Load events for all groups
+    useEffect(() => {
+      // Los eventos ahora vienen poblados en el objeto del grupo
+      if (groups.length > 0) {
+        setGroupsWithEvents(groups);
+      }
+    }, [groups]);
 
     useEffect(() => {
       const calendarEvents: CalendarEvent[] = [];
       const weekStart = startOfWeek(date, { weekStartsOn: 1 });
 
-      groups.forEach((group) => {
+      groupsWithEvents.forEach((group) => {
+        // Add schedule events
         if (group.schedule && group.schedule.length > 0) {
           group.schedule.forEach((sched: any) => {
             const [startHour, startMin] = sched.startTime
@@ -419,8 +429,8 @@ const DashboardAssignments = ({ user }: { user: any }) => {
             endTime.setHours(endHour, endMin, 0, 0);
 
             calendarEvents.push({
-              id: `${group._id}-${sched.day}-${sched.startTime}`,
-              title: group.name,
+              id: `schedule-${group._id}-${sched.day}-${sched.startTime}`,
+              title: `[Horario] ${group.name} (${sched.startTime} - ${sched.endTime})`,
               start: startTime,
               end: endTime,
               resource: {
@@ -430,21 +440,61 @@ const DashboardAssignments = ({ user }: { user: any }) => {
             });
           });
         }
+
+        // Add custom events
+        if (group.events_added && group.events_added.length > 0) {
+          group.events_added.forEach((evt: any) => {
+            try {
+              // Parsear la fecha YYYY-MM-DD correctamente sin timezone issues
+              const [year, month, day] = evt.eventDate.split("-").map(Number);
+              const eventDate = new Date(year, month - 1, day);
+
+              const [eventHour, eventMin] = evt.eventTime
+                .split(":")
+                .map(Number);
+
+              const startTime = new Date(eventDate);
+              startTime.setHours(eventHour, eventMin, 0, 0);
+
+              // End time calculated from duration (in minutes)
+              const endTime = new Date(startTime);
+              const durationMinutes = evt.duration || 60;
+              endTime.setMinutes(endTime.getMinutes() + durationMinutes);
+
+              calendarEvents.push({
+                id: `event-${evt._id}`,
+                title: `[Evento] ${evt.name}${evt.location ? ` (${evt.location})` : ""} - ${group.name}`,
+                start: startTime,
+                end: endTime,
+                resource: {
+                  club: group.club?.name || "",
+                  group: group.name,
+                },
+              });
+            } catch (e) {
+              console.error("Error processing event:", evt, e);
+            }
+          });
+        }
       });
 
       setEvents(calendarEvents);
-    }, [groups, date]);
+    }, [groupsWithEvents, date]);
 
     const eventStyleGetter = (event: CalendarEvent) => {
-      const colors = [
-        "#3174ad",
-        "#f50057",
-        "#ff9800",
-        "#4caf50",
-        "#2196f3",
-        "#9c27b0",
-      ];
-      const backgroundColor = colors[event.title.charCodeAt(0) % colors.length];
+      // Diferenciar colores: horarios vs eventos
+      let backgroundColor: string;
+
+      if (event.title.includes("[Horario]")) {
+        // Horarios en azul
+        backgroundColor = "#4472C4";
+      } else if (event.title.includes("[Evento]")) {
+        // Eventos en verde
+        backgroundColor = "#70AD47";
+      } else {
+        // Default
+        backgroundColor = "#3174ad";
+      }
 
       return {
         style: {

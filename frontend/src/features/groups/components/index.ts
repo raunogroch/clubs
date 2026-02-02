@@ -10,3 +10,5 @@ export { EditScheduleModal } from "./EditScheduleModal";
 export { ScheduleList } from "./ScheduleList";
 export { MemberList } from "./MemberList";
 export { GroupCard } from "./GroupCard";
+export { EventsList } from "./EventsList";
+export { CreateEventModal } from "./CreateEventModal";

@@ -36,6 +36,7 @@ import { fetchUsersByRole } from "../../store/usersThunk";
 
 // Servicios
 import userService from "../../services/userService";
+import eventsService from "../../services/eventsService";
 
 // Tipos
 import type { Group, Sport, User, MemberDetail } from "./types";
@@ -56,6 +57,8 @@ import {
   GroupCard,
   ScheduleList,
   MemberList,
+  EventsList,
+  CreateEventModal,
 } from "./components";
 
 // Estilos y constantes
@@ -120,6 +123,11 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
   // Modal de editar horarios
   const scheduleModal = useScheduleModal();
 
+  // Modal de crear evento
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [eventGroupId, setEventGroupId] = useState<string | null>(null);
+  const [groupEvents, setGroupEvents] = useState<Record<string, any[]>>({});
+
   // Modal de crear/editar grupo
   const [showGroupModal, setShowGroupModal] = useState(false);
 
@@ -150,6 +158,24 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
       }
     }
   }, [clubs, sports, clubId]);
+
+  /**
+   * Cargar eventos cuando se expande un grupo - ACTUALIZADO: usar eventos poblados
+   */
+  useEffect(() => {
+    // Los eventos ahora vienen poblados desde el servidor, no necesitamos cargarlos por separado
+    if (groupExpansion.expandedGroupId && groups.length > 0) {
+      const expandedGroup = groups.find(
+        (g: any) => g._id === groupExpansion.expandedGroupId,
+      );
+      if (expandedGroup && expandedGroup.events_added) {
+        setGroupEvents((prev) => ({
+          ...prev,
+          [groupExpansion.expandedGroupId]: expandedGroup.events_added || [],
+        }));
+      }
+    }
+  }, [groupExpansion.expandedGroupId, groups]);
 
   /**
    * Cargar detalles de miembros cuando cambian los grupos
@@ -544,6 +570,66 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
     await dispatch(removeScheduleFromGroup({ groupId, scheduleIndex: index }));
   };
 
+  const handleOpenEventModal = (groupId: string) => {
+    setEventGroupId(groupId);
+    setShowEventModal(true);
+  };
+
+  const handleCreateEvent = async (eventData: {
+    name: string;
+    location: string;
+    duration: number;
+    eventDate: string;
+    eventTime: string;
+  }) => {
+    if (!eventGroupId) return;
+
+    try {
+      const createdEvent = await eventsService.create({
+        group_id: eventGroupId,
+        ...eventData,
+      });
+
+      // Actualizar estado local con el nuevo evento
+      setGroupEvents((prev) => ({
+        ...prev,
+        [eventGroupId]: [...(prev[eventGroupId] || []), createdEvent],
+      }));
+
+      // Refrescar los datos del grupo desde el servidor para obtener events_added actualizado
+      await dispatch(fetchGroupsByClub(clubId));
+
+      toastr.success("Evento creado exitosamente");
+    } catch (error) {
+      console.error("Error al crear evento:", error);
+      toastr.error("Error al crear el evento");
+    }
+  };
+
+  const handleDeleteEvent = async (groupId: string, eventId: string) => {
+    if (!window.confirm("¿Eliminar este evento?")) {
+      return;
+    }
+
+    try {
+      await eventsService.delete(eventId);
+
+      // Actualizar estado local removiendo el evento
+      setGroupEvents((prev) => ({
+        ...prev,
+        [groupId]: (prev[groupId] || []).filter((e: any) => e._id !== eventId),
+      }));
+
+      // Refrescar los datos del grupo desde el servidor
+      await dispatch(fetchGroupsByClub(clubId));
+
+      toastr.success("Evento eliminado");
+    } catch (error) {
+      console.error("Error al eliminar evento:", error);
+      toastr.error("Error al eliminar el evento");
+    }
+  };
+
   // ============================================
   // RENDER
   // ============================================
@@ -623,6 +709,20 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
                               }
                               isEditing={
                                 scheduleModal.editingGroupId === group._id
+                              }
+                              isLoading={(groupsStatus as any) === "loading"}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Eventos */}
+                        <div className="row mt-3">
+                          <div className="col-md-12">
+                            <EventsList
+                              events={groupEvents[group._id] || []}
+                              onAdd={() => handleOpenEventModal(group._id)}
+                              onDelete={(eventId) =>
+                                handleDeleteEvent(group._id, eventId)
                               }
                               isLoading={(groupsStatus as any) === "loading"}
                             />
@@ -725,6 +825,17 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
         onAddRow={scheduleModal.addScheduleRow}
         onUpdateRow={scheduleModal.updateScheduleRow}
         onRemoveRow={scheduleModal.removeScheduleRow}
+      />
+
+      <CreateEventModal
+        isOpen={showEventModal}
+        groupId={eventGroupId || ""}
+        onClose={() => {
+          setShowEventModal(false);
+          setEventGroupId(null);
+        }}
+        onCreate={handleCreateEvent}
+        isLoading={groupsStatus === "loading"}
       />
     </>
   );

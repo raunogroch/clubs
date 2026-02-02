@@ -42,6 +42,7 @@ export class GroupRepository {
         populate: { path: 'athlete_id', select: 'name role ci lastname' },
       })
       .populate('coaches', 'name role ci lastname')
+      .populate('events_added', 'name location duration eventDate eventTime')
       .sort({ createdAt: -1 })
       .exec();
   }
@@ -60,6 +61,7 @@ export class GroupRepository {
       })
       .populate('coaches', 'name role ci lastname')
       .populate('club_id', 'name')
+      .populate('events_added', 'name location duration eventDate eventTime')
       .exec();
   }
 
@@ -84,6 +86,7 @@ export class GroupRepository {
         })
         .populate('coaches', 'name role ci lastname')
         .populate('club_id', 'name')
+        .populate('events_added', 'name location duration eventDate eventTime')
         .exec();
     } catch (error) {
       console.error('Error en update del repository:', error);
@@ -156,6 +159,7 @@ export class GroupRepository {
         })
         .populate('coaches', 'name role ci lastname')
         .populate('club_id', 'name')
+        .populate('events_added', 'name location duration eventDate eventTime')
         .exec();
     } catch (error) {
       console.error('Error en addAthlete del repository:', error);
@@ -185,6 +189,7 @@ export class GroupRepository {
         })
         .populate('coaches', 'name role ci lastname')
         .populate('club_id', 'name')
+        .populate('events_added', 'name location duration eventDate eventTime')
         .exec();
     } catch (error) {
       console.error('Error en removeAthlete del repository:', error);
@@ -211,6 +216,7 @@ export class GroupRepository {
         })
         .populate('coaches', 'name role ci lastname')
         .populate('club_id', 'name')
+        .populate('events_added', 'name location duration eventDate eventTime')
         .exec();
     } catch (error) {
       console.error('Error en addCoach del repository:', error);
@@ -237,6 +243,7 @@ export class GroupRepository {
         })
         .populate('coaches', 'name role ci lastname')
         .populate('club_id', 'name')
+        .populate('events_added', 'name location duration eventDate eventTime')
         .exec();
     } catch (error) {
       console.error('Error en removeCoach del repository:', error);
@@ -300,6 +307,7 @@ export class GroupRepository {
         })
         .populate('coaches', 'name role ci lastname')
         .populate('club_id', 'name')
+        .populate('events_added', 'name location duration eventDate eventTime')
         .exec();
       return result;
     } catch (error) {
@@ -343,6 +351,7 @@ export class GroupRepository {
         })
         .populate('coaches', 'name role ci lastname')
         .populate('club_id', 'name')
+        .populate('events_added', 'name location duration eventDate eventTime')
         .exec();
     } catch (error) {
       console.error('Error en addSchedule del repository:', error);
@@ -375,6 +384,10 @@ export class GroupRepository {
             })
             .populate('coaches', 'name role ci lastname')
             .populate('club_id', 'name')
+            .populate(
+              'events_added',
+              'name location duration eventDate eventTime',
+            )
             .exec(),
         );
       }
