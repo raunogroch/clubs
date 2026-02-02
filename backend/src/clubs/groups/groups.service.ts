@@ -105,6 +105,13 @@ export class GroupsService {
   }
 
   /**
+   * Obtener todos los grupos donde el usuario autenticado es coach
+   */
+  async getMyCoachGroups(userId: string): Promise<Group[]> {
+    return this.groupRepository.findByCoach(userId);
+  }
+
+  /**
    * Obtener todos los grupos de un club
    */
   async getGroupsByClub(clubId: string, userId: string): Promise<Group[]> {

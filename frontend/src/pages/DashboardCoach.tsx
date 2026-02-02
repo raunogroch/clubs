@@ -1,157 +1,120 @@
-import { useSelector } from "react-redux";
-import { useState, useEffect } from "react";
-import type { RootState } from "../store/store";
 import { NavHeader } from "../components/NavHeader";
 import type { pageParamProps } from "../interfaces/pageParamProps";
+import { useEffect, useState } from "react";
+
+interface Schedule {
+  day: string;
+  startTime: string;
+  endTime: string;
+}
+
+interface Group {
+  _id: string;
+  name: string;
+  club_id: {
+    _id: string;
+    name: string;
+  };
+  schedule?: Schedule[];
+}
 
 export const DashboardCoach = ({ name }: pageParamProps) => {
-  const user = useSelector((state: RootState) => state.auth.user);
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Verificar si el admin tiene assignment_id
-  const hasAssignment =
-    user?.role === "admin"
-      ? (user as any)?.assignment_id !== null &&
-        (user as any)?.assignment_id !== undefined
-      : true; // Superadmin y otros roles siempre tienen acceso
+  useEffect(() => {
+    const fetchCoachGroups = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const apiUrl = `${import.meta.env.VITE_BACKEND_URI}/api/groups/my-coach-groups`;
 
-  // Si es admin sin assignment_id, mostrar mensaje especial
-  if (user?.role === "admin" && !hasAssignment) {
-    return (
-      <>
-        <NavHeader name={name} />
-        <div className="wrapper wrapper-content">
-          <div className="middle-box text-center animated fadeInRightBig">
-            <h3 className="font-bold text-warning">⚠️ Sin Asignación</h3>
-            <div className="error-desc">
-              <p>
-                Aún no has sido asignado a ningún módulo. Por favor, ponte en
-                contacto con el superadministrador para que te asigne a los
-                módulos correspondientes.
-              </p>
-              <p className="text-muted m-t-md">
-                Una vez que seas asignado, tendrás acceso a la sección de
-                Usuarios y otras funcionalidades.
-              </p>
-            </div>
-          </div>
-        </div>
-      </>
-    );
-  }
+        const response = await fetch(apiUrl, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const contentType = response.headers.get("content-type");
+
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error(
+            `Error: Se esperaba JSON pero se recibió ${contentType || "desconocido"}. Status: ${response.status}`,
+          );
+        }
+
+        if (!response.ok) {
+          throw new Error(`Error HTTP: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setGroups(data);
+      } catch (err) {
+        const errorMsg =
+          err instanceof Error ? err.message : "Error desconocido";
+        setError(errorMsg);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCoachGroups();
+  }, []);
 
   return (
     <>
       <NavHeader name={name} />
       <div className="wrapper wrapper-content">
-        <DashboardAssignments />
-      </div>
-    </>
-  );
-};
-
-const DashboardAssignments = () => {
-  const [loading, setLoading] = useState(true);
-  const [items, setItems] = useState<Array<any>>([]);
-  const [breakdown, setBreakdown] = useState<any>(null);
-  const user = useSelector((state: RootState) => state.auth.user);
-
-  useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      const userService = (await import("../services/userService")).userService;
-
-      // Cargar conteos
-      const res = await userService.getUnpaidByAssignment();
-      if (res.code === 200) {
-        setItems(res.data || []);
-      } else {
-        setItems([]);
-      }
-
-      // Cargar desglose detallado
-      const breakdownRes = await userService.getAthletesBreakdownByAssignment();
-      if (breakdownRes.code === 200) {
-        setBreakdown(breakdownRes.data);
-      }
-
-      setLoading(false);
-    };
-    load();
-  }, [user]);
-
-  if (loading) {
-    return (
-      <div className="middle-box text-center animated fadeInRightBig">
-        <div className="spinner-border text-primary" role="status"></div>
-      </div>
-    );
-  }
-
-  if (!items || items.length === 0) {
-    return (
-      <div className="middle-box text-center animated fadeInRightBig">
-        <h5>No hay datos disponibles</h5>
-      </div>
-    );
-  }
-
-  return (
-    <>
-      <div className="wrapper wrapper-content">
-        <div className="animated fadeInRightBig">
-          <div className="row">
-            <div className="col-md-4">
-              <div className="ibox">
-                <div className="ibox-title">
-                  <h5>Atletas inscritos</h5>
-                </div>
-                <div className="ibox-content text-center">
-                  <h2 className="font-bold text-primary">
-                    {breakdown?.total ??
-                      (breakdown && breakdown.clubs
-                        ? breakdown.clubs.reduce((total: number, club: any) => {
-                            return (
-                              total +
-                              (club.groups || []).reduce(
-                                (gTotal: number, group: any) =>
-                                  gTotal + (group.athleteCount || 0),
-                                0,
-                              )
-                            );
-                          }, 0)
-                        : 0)}
-                  </h2>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-4">
-              <div className="ibox">
-                <div className="ibox-title">
-                  <h5>Atletas sin matricula</h5>
-                </div>
-                <div className="ibox-content text-center">
-                  <h2 className="font-bold text-danger">
-                    {breakdown && breakdown.clubs
-                      ? breakdown.clubs.reduce(
-                          (totalUnpaid: number, club: any) => {
-                            return (
-                              totalUnpaid +
-                              (club.groups || []).reduce(
-                                (clubUnpaid: number, group: any) => {
-                                  return clubUnpaid + (group.unpaidCount || 0);
-                                },
-                                0,
-                              )
-                            );
-                          },
-                          0,
-                        )
-                      : 0}
-                  </h2>
-                </div>
-              </div>
+        <div className="container-fluid">
+          <div className="row mb-4">
+            <div className="col-md-12">
+              <h2>Mis Grupos</h2>
             </div>
           </div>
+
+          {loading && <p>Cargando grupos...</p>}
+          {error && <p className="text-danger">{error}</p>}
+
+          {!loading && groups.length === 0 && (
+            <p>No tienes grupos asignados como entrenador.</p>
+          )}
+
+          {!loading && groups.length > 0 && (
+            <div className="row">
+              {groups.map((group) => (
+                <div key={group._id} className="col-md-6 col-lg-4 mb-3">
+                  <div className="card h-100">
+                    <div className="card-body">
+                      <h5 className="card-title">{group.name}</h5>
+                      <p className="card-text">
+                        <small className="text-muted">
+                          Club: {group.club_id.name}
+                        </small>
+                      </p>
+
+                      {group.schedule && group.schedule.length > 0 ? (
+                        <div className="mt-3">
+                          <h6 className="mb-2">Horarios:</h6>
+                          <ul className="list-unstyled">
+                            {group.schedule.map((sched, idx) => (
+                              <li key={idx} className="small mb-1">
+                                <strong>{sched.day}:</strong> {sched.startTime}{" "}
+                                - {sched.endTime}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : (
+                        <p className="small text-muted mt-3">
+                          Sin horarios asignados
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </>

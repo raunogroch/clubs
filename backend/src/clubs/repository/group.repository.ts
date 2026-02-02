@@ -309,6 +309,20 @@ export class GroupRepository {
   }
 
   /**
+   * Obtener grupos donde un usuario es coach
+   */
+  async findByCoach(coachId: string): Promise<Group[]> {
+    return this.groupModel
+      .find({
+        coaches: new Types.ObjectId(coachId),
+      })
+      .select('name club_id schedule')
+      .populate('club_id', 'name')
+      .sort({ createdAt: -1 })
+      .exec();
+  }
+
+  /**
    * Agregar horario a un grupo
    */
   async addSchedule(

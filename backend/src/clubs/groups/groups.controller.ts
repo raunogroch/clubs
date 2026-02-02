@@ -26,6 +26,15 @@ export class GroupsController {
   constructor(private groupsService: GroupsService) {}
 
   /**
+   * GET /groups/my-coach-groups
+   * Obtener todos los grupos donde el usuario autenticado es coach
+   */
+  @Get('my-coach-groups')
+  async getMyCoachGroups(@CurrentUser() user: any) {
+    return this.groupsService.getMyCoachGroups(user.sub);
+  }
+
+  /**
    * POST /groups
    * Crear un nuevo grupo
    * Solo administradores de la asignación del club
