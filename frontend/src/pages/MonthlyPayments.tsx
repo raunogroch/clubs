@@ -28,7 +28,7 @@ enum GENDER {
 }
 
 export const MonthlyPayments = () => {
-  const [ci, setCi] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [athlete, setAthlete] = useState<any | null>(null);
   const [registrations, setRegistrations] = useState<any[]>([]);
@@ -71,21 +71,41 @@ export const MonthlyPayments = () => {
   const user = useSelector((state: RootState) => state.auth.user);
 
   const handleSearch = async () => {
-    if (!ci) return;
+    if (!searchInput.trim()) return;
     setLoading(true);
     setAthlete(null);
     setRegistrations([]);
     setGroupsInfo({});
     try {
-      // Buscar específicamente un usuario con role 'athlete'
-      const res = await userService.findUserByCiAndRole(ci, "athlete");
-      const found = res.data?.data || res.data || null;
+      // Buscar por CI
+      let res = await userService.findUserByCiAndRole(searchInput, "athlete");
+      let found = res.data?.data || res.data || null;
+
+      // Si no encuentra por CI, buscar por nombre o apellido
       if (!found) {
-        alert("Atleta con ese CI y rol 'athlete' no encontrado");
+        // Obtener todos los atletas de los grupos
+        const allUsersRes = await userService.getAthletesFromGroups();
+        if (allUsersRes?.data) {
+          const searchTerm = searchInput.toLowerCase().trim();
+          found = (allUsersRes.data as any[]).find((user: any) => {
+            const nameLower = (user.name || "").toLowerCase();
+            const lastnameLower = (user.lastname || "").toLowerCase();
+            const ciLower = (user.ci || "").toLowerCase();
+            return (
+              nameLower.includes(searchTerm) ||
+              lastnameLower.includes(searchTerm) ||
+              ciLower.includes(searchTerm)
+            );
+          });
+        }
+      }
+
+      if (!found) {
+        alert("Atleta no encontrado");
         setLoading(false);
         return;
       }
-      // Mostrar el id del usuario (athlete)
+
       setAthlete(found);
 
       const assignmentId = (user as any)?.assignment_id;
@@ -320,10 +340,11 @@ export const MonthlyPayments = () => {
               <div className="ibox-content">
                 <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
                   <input
-                    placeholder="CI del atleta"
+                    placeholder="Buscar por CI, nombre o apellido"
                     className="form-control"
-                    value={ci}
-                    onChange={(e) => setCi(e.target.value)}
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                   />
                   <button
                     className="btn btn-primary"
