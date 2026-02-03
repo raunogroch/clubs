@@ -324,8 +324,9 @@ export class GroupRepository {
       .find({
         coaches: new Types.ObjectId(coachId),
       })
-      .select('name club_id schedule')
+      .select('name club_id schedule events_added')
       .populate('club_id', 'name')
+      .populate('events_added', 'name location duration eventDate eventTime')
       .sort({ createdAt: -1 })
       .exec();
   }

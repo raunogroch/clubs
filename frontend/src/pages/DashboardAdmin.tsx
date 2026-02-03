@@ -400,48 +400,7 @@ const DashboardAssignments = ({ user }: { user: any }) => {
       const weekStart = startOfWeek(date, { weekStartsOn: 1 });
 
       groupsWithEvents.forEach((group) => {
-        // Add schedule events
-        if (group.schedule && group.schedule.length > 0) {
-          group.schedule.forEach((sched: any) => {
-            const [startHour, startMin] = sched.startTime
-              .split(":")
-              .map(Number);
-            const [endHour, endMin] = sched.endTime.split(":").map(Number);
-
-            // Filtrar horarios entre 12:00 y 14:00 (misma lógica que ScheduleCoach)
-            if (
-              (startHour >= 12 && startHour < 14) ||
-              (endHour > 12 && endHour <= 14)
-            ) {
-              return;
-            }
-
-            const dayOffset = dayNameMap[sched.day] || 0;
-            const eventDate = new Date(weekStart);
-            eventDate.setDate(
-              eventDate.getDate() + (dayOffset === 0 ? 6 : dayOffset - 1),
-            );
-
-            const startTime = new Date(eventDate);
-            startTime.setHours(startHour, startMin, 0, 0);
-
-            const endTime = new Date(eventDate);
-            endTime.setHours(endHour, endMin, 0, 0);
-
-            calendarEvents.push({
-              id: `schedule-${group._id}-${sched.day}-${sched.startTime}`,
-              title: `[Horario] ${group.name} (${sched.startTime} - ${sched.endTime})`,
-              start: startTime,
-              end: endTime,
-              resource: {
-                club: group.club?.name || "",
-                group: group.name,
-              },
-            });
-          });
-        }
-
-        // Add custom events
+        // Agregar primero eventos especiales (events_added) para que tengan prioridad
         if (group.events_added && group.events_added.length > 0) {
           group.events_added.forEach((evt: any) => {
             try {
@@ -476,34 +435,72 @@ const DashboardAssignments = ({ user }: { user: any }) => {
             }
           });
         }
+
+        // Agregar eventos de horarios (schedule) después
+        if (group.schedule && group.schedule.length > 0) {
+          group.schedule.forEach((sched: any) => {
+            const [startHour, startMin] = sched.startTime
+              .split(":")
+              .map(Number);
+            const [endHour, endMin] = sched.endTime.split(":").map(Number);
+
+            const dayOffset = dayNameMap[sched.day] || 0;
+            const eventDate = new Date(weekStart);
+            eventDate.setDate(
+              eventDate.getDate() + (dayOffset === 0 ? 6 : dayOffset - 1),
+            );
+
+            const startTime = new Date(eventDate);
+            startTime.setHours(startHour, startMin, 0, 0);
+
+            const endTime = new Date(eventDate);
+            endTime.setHours(endHour, endMin, 0, 0);
+
+            calendarEvents.push({
+              id: `schedule-${group._id}-${sched.day}-${sched.startTime}`,
+              title: `[Horario] ${group.name} (${sched.startTime} - ${sched.endTime})`,
+              start: startTime,
+              end: endTime,
+              resource: {
+                club: group.club?.name || "",
+                group: group.name,
+              },
+            });
+          });
+        }
       });
 
       setEvents(calendarEvents);
     }, [groupsWithEvents, date]);
 
     const eventStyleGetter = (event: CalendarEvent) => {
-      // Diferenciar colores: horarios vs eventos
-      let backgroundColor: string;
-
-      if (event.title.includes("[Horario]")) {
-        // Horarios en azul
-        backgroundColor = "#4472C4";
-      } else if (event.title.includes("[Evento]")) {
-        // Eventos en verde
-        backgroundColor = "#70AD47";
-      } else {
-        // Default
-        backgroundColor = "#3174ad";
+      // Diferenciar colores: eventos vs horarios
+      // Eventos especiales siempre tienen máxima prioridad visual
+      if (event.title.includes("[Evento]")) {
+        return {
+          style: {
+            backgroundColor: "#e91e63",
+            borderRadius: "5px",
+            opacity: 1,
+            color: "white",
+            border: "3px solid #c2185b",
+            display: "block",
+            fontWeight: "bold",
+            zIndex: 999,
+          },
+        };
       }
-
+      
+      // Horarios con menor prioridad visual
       return {
         style: {
-          backgroundColor,
+          backgroundColor: "#4472C4",
           borderRadius: "5px",
-          opacity: 0.8,
+          opacity: 0.7,
           color: "white",
           border: "0px",
           display: "block",
+          zIndex: 1,
         },
       };
     };
@@ -525,8 +522,8 @@ const DashboardAssignments = ({ user }: { user: any }) => {
             eventPropGetter={eventStyleGetter}
             popup
             selectable
-            min={new Date(2024, 0, 1, 8, 0, 0)}
-            max={new Date(2024, 0, 1, 22, 0, 0)}
+            min={new Date(2024, 0, 1, 6, 0, 0)}
+            max={new Date(2024, 0, 1, 23, 59, 59)}
             step={30}
             showMultiDayTimes
             views={["month", "week", "day", "agenda"]}

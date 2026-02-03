@@ -19,6 +19,15 @@ interface Schedule {
   endTime: string;
 }
 
+interface Event {
+  _id: string;
+  name: string;
+  location: string;
+  duration: number;
+  eventDate: string;
+  eventTime: string;
+}
+
 interface Group {
   _id: string;
   name: string;
@@ -27,6 +36,7 @@ interface Group {
     name: string;
   };
   schedule?: Schedule[];
+  events_added?: Event[];
 }
 
 interface CalendarEvent {
@@ -34,9 +44,11 @@ interface CalendarEvent {
   title: string;
   start: Date;
   end: Date;
+  eventType: 'schedule' | 'event'; // Para diferenciar entre horarios y eventos
   resource?: {
     club: string;
     group: string;
+    location?: string;
   };
 }
 
@@ -111,18 +123,43 @@ const ProCalendar = ({ groups }: { groups: Group[] }) => {
     const weekStart = startOfWeek(date, { weekStartsOn: 1 });
 
     groups.forEach((group) => {
+      // Agregar primero eventos especiales (events_added) para que tengan prioridad visual
+      if (group.events_added && group.events_added.length > 0) {
+        group.events_added.forEach((event) => {
+          try {
+            const [year, month, day] = event.eventDate.split("-").map(Number);
+            const eventDate = new Date(year, month - 1, day);
+            const [eventHour, eventMin] = event.eventTime.split(":").map(Number);
+            
+            const startTime = new Date(eventDate);
+            startTime.setHours(eventHour, eventMin, 0, 0);
+            
+            const endTime = new Date(startTime);
+            endTime.setMinutes(endTime.getMinutes() + event.duration);
+
+            calendarEvents.push({
+              id: `event-${event._id}`,
+              title: `📍 ${event.name}`,
+              start: startTime,
+              end: endTime,
+              eventType: 'event',
+              resource: {
+                club: group.club_id?.name || "",
+                group: group.name,
+                location: event.location,
+              },
+            });
+          } catch (error) {
+            console.error('Error procesando evento:', event, error);
+          }
+        });
+      }
+
+      // Agregar eventos de horarios (schedule) después
       if (group.schedule && group.schedule.length > 0) {
         group.schedule.forEach((sched) => {
           const [startHour, startMin] = sched.startTime.split(":").map(Number);
           const [endHour, endMin] = sched.endTime.split(":").map(Number);
-
-          // Filtrar horarios entre 12:00 y 14:00
-          if (
-            (startHour >= 12 && startHour < 14) ||
-            (endHour > 12 && endHour <= 14)
-          ) {
-            return;
-          }
 
           const dayOffset = dayNameMap[sched.day] || 0;
           const eventDate = new Date(weekStart);
@@ -141,6 +178,7 @@ const ProCalendar = ({ groups }: { groups: Group[] }) => {
             title: group.name,
             start: startTime,
             end: endTime,
+            eventType: 'schedule',
             resource: {
               club: group.club_id?.name || "",
               group: group.name,
@@ -162,16 +200,34 @@ const ProCalendar = ({ groups }: { groups: Group[] }) => {
       "#2196f3",
       "#9c27b0",
     ];
+    
+    // Eventos especiales (eventos creados) con máxima prioridad visual
+    if (event.eventType === 'event') {
+      return {
+        style: {
+          backgroundColor: "#e91e63",
+          borderRadius: "5px",
+          opacity: 1,
+          color: "white",
+          border: "3px solid #c2185b",
+          display: "block",
+          fontWeight: "bold",
+          zIndex: 999,
+        },
+      };
+    }
+    
+    // Horarios regulares (schedule) con menor prioridad visual
     const backgroundColor = colors[event.title.charCodeAt(0) % colors.length];
-
     return {
       style: {
         backgroundColor,
         borderRadius: "5px",
-        opacity: 0.8,
+        opacity: 0.7,
         color: "white",
         border: "0px",
         display: "block",
+        zIndex: 1,
       },
     };
   };
@@ -193,8 +249,8 @@ const ProCalendar = ({ groups }: { groups: Group[] }) => {
           eventPropGetter={eventStyleGetter}
           popup
           selectable
-          min={new Date(2024, 0, 1, 8, 0, 0)}
-          max={new Date(2024, 0, 1, 22, 0, 0)}
+          min={new Date(2024, 0, 1, 6, 0, 0)}
+          max={new Date(2024, 0, 1, 23, 59, 59)}
           step={30}
           showMultiDayTimes
           views={["month", "week", "day", "agenda"]}
