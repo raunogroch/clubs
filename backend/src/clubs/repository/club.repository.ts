@@ -137,4 +137,64 @@ export class ClubRepository {
       assignment_id: new Types.ObjectId(assignmentId),
     });
   }
+
+  /**
+   * Añadir un nivel embebido en el club
+   */
+  async addLevel(
+    clubId: string,
+    level: { position: number; name: string; description?: string },
+  ): Promise<Club | null> {
+    const levelDoc = {
+      _id: new Types.ObjectId(),
+      position: level.position,
+      name: level.name,
+      description: level.description,
+    } as any;
+
+    await this.clubModel.updateOne(
+      { _id: new Types.ObjectId(clubId) },
+      { $push: { levels: levelDoc } },
+    );
+
+    return this.findById(clubId);
+  }
+
+  /**
+   * Actualizar un nivel embebido en el club
+   */
+  async updateLevel(
+    clubId: string,
+    levelId: string,
+    level: { position?: number; name?: string; description?: string },
+  ): Promise<Club | null> {
+    const update: any = {};
+    if (level.position !== undefined)
+      update['levels.$.position'] = level.position;
+    if (level.name !== undefined) update['levels.$.name'] = level.name;
+    if (level.description !== undefined)
+      update['levels.$.description'] = level.description;
+
+    await this.clubModel.updateOne(
+      {
+        _id: new Types.ObjectId(clubId),
+        'levels._id': new Types.ObjectId(levelId),
+      },
+      { $set: update },
+    );
+
+    return this.findById(clubId);
+  }
+
+  /**
+   * Eliminar un nivel embebido del club
+   */
+  async deleteLevel(clubId: string, levelId: string): Promise<Club | null> {
+    await this.clubModel.updateOne(
+      { _id: new Types.ObjectId(clubId) },
+      { $pull: { levels: { _id: new Types.ObjectId(levelId) } } },
+    );
+
+    return this.findById(clubId);
+  }
 }

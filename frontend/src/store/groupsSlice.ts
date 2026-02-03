@@ -258,6 +258,7 @@ const groupsSlice = createSlice({
         state.status = "failed";
         state.error = action.payload as string;
       });
+    // levels are handled by clubsSlice (club.levels)
   },
 });
 

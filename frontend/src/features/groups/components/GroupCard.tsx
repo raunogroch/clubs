@@ -15,7 +15,6 @@ interface GroupCardProps {
   onToggleExpand: () => void;
   onEdit: () => void;
   onDelete: () => void;
-  onOpenLevels?: () => void;
   children?: React.ReactNode;
 }
 
@@ -26,7 +25,6 @@ export const GroupCard: React.FC<GroupCardProps> = ({
   onToggleExpand,
   onEdit,
   onDelete,
-  onOpenLevels,
   children,
 }) => {
   const createdDate = new Date(group.createdAt).toLocaleDateString("es-ES");
@@ -74,14 +72,6 @@ export const GroupCard: React.FC<GroupCardProps> = ({
 
           {/* Botones de acción */}
           <div className="ibox-tools">
-            <button
-              className="btn btn-info btn-xs"
-              onClick={onOpenLevels}
-              title="Ver logros"
-              disabled={isLoading}
-            >
-              <i className="fa fa-trophy"></i> Logros
-            </button>{" "}
             <button
               className="btn btn-primary btn-xs"
               onClick={onEdit}

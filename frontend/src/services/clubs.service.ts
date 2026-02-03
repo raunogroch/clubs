@@ -205,6 +205,83 @@ class ClubsService {
 
     return safeParseJson(response);
   }
+
+  /**
+   * Añadir un nivel al club
+   * POST /api/clubs/:clubId/levels
+   */
+  async addLevel(
+    clubId: string,
+    level: { position: number; name: string; description?: string },
+  ): Promise<Club> {
+    const response = await fetch(`${API_URL}/clubs/${clubId}/levels`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify(level),
+    });
+
+    if (!response.ok) {
+      const error = await safeParseJson(response);
+      throw new Error(error.message || "Error al agregar nivel al club");
+    }
+
+    return safeParseJson(response);
+  }
+
+  /**
+   * Actualizar un nivel del club
+   * PATCH /api/clubs/:clubId/levels/:levelId
+   */
+  async updateLevel(
+    clubId: string,
+    levelId: string,
+    level: { position?: number; name?: string; description?: string },
+  ): Promise<Club> {
+    const response = await fetch(
+      `${API_URL}/clubs/${clubId}/levels/${levelId}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify(level),
+      },
+    );
+
+    if (!response.ok) {
+      const error = await safeParseJson(response);
+      throw new Error(error.message || "Error al actualizar nivel del club");
+    }
+
+    return safeParseJson(response);
+  }
+
+  /**
+   * Eliminar un nivel del club
+   * DELETE /api/clubs/:clubId/levels/:levelId
+   */
+  async deleteLevel(clubId: string, levelId: string): Promise<Club> {
+    const response = await fetch(
+      `${API_URL}/clubs/${clubId}/levels/${levelId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      },
+    );
+
+    if (!response.ok) {
+      const error = await safeParseJson(response);
+      throw new Error(error.message || "Error al eliminar nivel del club");
+    }
+
+    return safeParseJson(response);
+  }
 }
 
 const clubsService = new ClubsService();

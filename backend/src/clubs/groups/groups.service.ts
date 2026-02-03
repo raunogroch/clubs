@@ -13,10 +13,14 @@ import { GroupRepository } from '../repository/group.repository';
 import { ClubRepository } from '../repository/club.repository';
 import { CreateGroupDto } from '../dto/create-group.dto';
 import { UpdateGroupDto } from '../dto/update-group.dto';
+import {
+  CreateGroupLevelDto,
+  UpdateGroupLevelDto,
+} from '../dto/group-level.dto';
 import { Group } from '../schemas/group.schema';
 import { AssignmentsService } from '../../assignments/assignments.service';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { User } from '../../users/schemas/user.schema';
 import { RegistrationsService } from '../../registrations/registrations.service';
 
@@ -684,5 +688,135 @@ export class GroupsService {
       console.error('Error en removeSchedule:', error);
       throw error;
     }
+  }
+
+  /**
+   * Añadir un nivel al grupo
+   */
+  async addLevel(
+    groupId: string,
+    createLevelDto: CreateGroupLevelDto,
+    userId: string,
+  ): Promise<Group> {
+    const group = await this.groupRepository.findById(groupId);
+    if (!group) {
+      throw new NotFoundException(`Grupo con ID ${groupId} no encontrado`);
+    }
+
+    // Extraer el club_id correctamente
+    let clubId: string;
+    if (typeof group.club_id === 'object' && group.club_id !== null) {
+      clubId =
+        (group.club_id as any)._id?.toString?.() ||
+        (group.club_id as any)?.toString?.();
+    } else {
+      clubId = String(group.club_id);
+    }
+
+    // Verificar acceso al club
+    await this.verifyClubAccess(clubId, userId);
+
+    // Crear el nivel con _id automático
+    const newLevel = {
+      _id: new Types.ObjectId(),
+      position: createLevelDto.position,
+      name: createLevelDto.name,
+      description: createLevelDto.description,
+    };
+
+    // Agregar el nivel al array levels del grupo
+    const updated = await this.groupRepository.addLevel(groupId, newLevel);
+    if (!updated) {
+      throw new NotFoundException(`Grupo con ID ${groupId} no encontrado`);
+    }
+
+    return updated;
+  }
+
+  /**
+   * Actualizar un nivel del grupo
+   */
+  async updateLevel(
+    groupId: string,
+    levelId: string,
+    updateLevelDto: UpdateGroupLevelDto,
+    userId: string,
+  ): Promise<Group> {
+    const group = await this.groupRepository.findById(groupId);
+    if (!group) {
+      throw new NotFoundException(`Grupo con ID ${groupId} no encontrado`);
+    }
+
+    // Extraer el club_id correctamente
+    let clubId: string;
+    if (typeof group.club_id === 'object' && group.club_id !== null) {
+      clubId =
+        (group.club_id as any)._id?.toString?.() ||
+        (group.club_id as any)?.toString?.();
+    } else {
+      clubId = String(group.club_id);
+    }
+
+    // Verificar acceso al club
+    await this.verifyClubAccess(clubId, userId);
+
+    // Encontrar el nivel dentro del array
+    if (!group.levels || group.levels.length === 0) {
+      throw new NotFoundException(`Nivel con ID ${levelId} no encontrado`);
+    }
+
+    const levelIndex = group.levels.findIndex(
+      (l) => l._id?.toString() === levelId,
+    );
+    if (levelIndex === -1) {
+      throw new NotFoundException(`Nivel con ID ${levelId} no encontrado`);
+    }
+
+    // Actualizar el nivel
+    const updated = await this.groupRepository.updateLevel(
+      groupId,
+      levelId,
+      updateLevelDto,
+    );
+    if (!updated) {
+      throw new NotFoundException(`Grupo con ID ${groupId} no encontrado`);
+    }
+
+    return updated;
+  }
+
+  /**
+   * Eliminar un nivel del grupo
+   */
+  async deleteLevel(
+    groupId: string,
+    levelId: string,
+    userId: string,
+  ): Promise<Group> {
+    const group = await this.groupRepository.findById(groupId);
+    if (!group) {
+      throw new NotFoundException(`Grupo con ID ${groupId} no encontrado`);
+    }
+
+    // Extraer el club_id correctamente
+    let clubId: string;
+    if (typeof group.club_id === 'object' && group.club_id !== null) {
+      clubId =
+        (group.club_id as any)._id?.toString?.() ||
+        (group.club_id as any)?.toString?.();
+    } else {
+      clubId = String(group.club_id);
+    }
+
+    // Verificar acceso al club
+    await this.verifyClubAccess(clubId, userId);
+
+    // Eliminar el nivel del array
+    const updated = await this.groupRepository.deleteLevel(groupId, levelId);
+    if (!updated) {
+      throw new NotFoundException(`Grupo con ID ${groupId} no encontrado`);
+    }
+
+    return updated;
   }
 }

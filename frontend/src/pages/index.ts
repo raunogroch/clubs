@@ -6,6 +6,8 @@ export * from "./NotFound";
 export * from "./Navigation";
 export * from "./Assignments";
 export * from "./Clubs";
+export * from "./ClubGroups";
+export * from "./GroupDetail";
 export * from "./Groups";
 export * from "./Admins";
 export * from "./Assistants";

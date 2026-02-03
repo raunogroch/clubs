@@ -18,6 +18,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { ClubsService } from './clubs.service';
 import { CreateClubDto } from './dto/create-club.dto';
 import { UpdateClubDto } from './dto/update-club.dto';
+import { CreateClubLevelDto, UpdateClubLevelDto } from './dto/club-level.dto';
 
 @Controller('clubs')
 @UseGuards(JwtAuthGuard)
@@ -35,6 +36,54 @@ export class ClubsController {
     @CurrentUser() user: any,
   ) {
     return this.clubsService.createClub(createClubDto, user.sub);
+  }
+
+  /**
+   * POST /clubs/:clubId/levels
+   * Agregar un nivel al club
+   */
+  @Post(':clubId/levels')
+  async addLevel(
+    @Param('clubId') clubId: string,
+    @Body() createClubLevelDto: CreateClubLevelDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.clubsService.addLevelToClub(
+      clubId,
+      user.sub,
+      createClubLevelDto,
+    );
+  }
+
+  /**
+   * PATCH /clubs/:clubId/levels/:levelId
+   * Actualizar un nivel del club
+   */
+  @Patch(':clubId/levels/:levelId')
+  async updateLevel(
+    @Param('clubId') clubId: string,
+    @Param('levelId') levelId: string,
+    @Body() updateClubLevelDto: UpdateClubLevelDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.clubsService.updateLevelInClub(
+      clubId,
+      levelId,
+      user.sub,
+      updateClubLevelDto,
+    );
+  }
+
+  /**
+   * DELETE /clubs/:clubId/levels/:levelId
+   */
+  @Delete(':clubId/levels/:levelId')
+  async deleteLevel(
+    @Param('clubId') clubId: string,
+    @Param('levelId') levelId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.clubsService.deleteLevelFromClub(clubId, levelId, user.sub);
   }
 
   /**

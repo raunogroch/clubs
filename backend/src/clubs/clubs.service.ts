@@ -12,6 +12,7 @@ import {
 import { CreateClubDto } from './dto/create-club.dto';
 import { UpdateClubDto } from './dto/update-club.dto';
 import { ClubRepository } from './repository/club.repository';
+import { CreateClubLevelDto, UpdateClubLevelDto } from './dto/club-level.dto';
 import { AssignmentsService } from '../assignments/assignments.service';
 import { SportsService } from '../sports/sports.service';
 import { Assignment } from '../assignments/schemas/assignment.schema';
@@ -71,13 +72,109 @@ export class ClubsService {
   }
 
   /**
+   * Añadir un nivel al club
+   */
+  async addLevelToClub(
+    clubId: string,
+    userId: string,
+    createClubLevelDto: CreateClubLevelDto,
+  ) {
+    const club = await this.clubRepository.findById(clubId);
+    if (!club) throw new NotFoundException('Club no encontrado');
+
+    // Permisos: creador o admin de la asignación
+    const isCreator = club.created_by.toString() === userId;
+    const assignmentId =
+      typeof club.assignment_id === 'object' && club.assignment_id !== null
+        ? (club.assignment_id as any)._id.toString()
+        : (club.assignment_id as any).toString();
+    const isAssignmentAdmin =
+      await this.assignmentsService.isUserAdminOfAssignment(
+        userId,
+        assignmentId,
+      );
+
+    if (!isCreator && !isAssignmentAdmin) {
+      throw new ForbiddenException('No tienes permisos para agregar niveles');
+    }
+
+    const updated = await this.clubRepository.addLevel(
+      clubId,
+      createClubLevelDto as any,
+    );
+    return updated;
+  }
+
+  /**
+   * Actualizar nivel del club
+   */
+  async updateLevelInClub(
+    clubId: string,
+    levelId: string,
+    userId: string,
+    updateClubLevelDto: UpdateClubLevelDto,
+  ) {
+    const club = await this.clubRepository.findById(clubId);
+    if (!club) throw new NotFoundException('Club no encontrado');
+
+    const isCreator = club.created_by.toString() === userId;
+    const assignmentId =
+      typeof club.assignment_id === 'object' && club.assignment_id !== null
+        ? (club.assignment_id as any)._id.toString()
+        : (club.assignment_id as any).toString();
+    const isAssignmentAdmin =
+      await this.assignmentsService.isUserAdminOfAssignment(
+        userId,
+        assignmentId,
+      );
+
+    if (!isCreator && !isAssignmentAdmin) {
+      throw new ForbiddenException(
+        'No tienes permisos para actualizar niveles',
+      );
+    }
+
+    const updated = await this.clubRepository.updateLevel(
+      clubId,
+      levelId,
+      updateClubLevelDto as any,
+    );
+    return updated;
+  }
+
+  /**
+   * Eliminar nivel del club
+   */
+  async deleteLevelFromClub(clubId: string, levelId: string, userId: string) {
+    const club = await this.clubRepository.findById(clubId);
+    if (!club) throw new NotFoundException('Club no encontrado');
+
+    const isCreator = club.created_by.toString() === userId;
+    const assignmentId =
+      typeof club.assignment_id === 'object' && club.assignment_id !== null
+        ? (club.assignment_id as any)._id.toString()
+        : (club.assignment_id as any).toString();
+    const isAssignmentAdmin =
+      await this.assignmentsService.isUserAdminOfAssignment(
+        userId,
+        assignmentId,
+      );
+
+    if (!isCreator && !isAssignmentAdmin) {
+      throw new ForbiddenException('No tienes permisos para eliminar niveles');
+    }
+
+    const updated = await this.clubRepository.deleteLevel(clubId, levelId);
+    return updated;
+  }
+
+  /**
    * Obtener todos los clubs de las asignaciones del usuario
    */
   async getMyClubs(userId: string) {
     // Obtener las asignaciones del usuario
-    const assignments = await this.assignmentsService.getUserAssignments(
-      userId,
-    );
+    const assignments =
+      await this.assignmentsService.getUserAssignments(userId);
 
     if (!assignments || assignments.length === 0) {
       return [];

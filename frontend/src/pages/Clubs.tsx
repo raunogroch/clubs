@@ -6,12 +6,12 @@
  * - Crear nuevos clubs
  * - Actualizar clubs existentes
  * - Eliminar clubs
- * - Gestionar grupos dentro de cada club
  *
  * Solo accesible por administradores con assignments asignados
  */
 
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import toastr from "toastr";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState, AppDispatch } from "../store/store";
@@ -23,15 +23,15 @@ import {
 } from "../store/clubsThunk";
 import { fetchMyAssignments } from "../store/assignmentsThunk";
 import { fetchAllSports } from "../store/sportsThunk";
-import { fetchGroupsByClub } from "../store/groupsThunk";
 import groupsService from "../services/groups.service";
 import clubsService from "../services/clubs.service";
 
 import type { Club, CreateClubRequest } from "../services/clubs.service";
 import { NavHeader } from "../components";
-import { Groups } from "./Groups";
+import { GroupLevelsModal } from "../features/groups/components";
 
 export const Clubs = ({ name }: { name?: string }) => {
+  const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.auth.user);
   const { items: clubs, status: clubsStatus } = useSelector(
@@ -49,9 +49,9 @@ export const Clubs = ({ name }: { name?: string }) => {
   const [membersLoading, setMembersLoading] = useState<boolean>(true);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [selectedClubForGroups, setSelectedClubForGroups] = useState<
-    string | null
-  >(null);
+  const [showLevelsModal, setShowLevelsModal] = useState(false);
+  const [selectedClubForLevels, setSelectedClubForLevels] =
+    useState<Club | null>(null);
 
   // Formulario
   const [formData, setFormData] = useState<CreateClubRequest>({
@@ -171,10 +171,10 @@ export const Clubs = ({ name }: { name?: string }) => {
 
   // Cargar grupos cuando se selecciona un club
   useEffect(() => {
-    if (selectedClubForGroups) {
-      dispatch(fetchGroupsByClub(selectedClubForGroups));
+    if (editingId) {
+      // Esto solo se ejecuta si estamos editando
     }
-  }, [selectedClubForGroups, dispatch]);
+  }, [editingId]);
 
   // Obtener nombre del deporte por ID
   const getSportName = (sportId: string): string => {
@@ -289,125 +289,123 @@ export const Clubs = ({ name }: { name?: string }) => {
     <>
       <NavHeader name={"Clubs"} />
 
-      {/* Si hay un club seleccionado para gestionar grupos, mostrar ese componente */}
-      {selectedClubForGroups ? (
-        <Groups
-          clubId={selectedClubForGroups}
-          onBack={() => setSelectedClubForGroups(null)}
-        />
-      ) : (
-        <div className="wrapper wrapper-content">
-          <div className="row">
-            <div className="col-lg-12">
-              <div className="ibox">
-                <div className="ibox-title">
-                  <h5>Gestión de Clubs</h5>
-                  <div className="ibox-tools">
-                    <button
-                      className="btn btn-xs btn-primary"
-                      onClick={handleOpenCreate}
-                      disabled={clubsStatus === "loading"}
-                    >
-                      <i className="fa fa-plus"></i> Crear Club
-                    </button>
+      <div className="wrapper wrapper-content">
+        <div className="row">
+          <div className="col-lg-12">
+            <div className="ibox">
+              <div className="ibox-title">
+                <h5>Gestión de Clubs</h5>
+                <div className="ibox-tools">
+                  <button
+                    className="btn btn-xs btn-primary"
+                    onClick={handleOpenCreate}
+                    disabled={clubsStatus === "loading"}
+                  >
+                    <i className="fa fa-plus"></i> Crear Club
+                  </button>
+                </div>
+              </div>
+              <div className="ibox-content">
+                {clubsStatus === "loading" || membersLoading ? (
+                  <div className="text-center">
+                    <p>Cargando información...</p>
                   </div>
-                </div>
-                <div className="ibox-content">
-                  {clubsStatus === "loading" || membersLoading ? (
-                    <div className="text-center">
-                      <p>Cargando información...</p>
-                    </div>
-                  ) : clubs.length === 0 ? (
-                    <div className="text-center">
-                      <p className="text-muted">
-                        No hay clubs creados aún. Crea uno nuevo para comenzar.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="table-responsive">
-                      <table className="table table-striped table-hover">
-                        <thead>
-                          <tr>
-                            <th style={{ verticalAlign: "middle" }}>
-                              Disciplina
-                            </th>
-                            <th style={{ verticalAlign: "middle" }}>
-                              Ubicación
-                            </th>
-                            <th style={{ verticalAlign: "middle" }}>Grupos</th>
-                            <th style={{ verticalAlign: "middle" }}>
-                              Deportistas
-                            </th>
-                            <th style={{ verticalAlign: "middle" }}>
-                              Entrenadores
-                            </th>
-                            <th style={{ verticalAlign: "middle" }}>
-                              Acciones
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {clubs.map((club) => (
-                            <tr key={club._id}>
-                              <td style={{ verticalAlign: "middle" }}>
-                                <strong>{getSportName(club.sport_id)}</strong>
-                              </td>
-                              <td style={{ verticalAlign: "middle" }}>
-                                {club.location || "-"}
-                              </td>
-                              <td style={{ verticalAlign: "middle" }}>
-                                <button
-                                  className="btn btn-info btn-xs"
-                                  onClick={() =>
-                                    setSelectedClubForGroups(club._id)
-                                  }
-                                  title="Gestionar grupos"
-                                >
-                                  <i className="fa fa-sitemap"></i>{" "}
-                                  &nbsp;Gestionar grupos
-                                </button>
-                              </td>
-                              <td style={{ verticalAlign: "middle" }}>
-                                <span>
-                                  Registrados ( &nbsp;
-                                  {clubMembers[club._id]?.athletes || 0} &nbsp;)
-                                </span>
-                              </td>
-                              <td style={{ verticalAlign: "middle" }}>
-                                <span>
-                                  Registrados ( &nbsp;
-                                  {clubMembers[club._id]?.coaches || 0} &nbsp;)
-                                </span>
-                              </td>
+                ) : clubs.length === 0 ? (
+                  <div className="text-center">
+                    <p className="text-muted">
+                      No hay clubs creados aún. Crea uno nuevo para comenzar.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="table-responsive">
+                    <table className="table table-striped table-hover">
+                      <thead>
+                        <tr>
+                          <th style={{ verticalAlign: "middle" }}>
+                            Disciplina
+                          </th>
+                          <th style={{ verticalAlign: "middle" }}>Ubicación</th>
+                          <th style={{ verticalAlign: "middle" }}>Grupos</th>
+                          <th style={{ verticalAlign: "middle" }}>
+                            Deportistas
+                          </th>
+                          <th style={{ verticalAlign: "middle" }}>
+                            Entrenadores
+                          </th>
+                          <th style={{ verticalAlign: "middle" }}>Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {clubs.map((club) => (
+                          <tr key={club._id}>
+                            <td style={{ verticalAlign: "middle" }}>
+                              <strong>{getSportName(club.sport_id)}</strong>
+                            </td>
+                            <td style={{ verticalAlign: "middle" }}>
+                              {club.location || "-"}
+                            </td>
+                            <td style={{ verticalAlign: "middle" }}>
+                              <button
+                                className="btn btn-info btn-xs"
+                                onClick={() =>
+                                  navigate(`/clubs/${club._id}/groups`)
+                                }
+                                title="Gestionar grupos"
+                              >
+                                <i className="fa fa-sitemap"></i>
+                                &nbsp;Gestionar grupos
+                              </button>
+                            </td>
+                            <td style={{ verticalAlign: "middle" }}>
+                              <span>
+                                Registrados ( &nbsp;
+                                {clubMembers[club._id]?.athletes || 0} &nbsp;)
+                              </span>
+                            </td>
+                            <td style={{ verticalAlign: "middle" }}>
+                              <span>
+                                Registrados ( &nbsp;
+                                {clubMembers[club._id]?.coaches || 0} &nbsp;)
+                              </span>
+                            </td>
 
-                              <td style={{ verticalAlign: "middle" }}>
-                                <button
-                                  className="btn btn-primary btn-xs"
-                                  onClick={() => handleOpenEdit(club as any)}
-                                  title="Editar"
-                                >
-                                  <i className="fa fa-edit"></i> Editar
-                                </button>{" "}
-                                <button
-                                  className="btn btn-danger btn-xs"
-                                  onClick={() => handleDelete(club._id)}
-                                  title="Eliminar"
-                                >
-                                  <i className="fa fa-trash"></i> Eliminar
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
+                            <td style={{ verticalAlign: "middle" }}>
+                              <button
+                                className="btn btn-success btn-xs"
+                                onClick={() => {
+                                  setSelectedClubForLevels(club as Club);
+                                  setShowLevelsModal(true);
+                                }}
+                                title="Gestionar logros"
+                              >
+                                <i className="fa fa-trophy"></i> Logros
+                              </button>{" "}
+                              <button
+                                className="btn btn-primary btn-xs"
+                                onClick={() => handleOpenEdit(club as any)}
+                                title="Editar"
+                              >
+                                <i className="fa fa-edit"></i> Editar
+                              </button>{" "}
+                              <button
+                                className="btn btn-danger btn-xs"
+                                onClick={() => handleDelete(club._id)}
+                                title="Eliminar"
+                              >
+                                <i className="fa fa-trash"></i> Eliminar
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Modal de Crear/Editar */}
       {showModal && (
@@ -484,6 +482,28 @@ export const Clubs = ({ name }: { name?: string }) => {
           </div>
         </div>
       )}
+
+      {/* Modal de Logros/Niveles */}
+      <GroupLevelsModal
+        isOpen={showLevelsModal}
+        group={
+          selectedClubForLevels
+            ? {
+                _id: "",
+                name: "",
+                club_id: selectedClubForLevels._id,
+                coaches: [],
+                created_by: "",
+                createdAt: "",
+                updatedAt: "",
+              }
+            : null
+        }
+        onClose={() => {
+          setShowLevelsModal(false);
+          setSelectedClubForLevels(null);
+        }}
+      />
     </>
   );
 };

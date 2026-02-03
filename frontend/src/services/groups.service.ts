@@ -391,6 +391,83 @@ class GroupsService {
 
     return safeParseJson(response);
   }
+
+  /**
+   * Añadir un nivel al grupo
+   * POST /api/groups/:groupId/levels
+   */
+  async addLevel(
+    groupId: string,
+    level: { position: number; name: string; description?: string },
+  ): Promise<Group> {
+    const response = await fetch(`${API_URL}/groups/${groupId}/levels`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify(level),
+    });
+
+    if (!response.ok) {
+      const error = await safeParseJson(response);
+      throw new Error(error.message || "Error al agregar nivel");
+    }
+
+    return safeParseJson(response);
+  }
+
+  /**
+   * Actualizar un nivel del grupo
+   * PATCH /api/groups/:groupId/levels/:levelId
+   */
+  async updateLevel(
+    groupId: string,
+    levelId: string,
+    level: { position?: number; name?: string; description?: string },
+  ): Promise<Group> {
+    const response = await fetch(
+      `${API_URL}/groups/${groupId}/levels/${levelId}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify(level),
+      },
+    );
+
+    if (!response.ok) {
+      const error = await safeParseJson(response);
+      throw new Error(error.message || "Error al actualizar nivel");
+    }
+
+    return safeParseJson(response);
+  }
+
+  /**
+   * Eliminar un nivel del grupo
+   * DELETE /api/groups/:groupId/levels/:levelId
+   */
+  async deleteLevel(groupId: string, levelId: string): Promise<Group> {
+    const response = await fetch(
+      `${API_URL}/groups/${groupId}/levels/${levelId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      },
+    );
+
+    if (!response.ok) {
+      const error = await safeParseJson(response);
+      throw new Error(error.message || "Error al eliminar nivel");
+    }
+
+    return safeParseJson(response);
+  }
 }
 
 const groupsService = new GroupsService();

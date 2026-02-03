@@ -19,6 +19,10 @@ import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { GroupsService } from './groups.service';
 import { CreateGroupDto } from '../dto/create-group.dto';
 import { UpdateGroupDto } from '../dto/update-group.dto';
+import {
+  CreateGroupLevelDto,
+  UpdateGroupLevelDto,
+} from '../dto/group-level.dto';
 
 @Controller('groups')
 @UseGuards(JwtAuthGuard)
@@ -212,5 +216,50 @@ export class GroupsController {
       parseInt(index),
       user.sub,
     );
+  }
+
+  /**
+   * POST /groups/:groupId/levels
+   * Agregar un nivel al grupo
+   */
+  @Post(':groupId/levels')
+  async addLevel(
+    @Param('groupId') groupId: string,
+    @Body() createLevelDto: CreateGroupLevelDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.groupsService.addLevel(groupId, createLevelDto, user.sub);
+  }
+
+  /**
+   * PATCH /groups/:groupId/levels/:levelId
+   * Actualizar un nivel del grupo
+   */
+  @Patch(':groupId/levels/:levelId')
+  async updateLevel(
+    @Param('groupId') groupId: string,
+    @Param('levelId') levelId: string,
+    @Body() updateLevelDto: UpdateGroupLevelDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.groupsService.updateLevel(
+      groupId,
+      levelId,
+      updateLevelDto,
+      user.sub,
+    );
+  }
+
+  /**
+   * DELETE /groups/:groupId/levels/:levelId
+   * Eliminar un nivel del grupo
+   */
+  @Delete(':groupId/levels/:levelId')
+  async deleteLevel(
+    @Param('groupId') groupId: string,
+    @Param('levelId') levelId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.groupsService.deleteLevel(groupId, levelId, user.sub);
   }
 }

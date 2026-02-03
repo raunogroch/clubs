@@ -9,6 +9,10 @@ import { Model, Types } from 'mongoose';
 import { Group } from '../schemas/group.schema';
 import { CreateGroupDto } from '../dto/create-group.dto';
 import { UpdateGroupDto } from '../dto/update-group.dto';
+import {
+  CreateGroupLevelDto,
+  UpdateGroupLevelDto,
+} from '../dto/group-level.dto';
 
 @Injectable()
 export class GroupRepository {
@@ -396,6 +400,106 @@ export class GroupRepository {
       return group;
     } catch (error) {
       console.error('Error en removeSchedule del repository:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Añadir un nivel al grupo
+   */
+  async addLevel(
+    groupId: string,
+    level: {
+      _id: Types.ObjectId;
+      position: number;
+      name: string;
+      description?: string;
+    },
+  ): Promise<Group | null> {
+    try {
+      return await this.groupModel
+        .findByIdAndUpdate(groupId, { $push: { levels: level } }, { new: true })
+        .populate('created_by', 'name')
+        .populate({
+          path: 'athletes_added',
+          select: 'athlete_id registration_pay registration_date',
+          populate: { path: 'athlete_id', select: 'name role ci lastname' },
+        })
+        .populate('coaches', 'name role ci lastname')
+        .populate('club_id', 'name')
+        .populate('events_added', 'name location duration eventDate eventTime')
+        .exec();
+    } catch (error) {
+      console.error('Error en addLevel del repository:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Actualizar un nivel del grupo
+   */
+  async updateLevel(
+    groupId: string,
+    levelId: string,
+    updateLevelDto: UpdateGroupLevelDto,
+  ): Promise<Group | null> {
+    try {
+      const updateObj: any = {};
+      if (updateLevelDto.position !== undefined) {
+        updateObj['levels.$.position'] = updateLevelDto.position;
+      }
+      if (updateLevelDto.name !== undefined) {
+        updateObj['levels.$.name'] = updateLevelDto.name;
+      }
+      if (updateLevelDto.description !== undefined) {
+        updateObj['levels.$.description'] = updateLevelDto.description;
+      }
+
+      return await this.groupModel
+        .findOneAndUpdate(
+          { _id: groupId, 'levels._id': new Types.ObjectId(levelId) },
+          { $set: updateObj },
+          { new: true },
+        )
+        .populate('created_by', 'name')
+        .populate({
+          path: 'athletes_added',
+          select: 'athlete_id registration_pay registration_date',
+          populate: { path: 'athlete_id', select: 'name role ci lastname' },
+        })
+        .populate('coaches', 'name role ci lastname')
+        .populate('club_id', 'name')
+        .populate('events_added', 'name location duration eventDate eventTime')
+        .exec();
+    } catch (error) {
+      console.error('Error en updateLevel del repository:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Eliminar un nivel del grupo
+   */
+  async deleteLevel(groupId: string, levelId: string): Promise<Group | null> {
+    try {
+      return await this.groupModel
+        .findByIdAndUpdate(
+          groupId,
+          { $pull: { levels: { _id: new Types.ObjectId(levelId) } } },
+          { new: true },
+        )
+        .populate('created_by', 'name')
+        .populate({
+          path: 'athletes_added',
+          select: 'athlete_id registration_pay registration_date',
+          populate: { path: 'athlete_id', select: 'name role ci lastname' },
+        })
+        .populate('coaches', 'name role ci lastname')
+        .populate('club_id', 'name')
+        .populate('events_added', 'name location duration eventDate eventTime')
+        .exec();
+    } catch (error) {
+      console.error('Error en deleteLevel del repository:', error);
       throw error;
     }
   }

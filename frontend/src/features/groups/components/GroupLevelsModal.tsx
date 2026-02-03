@@ -1,188 +1,125 @@
-/**
- * Modal para gestionar logros/levels de un grupo
- *
- * Permite ver y crear levels asignados a un grupo específico
- */
-
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import toastr from "toastr";
-import levelsService from "../../../services/levelsService";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "../../../store/store";
+import {
+  addClubLevel,
+  updateClubLevel,
+  deleteClubLevel,
+} from "../../../store/levelsThunk";
 import type { Group } from "../types";
-
-interface LevelAssignment {
-  order: number;
-  name: string;
-  description?: string;
-}
-
-interface Level {
-  _id?: string;
-  name: string;
-  level_assignment: LevelAssignment[];
-  createdAt?: string;
-  updatedAt?: string;
-}
 
 interface GroupLevelsModalProps {
   isOpen: boolean;
   group: Group | null;
   onClose: () => void;
+  onLevelUpdated?: () => void;
 }
 
-export const GroupLevelsModal: React.FC<GroupLevelsModalProps> = ({
+const GroupLevelsModal: React.FC<GroupLevelsModalProps> = ({
   isOpen,
   group,
   onClose,
+  onLevelUpdated,
 }) => {
-  const [levels, setLevels] = useState<Level[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
   const [showLevelForm, setShowLevelForm] = useState(false);
   const [editingLevelId, setEditingLevelId] = useState<string | null>(null);
-  const [newLevelName, setNewLevelName] = useState("");
-  const [newLevelAssignments, setNewLevelAssignments] = useState<
-    LevelAssignment[]
-  >([]);
+  const [formData, setFormData] = useState({
+    position: 1,
+    name: "",
+    description: "",
+  });
 
-  useEffect(() => {
-    if (isOpen && group) {
-      loadLevels();
-      // Cargar los levels asignados al grupo desde localStorage o estado
-      const groupLevels = localStorage.getItem(`group_levels_${group._id}`);
-      if (groupLevels) {
-        try {
-          setSelectedLevels(JSON.parse(groupLevels));
-        } catch {
-          setSelectedLevels([]);
-        }
-      } else {
-        setSelectedLevels([]);
-      }
-    }
-  }, [isOpen, group]);
+  const dispatch = useDispatch<AppDispatch>();
+  const { loading } = useSelector((state: RootState) => state.levels);
 
-  const loadLevels = async () => {
-    try {
-      setLoading(true);
-      const data = await levelsService.getAll();
-      setLevels(Array.isArray(data) ? data : []);
-    } catch (error: any) {
-      console.error("Error al cargar niveles:", error);
-      setLevels([]);
-      toastr.error("Error al cargar los niveles");
-    } finally {
-      setLoading(false);
-    }
+  const club = useSelector((state: RootState) =>
+    state.clubs.items.find((c: any) => c._id === (group ? group.club_id : "")),
+  );
+  const levels = (
+    club && Array.isArray(club.levels) ? club.levels : []
+  ) as Array<any>;
+
+  if (!isOpen || !group) return null;
+
+  const resetForm = () => {
+    setFormData({ position: 1, name: "", description: "" });
+    setEditingLevelId(null);
+    setShowLevelForm(false);
   };
 
-  const handleAddAssignment = () => {
-    const newAssignment: LevelAssignment = {
-      order: (newLevelAssignments.length || 0) + 1,
-      name: "",
-      description: "",
-    };
-    setNewLevelAssignments([...newLevelAssignments, newAssignment]);
-  };
-
-  const handleRemoveAssignment = (index: number) => {
-    const updated = newLevelAssignments.filter((_, i) => i !== index);
-    setNewLevelAssignments(updated);
-  };
-
-  const handleAssignmentChange = (index: number, field: string, value: any) => {
-    const updated = [...newLevelAssignments];
-    updated[index] = { ...updated[index], [field]: value };
-    setNewLevelAssignments(updated);
-  };
-
-  const handleCreateLevel = async () => {
-    if (!newLevelName.trim()) {
+  const handleAddLevel = async () => {
+    if (!formData.name.trim()) {
       toastr.warning("El nombre del nivel es requerido");
       return;
     }
 
-    if (newLevelAssignments.length === 0) {
-      toastr.warning("Debe agregar al menos una asignación");
+    try {
+      await dispatch(
+        addClubLevel({
+          clubId: group.club_id,
+          level: {
+            position: formData.position,
+            name: formData.name,
+            description: formData.description,
+          },
+        }) as any,
+      );
+      resetForm();
+      if (onLevelUpdated) onLevelUpdated();
+    } catch (err) {
+      console.error("Error al agregar nivel:", err);
+    }
+  };
+
+  const handleUpdateLevel = async () => {
+    if (!formData.name.trim() || !editingLevelId) {
+      toastr.warning("El nombre del nivel es requerido");
       return;
     }
 
     try {
-      setLoading(true);
-      if (editingLevelId) {
-        // Modo edición
-        const updatedLevel = await levelsService.update(editingLevelId, {
-          name: newLevelName,
-          level_assignment: newLevelAssignments,
-        });
-        setLevels(
-          levels.map((l) => (l._id === editingLevelId ? updatedLevel : l)),
-        );
-        toastr.success("Nivel actualizado exitosamente");
-      } else {
-        // Modo creación
-        const newLevel = await levelsService.create({
-          name: newLevelName,
-          level_assignment: newLevelAssignments,
-        });
-
-        setLevels([...levels, newLevel]);
-        toastr.success("Nivel creado exitosamente");
-      }
-      setNewLevelName("");
-      setNewLevelAssignments([]);
-      setEditingLevelId(null);
-      setShowLevelForm(false);
-    } catch (error: any) {
-      console.error("Error al guardar nivel:", error);
-      toastr.error(
-        error.response?.data?.message || "Error al guardar el nivel",
+      await dispatch(
+        updateClubLevel({
+          clubId: group.club_id,
+          levelId: editingLevelId,
+          level: {
+            position: formData.position,
+            name: formData.name,
+            description: formData.description,
+          },
+        }) as any,
       );
-    } finally {
-      setLoading(false);
+      resetForm();
+      if (onLevelUpdated) onLevelUpdated();
+    } catch (err) {
+      console.error("Error al actualizar nivel:", err);
     }
   };
 
-  const handleToggleLevel = (levelId: string) => {
-    const updated = selectedLevels.includes(levelId)
-      ? selectedLevels.filter((id) => id !== levelId)
-      : [...selectedLevels, levelId];
-
-    setSelectedLevels(updated);
-    if (group) {
-      localStorage.setItem(
-        `group_levels_${group._id}`,
-        JSON.stringify(updated),
-      );
-    }
-    toastr.success("Logros actualizados para el grupo");
-  };
-
-  const handleEditLevel = (level: Level) => {
+  const handleEditLevel = (level: any) => {
     setEditingLevelId(level._id || null);
-    setNewLevelName(level.name);
-    setNewLevelAssignments([...level.level_assignment]);
+    setFormData({
+      position: level.position || 1,
+      name: level.name || "",
+      description: level.description || "",
+    });
     setShowLevelForm(true);
   };
 
   const handleDeleteLevel = async (levelId: string) => {
-    if (!window.confirm("¿Estás seguro de que deseas eliminar este nivel?")) {
+    if (!window.confirm("¿Estás seguro de que deseas eliminar este nivel?"))
       return;
-    }
 
     try {
-      setLoading(true);
-      await levelsService.delete(levelId);
-      setLevels(levels.filter((l) => l._id !== levelId));
-      toastr.success("Nivel eliminado exitosamente");
-    } catch (error: any) {
-      console.error("Error al eliminar nivel:", error);
-      toastr.error("Error al eliminar el nivel");
-    } finally {
-      setLoading(false);
+      await dispatch(
+        deleteClubLevel({ clubId: group.club_id, levelId }) as any,
+      );
+      if (onLevelUpdated) onLevelUpdated();
+    } catch (err) {
+      console.error("Error al eliminar nivel:", err);
     }
   };
-
-  if (!isOpen || !group) return null;
 
   return (
     <div
@@ -205,232 +142,106 @@ export const GroupLevelsModal: React.FC<GroupLevelsModalProps> = ({
           </div>
 
           <div className="modal-body">
-            {loading && !showLevelForm && (
-              <div className="text-center">
-                <p>Cargando niveles...</p>
-              </div>
-            )}
-
-            {!loading && !showLevelForm && (
-              <>
-                {!levels || levels.length === 0 ? (
-                  <div className="alert alert-info">
-                    No hay niveles disponibles. Crea uno nuevo.
-                  </div>
-                ) : (
-                  <div className="levels-list">
-                    {Array.isArray(levels) &&
-                      levels.map((level) => (
-                        <div
-                          key={level._id}
-                          style={{
-                            padding: "10px",
-                            marginBottom: "10px",
-                            backgroundColor: selectedLevels.includes(
-                              level._id || "",
-                            )
-                              ? "#d4edda"
-                              : "#f9f9f9",
-                            borderLeft: "3px solid #3498db",
-                            borderRadius: "4px",
-                          }}
-                        >
-                          <div className="row">
-                            <div className="col-md-8">
-                              <div className="form-check">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  id={`level_${level._id}`}
-                                  checked={selectedLevels.includes(
-                                    level._id || "",
-                                  )}
-                                  onChange={() =>
-                                    handleToggleLevel(level._id || "")
-                                  }
-                                />
-                                <label
-                                  className="form-check-label"
-                                  htmlFor={`level_${level._id}`}
-                                >
-                                  <strong>{level.name}</strong>
-                                  <div
-                                    style={{
-                                      marginTop: "5px",
-                                      fontSize: "0.9em",
-                                      color: "#666",
-                                    }}
-                                  >
-                                    {level.level_assignment.map(
-                                      (assignment, idx) => (
-                                        <div key={idx}>
-                                          <span className="badge badge-secondary">
-                                            {assignment.order}.{" "}
-                                            {assignment.name}
-                                          </span>
-                                        </div>
-                                      ),
-                                    )}
-                                  </div>
-                                </label>
-                              </div>
-                            </div>
-                            <div
-                              className="col-md-4"
-                              style={{ textAlign: "right" }}
-                            >
-                              <button
-                                className="btn btn-primary btn-xs"
-                                onClick={() => handleEditLevel(level)}
-                                disabled={loading}
-                                title="Editar nivel"
-                                style={{ marginRight: "5px" }}
-                              >
-                                <i className="fa fa-edit"></i>
-                              </button>
-                              <button
-                                className="btn btn-danger btn-xs"
-                                onClick={() =>
-                                  handleDeleteLevel(level._id || "")
-                                }
-                                disabled={loading}
-                                title="Eliminar nivel"
-                              >
-                                <i className="fa fa-trash"></i>
-                              </button>
-                            </div>
-                          </div>
+            {!showLevelForm ? (
+              levels.length === 0 ? (
+                <div className="alert alert-info">
+                  No hay niveles creados para este club.
+                </div>
+              ) : (
+                <div className="levels-list">
+                  {levels.map((level) => (
+                    <div
+                      key={level._id}
+                      style={{
+                        padding: 12,
+                        marginBottom: 10,
+                        backgroundColor: "#f9f9f9",
+                        borderLeft: "4px solid #3498db",
+                        borderRadius: 4,
+                      }}
+                    >
+                      <div className="row">
+                        <div className="col-md-8">
+                          <strong style={{ fontSize: "1.1em" }}>
+                            {level.position}. {level.name}
+                          </strong>
+                          {level.description && (
+                            <p style={{ marginTop: 6, color: "#666" }}>
+                              {level.description}
+                            </p>
+                          )}
                         </div>
-                      ))}
-                  </div>
-                )}
-              </>
-            )}
-
-            {showLevelForm && (
+                        <div
+                          className="col-md-4"
+                          style={{ textAlign: "right" }}
+                        >
+                          <button
+                            className="btn btn-primary btn-xs"
+                            onClick={() => handleEditLevel(level)}
+                            disabled={loading}
+                            style={{ marginRight: 6 }}
+                            title="Editar nivel"
+                          >
+                            <i className="fa fa-edit" />
+                          </button>
+                          <button
+                            className="btn btn-danger btn-xs"
+                            onClick={() => handleDeleteLevel(level._id || "")}
+                            disabled={loading}
+                            title="Eliminar nivel"
+                          >
+                            <i className="fa fa-trash" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
+            ) : (
               <div>
-                <div style={{ marginBottom: "15px" }}>
-                  <h5>
-                    {editingLevelId ? "Editar Nivel" : "Crear Nuevo Nivel"}
-                  </h5>
+                <h5 style={{ marginBottom: 12 }}>
+                  {editingLevelId ? "Editar Nivel" : "Crear Nuevo Nivel"}
+                </h5>
+                <div className="form-group">
+                  <label>Posición</label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={formData.position}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        position: Number(e.target.value),
+                      })
+                    }
+                    min={1}
+                    disabled={loading}
+                  />
                 </div>
                 <div className="form-group">
                   <label>Nombre del Nivel</label>
                   <input
                     type="text"
                     className="form-control"
-                    value={newLevelName}
-                    onChange={(e) => setNewLevelName(e.target.value)}
-                    placeholder="Ej: Nivel Principiante"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    disabled={loading}
                   />
                 </div>
-
                 <div className="form-group">
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginBottom: "15px",
-                    }}
-                  >
-                    <label>Asignaciones</label>
-                    <button
-                      className="btn btn-xs btn-success"
-                      onClick={handleAddAssignment}
-                      type="button"
-                    >
-                      <i className="fa fa-plus"></i> Agregar
-                    </button>
-                  </div>
-
-                  {newLevelAssignments.length === 0 ? (
-                    <div className="alert alert-info">
-                      Agrega al menos una asignación
-                    </div>
-                  ) : (
-                    <div
-                      style={{
-                        maxHeight: "300px",
-                        overflowY: "auto",
-                        border: "1px solid #ddd",
-                        padding: "10px",
-                        borderRadius: "4px",
-                      }}
-                    >
-                      {newLevelAssignments.map((assignment, index) => (
-                        <div
-                          key={index}
-                          style={{
-                            marginBottom: "15px",
-                            padding: "10px",
-                            backgroundColor: "#f9f9f9",
-                            borderRadius: "4px",
-                            borderLeft: "3px solid #3498db",
-                          }}
-                        >
-                          <div className="row">
-                            <div className="col-md-2">
-                              <label>Orden</label>
-                              <input
-                                type="number"
-                                className="form-control"
-                                value={assignment.order}
-                                onChange={(e) =>
-                                  handleAssignmentChange(
-                                    index,
-                                    "order",
-                                    Number(e.target.value),
-                                  )
-                                }
-                                min="1"
-                              />
-                            </div>
-                            <div className="col-md-5">
-                              <label>Nombre</label>
-                              <input
-                                type="text"
-                                className="form-control"
-                                value={assignment.name}
-                                onChange={(e) =>
-                                  handleAssignmentChange(
-                                    index,
-                                    "name",
-                                    e.target.value,
-                                  )
-                                }
-                                placeholder="Ej: Nivel 1"
-                              />
-                            </div>
-                            <div className="col-md-5">
-                              <label>Descripción</label>
-                              <input
-                                type="text"
-                                className="form-control"
-                                value={assignment.description || ""}
-                                onChange={(e) =>
-                                  handleAssignmentChange(
-                                    index,
-                                    "description",
-                                    e.target.value,
-                                  )
-                                }
-                                placeholder="Ej: Descripción..."
-                              />
-                            </div>
-                          </div>
-                          <button
-                            className="btn btn-xs btn-danger"
-                            onClick={() => handleRemoveAssignment(index)}
-                            style={{ marginTop: "10px" }}
-                            type="button"
-                          >
-                            <i className="fa fa-trash"></i> Remover
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  <label>Descripción</label>
+                  <textarea
+                    className="form-control"
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
+                    rows={3}
+                    disabled={loading}
+                  />
                 </div>
               </div>
             )}
@@ -442,12 +253,7 @@ export const GroupLevelsModal: React.FC<GroupLevelsModalProps> = ({
                 <button
                   type="button"
                   className="btn btn-default"
-                  onClick={() => {
-                    setShowLevelForm(false);
-                    setNewLevelName("");
-                    setNewLevelAssignments([]);
-                    setEditingLevelId(null);
-                  }}
+                  onClick={resetForm}
                   disabled={loading}
                 >
                   Cancelar
@@ -455,14 +261,14 @@ export const GroupLevelsModal: React.FC<GroupLevelsModalProps> = ({
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={handleCreateLevel}
+                  onClick={editingLevelId ? handleUpdateLevel : handleAddLevel}
                   disabled={loading}
                 >
                   {loading
                     ? "Guardando..."
                     : editingLevelId
                       ? "Actualizar Nivel"
-                      : "Crear Nivel"}
+                      : "Agregar Nivel"}
                 </button>
               </>
             ) : (
@@ -470,10 +276,17 @@ export const GroupLevelsModal: React.FC<GroupLevelsModalProps> = ({
                 <button
                   type="button"
                   className="btn btn-success"
-                  onClick={() => setShowLevelForm(true)}
+                  onClick={() => {
+                    setShowLevelForm(true);
+                    setFormData({
+                      position: levels.length + 1,
+                      name: "",
+                      description: "",
+                    });
+                  }}
                   disabled={loading}
                 >
-                  <i className="fa fa-plus"></i> Crear Nuevo Nivel
+                  <i className="fa fa-plus" /> Agregar Nivel
                 </button>
                 <button
                   type="button"
@@ -492,4 +305,5 @@ export const GroupLevelsModal: React.FC<GroupLevelsModalProps> = ({
   );
 };
 
+export { GroupLevelsModal };
 export default GroupLevelsModal;

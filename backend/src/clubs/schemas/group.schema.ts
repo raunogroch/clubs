@@ -16,6 +16,16 @@ export interface Schedule {
   endTime: string; // Hora de fin (HH:mm)
 }
 
+/**
+ * Interfaz para niveles/logros del grupo
+ */
+export interface GroupLevel {
+  _id?: Types.ObjectId;
+  position: number;
+  name: string;
+  description?: string;
+}
+
 @Schema({ timestamps: true })
 export class Group extends Document {
   /**
@@ -119,6 +129,23 @@ export class Group extends Document {
     default: [],
   })
   events_added?: Types.ObjectId[];
+
+  /**
+   * Array de niveles/logros del grupo
+   * Estructura embebida que contiene los niveles (cinturones) del grupo
+   */
+  @Prop({
+    type: [
+      {
+        _id: Types.ObjectId,
+        position: Number,
+        name: String,
+        description: String,
+      },
+    ],
+    default: [],
+  })
+  levels?: GroupLevel[];
 
   /**
    * Timestamp de creación (automático)

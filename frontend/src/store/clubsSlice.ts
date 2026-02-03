@@ -6,6 +6,7 @@ import {
   updateClub,
   deleteClub,
 } from "./clubsThunk";
+import { addClubLevel, updateClubLevel, deleteClubLevel } from "./levelsThunk";
 
 interface Club {
   _id: string;
@@ -114,6 +115,63 @@ const clubsSlice = createSlice({
         }
       })
       .addCase(deleteClub.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload as string;
+      });
+    // handle club levels actions
+    builder
+      .addCase(addClubLevel.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(addClubLevel.fulfilled, (state, action: PayloadAction<any>) => {
+        state.status = "succeeded";
+        const idx = state.items.findIndex((i) => i._id === action.payload._id);
+        if (idx >= 0) state.items[idx] = action.payload;
+        if (state.selectedClub?._id === action.payload._id)
+          state.selectedClub = action.payload;
+      })
+      .addCase(addClubLevel.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload as string;
+      })
+      .addCase(updateClubLevel.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(
+        updateClubLevel.fulfilled,
+        (state, action: PayloadAction<any>) => {
+          state.status = "succeeded";
+          const idx = state.items.findIndex(
+            (i) => i._id === action.payload._id,
+          );
+          if (idx >= 0) state.items[idx] = action.payload;
+          if (state.selectedClub?._id === action.payload._id)
+            state.selectedClub = action.payload;
+        },
+      )
+      .addCase(updateClubLevel.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload as string;
+      })
+      .addCase(deleteClubLevel.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(
+        deleteClubLevel.fulfilled,
+        (state, action: PayloadAction<any>) => {
+          state.status = "succeeded";
+          const idx = state.items.findIndex(
+            (i) => i._id === action.payload._id,
+          );
+          if (idx >= 0) state.items[idx] = action.payload;
+          if (state.selectedClub?._id === action.payload._id)
+            state.selectedClub = action.payload;
+        },
+      )
+      .addCase(deleteClubLevel.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload as string;
       });

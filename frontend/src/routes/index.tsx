@@ -3,6 +3,8 @@ import {
   Dashboard,
   Assignments,
   Clubs,
+  ClubGroups,
+  GroupDetail,
   Admins,
   Assistants,
   Coaches,
@@ -88,6 +90,14 @@ export const roleRoutes: RoleRoutes = {
       icon: "fa-object-group",
       label: "Clubs",
       element: <Clubs />,
+    },
+    {
+      path: "/clubs/:club_id/groups",
+      element: <ClubGroups />,
+    },
+    {
+      path: "/clubs/:club_id/groups/:group_id/group",
+      element: <GroupDetail />,
     },
     {
       path: "/mensualidad",

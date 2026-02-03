@@ -1,12 +1,12 @@
 /**
  * Componente raíz de la aplicación (App)
- * 
+ *
  * Responsabilidades:
  * - Configurar React Router para navegación
  * - Proporcionar contexto de autenticación
  * - Renderizar rutas públicas y privadas
  * - Configurar notificaciones (toastr)
- * 
+ *
  * Estructura:
  * App (componente raíz)
  *   ↓
@@ -35,10 +35,10 @@ import "toastr/build/toastr.min.css";
  * Estas opciones se aplican a todos los toasts que se muestren en la app
  */
 toastr.options = {
-  closeButton: true,      // Mostrar botón para cerrar la notificación
-  progressBar: true,      // Mostrar barra de progreso
+  closeButton: true, // Mostrar botón para cerrar la notificación
+  progressBar: true, // Mostrar barra de progreso
   positionClass: "toast-top-right", // Posición en la pantalla
-  timeOut: 3000,         // Cerrar automáticamente después de 3 segundos
+  timeOut: 3000, // Cerrar automáticamente después de 3 segundos
 };
 
 /**
@@ -57,7 +57,7 @@ export const App = () => {
 
 /**
  * Componente que maneja todas las rutas de la aplicación
- * 
+ *
  * Lógica:
  * 1. Obtiene el usuario y rol del estado global (Redux)
  * 2. Busca las rutas permitidas para ese rol
@@ -69,7 +69,7 @@ const AppRoutes = () => {
   const isAuthenticated = useSelector((state: any) => state.auth);
   const { user } = isAuthenticated;
   const role = user?.role || "";
-  
+
   // Obtener las rutas permitidas para el rol del usuario actual
   const allowedRoutes = roleRoutes[role] || [];
 
@@ -82,11 +82,29 @@ const AppRoutes = () => {
     .filter((route) => route.children)
     .flatMap((route) => route.children);
 
+  /**
+   * Separar rutas dinámicas (con parámetros) de rutas estáticas
+   */
+  const staticRoutes = allowedRoutes.filter(
+    (route) => !route.path.includes(":"),
+  );
+  const dynamicRoutes = allowedRoutes.filter((route) =>
+    route.path.includes(":"),
+  );
+  const staticChildRoutes = childRoutes.filter(
+    (route) => !route.path.includes(":"),
+  );
+  const dynamicChildRoutes = childRoutes.filter((route) =>
+    route.path.includes(":"),
+  );
+
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/404" element={<NotFound />} />
-      {allowedRoutes.map(({ path, element }) =>
+
+      {/* Rutas estáticas */}
+      {staticRoutes.map(({ path, element }) =>
         element ? (
           <Route
             key={path}
@@ -95,9 +113,11 @@ const AppRoutes = () => {
               <PrivateRoute allowedRoles={[role]}>{element}</PrivateRoute>
             }
           />
-        ) : null
+        ) : null,
       )}
-      {childRoutes.map(({ path, element }) =>
+
+      {/* Rutas dinámicas */}
+      {dynamicRoutes.map(({ path, element }) =>
         element ? (
           <Route
             key={path}
@@ -106,8 +126,35 @@ const AppRoutes = () => {
               <PrivateRoute allowedRoles={[role]}>{element}</PrivateRoute>
             }
           />
-        ) : null
+        ) : null,
       )}
+
+      {/* Rutas hijas estáticas */}
+      {staticChildRoutes.map(({ path, element }) =>
+        element ? (
+          <Route
+            key={path}
+            path={path}
+            element={
+              <PrivateRoute allowedRoles={[role]}>{element}</PrivateRoute>
+            }
+          />
+        ) : null,
+      )}
+
+      {/* Rutas hijas dinámicas */}
+      {dynamicChildRoutes.map(({ path, element }) =>
+        element ? (
+          <Route
+            key={path}
+            path={path}
+            element={
+              <PrivateRoute allowedRoles={[role]}>{element}</PrivateRoute>
+            }
+          />
+        ) : null,
+      )}
+
       <Route
         path="/"
         element={

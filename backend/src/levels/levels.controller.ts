@@ -29,6 +29,13 @@ export class LevelsController {
     return this.levelsService.findAll();
   }
 
+  @Get('group/:groupId')
+  async findByGroupId(
+    @Param('groupId') groupId: string,
+  ): Promise<Level | null> {
+    return this.levelsService.findByGroupId(groupId);
+  }
+
   @Get(':id')
   async findById(@Param('id') id: string): Promise<Level> {
     return this.levelsService.findById(id);
@@ -46,5 +53,13 @@ export class LevelsController {
   @HttpCode(HttpStatus.OK)
   async delete(@Param('id') id: string): Promise<{ message: string }> {
     return this.levelsService.delete(id);
+  }
+
+  @Delete('group/:groupId')
+  @HttpCode(HttpStatus.OK)
+  async deleteByGroupId(
+    @Param('groupId') groupId: string,
+  ): Promise<{ message: string }> {
+    return this.levelsService.deleteByGroupId(groupId);
   }
 }
