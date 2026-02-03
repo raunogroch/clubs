@@ -59,6 +59,7 @@ import {
   MemberList,
   EventsList,
   CreateEventModal,
+  GroupLevelsModal,
 } from "./components";
 
 // Estilos y constantes
@@ -127,6 +128,11 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
   const [showEventModal, setShowEventModal] = useState(false);
   const [eventGroupId, setEventGroupId] = useState<string | null>(null);
   const [groupEvents, setGroupEvents] = useState<Record<string, any[]>>({});
+
+  // Modal de logros/levels
+  const [showLevelsModal, setShowLevelsModal] = useState(false);
+  const [selectedGroupForLevels, setSelectedGroupForLevels] =
+    useState<Group | null>(null);
 
   // Modal de crear/editar grupo
   const [showGroupModal, setShowGroupModal] = useState(false);
@@ -687,6 +693,10 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
                         onToggleExpand={() =>
                           groupExpansion.toggleGroupExpansion(group._id)
                         }
+                        onOpenLevels={() => {
+                          setSelectedGroupForLevels(group as Group);
+                          setShowLevelsModal(true);
+                        }}
                         onEdit={() => {
                           groupForm.openForEdit(group as any);
                           setShowGroupModal(true);
@@ -836,6 +846,15 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
         }}
         onCreate={handleCreateEvent}
         isLoading={groupsStatus === "loading"}
+      />
+
+      <GroupLevelsModal
+        isOpen={showLevelsModal}
+        group={selectedGroupForLevels}
+        onClose={() => {
+          setShowLevelsModal(false);
+          setSelectedGroupForLevels(null);
+        }}
       />
     </>
   );

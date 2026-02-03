@@ -18,6 +18,7 @@ import { AssignmentsModule } from './assignments/assignments.module';
 import { ClubsModule } from './clubs/clubs.module';
 import { SportsModule } from './sports/sports.module';
 import { PaymentsModule } from './payments/payments.module';
+import { LevelsModule } from './levels/levels.module';
 
 @Module({
   imports: [
@@ -61,6 +62,8 @@ import { PaymentsModule } from './payments/payments.module';
     ClubsModule,
     // Módulo de payments (mensualidades)
     PaymentsModule,
+    // Módulo de niveles (crear y gestionar niveles con asignaciones)
+    LevelsModule,
   ],
 })
 export class AppModule {}

@@ -12,3 +12,4 @@ export { MemberList } from "./MemberList";
 export { GroupCard } from "./GroupCard";
 export { EventsList } from "./EventsList";
 export { CreateEventModal } from "./CreateEventModal";
+export { GroupLevelsModal } from "./GroupLevelsModal";
