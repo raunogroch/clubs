@@ -100,12 +100,19 @@ export class UserRepository implements IUserRepository {
 
   /**
    * Actualiza un usuario por su ID
+   * Filtra campos vacíos para evitar sobreescribir con strings vacíos
    */
   async updateById(
     id: string,
     updateUserDto: UpdateUserDto,
   ): Promise<User | null> {
-    return this.userModel.findByIdAndUpdate(id, updateUserDto, { new: true });
+    // Filtrar campos undefined/null/vacíos para evitar violaciones de índices únicos
+    const cleanedDto = Object.fromEntries(
+      Object.entries(updateUserDto).filter(
+        ([_, value]) => value !== undefined && value !== null && value !== '',
+      ),
+    );
+    return this.userModel.findByIdAndUpdate(id, cleanedDto, { new: true });
   }
 
   /**
