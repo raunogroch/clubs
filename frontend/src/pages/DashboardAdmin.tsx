@@ -490,7 +490,7 @@ const DashboardAssignments = ({ user }: { user: any }) => {
           },
         };
       }
-      
+
       // Horarios con menor prioridad visual
       return {
         style: {

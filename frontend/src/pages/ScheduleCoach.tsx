@@ -44,7 +44,7 @@ interface CalendarEvent {
   title: string;
   start: Date;
   end: Date;
-  eventType: 'schedule' | 'event'; // Para diferenciar entre horarios y eventos
+  eventType: "schedule" | "event"; // Para diferenciar entre horarios y eventos
   resource?: {
     club: string;
     group: string;
@@ -129,11 +129,13 @@ const ProCalendar = ({ groups }: { groups: Group[] }) => {
           try {
             const [year, month, day] = event.eventDate.split("-").map(Number);
             const eventDate = new Date(year, month - 1, day);
-            const [eventHour, eventMin] = event.eventTime.split(":").map(Number);
-            
+            const [eventHour, eventMin] = event.eventTime
+              .split(":")
+              .map(Number);
+
             const startTime = new Date(eventDate);
             startTime.setHours(eventHour, eventMin, 0, 0);
-            
+
             const endTime = new Date(startTime);
             endTime.setMinutes(endTime.getMinutes() + event.duration);
 
@@ -142,7 +144,7 @@ const ProCalendar = ({ groups }: { groups: Group[] }) => {
               title: `📍 ${event.name}`,
               start: startTime,
               end: endTime,
-              eventType: 'event',
+              eventType: "event",
               resource: {
                 club: group.club_id?.name || "",
                 group: group.name,
@@ -150,7 +152,7 @@ const ProCalendar = ({ groups }: { groups: Group[] }) => {
               },
             });
           } catch (error) {
-            console.error('Error procesando evento:', event, error);
+            console.error("Error procesando evento:", event, error);
           }
         });
       }
@@ -178,7 +180,7 @@ const ProCalendar = ({ groups }: { groups: Group[] }) => {
             title: group.name,
             start: startTime,
             end: endTime,
-            eventType: 'schedule',
+            eventType: "schedule",
             resource: {
               club: group.club_id?.name || "",
               group: group.name,
@@ -200,9 +202,9 @@ const ProCalendar = ({ groups }: { groups: Group[] }) => {
       "#2196f3",
       "#9c27b0",
     ];
-    
+
     // Eventos especiales (eventos creados) con máxima prioridad visual
-    if (event.eventType === 'event') {
+    if (event.eventType === "event") {
       return {
         style: {
           backgroundColor: "#e91e63",
@@ -216,7 +218,7 @@ const ProCalendar = ({ groups }: { groups: Group[] }) => {
         },
       };
     }
-    
+
     // Horarios regulares (schedule) con menor prioridad visual
     const backgroundColor = colors[event.title.charCodeAt(0) % colors.length];
     return {
