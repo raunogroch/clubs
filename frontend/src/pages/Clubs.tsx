@@ -325,14 +325,36 @@ export const Clubs = ({ name }: { name?: string }) => {
                             Disciplina
                           </th>
                           <th style={{ verticalAlign: "middle" }}>Ubicación</th>
-                          <th style={{ verticalAlign: "middle" }}>Grupos</th>
+                          <th
+                            style={{
+                              verticalAlign: "middle",
+                              textAlign: "center",
+                            }}
+                          >
+                            Grupos
+                          </th>
+                          <th
+                            style={{
+                              verticalAlign: "middle",
+                              textAlign: "center",
+                            }}
+                          >
+                            Niveles
+                          </th>
                           <th style={{ verticalAlign: "middle" }}>
                             Deportistas
                           </th>
                           <th style={{ verticalAlign: "middle" }}>
                             Entrenadores
                           </th>
-                          <th style={{ verticalAlign: "middle" }}>Acciones</th>
+                          <th
+                            style={{
+                              verticalAlign: "middle",
+                              textAlign: "center",
+                            }}
+                          >
+                            Acciones
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
@@ -344,7 +366,12 @@ export const Clubs = ({ name }: { name?: string }) => {
                             <td style={{ verticalAlign: "middle" }}>
                               {club.location || "-"}
                             </td>
-                            <td style={{ verticalAlign: "middle" }}>
+                            <td
+                              style={{
+                                verticalAlign: "middle",
+                                textAlign: "center",
+                              }}
+                            >
                               <button
                                 className="btn btn-info btn-xs"
                                 onClick={() =>
@@ -353,7 +380,24 @@ export const Clubs = ({ name }: { name?: string }) => {
                                 title="Gestionar grupos"
                               >
                                 <i className="fa fa-sitemap"></i>
-                                &nbsp;Gestionar grupos
+                                &nbsp;Gestionar
+                              </button>
+                            </td>
+                            <td
+                              style={{
+                                verticalAlign: "middle",
+                                textAlign: "center",
+                              }}
+                            >
+                              <button
+                                className="btn btn-success btn-xs mx-1"
+                                onClick={() => {
+                                  setSelectedClubForLevels(club as Club);
+                                  setShowLevelsModal(true);
+                                }}
+                                title="Gestionar logros"
+                              >
+                                <i className="fa fa-trophy"></i> &nbsp;Gestionar
                               </button>
                             </td>
                             <td style={{ verticalAlign: "middle" }}>
@@ -369,26 +413,21 @@ export const Clubs = ({ name }: { name?: string }) => {
                               </span>
                             </td>
 
-                            <td style={{ verticalAlign: "middle" }}>
+                            <td
+                              style={{
+                                verticalAlign: "middle",
+                                textAlign: "center",
+                              }}
+                            >
                               <button
-                                className="btn btn-success btn-xs"
-                                onClick={() => {
-                                  setSelectedClubForLevels(club as Club);
-                                  setShowLevelsModal(true);
-                                }}
-                                title="Gestionar logros"
-                              >
-                                <i className="fa fa-trophy"></i> Logros
-                              </button>{" "}
-                              <button
-                                className="btn btn-primary btn-xs"
+                                className="btn btn-primary btn-xs mx-1"
                                 onClick={() => handleOpenEdit(club as any)}
                                 title="Editar"
                               >
                                 <i className="fa fa-edit"></i> Editar
-                              </button>{" "}
+                              </button>
                               <button
-                                className="btn btn-danger btn-xs"
+                                className="btn btn-danger btn-xs mx-1"
                                 onClick={() => handleDelete(club._id)}
                                 title="Eliminar"
                               >
