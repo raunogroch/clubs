@@ -61,6 +61,21 @@ export class ClubRepository {
   }
 
   /**
+   * Obtener clubs de una asignación con sport populado
+   */
+  async findByAssignmentWithPopulate(assignmentId: string): Promise<Club[]> {
+    return this.clubModel
+      .find({
+        assignment_id: new Types.ObjectId(assignmentId),
+      })
+      .populate('sport_id', 'name')
+      .populate('created_by', 'name')
+      .populate('groups')
+      .sort({ createdAt: -1 })
+      .exec();
+  }
+
+  /**
    * Obtener un club por ID
    */
   async findById(clubId: string): Promise<Club | null> {

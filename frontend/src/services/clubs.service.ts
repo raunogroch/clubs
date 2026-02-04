@@ -57,6 +57,36 @@ async function safeParseJson(response: Response) {
 
 class ClubsService {
   /**
+   * Obtener datos del dashboard de clubs
+   * GET /api/clubs/view-dashboard
+   * Retorna: { clubs: [{ _id, name, location, athletes_added, coaches }] }
+   */
+  async getDashboardData(): Promise<{
+    clubs: Array<{
+      _id: string;
+      name: string;
+      location: string;
+      athletes_added: number;
+      coaches: number;
+    }>;
+  }> {
+    const response = await fetch(`${API_URL}/clubs/view-dashboard`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await safeParseJson(response);
+      throw new Error(error.message || "Error al obtener datos del dashboard");
+    }
+
+    return safeParseJson(response);
+  }
+
+  /**
    * Crear un nuevo club
    * POST /api/clubs
    */

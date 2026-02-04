@@ -409,4 +409,49 @@ export class ClubsService {
 
     return club;
   }
+
+  /**
+   * Obtener datos del dashboard de clubs
+   * Retorna: _id, name, location, athletes_added, coaches
+   */
+  async getDashboardData(userId: string) {
+    const assignments =
+      await this.assignmentsService.getUserAssignments(userId);
+
+    if (!assignments || assignments.length === 0) {
+      return { clubs: [] };
+    }
+
+    const clubsByAssignment = await Promise.all(
+      assignments.map((assignment: Assignment) =>
+        this.clubRepository.findByAssignmentWithPopulate(
+          (assignment._id as any).toString(),
+        ),
+      ),
+    );
+
+    const clubs = clubsByAssignment.flat();
+
+    const processedClubs = clubs.map((club: any) => {
+      let totalAthletes = 0;
+      let totalCoaches = 0;
+
+      if (club.groups && club.groups.length > 0) {
+        club.groups.forEach((group: any) => {
+          totalAthletes += group.athletes_added?.length || 0;
+          totalCoaches += group.coaches?.length || 0;
+        });
+      }
+
+      return {
+        _id: club._id,
+        name: club.sport_id.name,
+        location: club.location || '-',
+        athletes_added: totalAthletes,
+        coaches: totalCoaches,
+      };
+    });
+
+    return { clubs: processedClubs };
+  }
 }

@@ -1,22 +1,23 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import type { Club } from "../services/clubs.service";
 
 interface ClubsTableProps {
-  clubs: any[];
-  clubMembers: Record<string, { athletes: number; coaches: number }>;
+  clubs: Array<{
+    _id: string;
+    name: string;
+    location: string;
+    athletes_added: number;
+    coaches: number;
+  }>;
   isLoading: boolean;
-  getSportName: (sportId: string) => string;
-  onEdit: (club: Club) => void;
+  onEdit: (clubId: string) => void;
   onDelete: (clubId: string) => void;
-  onOpenLevels: (club: Club) => void;
+  onOpenLevels: (clubId: string) => void;
 }
 
 export const ClubsTable: React.FC<ClubsTableProps> = ({
   clubs,
-  clubMembers,
   isLoading,
-  getSportName,
   onEdit,
   onDelete,
   onOpenLevels,
@@ -46,7 +47,7 @@ export const ClubsTable: React.FC<ClubsTableProps> = ({
       <table className="table table-striped table-hover">
         <thead>
           <tr>
-            <th style={{ verticalAlign: "middle" }}>Disciplina</th>
+            <th style={{ verticalAlign: "middle" }}>Nombre</th>
             <th style={{ verticalAlign: "middle" }}>Ubicación</th>
             <th style={{ verticalAlign: "middle", textAlign: "center" }}>
               Grupos
@@ -65,11 +66,9 @@ export const ClubsTable: React.FC<ClubsTableProps> = ({
           {clubs.map((club) => (
             <tr key={club._id}>
               <td style={{ verticalAlign: "middle" }}>
-                <strong>{getSportName(club.sport_id)}</strong>
+                <strong>{club.name}</strong>
               </td>
-              <td style={{ verticalAlign: "middle" }}>
-                {club.location || "-"}
-              </td>
+              <td style={{ verticalAlign: "middle" }}>{club.location}</td>
               <td style={{ verticalAlign: "middle", textAlign: "center" }}>
                 <button
                   className="btn btn-info btn-xs"
@@ -82,22 +81,22 @@ export const ClubsTable: React.FC<ClubsTableProps> = ({
               <td style={{ verticalAlign: "middle", textAlign: "center" }}>
                 <button
                   className="btn btn-success btn-xs mx-1"
-                  onClick={() => onOpenLevels(club)}
+                  onClick={() => onOpenLevels(club._id)}
                   title="Gestionar logros"
                 >
                   <i className="fa fa-trophy"></i>&nbsp;Gestionar
                 </button>
               </td>
               <td style={{ verticalAlign: "middle" }}>
-                Registrados ({clubMembers[club._id]?.athletes || 0})
+                Registrados ({club.athletes_added})
               </td>
               <td style={{ verticalAlign: "middle" }}>
-                Registrados ({clubMembers[club._id]?.coaches || 0})
+                Registrados ({club.coaches})
               </td>
               <td style={{ verticalAlign: "middle", textAlign: "center" }}>
                 <button
                   className="btn btn-primary btn-xs mx-1"
-                  onClick={() => onEdit(club)}
+                  onClick={() => onEdit(club._id)}
                   title="Editar"
                 >
                   <i className="fa fa-edit"></i> Editar

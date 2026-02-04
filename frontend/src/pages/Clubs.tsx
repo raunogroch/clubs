@@ -8,12 +8,12 @@ import toastr from "toastr";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState, AppDispatch } from "../store/store";
 import {
-  fetchAllClubs,
+  fetchClubsDashboardData,
+  fetchClubById,
   createClub,
   updateClub,
   deleteClub,
 } from "../store/clubsThunk";
-import { fetchMyAssignments } from "../store/assignmentsThunk";
 import { fetchAllSports } from "../store/sportsThunk";
 import type { Club, CreateClubRequest } from "../services/clubs.service";
 import type { UserAdmin } from "../interfaces/user";
@@ -21,19 +21,26 @@ import { NavHeader } from "../components";
 import { ClubFormModal } from "../components/ClubFormModal";
 import { ClubsTable } from "../components/ClubsTable";
 import { GroupLevelsModal } from "../features/groups/components";
-import { useClubMembers } from "../hooks/useClubMembers";
 
 export const Clubs = ({ name }: { name?: string }) => {
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.auth.user);
-  const { items: clubs, status: clubsStatus } = useSelector(
-    (state: RootState) => state.clubs,
-  );
-  const { items: assignments } = useSelector(
-    (state: RootState) => state.assignments,
-  );
-  const { items: sports } = useSelector((state: RootState) => state.sports);
-  const { clubMembers, loading: membersLoading } = useClubMembers();
+
+  // Estado local para datos del dashboard
+  const [dashboardData, setDashboardData] = useState<{
+    clubs: Array<{
+      _id: string;
+      name: string;
+      location: string;
+      athletes_added: number;
+      coaches: number;
+    }>;
+  } | null>(null);
+  const [dashboardLoading, setDashboardLoading] = useState(true);
+
+  // Estado para deportes
+  const [sports, setSports] = useState<any[]>([]);
+  const [sportsLoading, setSportsLoading] = useState(false);
 
   // Estado local optimizado
   const [showModal, setShowModal] = useState(false);
@@ -47,27 +54,40 @@ export const Clubs = ({ name }: { name?: string }) => {
     assignment_id: "",
   });
 
-  // Cargar datos del store
   useEffect(() => {
-    dispatch(fetchAllClubs());
-    dispatch(fetchMyAssignments());
-    dispatch(fetchAllSports());
+    const loadData = async () => {
+      setDashboardLoading(true);
+      setSportsLoading(true);
+
+      const dashboardResult = await dispatch(fetchClubsDashboardData());
+      if (dashboardResult.payload) {
+        setDashboardData(dashboardResult.payload as any);
+      }
+
+      const sportsResult = await dispatch(fetchAllSports());
+      if (sportsResult.payload) {
+        setSports(sportsResult.payload as any);
+      }
+
+      setDashboardLoading(false);
+      setSportsLoading(false);
+    };
+    loadData();
   }, [dispatch]);
 
-  // Funciones optimizadas
-  const getSportName = useCallback(
-    (sportId: string) =>
-      sports.find((s) => s._id === sportId)?.name || `Deporte ID: ${sportId}`,
-    [sports],
-  );
+  // Datos locales del dashboard o valores por defecto
+  const clubs = dashboardData?.clubs || [];
+  const clubsStatus = dashboardLoading ? "loading" : "idle";
 
+  // Funciones optimizadas
   const resetForm = useCallback(() => {
     setFormData({
       sport_id: "",
       location: "",
-      assignment_id: assignments[0]?._id || "",
+      assignment_id:
+        user?.role === "admin" ? (user as UserAdmin).assignment_id || "" : "",
     });
-  }, [assignments]);
+  }, [user]);
 
   const handleOpenCreate = useCallback(() => {
     setEditingId(null);
@@ -75,15 +95,22 @@ export const Clubs = ({ name }: { name?: string }) => {
     setShowModal(true);
   }, [resetForm]);
 
-  const handleOpenEdit = useCallback((club: Club) => {
-    setEditingId(club._id);
-    setFormData({
-      sport_id: club.sport_id,
-      location: club.location || "",
-      assignment_id: club.assignment_id,
-    });
-    setShowModal(true);
-  }, []);
+  const handleOpenEdit = useCallback(
+    async (clubId: string) => {
+      setEditingId(clubId);
+      const result = await dispatch(fetchClubById(clubId));
+      if (result.payload) {
+        const club = result.payload as any;
+        setFormData({
+          sport_id: club.sport_id?._id || club.sport_id || "",
+          location: club.location || "",
+          assignment_id: club.assignment_id || "",
+        });
+      }
+      setShowModal(true);
+    },
+    [dispatch],
+  );
 
   const handleCloseModal = useCallback(() => {
     setShowModal(false);
@@ -103,14 +130,22 @@ export const Clubs = ({ name }: { name?: string }) => {
     [],
   );
 
+  const reloadDashboard = useCallback(async () => {
+    const result = await dispatch(fetchClubsDashboardData());
+    if (result.payload) {
+      setDashboardData(result.payload as any);
+    }
+  }, [dispatch]);
+
   const handleDelete = useCallback(
     async (clubId: string) => {
       if (!window.confirm("¿Estás seguro de que deseas eliminar este club?")) {
         return;
       }
       await dispatch(deleteClub(clubId));
+      await reloadDashboard();
     },
-    [dispatch],
+    [dispatch, reloadDashboard],
   );
 
   const handleSave = useCallback(async () => {
@@ -119,16 +154,20 @@ export const Clubs = ({ name }: { name?: string }) => {
       return;
     }
 
+    let result;
     if (editingId) {
-      await dispatch(
+      result = await dispatch(
         updateClub({ id: editingId, club: { location: formData.location } }),
       );
     } else {
-      await dispatch(createClub(formData));
+      result = await dispatch(createClub(formData));
     }
 
-    handleCloseModal();
-  }, [editingId, formData, dispatch, handleCloseModal]);
+    if (result.payload) {
+      await reloadDashboard();
+      handleCloseModal();
+    }
+  }, [editingId, formData, dispatch, handleCloseModal, reloadDashboard]);
 
   // Verificar si el usuario admin tiene assignment_id
   const hasAssignment =
@@ -178,13 +217,20 @@ export const Clubs = ({ name }: { name?: string }) => {
               <div className="ibox-content">
                 <ClubsTable
                   clubs={clubs}
-                  clubMembers={clubMembers}
-                  isLoading={clubsStatus === "loading" || membersLoading}
-                  getSportName={getSportName}
+                  isLoading={clubsStatus === "loading"}
                   onEdit={handleOpenEdit}
                   onDelete={handleDelete}
-                  onOpenLevels={(club) => {
-                    setSelectedClubForLevels(club);
+                  onOpenLevels={(clubId) => {
+                    setSelectedClubForLevels({
+                      _id: clubId,
+                      sport_id: "",
+                      location: "",
+                      assignment_id: "",
+                      created_by: "",
+                      members: [],
+                      createdAt: "",
+                      updatedAt: "",
+                    });
                     setShowLevelsModal(true);
                   }}
                 />
@@ -196,7 +242,7 @@ export const Clubs = ({ name }: { name?: string }) => {
 
       <ClubFormModal
         isOpen={showModal}
-        isLoading={clubsStatus === "loading"}
+        isLoading={clubsStatus === "loading" || sportsLoading}
         isEditing={!!editingId}
         formData={formData}
         sports={sports}

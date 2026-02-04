@@ -2,6 +2,22 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import clubsService from "../services/clubs.service";
 import toastr from "toastr";
 
+export const fetchClubsDashboardData = createAsyncThunk(
+  "clubs/fetchDashboardData",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await clubsService.getDashboardData();
+      return response;
+    } catch (err: any) {
+      console.error("❌ Error al obtener datos del dashboard:", err);
+      toastr.error("Error al obtener datos del dashboard");
+      return rejectWithValue(
+        err.message || "Error al obtener datos del dashboard",
+      );
+    }
+  },
+);
+
 export const fetchAllClubs = createAsyncThunk(
   "clubs/fetchAll",
   async (_, { rejectWithValue }) => {

@@ -87,6 +87,16 @@ export class ClubsController {
   }
 
   /**
+   * GET /clubs/view-dashboard
+   * Obtener datos del dashboard con clubs, deportes y miembros
+   * IMPORTANTE: Esta ruta debe ir ANTES de @Get(':clubId')
+   */
+  @Get('view-dashboard')
+  async getDashboardData(@CurrentUser() user: any) {
+    return this.clubsService.getDashboardData(user.sub);
+  }
+
+  /**
    * GET /clubs
    * Obtener todos los clubs del usuario (de sus asignaciones)
    */
