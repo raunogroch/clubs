@@ -52,25 +52,15 @@ export class Club extends Document {
   groups?: Types.ObjectId[];
 
   /**
-   * Niveles/Logros del club (embebidos)
+   * IDs de los niveles/logros del club
+   * Referencias a documentos de ClubLevel
    */
   @Prop({
-    type: [
-      {
-        _id: { type: Types.ObjectId, auto: true },
-        position: { type: Number, required: true },
-        name: { type: String, required: true },
-        description: { type: String },
-      },
-    ],
+    type: [Types.ObjectId],
+    ref: 'ClubLevel',
     default: [],
   })
-  levels?: Array<{
-    _id?: Types.ObjectId;
-    position: number;
-    name: string;
-    description?: string;
-  }>;
+  levels?: Types.ObjectId[];
 
   /**
    * ID del administrador que creó el club

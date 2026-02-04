@@ -10,6 +10,7 @@ const API_URL = BASE_URL.endsWith("/api") ? BASE_URL : `${BASE_URL}/api`;
 
 export interface Club {
   _id: string;
+  name?: string;
   sport_id: string;
   sport?: {
     _id: string;
@@ -21,6 +22,12 @@ export interface Club {
   assignment_id: string;
   created_by: string;
   members: string[];
+  levels?: Array<{
+    _id?: string;
+    position: number;
+    name: string;
+    description?: string;
+  }>;
   createdAt: string;
   updatedAt: string;
 }

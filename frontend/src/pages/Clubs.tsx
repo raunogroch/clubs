@@ -34,6 +34,12 @@ export const Clubs = ({ name }: { name?: string }) => {
       location: string;
       athletes_added: number;
       coaches: number;
+      levels?: Array<{
+        _id?: string;
+        position: number;
+        name: string;
+        description?: string;
+      }>;
     }>;
   } | null>(null);
   const [dashboardLoading, setDashboardLoading] = useState(true);
@@ -48,6 +54,12 @@ export const Clubs = ({ name }: { name?: string }) => {
   const [showLevelsModal, setShowLevelsModal] = useState(false);
   const [selectedClubForLevels, setSelectedClubForLevels] =
     useState<Club | null>(null);
+  const [clubLevels, setClubLevels] = useState<Array<{
+    _id?: string;
+    position: number;
+    name: string;
+    description?: string;
+  }> | null>(null);
   const [formData, setFormData] = useState<CreateClubRequest>({
     sport_id: "",
     location: "",
@@ -106,6 +118,7 @@ export const Clubs = ({ name }: { name?: string }) => {
           location: club.location || "",
           assignment_id: club.assignment_id || "",
         });
+        setClubLevels(club.levels || []);
       }
       setShowModal(true);
     },
@@ -115,6 +128,7 @@ export const Clubs = ({ name }: { name?: string }) => {
   const handleCloseModal = useCallback(() => {
     setShowModal(false);
     setEditingId(null);
+    setClubLevels(null);
     resetForm();
   }, [resetForm]);
 
@@ -134,8 +148,18 @@ export const Clubs = ({ name }: { name?: string }) => {
     const result = await dispatch(fetchClubsDashboardData());
     if (result.payload) {
       setDashboardData(result.payload as any);
+      // Actualizar el club seleccionado en el modal de levels si está abierto
+      if (showLevelsModal && selectedClubForLevels) {
+        const updatedClubs = (result.payload as any).clubs || [];
+        const updatedClub = updatedClubs.find(
+          (c: any) => c._id === selectedClubForLevels._id,
+        );
+        if (updatedClub) {
+          setSelectedClubForLevels(updatedClub);
+        }
+      }
     }
-  }, [dispatch]);
+  }, [dispatch, showLevelsModal, selectedClubForLevels]);
 
   const handleDelete = useCallback(
     async (clubId: string) => {
@@ -221,16 +245,21 @@ export const Clubs = ({ name }: { name?: string }) => {
                   onEdit={handleOpenEdit}
                   onDelete={handleDelete}
                   onOpenLevels={(clubId) => {
-                    setSelectedClubForLevels({
-                      _id: clubId,
-                      sport_id: "",
-                      location: "",
-                      assignment_id: "",
-                      created_by: "",
-                      members: [],
-                      createdAt: "",
-                      updatedAt: "",
-                    });
+                    const clubData = clubs.find((c) => c._id === clubId);
+                    if (clubData) {
+                      setSelectedClubForLevels({
+                        _id: clubId,
+                        name: clubData.name || "",
+                        sport_id: "",
+                        location: clubData.location || "",
+                        assignment_id: "",
+                        created_by: "",
+                        members: [],
+                        levels: clubData.levels || [],
+                        createdAt: "",
+                        updatedAt: "",
+                      });
+                    }
                     setShowLevelsModal(true);
                   }}
                 />
@@ -246,6 +275,7 @@ export const Clubs = ({ name }: { name?: string }) => {
         isEditing={!!editingId}
         formData={formData}
         sports={sports}
+        levels={clubLevels || []}
         onClose={handleCloseModal}
         onSave={handleSave}
         onChange={handleChange}
@@ -266,6 +296,8 @@ export const Clubs = ({ name }: { name?: string }) => {
               }
             : null
         }
+        initialLevels={selectedClubForLevels?.levels || []}
+        onLevelUpdated={reloadDashboard}
         onClose={() => {
           setShowLevelsModal(false);
           setSelectedClubForLevels(null);

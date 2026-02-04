@@ -28,7 +28,6 @@ export const updateClubLevel = createAsyncThunk(
         payload.levelId,
         payload.level,
       );
-      toastr.success("Nivel actualizado");
       return data;
     } catch (err: any) {
       toastr.error("Error al actualizar nivel");

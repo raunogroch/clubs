@@ -449,6 +449,7 @@ export class ClubsService {
         location: club.location || '-',
         athletes_added: totalAthletes,
         coaches: totalCoaches,
+        levels: club.levels || [],
       };
     });
 

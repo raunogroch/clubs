@@ -70,6 +70,12 @@ export interface Group {
   coaches: string[];
   members?: string[]; // legacy support
   schedule?: Schedule[];
+  levels?: Array<{
+    _id?: string;
+    position: number;
+    name: string;
+    description?: string;
+  }>;
   createdAt: string;
   updatedAt: string;
 }

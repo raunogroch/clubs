@@ -14,6 +14,12 @@ interface GroupLevelsModalProps {
   group: Group | null;
   onClose: () => void;
   onLevelUpdated?: () => void;
+  initialLevels?: Array<{
+    _id?: string;
+    position: number;
+    name: string;
+    description?: string;
+  }>;
 }
 
 const GroupLevelsModal: React.FC<GroupLevelsModalProps> = ({
@@ -21,6 +27,7 @@ const GroupLevelsModal: React.FC<GroupLevelsModalProps> = ({
   group,
   onClose,
   onLevelUpdated,
+  initialLevels = [],
 }) => {
   const [editingLevelId, setEditingLevelId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
@@ -32,12 +39,13 @@ const GroupLevelsModal: React.FC<GroupLevelsModalProps> = ({
   const dispatch = useDispatch<AppDispatch>();
   const { loading } = useSelector((state: RootState) => state.levels);
 
-  const club = useSelector((state: RootState) =>
-    state.clubs.items.find((c: any) => c._id === (group ? group.club_id : "")),
-  );
-  const rawLevels = (
-    club && Array.isArray(club.levels) ? club.levels : []
-  ) as Array<any>;
+  // Obtener levels del grupo/club que se pasa como prop o del initialLevels
+  const rawLevels =
+    initialLevels.length > 0
+      ? initialLevels
+      : (((group as any) && Array.isArray((group as any).levels)
+          ? (group as any).levels
+          : []) as Array<any>);
 
   // Ordenar niveles por posición
   const levels = [...rawLevels].sort(
@@ -143,32 +151,36 @@ const GroupLevelsModal: React.FC<GroupLevelsModalProps> = ({
   const handleDrop = async (targetLevel: any) => {
     if (!draggedLevelId || draggedLevelId === targetLevel._id) return;
 
-    const draggedLevel = levels.find((l) => l._id === draggedLevelId);
-    if (!draggedLevel) return;
-
-    // Intercambiar posiciones
-    const draggedPos = draggedLevel.position;
-    const targetPos = targetLevel.position;
-
     try {
-      // Actualizar posiciones en backend (ambas llamadas en paralelo)
-      await Promise.all([
-        dispatch(
-          updateClubLevel({
-            clubId: group.club_id,
-            levelId: draggedLevelId,
-            level: { position: targetPos },
-          }) as any,
-        ),
-        dispatch(
-          updateClubLevel({
-            clubId: group.club_id,
-            levelId: targetLevel._id,
-            level: { position: draggedPos },
-          }) as any,
-        ),
-      ]);
+      // Encontrar índices en la lista ordenada
+      const draggedIndex = levels.findIndex((l) => l._id === draggedLevelId);
+      const targetIndex = levels.findIndex((l) => l._id === targetLevel._id);
 
+      if (draggedIndex === -1 || targetIndex === -1) return;
+
+      // Crear copia y reorganizar
+      const newLevels = [...levels];
+      const [draggedLevel] = newLevels.splice(draggedIndex, 1);
+      newLevels.splice(targetIndex, 0, draggedLevel);
+
+      // Crear actualizaciones con nuevas posiciones secuenciales
+      const updatesToMake = newLevels.map((level, index) => ({
+        levelId: level._id!,
+        newPosition: index + 1,
+      }));
+
+      // Actualizar todas las posiciones en paralelo
+      const updatePromises = updatesToMake.map((update) =>
+        dispatch(
+          updateClubLevel({
+            clubId: group.club_id,
+            levelId: update.levelId,
+            level: { position: update.newPosition },
+          }) as any,
+        ),
+      );
+
+      await Promise.all(updatePromises);
       if (onLevelUpdated) onLevelUpdated();
     } catch (err) {
       console.error("Error al reordenar niveles:", err);

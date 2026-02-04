@@ -7,12 +7,16 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Club } from '../schemas/club.schema';
+import { ClubLevel } from '../schemas/club-level.schema';
 import { CreateClubDto } from '../dto/create-club.dto';
 import { UpdateClubDto } from '../dto/update-club.dto';
 
 @Injectable()
 export class ClubRepository {
-  constructor(@InjectModel(Club.name) private clubModel: Model<Club>) {}
+  constructor(
+    @InjectModel(Club.name) private clubModel: Model<Club>,
+    @InjectModel(ClubLevel.name) private clubLevelModel: Model<ClubLevel>,
+  ) {}
 
   /**
    * Crear un nuevo club
@@ -61,7 +65,7 @@ export class ClubRepository {
   }
 
   /**
-   * Obtener clubs de una asignación con sport populado
+   * Obtener clubs de una asignación con sport y levels populados
    */
   async findByAssignmentWithPopulate(assignmentId: string): Promise<Club[]> {
     return this.clubModel
@@ -71,6 +75,7 @@ export class ClubRepository {
       .populate('sport_id', 'name')
       .populate('created_by', 'name')
       .populate('groups')
+      .populate('levels', 'position name description')
       .sort({ createdAt: -1 })
       .exec();
   }
@@ -81,8 +86,11 @@ export class ClubRepository {
   async findById(clubId: string): Promise<Club | null> {
     return this.clubModel
       .findById(clubId)
+      .populate('sport_id', 'name')
       .populate('created_by', 'name')
       .populate('assignment_id', 'module_name')
+      .populate('groups')
+      .populate('levels', 'position name description')
       .exec();
   }
 
@@ -154,60 +162,66 @@ export class ClubRepository {
   }
 
   /**
-   * Añadir un nivel embebido en el club
+   * Añadir un nivel al club (crea documento separado de ClubLevel)
    */
   async addLevel(
     clubId: string,
     level: { position: number; name: string; description?: string },
   ): Promise<Club | null> {
-    const levelDoc = {
-      _id: new Types.ObjectId(),
+    // Crear el nivel en la colección ClubLevel
+    const newLevel = new this.clubLevelModel({
+      club_id: new Types.ObjectId(clubId),
       position: level.position,
       name: level.name,
       description: level.description,
-    } as any;
+    });
 
+    const savedLevel = await newLevel.save();
+
+    // Agregar el ID del nivel al club
     await this.clubModel.updateOne(
       { _id: new Types.ObjectId(clubId) },
-      { $push: { levels: levelDoc } },
+      { $addToSet: { levels: savedLevel._id } },
     );
 
     return this.findById(clubId);
   }
 
   /**
-   * Actualizar un nivel embebido en el club
+   * Actualizar un nivel del club
    */
   async updateLevel(
     clubId: string,
     levelId: string,
     level: { position?: number; name?: string; description?: string },
   ): Promise<Club | null> {
-    const update: any = {};
-    if (level.position !== undefined)
-      update['levels.$.position'] = level.position;
-    if (level.name !== undefined) update['levels.$.name'] = level.name;
+    // Actualizar el documento de ClubLevel
+    const updateData: any = {};
+    if (level.position !== undefined) updateData.position = level.position;
+    if (level.name !== undefined) updateData.name = level.name;
     if (level.description !== undefined)
-      update['levels.$.description'] = level.description;
+      updateData.description = level.description;
 
-    await this.clubModel.updateOne(
-      {
-        _id: new Types.ObjectId(clubId),
-        'levels._id': new Types.ObjectId(levelId),
-      },
-      { $set: update },
+    await this.clubLevelModel.findByIdAndUpdate(
+      new Types.ObjectId(levelId),
+      updateData,
+      { new: true },
     );
 
     return this.findById(clubId);
   }
 
   /**
-   * Eliminar un nivel embebido del club
+   * Eliminar un nivel del club
    */
   async deleteLevel(clubId: string, levelId: string): Promise<Club | null> {
+    // Eliminar el documento de ClubLevel
+    await this.clubLevelModel.findByIdAndDelete(new Types.ObjectId(levelId));
+
+    // Remover el ID del nivel del club
     await this.clubModel.updateOne(
       { _id: new Types.ObjectId(clubId) },
-      { $pull: { levels: { _id: new Types.ObjectId(levelId) } } },
+      { $pull: { levels: new Types.ObjectId(levelId) } },
     );
 
     return this.findById(clubId);

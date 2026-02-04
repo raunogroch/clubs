@@ -6,6 +6,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Club, ClubSchema } from './schemas/club.schema';
+import { ClubLevel, ClubLevelSchema } from './schemas/club-level.schema';
 import { Group, GroupSchema } from './schemas/group.schema';
 import { Event, EventSchema } from './schemas/event.schema';
 import { User, UserSchema } from '../users/schemas/user.schema';
@@ -26,6 +27,7 @@ import { RegistrationsModule } from '../registrations/registrations.module';
   imports: [
     MongooseModule.forFeature([
       { name: Club.name, schema: ClubSchema },
+      { name: ClubLevel.name, schema: ClubLevelSchema },
       { name: Group.name, schema: GroupSchema },
       { name: Event.name, schema: EventSchema },
       { name: User.name, schema: UserSchema },

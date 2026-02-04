@@ -8,6 +8,12 @@ interface ClubsTableProps {
     location: string;
     athletes_added: number;
     coaches: number;
+    levels?: Array<{
+      _id?: string;
+      position: number;
+      name: string;
+      description?: string;
+    }>;
   }>;
   isLoading: boolean;
   onEdit: (clubId: string) => void;
