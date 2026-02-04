@@ -1,6 +1,7 @@
 import { useSelector } from "react-redux";
 import { useState, useEffect, useMemo } from "react";
 import type { RootState } from "../store/store";
+import type { User, UserAdmin } from "../interfaces/user";
 import { NavHeader } from "../components/NavHeader";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import {
@@ -24,8 +25,8 @@ export const DashboardAdmin = ({ name }: pageParamProps) => {
   // Verificar si el admin tiene assignment_id
   const hasAssignment =
     user?.role === "admin"
-      ? (user as any)?.assignment_id !== null &&
-        (user as any)?.assignment_id !== undefined
+      ? (user as UserAdmin).assignment_id !== null &&
+        (user as UserAdmin).assignment_id !== undefined
       : true; // Superadmin y otros roles siempre tienen acceso
 
   // Si es admin sin assignment_id, mostrar mensaje especial
@@ -88,7 +89,7 @@ const calculateUnpaidAthletes = (breakdown: any): number => {
   }, 0);
 };
 
-const DashboardAssignments = ({ user }: { user: any }) => {
+const DashboardAssignments = ({ user }: { user: User | undefined }) => {
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<Array<any>>([]);
   const [breakdown, setBreakdown] = useState<any>(null);

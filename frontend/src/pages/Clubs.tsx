@@ -1,17 +1,9 @@
 /**
  * Página de Clubs
- *
- * Permite a los administradores con assignments asignados:
- * - Ver todos los clubs de sus assignments
- * - Crear nuevos clubs
- * - Actualizar clubs existentes
- * - Eliminar clubs
- *
- * Solo accesible por administradores con assignments asignados
+ * Permite a administradores con assignments: ver, crear, actualizar y eliminar clubs
  */
 
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useCallback, useEffect } from "react";
 import toastr from "toastr";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState, AppDispatch } from "../store/store";
@@ -23,15 +15,15 @@ import {
 } from "../store/clubsThunk";
 import { fetchMyAssignments } from "../store/assignmentsThunk";
 import { fetchAllSports } from "../store/sportsThunk";
-import groupsService from "../services/groups.service";
-import clubsService from "../services/clubs.service";
-
 import type { Club, CreateClubRequest } from "../services/clubs.service";
+import type { UserAdmin } from "../interfaces/user";
 import { NavHeader } from "../components";
+import { ClubFormModal } from "../components/ClubFormModal";
+import { ClubsTable } from "../components/ClubsTable";
 import { GroupLevelsModal } from "../features/groups/components";
+import { useClubMembers } from "../hooks/useClubMembers";
 
 export const Clubs = ({ name }: { name?: string }) => {
-  const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.auth.user);
   const { items: clubs, status: clubsStatus } = useSelector(
@@ -41,160 +33,49 @@ export const Clubs = ({ name }: { name?: string }) => {
     (state: RootState) => state.assignments,
   );
   const { items: sports } = useSelector((state: RootState) => state.sports);
+  const { clubMembers, loading: membersLoading } = useClubMembers();
 
-  // Estado local
-  const [clubMembers, setClubMembers] = useState<
-    Record<string, { athletes: number; coaches: number }>
-  >({});
-  const [membersLoading, setMembersLoading] = useState<boolean>(true);
+  // Estado local optimizado
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showLevelsModal, setShowLevelsModal] = useState(false);
   const [selectedClubForLevels, setSelectedClubForLevels] =
     useState<Club | null>(null);
-
-  // Formulario
   const [formData, setFormData] = useState<CreateClubRequest>({
     sport_id: "",
     location: "",
     assignment_id: "",
   });
 
-  // Cargar todo en un solo useEffect: dispatchs + conteos por club
+  // Cargar datos del store
   useEffect(() => {
-    let mounted = true;
-
-    const loadAll = async () => {
-      setMembersLoading(true);
-
-      try {
-        // Mantener store sincronizado
-        dispatch(fetchAllClubs());
-        dispatch(fetchMyAssignments());
-        dispatch(fetchAllSports());
-
-        // Obtener clubs directamente para cálculo (no dependemos del store)
-        const clubsData = await clubsService.getAll();
-
-        const membersData: Record<
-          string,
-          { athletes: number; coaches: number }
-        > = {};
-
-        const maxRetries = 5;
-        for (let attempt = 1; attempt <= maxRetries && mounted; attempt++) {
-          const results = await Promise.allSettled(
-            clubsData.map((c) => groupsService.getByClub(c._id)),
-          );
-
-          const allFulfilled = results.every((r) => r.status === "fulfilled");
-
-          if (allFulfilled) {
-            for (let i = 0; i < clubsData.length; i++) {
-              const club = clubsData[i];
-              const clubGroups =
-                (results[i] as PromiseFulfilledResult<any>).value || [];
-
-              const athleteIds = new Set<string>();
-              const coachIds = new Set<string>();
-
-              for (const g of clubGroups) {
-                if (Array.isArray((g as any).athletes)) {
-                  for (const a of (g as any).athletes)
-                    if (a) athleteIds.add(String(a));
-                }
-
-                if (Array.isArray((g as any).athletes_added)) {
-                  for (const entry of (g as any).athletes_added) {
-                    const idField = entry?.athlete_id;
-                    const id =
-                      typeof idField === "string" ? idField : idField?._id;
-                    if (id) athleteIds.add(String(id));
-                  }
-                }
-
-                if (Array.isArray((g as any).coaches)) {
-                  for (const c of (g as any).coaches) {
-                    if (!c) continue;
-                    if (typeof c === "string") coachIds.add(c);
-                    else if (c._id) coachIds.add(String(c._id));
-                  }
-                }
-
-                if (Array.isArray((g as any).members)) {
-                  for (const m of (g as any).members) {
-                    if (m) {
-                      coachIds.add(String(m));
-                      athleteIds.add(String(m));
-                    }
-                  }
-                }
-              }
-
-              membersData[club._id] = {
-                athletes: athleteIds.size,
-                coaches: coachIds.size,
-              };
-            }
-
-            break;
-          }
-
-          const delayMs = 1000 * Math.pow(2, attempt - 1);
-          await new Promise((res) => setTimeout(res, delayMs));
-        }
-
-        // Rellenar con 0s si falta info
-        for (const c of clubsData) {
-          if (!membersData[c._id])
-            membersData[c._id] = { athletes: 0, coaches: 0 };
-        }
-
-        if (mounted) {
-          setClubMembers(membersData);
-          setMembersLoading(false);
-        }
-      } catch (e) {
-        if (mounted) {
-          setClubMembers({});
-          setMembersLoading(false);
-        }
-      }
-    };
-
-    loadAll();
-
-    return () => {
-      mounted = false;
-    };
+    dispatch(fetchAllClubs());
+    dispatch(fetchMyAssignments());
+    dispatch(fetchAllSports());
   }, [dispatch]);
 
-  // Cargar grupos cuando se selecciona un club
-  useEffect(() => {
-    if (editingId) {
-      // Esto solo se ejecuta si estamos editando
-    }
-  }, [editingId]);
+  // Funciones optimizadas
+  const getSportName = useCallback(
+    (sportId: string) =>
+      sports.find((s) => s._id === sportId)?.name || `Deporte ID: ${sportId}`,
+    [sports],
+  );
 
-  // Obtener nombre del deporte por ID
-  const getSportName = (sportId: string): string => {
-    const sport = sports.find((s) => s._id === sportId);
-    return sport?.name || `Deporte ID: ${sportId}`;
-  };
-
-  // Abrir modal para crear
-  const handleOpenCreate = () => {
-    setEditingId(null);
+  const resetForm = useCallback(() => {
     setFormData({
       sport_id: "",
       location: "",
       assignment_id: assignments[0]?._id || "",
     });
-    setShowModal(true);
-  };
+  }, [assignments]);
 
-  // Abrir modal para editar
-  const handleOpenEdit = (club: Club) => {
+  const handleOpenCreate = useCallback(() => {
+    setEditingId(null);
+    resetForm();
+    setShowModal(true);
+  }, [resetForm]);
+
+  const handleOpenEdit = useCallback((club: Club) => {
     setEditingId(club._id);
     setFormData({
       sport_id: club.sport_id,
@@ -202,49 +83,60 @@ export const Clubs = ({ name }: { name?: string }) => {
       assignment_id: club.assignment_id,
     });
     setShowModal(true);
-  };
+  }, []);
 
-  // Cerrar modal
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setShowModal(false);
     setEditingId(null);
-    setFormData({
-      sport_id: "",
-      location: "",
-      assignment_id: assignments[0]?._id || "",
-    });
-  };
+    resetForm();
+  }, [resetForm]);
 
-  // Cambiar campo del formulario
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >,
-  ) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
+  const handleChange = useCallback(
+    (
+      e: React.ChangeEvent<
+        HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+      >,
+    ) => {
+      const { name, value } = e.target;
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    },
+    [],
+  );
 
-  // Eliminar club
-  const handleDelete = async (clubId: string) => {
-    if (!window.confirm("¿Estás seguro de que deseas eliminar este club?")) {
+  const handleDelete = useCallback(
+    async (clubId: string) => {
+      if (!window.confirm("¿Estás seguro de que deseas eliminar este club?")) {
+        return;
+      }
+      await dispatch(deleteClub(clubId));
+    },
+    [dispatch],
+  );
+
+  const handleSave = useCallback(async () => {
+    if (!formData.sport_id.trim()) {
+      toastr.warning("Debes seleccionar un deporte");
       return;
     }
 
-    await dispatch(deleteClub(clubId));
-  };
+    if (editingId) {
+      await dispatch(
+        updateClub({ id: editingId, club: { location: formData.location } }),
+      );
+    } else {
+      await dispatch(createClub(formData));
+    }
 
-  // Verificar si el usuario tiene assignment_id
+    handleCloseModal();
+  }, [editingId, formData, dispatch, handleCloseModal]);
+
+  // Verificar si el usuario admin tiene assignment_id
   const hasAssignment =
     user?.role === "admin"
-      ? (user as any)?.assignment_id !== null &&
-        (user as any)?.assignment_id !== undefined
+      ? (user as UserAdmin).assignment_id !== null &&
+        (user as UserAdmin).assignment_id !== undefined
       : true;
 
-  // Si es admin sin assignment_id, mostrar mensaje
   if (user?.role === "admin" && !hasAssignment) {
     return (
       <>
@@ -255,8 +147,7 @@ export const Clubs = ({ name }: { name?: string }) => {
             <div className="error-desc">
               <p>
                 Aún no has sido asignado a ningún módulo. Por favor, ponte en
-                contacto con el superadministrador para que te asigne a los
-                módulos correspondientes.
+                contacto con el superadministrador.
               </p>
             </div>
           </div>
@@ -265,30 +156,9 @@ export const Clubs = ({ name }: { name?: string }) => {
     );
   }
 
-  // Guardar club (crear o actualizar)
-  const handleSave = async () => {
-    if (!formData.sport_id.trim()) {
-      toastr.warning("Debes seleccionar un deporte");
-      return;
-    }
-
-    if (editingId) {
-      // Actualizar
-      await dispatch(
-        updateClub({ id: editingId, club: { location: formData.location } }),
-      );
-    } else {
-      // Crear
-      await dispatch(createClub(formData));
-    }
-
-    handleCloseModal();
-  };
-
   return (
     <>
-      <NavHeader name={"Clubs"} />
-
+      <NavHeader name="Clubs" />
       <div className="wrapper wrapper-content">
         <div className="row">
           <div className="col-lg-12">
@@ -306,223 +176,35 @@ export const Clubs = ({ name }: { name?: string }) => {
                 </div>
               </div>
               <div className="ibox-content">
-                {clubsStatus === "loading" || membersLoading ? (
-                  <div className="text-center">
-                    <p>Cargando información...</p>
-                  </div>
-                ) : clubs.length === 0 ? (
-                  <div className="text-center">
-                    <p className="text-muted">
-                      No hay clubs creados aún. Crea uno nuevo para comenzar.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="table-responsive">
-                    <table className="table table-striped table-hover">
-                      <thead>
-                        <tr>
-                          <th style={{ verticalAlign: "middle" }}>
-                            Disciplina
-                          </th>
-                          <th style={{ verticalAlign: "middle" }}>Ubicación</th>
-                          <th
-                            style={{
-                              verticalAlign: "middle",
-                              textAlign: "center",
-                            }}
-                          >
-                            Grupos
-                          </th>
-                          <th
-                            style={{
-                              verticalAlign: "middle",
-                              textAlign: "center",
-                            }}
-                          >
-                            Niveles
-                          </th>
-                          <th style={{ verticalAlign: "middle" }}>
-                            Deportistas
-                          </th>
-                          <th style={{ verticalAlign: "middle" }}>
-                            Entrenadores
-                          </th>
-                          <th
-                            style={{
-                              verticalAlign: "middle",
-                              textAlign: "center",
-                            }}
-                          >
-                            Acciones
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {clubs.map((club) => (
-                          <tr key={club._id}>
-                            <td style={{ verticalAlign: "middle" }}>
-                              <strong>{getSportName(club.sport_id)}</strong>
-                            </td>
-                            <td style={{ verticalAlign: "middle" }}>
-                              {club.location || "-"}
-                            </td>
-                            <td
-                              style={{
-                                verticalAlign: "middle",
-                                textAlign: "center",
-                              }}
-                            >
-                              <button
-                                className="btn btn-info btn-xs"
-                                onClick={() =>
-                                  navigate(`/clubs/${club._id}/groups`)
-                                }
-                                title="Gestionar grupos"
-                              >
-                                <i className="fa fa-sitemap"></i>
-                                &nbsp;Gestionar
-                              </button>
-                            </td>
-                            <td
-                              style={{
-                                verticalAlign: "middle",
-                                textAlign: "center",
-                              }}
-                            >
-                              <button
-                                className="btn btn-success btn-xs mx-1"
-                                onClick={() => {
-                                  setSelectedClubForLevels(club as Club);
-                                  setShowLevelsModal(true);
-                                }}
-                                title="Gestionar logros"
-                              >
-                                <i className="fa fa-trophy"></i> &nbsp;Gestionar
-                              </button>
-                            </td>
-                            <td style={{ verticalAlign: "middle" }}>
-                              <span>
-                                Registrados ( &nbsp;
-                                {clubMembers[club._id]?.athletes || 0} &nbsp;)
-                              </span>
-                            </td>
-                            <td style={{ verticalAlign: "middle" }}>
-                              <span>
-                                Registrados ( &nbsp;
-                                {clubMembers[club._id]?.coaches || 0} &nbsp;)
-                              </span>
-                            </td>
-
-                            <td
-                              style={{
-                                verticalAlign: "middle",
-                                textAlign: "center",
-                              }}
-                            >
-                              <button
-                                className="btn btn-primary btn-xs mx-1"
-                                onClick={() => handleOpenEdit(club as any)}
-                                title="Editar"
-                              >
-                                <i className="fa fa-edit"></i> Editar
-                              </button>
-                              <button
-                                className="btn btn-danger btn-xs mx-1"
-                                onClick={() => handleDelete(club._id)}
-                                title="Eliminar"
-                              >
-                                <i className="fa fa-trash"></i> Eliminar
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                <ClubsTable
+                  clubs={clubs}
+                  clubMembers={clubMembers}
+                  isLoading={clubsStatus === "loading" || membersLoading}
+                  getSportName={getSportName}
+                  onEdit={handleOpenEdit}
+                  onDelete={handleDelete}
+                  onOpenLevels={(club) => {
+                    setSelectedClubForLevels(club);
+                    setShowLevelsModal(true);
+                  }}
+                />
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Modal de Crear/Editar */}
-      {showModal && (
-        <div
-          className="modal"
-          style={{ display: "block", backgroundColor: "rgba(0,0,0,.5)" }}
-        >
-          <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-content">
-              <div className="modal-header">
-                <h4 className="modal-title">
-                  {editingId ? "Editar Club" : "Crear Club"}
-                </h4>
-                <button
-                  type="button"
-                  className="close"
-                  onClick={handleCloseModal}
-                >
-                  &times;
-                </button>
-              </div>
-              <div className="modal-body">
-                <div className="form-group">
-                  <label>Deporte *</label>
-                  <select
-                    className="form-control"
-                    name="sport_id"
-                    value={formData.sport_id}
-                    onChange={handleChange}
-                  >
-                    <option value="">-- Selecciona un deporte --</option>
-                    {sports.map((sport) => (
-                      <option key={sport._id} value={sport._id}>
-                        {sport.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+      <ClubFormModal
+        isOpen={showModal}
+        isLoading={clubsStatus === "loading"}
+        isEditing={!!editingId}
+        formData={formData}
+        sports={sports}
+        onClose={handleCloseModal}
+        onSave={handleSave}
+        onChange={handleChange}
+      />
 
-                {/* description field removed */}
-
-                <div className="form-group">
-                  <label>Ubicación</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    name="location"
-                    value={formData.location || ""}
-                    onChange={handleChange}
-                    placeholder="Ej: Cancha 1"
-                  />
-                </div>
-
-                {/* Campo assignment_id se asigna automáticamente */}
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-xs btn-default"
-                  onClick={handleCloseModal}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-xs btn-primary"
-                  onClick={handleSave}
-                  disabled={clubsStatus === "loading"}
-                >
-                  {editingId ? "Actualizar" : "Crear"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal de Logros/Niveles */}
       <GroupLevelsModal
         isOpen={showLevelsModal}
         group={

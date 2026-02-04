@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Image, NavHeader } from "../components";
-
+import type { UserAthlete } from "../interfaces/user";
 import { userService } from "../services/userService";
 import Cropper from "react-cropper";
 import "cropperjs/dist/cropper.css";
@@ -9,8 +9,8 @@ import { ParentTooltip } from "../components/ParentTooltip";
 export const Athletes = () => {
   const [showImageModal, setShowImageModal] = useState(false);
 
-  const [editingImage, setEditingImage] = useState<any | null>(null);
-  const [athletes, setAthletes] = useState<any[]>([]);
+  const [editingImage, setEditingImage] = useState<UserAthlete | null>(null);
+  const [athletes, setAthletes] = useState<UserAthlete[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploadedImageBase64, setUploadedImageBase64] = useState<string>("");
 
@@ -36,7 +36,7 @@ export const Athletes = () => {
     }
   };
 
-  const openImageEdit = (u: any) => {
+  const openImageEdit = (u: UserAthlete) => {
     setEditingImage(u);
     setUploadedImageBase64("");
     setShowImageModal(true);

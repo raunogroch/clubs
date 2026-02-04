@@ -5,6 +5,7 @@ import groupsService from "../services/groups.service";
 import { paymentsService } from "../services/paymentsService";
 import { useSelector } from "react-redux";
 import type { RootState } from "../store/store";
+import type { User, UserAdmin } from "../interfaces/user";
 import { Image, NavHeader } from "../components";
 
 const MONTH_NAMES = [
@@ -108,7 +109,7 @@ export const MonthlyPayments = () => {
 
       setAthlete(found);
 
-      const assignmentId = (user as any)?.assignment_id;
+      const assignmentId = (user as UserAdmin)?.assignment_id;
       if (!assignmentId) {
         alert("No tienes una asignación activa");
         setLoading(false);
