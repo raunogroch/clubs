@@ -7,6 +7,7 @@ import groupsReducer from "./groupsSlice";
 import sportsReducer from "./sportsSlice";
 import assignmentsReducer from "./assignmentsSlice";
 import levelsReducer from "./levelsSlice";
+import athletesReducer from "./athletesSlice";
 import { tokenSessionMiddleware } from "./middleware/tokenSessionMiddleware";
 
 export const store = configureStore({
@@ -19,6 +20,7 @@ export const store = configureStore({
     sports: sportsReducer,
     assignments: assignmentsReducer,
     levels: levelsReducer,
+    athletes: athletesReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(tokenSessionMiddleware),
