@@ -25,6 +25,7 @@ export class RegistrationsController {
   }
 
   @Get('debug/all')
+  @UseGuards(JwtAuthGuard)
   async debugAll() {
     try {
       const registrations = await this.registrationsService.findByGroups([]);

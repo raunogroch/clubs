@@ -8,6 +8,34 @@ import {
 } from "@nestjs/common";
 import { ProcessorService } from "./processor.service";
 
+/**
+ * Interfaces para tipado fuerte de los DTOs
+ */
+interface ProcessImageRequest {
+  image: string;
+}
+
+interface SaveImageRequest {
+  image: string;
+  folder?: string;
+}
+
+interface SavePdfRequest {
+  pdf: string;
+  folder?: string;
+  fileIdentifier?: string;
+}
+
+interface DeleteImageRequest {
+  folder: string;
+  imagePath: string;
+}
+
+interface DeletePdfRequest {
+  folder: string;
+  fileIdentifier: string;
+}
+
 @Controller("process")
 export class ProcessorController {
   private readonly logger = new Logger(ProcessorController.name);
@@ -16,7 +44,7 @@ export class ProcessorController {
 
   @Post()
   @HttpCode(200)
-  async process(@Body() body: any) {
+  async process(@Body() body: ProcessImageRequest) {
     try {
       if (!body?.image) {
         throw new BadRequestException("Missing or empty image in body");
@@ -31,7 +59,7 @@ export class ProcessorController {
 
   @Post("save")
   @HttpCode(200)
-  async save(@Body() body: any) {
+  async save(@Body() body: SaveImageRequest) {
     try {
       if (!body?.image) {
         throw new BadRequestException("Missing or empty image in body");
@@ -47,7 +75,7 @@ export class ProcessorController {
 
   @Post("save-pdf")
   @HttpCode(200)
-  async savePdf(@Body() body: any) {
+  async savePdf(@Body() body: SavePdfRequest) {
     try {
       if (!body?.pdf) {
         throw new BadRequestException("Missing or empty PDF in body");
@@ -68,7 +96,7 @@ export class ProcessorController {
 
   @Post("delete")
   @HttpCode(200)
-  async delete(@Body() body: any) {
+  async delete(@Body() body: DeleteImageRequest) {
     try {
       if (!body?.folder || !body?.imagePath) {
         throw new BadRequestException("Missing folder or imagePath");
@@ -83,7 +111,7 @@ export class ProcessorController {
 
   @Post("delete-pdf")
   @HttpCode(200)
-  async deletePdf(@Body() body: any) {
+  async deletePdf(@Body() body: DeletePdfRequest) {
     try {
       if (!body?.folder || !body?.fileIdentifier) {
         throw new BadRequestException("Missing folder or fileIdentifier");
