@@ -160,7 +160,6 @@ export const addScheduleToGroup = createAsyncThunk(
         payload.schedule.startTime,
         payload.schedule.endTime,
       );
-      toastr.success("Horario añadido");
       return data;
     } catch (err: any) {
       toastr.error("Error al añadir horario");
@@ -180,7 +179,6 @@ export const removeScheduleFromGroup = createAsyncThunk(
         payload.groupId,
         payload.scheduleIndex,
       );
-      toastr.success("Horario removido");
       return data;
     } catch (err: any) {
       toastr.error("Error al remover horario");

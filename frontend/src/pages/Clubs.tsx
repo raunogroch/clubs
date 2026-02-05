@@ -18,9 +18,9 @@ import { fetchAllSports } from "../store/sportsThunk";
 import type { Club, CreateClubRequest } from "../services/clubs.service";
 import type { UserAdmin } from "../interfaces/user";
 import { NavHeader } from "../components";
-import { ClubFormModal } from "../components/ClubFormModal";
+import { ClubFormModal } from "../components/modals/ClubForm.modal";
 import { ClubsTable } from "../components/ClubsTable";
-import { GroupLevelsModal } from "../features/groups/components";
+import { GroupLevelsModal } from "../components/modals/GroupLevels.modal";
 
 export const Clubs = ({ name }: { name?: string }) => {
   const dispatch = useDispatch<AppDispatch>();

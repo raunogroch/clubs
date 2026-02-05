@@ -13,11 +13,11 @@ import {
 } from "../store/athletesThunk";
 import { clearSearchedParent } from "../store/athletesSlice";
 import { AthletesTable } from "./athletes-admin/components/AthletesTable";
-import { AthleteFormModal } from "./athletes-admin/components/AthleteFormModal";
-import { ImageEditModal } from "./athletes-admin/components/ImageEditModal";
-import { CIEditModal } from "./athletes-admin/components/CIEditModal";
-import { PDFPreviewModal } from "./athletes-admin/components/PDFPreviewModal";
-import { CredentialsModal } from "./athletes-admin/components/CredentialsModal";
+import { AthleteFormModal } from "../components/modals/AthleteForm.modal";
+import { ImageEditModal } from "../components/modals/ImageEdit.modal";
+import { CIEditModal } from "../components/modals/CIEdit.modal";
+import { PDFPreviewModal } from "../components/modals/PDFPreview.modal";
+import { CredentialsModal } from "../components/modals/Credentials.modal";
 import {
   calculateAge,
   generateUsername,
