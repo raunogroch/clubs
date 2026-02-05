@@ -682,6 +682,7 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
                       <GroupCard
                         key={group._id}
                         group={group as any}
+                        clubId={clubId}
                         isExpanded={groupExpansion.isExpanded(group._id)}
                         isLoading={(groupsStatus as string) === "loading"}
                         onToggleExpand={() =>

@@ -2,6 +2,7 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import {
   fetchGroupsByClub,
   fetchGroupById,
+  fetchGroupSummary,
   createGroup,
   updateGroup,
   deleteGroup,
@@ -77,6 +78,22 @@ const groupsSlice = createSlice({
         },
       )
       .addCase(fetchGroupById.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload as string;
+      })
+      // fetchGroupSummary
+      .addCase(fetchGroupSummary.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(
+        fetchGroupSummary.fulfilled,
+        (state, action: PayloadAction<any>) => {
+          state.status = "succeeded";
+          state.selectedGroup = action.payload;
+        },
+      )
+      .addCase(fetchGroupSummary.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload as string;
       })

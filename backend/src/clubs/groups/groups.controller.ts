@@ -68,8 +68,25 @@ export class GroupsController {
    * Obtener un grupo específico
    */
   @Get(':groupId')
-  async getGroup(@Param('groupId') groupId: string, @CurrentUser() user: any) {
-    return this.groupsService.getGroup(groupId, user.sub);
+  async getGroup(
+    @Param('groupId') groupId: string,
+    @CurrentUser() user: any,
+    @Query('fields') fields?: string,
+  ) {
+    // fields query param: comma separated list of fields to return
+    const parsedFields = fields
+      ? fields
+          .split(',')
+          .map((f) => f.trim())
+          .filter(Boolean)
+      : undefined;
+
+    // Ensure club_id is always requested because service verifies access
+    const fieldsWithClub = parsedFields
+      ? Array.from(new Set([...parsedFields, 'club_id']))
+      : undefined;
+
+    return this.groupsService.getGroup(groupId, user.sub, fieldsWithClub);
   }
 
   /**

@@ -96,7 +96,7 @@ export const roleRoutes: RoleRoutes = {
       element: <ClubGroups />,
     },
     {
-      path: "/clubs/:club_id/groups/:group_id/group",
+      path: "/clubs/:club_id/groups/:id_subgrupo/group",
       element: <GroupDetail />,
     },
     {

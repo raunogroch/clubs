@@ -5,6 +5,7 @@
  */
 
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import type { Group } from "../types";
 import { formatPrice } from "../utils";
 
@@ -12,6 +13,7 @@ interface GroupCardProps {
   group: Group;
   isExpanded: boolean;
   isLoading?: boolean;
+  clubId?: string;
   onToggleExpand: () => void;
   onEdit: () => void;
   onDelete: () => void;
@@ -22,12 +24,20 @@ export const GroupCard: React.FC<GroupCardProps> = ({
   group,
   isExpanded,
   isLoading = false,
+  clubId,
   onToggleExpand,
   onEdit,
   onDelete,
   children,
 }) => {
+  const navigate = useNavigate();
   const createdDate = new Date(group.createdAt).toLocaleDateString("es-ES");
+
+  const handleViewDetail = () => {
+    if (clubId) {
+      navigate(`/clubs/${clubId}/groups/${group._id}/group`);
+    }
+  };
 
   return (
     <div className="ibox">
@@ -72,6 +82,14 @@ export const GroupCard: React.FC<GroupCardProps> = ({
 
           {/* Botones de acción */}
           <div className="ibox-tools">
+            <button
+              className="btn btn-info btn-xs"
+              onClick={handleViewDetail}
+              title="Ver detalle del grupo"
+              disabled={isLoading}
+            >
+              <i className="fa fa-eye"></i>
+            </button>{" "}
             <button
               className="btn btn-primary btn-xs"
               onClick={onEdit}

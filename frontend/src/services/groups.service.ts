@@ -113,8 +113,13 @@ class GroupsService {
    * Obtener un grupo específico
    * GET /api/groups/:groupId
    */
-  async getById(groupId: string): Promise<Group> {
-    const response = await fetch(`${API_URL}/groups/${groupId}`, {
+  async getById(groupId: string, fields?: string[]): Promise<Group> {
+    const url = new URL(`${API_URL}/groups/${groupId}`);
+    if (fields && fields.length > 0) {
+      url.searchParams.append("fields", fields.join(","));
+    }
+
+    const response = await fetch(url.toString(), {
       method: "GET",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,

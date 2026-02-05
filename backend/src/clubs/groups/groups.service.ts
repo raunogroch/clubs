@@ -42,6 +42,14 @@ export class GroupsService {
     clubId: string,
     userId: string,
   ): Promise<void> {
+    // Validate clubId early to avoid passing the string "undefined" to Mongoose
+    if (!clubId || clubId === 'undefined' || clubId === 'null') {
+      throw new BadRequestException('Club ID inválido o ausente');
+    }
+    if (!Types.ObjectId.isValid(clubId as any)) {
+      throw new BadRequestException(`Club ID inválido: ${clubId}`);
+    }
+
     const club = await this.clubRepository.findById(clubId);
     if (!club) {
       throw new NotFoundException(`Club con ID ${clubId} no encontrado`);
@@ -149,10 +157,21 @@ export class GroupsService {
   /**
    * Obtener un grupo específico
    */
-  async getGroup(groupId: string, userId: string): Promise<Group> {
-    const group = await this.groupRepository.findById(groupId);
+  async getGroup(
+    groupId: string,
+    userId: string,
+    fields?: string[],
+  ): Promise<Group> {
+    const group = await this.groupRepository.findById(groupId, fields);
     if (!group) {
       throw new NotFoundException(`Grupo con ID ${groupId} no encontrado`);
+    }
+
+    // Asegurarse que el grupo tiene un club asociado
+    if (!group.club_id) {
+      throw new NotFoundException(
+        `Grupo con ID ${groupId} no tiene club asociado`,
+      );
     }
 
     // Extraer el club_id correctamente (puede estar poblado)

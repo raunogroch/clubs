@@ -28,6 +28,26 @@ export const fetchGroupById = createAsyncThunk(
   },
 );
 
+export const fetchGroupSummary = createAsyncThunk(
+  "groups/fetchSummary",
+  async (payload: { id: string; fields?: string[] }, { rejectWithValue }) => {
+    try {
+      console.log(
+        `[fetchGroupSummary] Requesting group ${payload.id} with fields:`,
+        payload.fields,
+      );
+      const data = await groupsService.getById(payload.id, payload.fields);
+      return data;
+    } catch (err: any) {
+      console.error(`[fetchGroupSummary] Error:`, err);
+      toastr.error("Error al obtener resumen del grupo");
+      return rejectWithValue(
+        err.message || "Error al obtener resumen del grupo",
+      );
+    }
+  },
+);
+
 export const createGroup = createAsyncThunk(
   "groups/create",
   async (group: any, { rejectWithValue }) => {

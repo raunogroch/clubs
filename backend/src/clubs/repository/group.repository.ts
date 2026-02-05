@@ -54,7 +54,78 @@ export class GroupRepository {
   /**
    * Obtener un grupo por ID
    */
-  async findById(groupId: string): Promise<Group | null> {
+  async findById(
+    groupId: string,
+    projection?: string[],
+  ): Promise<Group | null> {
+    const query = this.groupModel.findById(groupId);
+
+    // If a projection is provided, use .select to limit fields
+    if (projection && projection.length > 0) {
+      // Always include relational field refs so populate() can work
+      const fieldsToSelect = new Set([...projection, 'club_id']);
+      if (projection.some((f) => f.includes('athletes_added'))) {
+        fieldsToSelect.add('athletes_added');
+      }
+      if (projection.some((f) => f.includes('coaches'))) {
+        fieldsToSelect.add('coaches');
+      }
+      // Note: 'athletes' field doesn't exist in schema, only 'athletes_added'
+      if (
+        projection.some(
+          (f) =>
+            f.includes('events_added') ||
+            f.includes('events') ||
+            f.includes('schedule'),
+        )
+      ) {
+        fieldsToSelect.add('events_added');
+        fieldsToSelect.add('schedule');
+      }
+      if (projection.some((f) => f.includes('created'))) {
+        fieldsToSelect.add('created_by');
+      }
+
+      query.select(Array.from(fieldsToSelect).join(' '));
+
+      // Conditionally populate only requested relational fields
+      if (projection.includes('athletes_added')) {
+        query.populate({
+          path: 'athletes_added',
+          select: 'athlete_id registration_pay registration_date',
+          populate: {
+            path: 'athlete_id',
+            select: 'name role ci lastname images',
+          },
+        });
+      }
+
+      if (projection.includes('coaches')) {
+        query.populate('coaches', 'name role ci lastname images');
+      }
+
+      if (projection.includes('club_id')) {
+        query.populate('club_id', 'name');
+      }
+
+      if (
+        projection.includes('events_added') ||
+        projection.includes('events')
+      ) {
+        query.populate(
+          'events_added',
+          'name location duration eventDate eventTime',
+        );
+      }
+
+      if (projection.includes('created_by')) {
+        query.populate('created_by', 'name');
+      }
+
+      return query.exec();
+    }
+
+    // Default behaviour: full object with usual populates
     return this.groupModel
       .findById(groupId)
       .populate('created_by', 'name')
