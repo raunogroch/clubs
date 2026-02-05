@@ -1,4 +1,5 @@
 import React from "react";
+import { Button } from "./Button";
 import type { CreateClubRequest } from "../services/clubs.service";
 
 interface ClubFormModalProps {
@@ -150,14 +151,15 @@ export const ClubFormModal: React.FC<ClubFormModalProps> = ({
             >
               Cancelar
             </button>
-            <button
+            <Button
               type="button"
-              className="btn btn-xs btn-primary"
+              variant="primary"
+              className="btn-xs"
               onClick={onSave}
               disabled={isLoading}
             >
               {isEditing ? "Actualizar" : "Crear"}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

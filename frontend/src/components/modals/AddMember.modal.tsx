@@ -1,34 +1,6 @@
-/**
- * Modal para Agregar Miembros (Coach o Atleta)
- *
- * Componente presentacional que maneja la UI del formulario de búsqueda/creación.
- */
+import { Button, Image } from "../../components";
 
-import React from "react";
-import type {
-  User,
-  MemberType,
-  CreateUserData,
-} from "../../features/groups/types";
-import { Image } from "../../components";
-
-interface AddMemberModalProps {
-  isOpen: boolean;
-  memberType: MemberType | null;
-  searchCi: string;
-  searchResult: User | null;
-  showCreateUserForm: boolean;
-  createUserData: CreateUserData;
-  loading: boolean;
-  onClose: () => void;
-  onSearchCiChange: (value: string) => void;
-  onSearch: () => void;
-  onAddMember: () => void;
-  onCreateUser: () => void;
-  onCreateUserDataChange: (field: keyof CreateUserData, value: string) => void;
-}
-
-export const AddMemberModal: React.FC<AddMemberModalProps> = ({
+export const AddMemberModal = ({
   isOpen,
   memberType,
   searchCi,
@@ -49,35 +21,73 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
 
   return (
     <div
-      className="modal"
-      style={{ display: "block", backgroundColor: "rgba(0,0,0,.5)" }}
-      onClick={onClose}
+      className="modal inmodal"
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "rgba(0,0,0,.5)",
+        zIndex: 1050,
+        height: "100vh",
+        overflow: "auto",
+      }}
     >
-      <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-content">
+      <div
+        className="modal-dialog modal-lg"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          maxWidth: "700px",
+          width: "90vw",
+          maxHeight: "90vh",
+          display: "flex",
+          flexDirection: "column",
+          margin: "auto",
+        }}
+      >
+        <div
+          className="modal-content animated bounceInRight"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+            maxHeight: "90vh",
+          }}
+        >
           <div className="modal-header">
+            <i className="fa fa-user-plus modal-icon"></i>
             <h4 className="modal-title">Agregar {memberTypeLabel}</h4>
-            <button
+            <small className="font-bold">Búsqueda rápida de usuarios</small>
+            <Button
               type="button"
               className="close"
               onClick={onClose}
               aria-label="Cerrar"
             >
               &times;
-            </button>
+            </Button>
           </div>
 
-          <div className="modal-body">
+          <div
+            className="modal-body"
+            style={{
+              flex: 1,
+              overflowY: "auto",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
             {/* Búsqueda de usuario */}
             <div className="form-group">
-              <label htmlFor="search-ci">Buscar por Carnet</label>
+              <label htmlFor="search-ci">
+                <i className="fa fa-search"></i> Buscar por Carnet (CI)
+              </label>
               <div className="input-group">
                 <input
                   id="search-ci"
                   type="text"
                   className="form-control"
                   value={searchCi}
-                  placeholder="ingresa el numero de carnet..."
+                  placeholder="ingresa el número de carnet..."
                   onChange={(e) => onSearchCiChange(e.target.value)}
                   onKeyPress={(e) => {
                     if (e.key === "Enter") {
@@ -87,213 +97,238 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
                   disabled={loading}
                 />
                 <span className="input-group-btn">
-                  <button
+                  <Button
                     className="btn btn-primary"
                     type="button"
                     onClick={onSearch}
                     disabled={loading || !searchCi.trim()}
+                    icon="fa-search"
                   >
-                    <i className="fa fa-search"></i> Buscar
-                  </button>
+                    Buscar
+                  </Button>
                 </span>
               </div>
+              <small className="form-text text-muted">
+                Ingresa el carnet del {memberTypeLabel.toLowerCase()} que deseas
+                agregar
+              </small>
             </div>
+
+            <div className="hr-line-dashed"></div>
 
             {/* Usuario encontrado */}
             {searchResult && (
-              <div
-                style={{
-                  border: "1px solid #e0e0e0",
-                  borderRadius: "12px",
-                  padding: "16px",
-                  backgroundColor: "#f9f9f9",
-                  marginBottom: "16px",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "16px",
-                    alignItems: "stretch",
-                  }}
-                >
-                  {/* Imagen del atleta - ocupa altura total */}
-                  <div style={{ flexShrink: 0 }}>
-                    {searchResult.images?.medium ? (
-                      <Image
-                        src={searchResult.images.medium}
-                        alt={`${searchResult.name} ${searchResult.lastname}`}
-                        style={{
-                          width: "100px",
-                          height: "100%",
-                          borderRadius: "8px",
-                          objectFit: "cover",
-                          border: "2px solid #3498db",
-                        }}
-                      />
-                    ) : (
-                      <div
-                        style={{
-                          width: "100px",
-                          height: "100%",
-                          borderRadius: "8px",
-                          backgroundColor: "#e8e8e8",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          border: "2px solid #ccc",
-                          minHeight: "120px",
-                        }}
-                      >
-                        <i
-                          className="fa fa-user"
-                          style={{ fontSize: "40px", color: "#999" }}
-                        ></i>
-                      </div>
-                    )}
-                  </div>
+              <>
+                <div style={{ marginBottom: "16px" }}>
+                  <h5 style={{ marginBottom: "12px" }}>
+                    <i className="fa fa-check-circle text-success"></i> Usuario
+                    Encontrado
+                  </h5>
+                  <div
+                    className="contact-box center-version"
+                    style={{ textAlign: "center" }}
+                  >
+                    <div style={{ padding: "16px" }}>
+                      {/* Imagen del usuario */}
+                      {searchResult.images?.medium ? (
+                        <Image
+                          src={searchResult.images.medium}
+                          alt={`${searchResult.name} ${searchResult.lastname}`}
+                          className="rounded-circle"
+                          style={{
+                            width: "90px",
+                            height: "90px",
+                            objectFit: "cover",
+                            border: "3px solid #5c6cfa",
+                            marginBottom: "12px",
+                          }}
+                        />
+                      ) : (
+                        <div
+                          className="rounded-circle"
+                          style={{
+                            width: "90px",
+                            height: "90px",
+                            margin: "0 auto 12px",
+                            backgroundColor: "#e8e8e8",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            border: "3px solid #5c6cfa",
+                          }}
+                        >
+                          <i
+                            className="fa fa-user"
+                            style={{ fontSize: "40px", color: "#999" }}
+                          ></i>
+                        </div>
+                      )}
 
-                  {/* Información del atleta */}
-                  <div style={{ flex: 1 }}>
-                    <p
-                      style={{
-                        margin: "4px 0",
-                        color: "#666",
-                        fontSize: "13px",
-                      }}
-                    >
-                      <strong>Nombres:</strong> {searchResult.name || "-"}
-                    </p>
-                    <p
-                      style={{
-                        margin: "4px 0",
-                        color: "#666",
-                        fontSize: "13px",
-                      }}
-                    >
-                      <strong>Apellidos:</strong> {searchResult.lastname || "-"}
-                    </p>
-                    <p
-                      style={{
-                        margin: "4px 0",
-                        color: "#666",
-                        fontSize: "13px",
-                      }}
-                    >
-                      <strong>Carnet:</strong> {searchResult.ci || "-"}
-                    </p>
-                    {searchResult.phone && (
-                      <p
-                        style={{
-                          margin: "4px 0",
-                          color: "#666",
-                          fontSize: "13px",
-                        }}
-                      >
-                        <strong>Teléfono:</strong> {searchResult.phone}
-                      </p>
-                    )}
+                      {/* Nombre completo */}
+                      <h3 className="m-b-xs" style={{ marginBottom: "8px" }}>
+                        <strong>
+                          {searchResult.name} {searchResult.lastname}
+                        </strong>
+                      </h3>
+
+                      {/* Información en formato direcciones */}
+                      <address style={{ margin: "12px 0", fontSize: "13px" }}>
+                        <strong>
+                          {memberType === "coach" ? "Entrenador" : "Deportista"}
+                        </strong>
+                        <br />
+                        <strong>CI:</strong> {searchResult.ci || "-"}
+                        {searchResult.phone && (
+                          <>
+                            <br />
+                            <strong>Teléfono:</strong> {searchResult.phone}
+                          </>
+                        )}
+                      </address>
+                    </div>
                   </div>
                 </div>
-              </div>
+                <div className="hr-line-dashed"></div>
+              </>
             )}
 
             {/* Formulario para crear nuevo usuario */}
             {showCreateUserForm && !searchResult && (
-              <div className="alert alert-warning">
-                <h5>Crear nuevo {memberTypeLabel}</h5>
-
-                <div className="form-group">
-                  <label htmlFor="create-user-name">Nombre *</label>
-                  <input
-                    id="create-user-name"
-                    type="text"
-                    className="form-control"
-                    value={createUserData.name}
-                    onChange={(e) =>
-                      onCreateUserDataChange("name", e.target.value)
-                    }
-                    placeholder="Ej: Juan"
-                    disabled={loading}
-                  />
+              <>
+                <div
+                  className="alert alert-warning alert-with-icon"
+                  data-notify="container"
+                >
+                  <span
+                    data-notify="icon"
+                    className="fa fa-exclamation-triangle"
+                  ></span>
+                  <span data-notify="message">
+                    <strong>Usuario no encontrado.</strong> Crea un nuevo{" "}
+                    {memberTypeLabel.toLowerCase()} completando el formulario
+                    abajo.
+                  </span>
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="create-user-lastname">Apellido *</label>
-                  <input
-                    id="create-user-lastname"
-                    type="text"
-                    className="form-control"
-                    value={createUserData.lastname}
-                    onChange={(e) =>
-                      onCreateUserDataChange("lastname", e.target.value)
-                    }
-                    placeholder="Ej: García"
-                    disabled={loading}
-                  />
-                </div>
+                <div
+                  style={{
+                    backgroundColor: "#f9f9fa",
+                    padding: "16px",
+                    borderRadius: "4px",
+                    marginBottom: "16px",
+                  }}
+                >
+                  <h5
+                    style={{
+                      marginBottom: "12px",
+                      marginTop: 0,
+                      color: "#333",
+                    }}
+                  >
+                    <i className="fa fa-plus-circle text-info"></i> Crear{" "}
+                    {memberTypeLabel}
+                  </h5>
 
-                <div className="form-group">
-                  <label htmlFor="create-user-ci">Carnet (CI) *</label>
-                  <input
-                    id="create-user-ci"
-                    type="text"
-                    className="form-control"
-                    value={createUserData.ci}
-                    onChange={(e) =>
-                      onCreateUserDataChange("ci", e.target.value)
-                    }
-                    placeholder="Ingresa el carnet"
-                    disabled={loading}
-                  />
-                </div>
-
-                {memberType === "coach" && (
-                  <div className="alert alert-info">
-                    <small>
-                      <strong>Nota:</strong> El usuario se generará
-                      automáticamente como la primera palabra del nombre y la
-                      primera palabra del apellido, separadas por un punto, en
-                      minúsculas y sin acentos (ej: "juan.garcia"). La
-                      contraseña será el carnet (CI).
-                    </small>
+                  <div className="form-group">
+                    <label htmlFor="create-user-name">
+                      Nombre <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      id="create-user-name"
+                      type="text"
+                      className="form-control"
+                      value={createUserData.name}
+                      onChange={(e) =>
+                        onCreateUserDataChange("name", e.target.value)
+                      }
+                      placeholder="Ej: Juan"
+                      disabled={loading}
+                    />
                   </div>
-                )}
-              </div>
+
+                  <div className="form-group">
+                    <label htmlFor="create-user-lastname">
+                      Apellido <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      id="create-user-lastname"
+                      type="text"
+                      className="form-control"
+                      value={createUserData.lastname}
+                      onChange={(e) =>
+                        onCreateUserDataChange("lastname", e.target.value)
+                      }
+                      placeholder="Ej: García"
+                      disabled={loading}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="create-user-ci">
+                      Carnet (CI) <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      id="create-user-ci"
+                      type="text"
+                      className="form-control"
+                      value={createUserData.ci}
+                      onChange={(e) =>
+                        onCreateUserDataChange("ci", e.target.value)
+                      }
+                      placeholder="Ingresa el carnet"
+                      disabled={loading}
+                    />
+                  </div>
+
+                  {memberType === "coach" && (
+                    <div className="alert alert-info alert-sm">
+                      <i className="fa fa-info-circle"></i>
+                      <small>
+                        <strong>Nota:</strong> El usuario se generará
+                        automáticamente como la primera palabra del nombre y la
+                        primera palabra del apellido, separadas por un punto, en
+                        minúsculas y sin acentos (ej: "juan.garcia"). La
+                        contraseña será el carnet (CI).
+                      </small>
+                    </div>
+                  )}
+                </div>
+              </>
             )}
           </div>
 
           <div className="modal-footer">
-            <button
+            <Button
               type="button"
-              className="btn btn-xs btn-default"
+              variant="white"
               onClick={onClose}
               disabled={loading}
             >
               Cancelar
-            </button>
+            </Button>
 
             {searchResult && (
-              <button
+              <Button
                 type="button"
-                className="btn btn-xs btn-primary"
+                variant="primary"
                 onClick={onAddMember}
                 disabled={loading}
+                icon="fa-user-plus"
               >
-                Agregar
-              </button>
+                Agregar {memberTypeLabel}
+              </Button>
             )}
 
             {showCreateUserForm && !searchResult && (
-              <button
+              <Button
                 type="button"
-                className="btn btn-xs btn-success"
+                variant="success"
                 onClick={onCreateUser}
                 disabled={loading}
+                icon="fa-plus"
               >
                 Crear y Agregar
-              </button>
+              </Button>
             )}
           </div>
         </div>

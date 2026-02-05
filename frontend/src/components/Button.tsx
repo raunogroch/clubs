@@ -1,29 +1,42 @@
-import React from "react";
-
-interface ButtonProps {
-  type?: "button" | "submit" | "reset";
-  className?: string;
-  onClick?: () => void;
-  name?: string;
-  icon?: string | React.ReactNode;
-  disabled?: boolean;
-}
-
-export const Button: React.FC<ButtonProps> = ({
-  type = "button",
-  className = "btn btn-xs",
-  onClick,
-  name = "",
-  icon = "",
+export const Button = ({
+  type = "button" as const,
+  variant = "primary",
+  className,
   disabled = false,
-}) => (
-  <button
-    type={type}
-    className={className}
-    onClick={onClick}
-    disabled={disabled}
-  >
-    {icon && <i className={`fa fa-${icon}`}></i>}
-    {name}
-  </button>
-);
+  onClick,
+  icon,
+  children,
+  hidden = false,
+}: {
+  type?: "button" | "submit" | "reset";
+  variant?: string;
+  className?: string;
+  disabled?: boolean;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  icon?: string;
+  children?: React.ReactNode;
+  hidden?: boolean;
+}) => {
+  if (hidden) return null;
+  const classes: string[] = ["btn"];
+  // If caller already provides a btn- class, don't add variant
+  if (!className || !/\bbtn-/.test(className)) {
+    classes.push(`btn-${variant}`);
+  }
+  if (className) classes.push(className);
+
+  return (
+    <button
+      type={type}
+      className={classes.join(" ")}
+      onClick={onClick}
+      disabled={disabled}
+    >
+      {icon && (
+        <i className={`fa ${icon}`} style={{ marginRight: children ? 8 : 0 }} />
+      )}
+
+      {children}
+    </button>
+  );
+};

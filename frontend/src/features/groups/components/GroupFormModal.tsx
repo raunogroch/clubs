@@ -6,6 +6,7 @@
  */
 
 import React from "react";
+import { Button } from "../../../components/Button";
 import type { GroupFormState } from "../types";
 
 interface GroupFormModalProps {
@@ -103,14 +104,15 @@ export const GroupFormModal: React.FC<GroupFormModalProps> = ({
             >
               Cancelar
             </button>
-            <button
+            <Button
               type="button"
-              className="btn btn-xs btn-primary"
+              variant="primary"
+              className="btn-xs"
               onClick={onSave}
               disabled={loading}
             >
               {isEditMode ? "Actualizar" : "Crear"}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

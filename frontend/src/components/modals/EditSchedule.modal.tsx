@@ -1,17 +1,5 @@
-import React from "react";
-import type { Schedule } from "../../features/groups/types";
 import "./EditSchedule.spinner.css";
-
-interface EditScheduleModalProps {
-  isOpen: boolean;
-  schedules: Schedule[];
-  loading: boolean;
-  onClose: () => void;
-  onSave: () => void;
-  onAddRow: () => void;
-  onUpdateRow: (index: number, field: keyof Schedule, value: string) => void;
-  onRemoveRow: (index: number) => void;
-}
+import { Button } from "../Button";
 
 const DayNameMap: Record<string, string> = {
   Monday: "Lunes",
@@ -23,7 +11,7 @@ const DayNameMap: Record<string, string> = {
   Sunday: "Domingo",
 };
 
-export const EditScheduleModal: React.FC<EditScheduleModalProps> = ({
+export const EditScheduleModal = ({
   isOpen,
   schedules,
   loading,
@@ -216,14 +204,15 @@ export const EditScheduleModal: React.FC<EditScheduleModalProps> = ({
 
                           {/* Botón eliminar fila */}
                           <td style={{ textAlign: "center" }}>
-                            <button
+                            <Button
+                              type="button"
                               className="btn btn-danger"
                               onClick={() => onRemoveRow(idx)}
-                              title="Eliminar horario"
                               disabled={loading}
+                              icon="fa-trash"
                             >
-                              <i className="fa fa-trash"></i>
-                            </button>
+                              Eliminar
+                            </Button>
                           </td>
                         </tr>
                       ))}
@@ -240,14 +229,15 @@ export const EditScheduleModal: React.FC<EditScheduleModalProps> = ({
                 borderTop: schedules.length > 0 ? "1px solid #e0e0e0" : "none",
               }}
             >
-              <button
-                className="btn btn-info btn-sm"
+              <Button
+                type="button"
+                className="btn btn-info"
                 onClick={onAddRow}
-                title="Agregar nuevo horario"
+                icon="fa-plus-circle"
                 disabled={loading}
               >
-                <i className="fa fa-plus-circle"></i> Agregar horario
-              </button>
+                Agregar horario
+              </Button>
               {schedules.length === 0 && (
                 <small
                   className="form-text text-muted"
@@ -261,22 +251,23 @@ export const EditScheduleModal: React.FC<EditScheduleModalProps> = ({
           </div>
 
           <div className="modal-footer">
-            <button
+            <Button
               type="button"
               className="btn btn-white"
               onClick={onClose}
               disabled={loading}
             >
               Cancelar
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
-              className="btn btn-primary"
+              variant="primary"
               onClick={onSave}
               disabled={loading || schedules.length === 0}
+              icon="fa-check"
             >
-              <i className="fa fa-check"></i> Guardar Cambios
-            </button>
+              Guardar Cambios
+            </Button>
           </div>
         </div>
       </div>

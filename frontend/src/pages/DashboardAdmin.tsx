@@ -686,8 +686,8 @@ const DashboardAssignments = ({ user }: { user: User | undefined }) => {
                                       flex: 1,
                                     }}
                                   />
-                                  <button
-                                    className="btn btn-xs btn-success"
+                                  <Button
+                                    className="btn-xs btn-success"
                                     onClick={() => handleSaveDate(reg._id)}
                                     disabled={savingDateId === reg._id}
                                   >
@@ -706,7 +706,7 @@ const DashboardAssignments = ({ user }: { user: User | undefined }) => {
                                         <i className="fa fa-check"></i> Guardar
                                       </>
                                     )}
-                                  </button>
+                                  </Button>
                                   <button
                                     className="btn btn-xs btn-secondary"
                                     onClick={handleCancelEdit}
