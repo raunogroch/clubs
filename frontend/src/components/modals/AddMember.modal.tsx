@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Button, Image } from "../../components";
 
 export const AddMemberModal = ({
@@ -16,43 +18,43 @@ export const AddMemberModal = ({
   onCreateUserDataChange,
 }) => {
   if (!isOpen) return null;
-
   const memberTypeLabel = memberType === "coach" ? "Entrenador" : "Deportista";
 
-  return (
+  // Prevent closing the modal with the Escape key: only close via explicit buttons
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" || e.key === "Esc") {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown, true);
+    return () => document.removeEventListener("keydown", onKeyDown, true);
+  }, [isOpen]);
+
+  const modalContent = (
     <div
       className="modal inmodal"
       style={{
+        position: "fixed",
+        inset: 0,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "rgba(0,0,0,.5)",
-        zIndex: 1050,
-        height: "100vh",
-        overflow: "auto",
+        backgroundColor: "rgba(0,0,0,0.6)",
+        zIndex: 99999,
+        overflowY: "auto",
       }}
     >
       <div
         className="modal-dialog modal-lg"
         onClick={(e) => e.stopPropagation()}
-        style={{
-          maxWidth: "700px",
-          width: "90vw",
-          maxHeight: "90vh",
-          display: "flex",
-          flexDirection: "column",
-          margin: "auto",
-        }}
+        role="dialog"
+        aria-modal="true"
+        style={{ pointerEvents: "auto" }}
       >
-        <div
-          className="modal-content animated bounceInRight"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            height: "100%",
-            maxHeight: "90vh",
-          }}
-        >
+        <div className="modal-content animated bounceInRight">
           <div className="modal-header">
             <i className="fa fa-user-plus modal-icon"></i>
             <h4 className="modal-title">Agregar {memberTypeLabel}</h4>
@@ -67,19 +69,11 @@ export const AddMemberModal = ({
             </Button>
           </div>
 
-          <div
-            className="modal-body"
-            style={{
-              flex: 1,
-              overflowY: "auto",
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
+          <div className="modal-body">
             {/* Búsqueda de usuario */}
             <div className="form-group">
               <label htmlFor="search-ci">
-                <i className="fa fa-search"></i> Buscar por Carnet (CI)
+                <i className="fa fa-search"></i> Buscar por Carnet
               </label>
               <div className="input-group">
                 <input
@@ -96,16 +90,15 @@ export const AddMemberModal = ({
                   }}
                   disabled={loading}
                 />
-                <span className="input-group-btn">
-                  <Button
+                <span className="input-group-append">
+                  <button
                     className="btn btn-primary"
                     type="button"
                     onClick={onSearch}
                     disabled={loading || !searchCi.trim()}
-                    icon="fa-search"
                   >
-                    Buscar
-                  </Button>
+                    <i className="fa fa-search"></i> Buscar
+                  </button>
                 </span>
               </div>
               <small className="form-text text-muted">
@@ -113,8 +106,6 @@ export const AddMemberModal = ({
                 agregar
               </small>
             </div>
-
-            <div className="hr-line-dashed"></div>
 
             {/* Usuario encontrado */}
             {searchResult && (
@@ -188,7 +179,6 @@ export const AddMemberModal = ({
                     </div>
                   </div>
                 </div>
-                <div className="hr-line-dashed"></div>
               </>
             )}
 
@@ -335,4 +325,6 @@ export const AddMemberModal = ({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };

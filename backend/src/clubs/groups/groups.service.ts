@@ -390,6 +390,16 @@ export class GroupsService {
         );
       }
 
+      // Validar que el atleta no tenga matrícula pagada
+      if (
+        registration.registration_pay !== null &&
+        registration.registration_pay !== undefined
+      ) {
+        throw new BadRequestException(
+          'No se puede remover un atleta con matrícula pagada. Contacta al administrador.',
+        );
+      }
+
       // Eliminar el registro y remover su id del grupo
       await this.registrationsService.delete(registration._id.toString());
 

@@ -501,6 +501,15 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
    * Remover deportista de un grupo
    */
   const handleRemoveAthlete = async (groupId: string, athleteId: string) => {
+    // Verificar si el atleta tiene matrícula pagada
+    const regInfo = athleteRegistrationInfo[groupId]?.[athleteId];
+    if (regInfo?.registration_pay) {
+      toastr.error(
+        "No se puede remover un atleta con matrícula pagada. Contacta al administrador.",
+      );
+      return;
+    }
+
     if (
       !window.confirm("¿Estás seguro de que deseas remover este deportista?")
     ) {
@@ -646,7 +655,7 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
                 <h5>Grupos del club de {clubName}</h5>
                 <div className="ibox-tools">
                   <button
-                    className="btn btn-xs btn-default"
+                    className="btn  btn-default"
                     onClick={onBack}
                     title="Volver a clubs"
                     disabled={groupsStatus === "loading"}
@@ -654,7 +663,7 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
                     <i className="fa fa-arrow-left"></i> Volver
                   </button>{" "}
                   <button
-                    className="btn btn-xs btn-primary"
+                    className="btn  btn-primary"
                     onClick={() => {
                       groupForm.openForCreate();
                       setShowGroupModal(true);
@@ -734,8 +743,8 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
                         <div className="row">
                           <MemberList
                             title="Entrenadores"
+                            type="coach"
                             icon="fa-user-tie"
-                            badge="badge-info"
                             members={group.coaches || []}
                             memberDetails={memberDetails}
                             memberCount={group.coaches?.length || 0}
@@ -750,8 +759,8 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
 
                           <MemberList
                             title="Deportistas"
+                            type="athlete"
                             icon="fa-person-running"
-                            badge="badge-primary"
                             members={
                               (group as any).athletes_added
                                 ? (group as any).athletes_added.map((r: any) =>

@@ -256,13 +256,7 @@ export const AthleteFormModal: React.FC<AthleteFormModalProps> = ({
                       <label>
                         <strong>🔍 Buscar Tutor por CI</strong>
                       </label>
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "8px",
-                          alignItems: "flex-end",
-                        }}
-                      >
+                      <div className="input-group">
                         <input
                           className="form-control"
                           placeholder="Ingrese CI del tutor"
@@ -273,15 +267,21 @@ export const AthleteFormModal: React.FC<AthleteFormModalProps> = ({
                           onBlur={() =>
                             parentCISearch && handleParentSearch(parentCISearch)
                           }
+                          onKeyPress={(e) =>
+                            e.key === "Enter" &&
+                            handleParentSearch(parentCISearch)
+                          }
                         />
-                        <button
-                          type="button"
-                          className="btn btn-info"
-                          onClick={() => handleParentSearch(parentCISearch)}
-                          disabled={searchingParent || !parentCISearch}
-                        >
-                          {searchingParent ? "Buscando..." : "Buscar"}
-                        </button>
+                        <span className="input-group-append">
+                          <button
+                            type="button"
+                            className="btn btn-info"
+                            onClick={() => handleParentSearch(parentCISearch)}
+                            disabled={searchingParent || !parentCISearch}
+                          >
+                            {searchingParent ? "Buscando..." : "Buscar"}
+                          </button>
+                        </span>
                       </div>
                       {parentNotFound && (
                         <div

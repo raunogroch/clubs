@@ -4,23 +4,7 @@
  * Presenta los miembros de un grupo de forma ordenada
  */
 
-import React from "react";
-import type { MemberDetail } from "../types";
-import { formatMemberDisplay } from "../utils";
-
-interface MemberListProps {
-  title: string;
-  icon: string;
-  badge: string;
-  members: (string | MemberDetail)[];
-  memberDetails: Record<string, MemberDetail>;
-  memberCount: number;
-  onAddMember: () => void;
-  onRemoveMember: (memberId: string) => void;
-  isLoading?: boolean;
-  rowClassName?: string;
-  registrationInfo?: Record<string, { registration_pay: boolean }>;
-}
+import { Button } from "../../../components";
 
 const MESSAGES = {
   NO_MEMBERS: "Sin miembros asignados",
@@ -28,10 +12,9 @@ const MESSAGES = {
   REMOVE_TOOLTIP: "Remover",
 };
 
-export const MemberList: React.FC<MemberListProps> = ({
+export const MemberList = ({
   title,
   icon,
-  badge,
   members,
   memberDetails,
   memberCount,
@@ -40,101 +23,164 @@ export const MemberList: React.FC<MemberListProps> = ({
   isLoading = false,
   rowClassName = "col-md-6",
   registrationInfo = {},
+  type = "athlete",
 }) => {
+  // Infer type from registrationInfo if not provided
+  const memberType =
+    type || (Object.keys(registrationInfo).length > 0 ? "athlete" : "coach");
+
   return (
     <div className={rowClassName}>
-      <div className="section-box">
-        <h5 className="d-flex justify-content-between">
+      <div className="ibox">
+        <div className="ibox-title d-flex justify-content-between align-items-center">
           <div>
             <i className={`fa ${icon}`}></i> {title}
-            <span className={`badge ${badge} ml-2`}>{memberCount}</span>
           </div>
-          <button
-            className="btn btn-success btn-xs"
-            onClick={onAddMember}
-            title={`${MESSAGES.BUTTON_ADD} ${title.toLowerCase()}`}
-            disabled={isLoading}
-          >
-            <i className="fa fa-plus"></i> {MESSAGES.BUTTON_ADD} {title}
-          </button>
-        </h5>
+          <div>
+            <Button
+              className="btn btn-xs btn-success "
+              onClick={onAddMember}
+              disabled={isLoading}
+              icon="fa-plus"
+            >
+              {MESSAGES.BUTTON_ADD}
+            </Button>
+          </div>
+        </div>
 
-        <div className="members-list">
-          {memberCount === 0 ? (
-            <p className="text-muted">
-              <em>{MESSAGES.NO_MEMBERS}</em>
-            </p>
-          ) : (
-            <ul className="list-group mb-0">
-              {members.map((member) => {
-                const memberId =
-                  typeof member === "string" ? member : (member as any)._id;
-                const memberDetail = memberDetails[memberId];
-                const regInfo = registrationInfo[memberId];
-                const isUnpaid = regInfo && !regInfo.registration_pay;
-                const isPaid = regInfo && regInfo.registration_pay;
+        <div className="ibox-content">
+          <div className="members-list table-responsive">
+            {memberCount === 0 ? (
+              <p className="text-muted">
+                <em>{MESSAGES.NO_MEMBERS}</em>
+              </p>
+            ) : (
+              <table className="table table-striped table-hover">
+                <thead>
+                  <tr>
+                    {memberType === "coach" ? (
+                      <>
+                        <th>Nombre Completo</th>
+                        <th>Carnet</th>
 
-                if (!memberDetail) {
-                  return null;
-                }
-
-                return (
-                  <li
-                    key={memberId}
-                    className="list-group-item"
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      padding: "8px 12px",
-                      borderRadius: "3px",
-                      marginBottom: "5px",
-                      backgroundColor: isPaid ? "#d4edda" : "#f9f9f9",
-                      border: isPaid ? "1px solid #28a745" : "1px solid #ddd",
-                      opacity: 1,
-                    }}
-                  >
-                    <span
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
-                      {isPaid && (
-                        <i
-                          className="fa fa-check-circle"
-                          style={{ color: "#28a745", fontSize: "16px" }}
-                          title="Matrícula pagada"
-                        ></i>
-                      )}
-                      {isUnpaid && (
-                        <i
-                          className="fa fa-exclamation-triangle"
-                          style={{ color: "#ff9800", fontSize: "16px" }}
-                          title="Matrícula pendiente de pago"
-                        ></i>
-                      )}
-                      <strong>{formatMemberDisplay(memberDetail)}</strong>
-                    </span>
-                    {!isPaid && (
-                      <button
-                        className="btn btn-danger btn-xs"
-                        onClick={() => onRemoveMember(memberId)}
-                        title={MESSAGES.REMOVE_TOOLTIP}
-                        disabled={isLoading}
-                        style={{
-                          cursor: "pointer",
-                        }}
-                      >
-                        <i className="fa fa-trash"></i>
-                      </button>
+                        <th
+                          className="text-center"
+                          style={{ verticalAlign: "middle" }}
+                        >
+                          Acciones
+                        </th>
+                      </>
+                    ) : (
+                      <>
+                        <th>Nombre Completo</th>
+                        <th>Carnet</th>
+                        <th
+                          className="text-center"
+                          style={{ verticalAlign: "middle" }}
+                        >
+                          Matrícula
+                        </th>
+                        <th
+                          className="text-center"
+                          style={{ verticalAlign: "middle" }}
+                        >
+                          Acciones
+                        </th>
+                      </>
                     )}
-                  </li>
-                );
-              })}
-            </ul>
-          )}
+                  </tr>
+                </thead>
+                <tbody>
+                  {members.map((member) => {
+                    const memberId =
+                      typeof member === "string" ? member : (member as any)._id;
+                    const memberDetail = memberDetails[memberId];
+                    const regInfo = registrationInfo[memberId];
+                    const hasRegistrationInfo = regInfo !== undefined;
+                    const isPaid = regInfo && regInfo.registration_pay != null;
+
+                    if (!memberDetail) return null;
+
+                    // Coach view: CI, Nombre Completo, Acciones
+                    if (memberType === "coach") {
+                      return (
+                        <tr key={memberId}>
+                          <td style={{ verticalAlign: "middle" }}>
+                            <strong>
+                              {memberDetail.lastname}, {memberDetail.name}
+                            </strong>
+                          </td>
+                          <td style={{ verticalAlign: "middle" }}>
+                            {memberDetail.ci || "-"}
+                          </td>
+                          <td
+                            className="text-center"
+                            style={{ verticalAlign: "middle" }}
+                          >
+                            <Button
+                              className="btn btn-xs btn-danger "
+                              onClick={() => onRemoveMember(memberId)}
+                              disabled={isLoading}
+                              icon="fa-trash"
+                            >
+                              Eliminar
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    }
+
+                    // Athlete view: Nombre, Apellido, CI, Matrícula, Acciones
+                    return (
+                      <tr key={memberId}>
+                        <td style={{ verticalAlign: "middle" }}>
+                          <strong>
+                            {memberDetail.lastname}, {memberDetail.name}
+                          </strong>
+                        </td>
+                        <td style={{ verticalAlign: "middle" }}>
+                          {memberDetail.ci || "-"}
+                        </td>
+                        <td
+                          className="text-center"
+                          style={{ verticalAlign: "middle" }}
+                        >
+                          {hasRegistrationInfo ? (
+                            isPaid ? (
+                              <i
+                                className="fa fa-check-circle"
+                                style={{ color: "green" }}
+                                title="Matrícula pagada"
+                              ></i>
+                            ) : (
+                              <span>Pendiente</span>
+                            )
+                          ) : (
+                            <span className="label label-default">N/A</span>
+                          )}
+                        </td>
+                        <td
+                          className="text-center"
+                          style={{ verticalAlign: "middle" }}
+                        >
+                          {hasRegistrationInfo && !isPaid && (
+                            <Button
+                              className="btn btn-xs btn-danger "
+                              onClick={() => onRemoveMember(memberId)}
+                              disabled={isLoading}
+                              icon="fa-trash"
+                            >
+                              Eliminar
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
         </div>
       </div>
     </div>

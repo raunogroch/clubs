@@ -339,7 +339,7 @@ export const MonthlyPayments = () => {
           <div className="col-md-12">
             <div className="ibox">
               <div className="ibox-content">
-                <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+                <div className="input-group" style={{ marginBottom: 16 }}>
                   <input
                     placeholder="Buscar por CI, nombre o apellido"
                     className="form-control"
@@ -347,13 +347,16 @@ export const MonthlyPayments = () => {
                     onChange={(e) => setSearchInput(e.target.value)}
                     onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                   />
-                  <button
-                    className="btn btn-primary"
-                    onClick={handleSearch}
-                    disabled={loading}
-                  >
-                    {loading ? "Buscando..." : "Buscar"}
-                  </button>
+                  <span className="input-group-append">
+                    <button
+                      className="btn btn-primary"
+                      onClick={handleSearch}
+                      disabled={loading}
+                      type="button"
+                    >
+                      {loading ? "Buscando..." : "Buscar"}
+                    </button>
+                  </span>
                 </div>
 
                 {athlete && (

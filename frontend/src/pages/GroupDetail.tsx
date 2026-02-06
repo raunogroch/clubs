@@ -11,11 +11,31 @@
  */
 
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Image, NavHeader } from "../components";
+import toastr from "toastr";
+import { NavHeader } from "../components";
 import type { RootState, AppDispatch } from "../store/store";
-import { fetchGroupSummary } from "../store/groupsThunk";
+import {
+  fetchGroupSummary,
+  removeAthleteFromGroup,
+  addCoachToGroup,
+  removeCoachFromGroup,
+  addAthleteToGroup,
+} from "../store/groupsThunk";
+import { AddMemberModal } from "../components/modals";
+import { useAddMemberModal, useScheduleModal } from "../features/groups/hooks";
+import {
+  MemberList,
+  EditScheduleModal,
+  CreateEventModal,
+} from "../features/groups/components";
+import userService from "../services/userService";
+import eventsService from "../services/eventsService";
+import {
+  addScheduleToGroup,
+  removeScheduleFromGroup,
+} from "../store/groupsThunk";
 
 // Group and Event shape are dynamic; using `any` in UI layer for flexibility
 
@@ -34,6 +54,8 @@ export const GroupDetail = () => {
     error,
   } = useSelector((s: RootState) => s.groups);
 
+  const isLoading = status === "loading";
+
   useEffect(() => {
     if (!id_subgrupo) return;
     const fields = [
@@ -47,7 +69,269 @@ export const GroupDetail = () => {
     dispatch(fetchGroupSummary({ id: id_subgrupo, fields }));
   }, [id_subgrupo, dispatch]);
 
+  /**
+   * Maneja la eliminación de un atleta del grupo
+   */
+  const handleRemoveAthlete = async (athleteId: string, registration: any) => {
+    // Verificar si el atleta tiene matrícula pagada
+    if (
+      registration?.registration_pay !== null &&
+      registration?.registration_pay !== undefined
+    ) {
+      toastr.error(
+        "No se puede remover un atleta con matrícula pagada. Contacta al administrador.",
+      );
+      return;
+    }
+
+    if (
+      !window.confirm("¿Estás seguro de que deseas remover este deportista?")
+    ) {
+      return;
+    }
+
+    await dispatch(
+      removeAthleteFromGroup({ groupId: id_subgrupo!, athleteId }),
+    );
+  };
+
+  const handleRemoveCoach = async (coachId: string) => {
+    if (
+      !window.confirm("¿Estás seguro de que deseas remover este entrenador?")
+    ) {
+      return;
+    }
+
+    await dispatch(removeCoachFromGroup({ groupId: id_subgrupo!, coachId }));
+  };
+
+  const addMemberModal = useAddMemberModal();
+
+  const handleAddCoach = async () => {
+    addMemberModal.openModal(id_subgrupo!, "coach");
+  };
+
+  const handleSearchMember = async () => {
+    if (!addMemberModal.searchCi.trim()) {
+      toastr.warning("CI es requerido");
+      return;
+    }
+
+    if (!addMemberModal.memberType) {
+      toastr.warning("Tipo de miembro no especificado");
+      return;
+    }
+
+    try {
+      addMemberModal.setSearchLoading(true);
+      addMemberModal.setShowCreateUserForm(false);
+
+      const response = await userService.findUserByCiAndRole(
+        addMemberModal.searchCi,
+        addMemberModal.memberType,
+      );
+
+      if (response.code === 200 && response.data) {
+        // Verificar si ya está en el grupo
+        const currentGroup = group;
+        if (currentGroup) {
+          if (
+            addMemberModal.memberType === "coach" &&
+            currentGroup.coaches?.includes(response.data._id)
+          ) {
+            toastr.warning("Este entrenador ya está registrado en el grupo");
+            addMemberModal.setShowCreateUserForm(false);
+            addMemberModal.setSearchResult(null);
+            return;
+          }
+
+          if (addMemberModal.memberType === "athlete") {
+            const isAthleteInGroup = (currentGroup as any).athletes_added?.some(
+              (reg: any) =>
+                (reg.athlete_id?._id || reg.athlete_id) === response.data._id,
+            );
+            if (isAthleteInGroup) {
+              toastr.warning("Este deportista ya está registrado en el grupo");
+              addMemberModal.setShowCreateUserForm(false);
+              addMemberModal.setSearchResult(null);
+              return;
+            }
+          }
+        }
+
+        addMemberModal.setSearchResult(response.data);
+      } else {
+        // No encontrado -> mostrar formulario de creación
+        toastr.info("Usuario no encontrado");
+        addMemberModal.setShowCreateUserForm(true);
+        addMemberModal.updateCreateUserData("ci", addMemberModal.searchCi);
+      }
+    } catch (error: any) {
+      console.error("Error al buscar usuario:", error);
+      addMemberModal.setShowCreateUserForm(true);
+      addMemberModal.updateCreateUserData("ci", addMemberModal.searchCi);
+    } finally {
+      addMemberModal.setSearchLoading(false);
+    }
+  };
+
+  const handleAddMember = async () => {
+    if (!addMemberModal.selectedGroupId || !addMemberModal.searchResult) {
+      toastr.warning("Usuario no seleccionado");
+      return;
+    }
+
+    if (addMemberModal.memberType === "coach") {
+      await dispatch(
+        addCoachToGroup({
+          groupId: addMemberModal.selectedGroupId,
+          coachId: addMemberModal.searchResult._id,
+        }),
+      );
+    } else if (addMemberModal.memberType === "athlete") {
+      await dispatch(
+        addAthleteToGroup({
+          groupId: addMemberModal.selectedGroupId,
+          athleteId: addMemberModal.searchResult._id,
+        }),
+      );
+    }
+
+    // actualizar vista local mínima y cerrar modal
+    toastr.success("Miembro agregado");
+    addMemberModal.closeModal();
+  };
+
+  const handleCreateUser = async () => {
+    const { name, lastname, ci } = addMemberModal.createUserData;
+    if (!name.trim() || !lastname.trim() || !ci.trim()) {
+      toastr.warning("Completa los datos requeridos");
+      return;
+    }
+
+    try {
+      addMemberModal.setSearchLoading(true);
+      const newUser = await userService.createAthlete({
+        name,
+        lastname,
+        ci,
+        role: addMemberModal.memberType,
+      });
+
+      if (newUser.code === 201 || newUser.code === 200) {
+        addMemberModal.setSearchResult(newUser.data);
+        addMemberModal.setShowCreateUserForm(false);
+        toastr.success("Usuario creado");
+      } else {
+        toastr.error("Error al crear el usuario");
+      }
+    } catch (error: any) {
+      console.error(error);
+      toastr.error("Error al crear usuario");
+    } finally {
+      addMemberModal.setSearchLoading(false);
+    }
+  };
+
+  // schedule & events helpers
+  const scheduleModal = useScheduleModal();
+  const [showEventModal, setShowEventModal] = useState(false);
+
+  const handleCreateEvent = async (eventData: any) => {
+    if (!id_subgrupo) return;
+    try {
+      await eventsService.create({ group_id: id_subgrupo, ...eventData });
+      const fields = [
+        "name",
+        "location",
+        "schedule",
+        "events_added",
+        "coaches",
+        "athletes_added",
+      ];
+      await dispatch(fetchGroupSummary({ id: id_subgrupo, fields }));
+      toastr.success("Evento creado exitosamente");
+    } catch (err) {
+      console.error(err);
+      toastr.error("Error al crear evento");
+    } finally {
+      setShowEventModal(false);
+    }
+  };
+
+  const handleSaveSchedules = async () => {
+    if (
+      !scheduleModal.editingGroupId ||
+      scheduleModal.editingSchedules.length === 0
+    ) {
+      toastr.warning("Debe haber al menos un horario");
+      return;
+    }
+
+    const currentGroup = group;
+    const currentSchedules = currentGroup?.schedule || [];
+
+    for (let i = 0; i < currentSchedules.length; i++) {
+      await dispatch(
+        removeScheduleFromGroup({
+          groupId: scheduleModal.editingGroupId!,
+          scheduleIndex: 0,
+        }),
+      );
+    }
+
+    for (const schedule of scheduleModal.editingSchedules) {
+      await dispatch(
+        addScheduleToGroup({
+          groupId: scheduleModal.editingGroupId!,
+          schedule: {
+            day: schedule.day,
+            startTime: schedule.startTime,
+            endTime: schedule.endTime,
+          },
+        }),
+      );
+    }
+
+    toastr.success("Horarios guardados");
+    scheduleModal.closeModal();
+  };
+
   console.log("GroupDetail render", { group, status, error });
+
+  // Build member details map and registration info for MemberList
+  const memberDetails: Record<string, any> = {};
+  const registrationInfo: Record<string, { registration_pay: any }> = {};
+
+  if (group) {
+    // coaches
+    (group.coaches || []).forEach((c: any) => {
+      const id = c?._id || c;
+      memberDetails[id] = {
+        name: c?.name || "",
+        lastname: c?.lastname || "",
+        role: c?.role || "coach",
+        ci: c?.ci || "",
+      };
+    });
+
+    // athletes
+    (group.athletes_added || []).forEach((reg: any) => {
+      const athlete = reg?.athlete_id;
+      const id = athlete?._id || reg?.athlete_id;
+      if (id) {
+        memberDetails[id] = {
+          name: athlete?.name || "",
+          lastname: athlete?.lastname || "",
+          role: athlete?.role || "athlete",
+          ci: athlete?.ci || "",
+        };
+        registrationInfo[id] = {
+          registration_pay: reg?.registration_pay || null,
+        };
+      }
+    });
+  }
 
   if (status === "loading") {
     return (
@@ -90,12 +374,16 @@ export const GroupDetail = () => {
             <div className="ibox">
               <div className="ibox-content">
                 <h1 className="no-margins">
-                  {group?.athletes_added?.length || 0}
+                  {(group?.athletes_added || []).filter(
+                    (entry: any) =>
+                      entry?.registration_pay !== null &&
+                      entry?.registration_pay !== undefined,
+                  ).length || 0}
                 </h1>
                 <div className="stat-percent font-bold">
-                  <i className="fa fa-users text-navy"></i> Atletas
+                  <i className="fa fa-users text-navy"></i> Atletas Pagados
                 </div>
-                <small>Miembros activos</small>
+                <small>Matrícula confirmada</small>
               </div>
             </div>
           </div>
@@ -176,6 +464,13 @@ export const GroupDetail = () => {
                       Entrenamiento
                     </h5>
                     <div className="ibox-tools">
+                      <button
+                        className="btn btn-success"
+                        onClick={handleAddCoach}
+                        title="Agregar entrenador"
+                      >
+                        <i className="fa fa-plus"></i>
+                      </button>
                       <a className="collapse-link">
                         <i className="fa fa-chevron-up"></i>
                       </a>
@@ -202,207 +497,45 @@ export const GroupDetail = () => {
               </div>
             </div>
           )}
+        <div className="row m-t-md">
+          <MemberList
+            title="Entrenadores"
+            type="coach"
+            icon="fa-users"
+            members={group?.coaches || []}
+            memberDetails={memberDetails}
+            memberCount={group?.coaches?.length || 0}
+            onAddMember={() => addMemberModal.openModal(id_subgrupo!, "coach")}
+            onRemoveMember={(memberId: string) => handleRemoveCoach(memberId)}
+            isLoading={isLoading}
+            rowClassName="col-lg-5"
+          />
 
-        {/* Entrenadores */}
-        {group?.coaches &&
-          Array.isArray(group.coaches) &&
-          group.coaches.length > 0 && (
-            <div className="row m-t-md">
-              <div className="col-lg-12">
-                <div className="ibox">
-                  <div className="ibox-title">
-                    <h5>
-                      <i className="fa fa-user-tie"></i> Entrenadores (
-                      <span className="label label-primary">
-                        {group!.coaches.length}
-                      </span>
-                      )
-                    </h5>
-                    <div className="ibox-tools">
-                      <a className="collapse-link">
-                        <i className="fa fa-chevron-up"></i>
-                      </a>
-                    </div>
-                  </div>
-                  <div className="ibox-content">
-                    <div className="row">
-                      {group!.coaches.map((coach: any, idx: number) => {
-                        const coachName =
-                          typeof coach === "string"
-                            ? coach
-                            : coach?.name || coach?.firstName || "Entrenador";
-                        const coachEmail =
-                          typeof coach === "string" ? "" : coach?.email || "";
-                        return (
-                          <div className="col-lg-3 col-md-6" key={idx}>
-                            <div className="contact-box center-version">
-                              <a href="#">
-                                {coach.images?.small ? (
-                                  <Image
-                                    alt="avatar"
-                                    className="rounded-circle"
-                                    src={coach.images.small}
-                                  />
-                                ) : (
-                                  <img
-                                    alt="avatar"
-                                    className="rounded-circle"
-                                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(coachName)}`}
-                                  />
-                                )}
-                                <h3 className="m-b-xs">
-                                  <strong>{coachName}</strong>
-                                </h3>
-                                {coachEmail && (
-                                  <p className="text-muted small m-b-xs">
-                                    {coachEmail}
-                                  </p>
-                                )}
-                              </a>
-                              <div className="contact-box-footer">
-                                <div className="m-t-xs btn-group">
-                                  <a href="#" className="btn btn-xs btn-white">
-                                    <i className="fa fa-envelope"></i> Contactar
-                                  </a>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-        {/* Atletas */}
-        {(group?.athletes || group?.athletes_added) &&
-          group?.athletes_added?.length &&
-          group.athletes_added.length > 0 && (
-            <div className="row m-t-md">
-              <div className="col-lg-12">
-                <div className="ibox">
-                  <div className="ibox-title">
-                    <h5>
-                      <i className="fa fa-users"></i> Atletas (
-                      <span className="label label-warning">
-                        {group?.athletes_added?.length &&
-                          group.athletes_added.length}
-                      </span>
-                      )
-                    </h5>
-                    <div className="ibox-tools">
-                      <a className="collapse-link">
-                        <i className="fa fa-chevron-up"></i>
-                      </a>
-                    </div>
-                  </div>
-                  <div className="ibox-content">
-                    <div className="row">
-                      {Array.isArray(group.athletes) &&
-                        group!.athletes.map((athlete: any, idx: number) => {
-                          const athleteName =
-                            typeof athlete === "string"
-                              ? athlete
-                              : athlete?.name || athlete?.firstName || "Atleta";
-                          const athleteEmail =
-                            typeof athlete === "string"
-                              ? ""
-                              : athlete?.email || "";
-                          return (
-                            <div className="col-lg-3 col-md-6" key={`a-${idx}`}>
-                              <div className="contact-box center-version">
-                                <a href="#">
-                                  <img
-                                    alt="avatar"
-                                    className="rounded-circle"
-                                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(athleteName)}`}
-                                  />
-                                  <h3 className="m-b-xs">
-                                    <strong>{athleteName}</strong>
-                                  </h3>
-                                  {athleteEmail && (
-                                    <p className="text-muted small m-b-xs">
-                                      {athleteEmail}
-                                    </p>
-                                  )}
-                                </a>
-                                <div className="contact-box-footer">
-                                  <div className="m-t-xs btn-group">
-                                    <a
-                                      href="#"
-                                      className="btn btn-xs btn-white"
-                                    >
-                                      <i className="fa fa-envelope"></i>{" "}
-                                      Contactar
-                                    </a>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      {Array.isArray(group.athletes_added) &&
-                        group!.athletes_added.map((entry: any, idx: number) => {
-                          const athleteName =
-                            entry?.athlete_id?.name ||
-                            entry?.athlete_id?.firstName ||
-                            "Atleta";
-                          const athleteEmail = entry?.athlete_id?.email || "";
-                          return (
-                            <div
-                              className="col-lg-3 col-md-6"
-                              key={`aa-${idx}`}
-                            >
-                              <div className="contact-box center-version">
-                                <a href="#">
-                                  {entry.athlete_id.images?.small ? (
-                                    <Image
-                                      alt="avatar"
-                                      className="rounded-circle"
-                                      src={entry.athlete_id.images.small}
-                                    />
-                                  ) : (
-                                    <img
-                                      alt="avatar"
-                                      className="rounded-circle"
-                                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(athleteName)}`}
-                                    />
-                                  )}
-
-                                  <h3 className="m-b-xs">
-                                    <strong>{athleteName}</strong>
-                                  </h3>
-                                  {athleteEmail && (
-                                    <p className="text-muted small m-b-xs">
-                                      {athleteEmail}
-                                    </p>
-                                  )}
-                                </a>
-                                <div className="contact-box-footer">
-                                  <div className="m-t-xs btn-group">
-                                    <a
-                                      href="#"
-                                      className="btn btn-xs btn-white"
-                                    >
-                                      <i className="fa fa-envelope"></i>{" "}
-                                      Contactar
-                                    </a>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
+          <MemberList
+            type="athlete"
+            title="Atletas"
+            icon="fa-users"
+            members={(group?.athletes_added || []).map(
+              (r: any) => r?.athlete_id?._id || r?.athlete_id,
+            )}
+            memberDetails={memberDetails}
+            memberCount={(group?.athletes_added || []).length}
+            onAddMember={() =>
+              addMemberModal.openModal(id_subgrupo!, "athlete")
+            }
+            onRemoveMember={(memberId: string) => {
+              // find registration entry
+              const entry = (group?.athletes_added || []).find(
+                (reg: any) =>
+                  (reg?.athlete_id?._id || reg?.athlete_id) === memberId,
+              );
+              handleRemoveAthlete(memberId, entry);
+            }}
+            isLoading={isLoading}
+            rowClassName="col-lg-7"
+            registrationInfo={registrationInfo}
+          />
+        </div>
         {/* Eventos */}
         {(group?.events_added || []).length > 0 && (
           <div className="row m-t-md">
@@ -410,11 +543,7 @@ export const GroupDetail = () => {
               <div className="ibox">
                 <div className="ibox-title">
                   <h5>
-                    <i className="fa fa-calendar"></i> Eventos (
-                    <span className="label label-info">
-                      {(group?.events_added || []).length}
-                    </span>
-                    )
+                    <i className="fa fa-calendar"></i> Proximos eventos
                   </h5>
                   <div className="ibox-tools">
                     <a className="collapse-link">
@@ -471,6 +600,40 @@ export const GroupDetail = () => {
             </div>
           </div>
         )}
+        <EditScheduleModal
+          isOpen={scheduleModal.showModal}
+          schedules={scheduleModal.editingSchedules}
+          loading={isLoading}
+          onClose={scheduleModal.closeModal}
+          onSave={handleSaveSchedules}
+          onAddRow={scheduleModal.addScheduleRow}
+          onUpdateRow={scheduleModal.updateScheduleRow}
+          onRemoveRow={scheduleModal.removeScheduleRow}
+        />
+
+        <CreateEventModal
+          isOpen={showEventModal}
+          groupId={id_subgrupo || ""}
+          onClose={() => setShowEventModal(false)}
+          onCreate={handleCreateEvent}
+          isLoading={isLoading}
+        />
+
+        <AddMemberModal
+          isOpen={addMemberModal.showModal}
+          memberType={addMemberModal.memberType}
+          searchCi={addMemberModal.searchCi}
+          searchResult={addMemberModal.searchResult}
+          showCreateUserForm={addMemberModal.showCreateUserForm}
+          createUserData={addMemberModal.createUserData}
+          loading={addMemberModal.searchLoading}
+          onClose={addMemberModal.closeModal}
+          onSearchCiChange={(val: string) => addMemberModal.setSearchCi(val)}
+          onSearch={handleSearchMember}
+          onAddMember={handleAddMember}
+          onCreateUser={handleCreateUser}
+          onCreateUserDataChange={addMemberModal.updateCreateUserData}
+        />
       </div>
     </>
   );
