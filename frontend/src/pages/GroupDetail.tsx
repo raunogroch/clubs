@@ -24,6 +24,7 @@ import {
   addScheduleToGroup,
   removeScheduleFromGroup,
 } from "../store/groupsThunk";
+import { updateEventInSelectedGroup } from "../store/groupsSlice";
 
 // Group and Event shape are dynamic; using `any` in UI layer for flexibility
 
@@ -241,6 +242,89 @@ export const GroupDetail = () => {
     }
   };
 
+  const handleSuspendEvent = async (eventId: string) => {
+    if (!id_subgrupo) return;
+
+    if (!window.confirm("¿Estás seguro de que deseas suspender este evento?")) {
+      return;
+    }
+
+    // Optimistic update: store previous state, update UI first
+    const prevEvent = (group?.events_added || []).find(
+      (e: any) => e._id === eventId,
+    );
+    const prevState = prevEvent
+      ? { suspended: prevEvent.suspended }
+      : { suspended: false };
+
+    dispatch(
+      updateEventInSelectedGroup({ eventId, changes: { suspended: true } }),
+    );
+
+    try {
+      const updated = await eventsService.update(eventId, { suspended: true });
+      // ensure updatedAt from server is reflected
+      dispatch(
+        updateEventInSelectedGroup({
+          eventId,
+          changes: { updatedAt: updated.updatedAt },
+        }),
+      );
+      toastr.success("Evento suspendido");
+    } catch (err) {
+      console.error(err);
+      // revert optimistic update
+      dispatch(
+        updateEventInSelectedGroup({
+          eventId,
+          changes: { suspended: prevState.suspended },
+        }),
+      );
+      toastr.error("Error al suspender el evento");
+    }
+  };
+
+  const handleReactivateEvent = async (eventId: string) => {
+    if (!id_subgrupo) return;
+
+    if (!window.confirm("¿Deseas reactivar este evento?")) {
+      return;
+    }
+
+    // Optimistic update
+    const prevEvent = (group?.events_added || []).find(
+      (e: any) => e._id === eventId,
+    );
+    const prevState = prevEvent
+      ? { suspended: prevEvent.suspended }
+      : { suspended: false };
+
+    dispatch(
+      updateEventInSelectedGroup({ eventId, changes: { suspended: false } }),
+    );
+
+    try {
+      const updated = await eventsService.update(eventId, { suspended: false });
+      dispatch(
+        updateEventInSelectedGroup({
+          eventId,
+          changes: { updatedAt: updated.updatedAt },
+        }),
+      );
+      toastr.success("Evento reactivado");
+    } catch (err) {
+      console.error(err);
+      // revert
+      dispatch(
+        updateEventInSelectedGroup({
+          eventId,
+          changes: { suspended: prevState.suspended },
+        }),
+      );
+      toastr.error("Error al reactivar el evento");
+    }
+  };
+
   const handleSaveSchedules = async () => {
     if (
       !scheduleModal.editingGroupId ||
@@ -277,6 +361,17 @@ export const GroupDetail = () => {
 
     toastr.success("Horarios guardados");
     scheduleModal.closeModal();
+  };
+
+  /**
+   * Calcula la hora de fin basada en la hora de inicio y la duración
+   */
+  const calculateEndTime = (startTime: string, durationMinutes: number) => {
+    const [hours, minutes] = startTime.split(":").map(Number);
+    const totalMinutes = hours * 60 + minutes + durationMinutes;
+    const endHours = Math.floor(totalMinutes / 60) % 24;
+    const endMinutes = totalMinutes % 60;
+    return `${String(endHours).padStart(2, "0")}:${String(endMinutes).padStart(2, "0")}`;
   };
 
   /**
@@ -584,21 +679,28 @@ export const GroupDetail = () => {
           />
         </div>
         {/* Eventos */}
-        {(group?.events_added || []).length > 0 && (
-          <div className="row m-t-md">
-            <div className="col-lg-12">
-              <div className="ibox">
-                <div className="ibox-title">
-                  <h5>
-                    <i className="fa fa-calendar"></i> Proximos eventos
-                  </h5>
-                  <div className="ibox-tools">
-                    <a className="collapse-link">
-                      <i className="fa fa-chevron-up"></i>
-                    </a>
-                  </div>
+        <div className="row m-t-md">
+          <div className="col-lg-12">
+            <div className="ibox">
+              <div className="ibox-title">
+                <h5>
+                  <i className="fa fa-calendar"></i> Proximos eventos
+                </h5>
+                <div className="ibox-tools">
+                  <Button
+                    className="btn btn-xs btn-success"
+                    icon="fa-plus"
+                    onClick={() => setShowEventModal(true)}
+                  >
+                    Agregar
+                  </Button>
+                  <a className="collapse-link">
+                    <i className="fa fa-chevron-up"></i>
+                  </a>
                 </div>
-                <div className="ibox-content">
+              </div>
+              <div className="ibox-content">
+                {(group?.events_added || []).length > 0 ? (
                   <div className="table-responsive">
                     <table className="table table-hover">
                       <thead>
@@ -607,46 +709,121 @@ export const GroupDetail = () => {
                           <th>Fecha</th>
                           <th>Hora</th>
                           <th>Ubicación</th>
-                          <th>Duración</th>
+                          <th className="text-center">Acciones</th>
                         </tr>
                       </thead>
                       <tbody>
                         {(group!.events_added || []).map((event: any) => (
-                          <tr key={event._id}>
+                          <tr
+                            key={event._id}
+                            style={{ opacity: event.suspended ? 0.6 : 1 }}
+                            title={event.suspended ? "Reactivar" : undefined}
+                          >
                             <td>
-                              <strong>{event.name}</strong>
+                              <strong
+                                style={{
+                                  textDecoration: event.suspended
+                                    ? "line-through"
+                                    : undefined,
+                                }}
+                              >
+                                {event.name}
+                              </strong>
                             </td>
                             <td>
-                              <i className="fa fa-calendar-o"></i>{" "}
-                              {event.eventDate || "-"}
+                              <span
+                                style={{
+                                  textDecoration: event.suspended
+                                    ? "line-through"
+                                    : undefined,
+                                }}
+                              >
+                                <i className="fa fa-calendar-o"></i>{" "}
+                                {event.eventDate || "-"}
+                              </span>
                             </td>
                             <td>
-                              <i className="fa fa-clock-o"></i>{" "}
-                              {event.eventTime || "-"}
+                              <span
+                                style={{
+                                  textDecoration: event.suspended
+                                    ? "line-through"
+                                    : undefined,
+                                }}
+                              >
+                                <i className="fa fa-clock-o"></i>{" "}
+                                {event.eventTime}
+                                {event.duration &&
+                                  ` - ${calculateEndTime(event.eventTime, event.duration)}`}
+                              </span>
                             </td>
                             <td>
-                              <i className="fa fa-map-marker"></i>{" "}
-                              {event.location || "-"}
+                              <span
+                                style={{
+                                  textDecoration: event.suspended
+                                    ? "line-through"
+                                    : undefined,
+                                }}
+                              >
+                                <i className="fa fa-map-marker"></i>{" "}
+                                {event.location || "-"}
+                              </span>
                             </td>
                             <td>
-                              {event.duration ? (
-                                <span className="label label-primary">
-                                  {event.duration} min
-                                </span>
-                              ) : (
-                                "-"
-                              )}
+                              <div
+                                className="justify-content-center"
+                                style={{ display: "flex", gap: "8px" }}
+                              >
+                                {event.suspended ? (
+                                  <Button
+                                    className="btn btn-xs btn-success"
+                                    icon="fa-play-circle"
+                                    onClick={() =>
+                                      handleReactivateEvent(event._id)
+                                    }
+                                  >
+                                    Reactivar
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    className="btn btn-xs btn-danger"
+                                    icon="fa-pause-circle"
+                                    onClick={() =>
+                                      handleSuspendEvent(event._id)
+                                    }
+                                  >
+                                    Suspender
+                                  </Button>
+                                )}
+
+                                <Button
+                                  className="btn btn-xs btn-warning"
+                                  icon="fa-calendar"
+                                >
+                                  Reprogramar
+                                </Button>
+                              </div>
                             </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
-                </div>
+                ) : (
+                  <div
+                    className="alert alert-info alert-with-icon"
+                    data-notify="container"
+                  >
+                    <span
+                      data-notify="icon"
+                      className="fa fa-info-circle"
+                    ></span>
+                    &nbsp; Sin eventos
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        )}
+        </div>
         <EditScheduleModal
           isOpen={scheduleModal.showModal}
           schedules={scheduleModal.editingSchedules}

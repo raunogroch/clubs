@@ -43,6 +43,28 @@ const groupsSlice = createSlice({
       state.status = "idle";
       state.error = null;
     },
+    // Actualiza campos de un evento dentro del grupo seleccionado
+    updateEventInSelectedGroup(
+      state,
+      action: PayloadAction<{ eventId: string; changes: Record<string, any> }>,
+    ) {
+      const { eventId, changes } = action.payload;
+      if (!state.selectedGroup || !state.selectedGroup.events_added) return;
+      state.selectedGroup.events_added = state.selectedGroup.events_added.map(
+        (evt: any) => (evt._id === eventId ? { ...evt, ...changes } : evt),
+      );
+
+      // Also sync into items list if present
+      const idx = state.items.findIndex(
+        (g) => g._id === state.selectedGroup!._id,
+      );
+      if (idx >= 0) {
+        state.items[idx] = {
+          ...state.items[idx],
+          events_added: state.selectedGroup.events_added,
+        } as any;
+      }
+    },
     setSelectedGroup(state, action: PayloadAction<Group | null>) {
       state.selectedGroup = action.payload;
     },
@@ -279,5 +301,6 @@ const groupsSlice = createSlice({
   },
 });
 
-export const { clearGroups, setSelectedGroup } = groupsSlice.actions;
+export const { clearGroups, setSelectedGroup, updateEventInSelectedGroup } =
+  groupsSlice.actions;
 export default groupsSlice.reducer;

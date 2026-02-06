@@ -54,6 +54,13 @@ export class Event extends Document {
   eventTime: string;
 
   /**
+   * Si el evento está suspendido
+   * Default: false
+   */
+  @Prop({ default: false })
+  suspended: boolean;
+
+  /**
    * Timestamp de creación (automático)
    */
   @Prop()

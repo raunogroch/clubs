@@ -15,6 +15,7 @@ export interface Event {
   duration: number;
   eventDate: string; // ISO date string
   eventTime: string; // HH:mm format
+  suspended?: boolean; // Si el evento está suspendido (default: false)
   createdAt: string;
   updatedAt: string;
 }
@@ -34,6 +35,7 @@ export interface UpdateEventRequest {
   duration?: number;
   eventDate?: string;
   eventTime?: string;
+  suspended?: boolean;
 }
 
 /**
