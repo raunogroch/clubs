@@ -48,7 +48,7 @@ export class GroupRepository {
       .populate('coaches', 'name role ci lastname')
       .populate(
         'events_added',
-        'name location duration eventDate eventTime suspended createdAt updatedAt',
+        'name location duration eventDate eventTime suspended rescheduled',
       )
       .sort({ createdAt: -1 })
       .exec();
@@ -117,7 +117,7 @@ export class GroupRepository {
       ) {
         query.populate(
           'events_added',
-          'name location duration eventDate eventTime suspended createdAt updatedAt',
+          'name location duration eventDate eventTime suspended rescheduled',
         );
       }
 
@@ -141,7 +141,7 @@ export class GroupRepository {
       .populate('club_id', 'name')
       .populate(
         'events_added',
-        'name location duration eventDate eventTime suspended createdAt updatedAt',
+        'name location duration eventDate eventTime suspended rescheduled',
       )
       .exec();
   }
@@ -169,7 +169,7 @@ export class GroupRepository {
         .populate('club_id', 'name')
         .populate(
           'events_added',
-          'name location duration eventDate eventTime suspended createdAt updatedAt',
+          'name location duration eventDate eventTime suspended rescheduled',
         )
         .exec();
     } catch (error) {
@@ -245,7 +245,7 @@ export class GroupRepository {
         .populate('club_id', 'name')
         .populate(
           'events_added',
-          'name location duration eventDate eventTime suspended createdAt updatedAt',
+          'name location duration eventDate eventTime suspended rescheduled',
         )
         .exec();
     } catch (error) {
@@ -278,7 +278,7 @@ export class GroupRepository {
         .populate('club_id', 'name')
         .populate(
           'events_added',
-          'name location duration eventDate eventTime suspended createdAt updatedAt',
+          'name location duration eventDate eventTime suspended rescheduled',
         )
         .exec();
     } catch (error) {
@@ -308,7 +308,7 @@ export class GroupRepository {
         .populate('club_id', 'name')
         .populate(
           'events_added',
-          'name location duration eventDate eventTime suspended createdAt updatedAt',
+          'name location duration eventDate eventTime suspended rescheduled',
         )
         .exec();
     } catch (error) {
@@ -338,7 +338,7 @@ export class GroupRepository {
         .populate('club_id', 'name')
         .populate(
           'events_added',
-          'name location duration eventDate eventTime suspended createdAt updatedAt',
+          'name location duration eventDate eventTime suspended rescheduled',
         )
         .exec();
     } catch (error) {
@@ -405,7 +405,7 @@ export class GroupRepository {
         .populate('club_id', 'name')
         .populate(
           'events_added',
-          'name location duration eventDate eventTime suspended createdAt updatedAt',
+          'name location duration eventDate eventTime suspended rescheduled',
         )
         .exec();
       return result;
@@ -427,7 +427,7 @@ export class GroupRepository {
       .populate('club_id', 'name')
       .populate(
         'events_added',
-        'name location duration eventDate eventTime suspended createdAt updatedAt',
+        'name location duration eventDate eventTime suspended rescheduled',
       )
       .sort({ createdAt: -1 })
       .exec();
@@ -456,7 +456,7 @@ export class GroupRepository {
         .populate('club_id', 'name')
         .populate(
           'events_added',
-          'name location duration eventDate eventTime suspended createdAt updatedAt',
+          'name location duration eventDate eventTime suspended rescheduled',
         )
         .exec();
     } catch (error) {
@@ -492,7 +492,7 @@ export class GroupRepository {
             .populate('club_id', 'name')
             .populate(
               'events_added',
-              'name location duration eventDate eventTime suspended createdAt updatedAt',
+              'name location duration eventDate eventTime suspended rescheduled',
             )
             .exec(),
         );
@@ -530,7 +530,7 @@ export class GroupRepository {
         .populate('club_id', 'name')
         .populate(
           'events_added',
-          'name location duration eventDate eventTime suspended createdAt updatedAt',
+          'name location duration eventDate eventTime suspended rescheduled',
         )
         .exec();
     } catch (error) {
@@ -575,7 +575,7 @@ export class GroupRepository {
         .populate('club_id', 'name')
         .populate(
           'events_added',
-          'name location duration eventDate eventTime suspended createdAt updatedAt',
+          'name location duration eventDate eventTime suspended rescheduled',
         )
         .exec();
     } catch (error) {

@@ -61,6 +61,13 @@ export class Event extends Document {
   suspended: boolean;
 
   /**
+   * Si el evento fue reprogramado
+   * Default: false
+   */
+  @Prop({ default: false })
+  rescheduled: boolean;
+
+  /**
    * Timestamp de creación (automático)
    */
   @Prop()

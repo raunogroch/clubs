@@ -714,59 +714,51 @@ export const GroupDetail = () => {
                       </thead>
                       <tbody>
                         {(group!.events_added || []).map((event: any) => (
-                          <tr
-                            key={event._id}
-                            style={{ opacity: event.suspended ? 0.6 : 1 }}
-                            title={event.suspended ? "Reactivar" : undefined}
-                          >
-                            <td>
-                              <strong
-                                style={{
-                                  textDecoration: event.suspended
-                                    ? "line-through"
-                                    : undefined,
-                                }}
-                              >
-                                {event.name}
-                              </strong>
+                          <tr key={event._id}>
+                            <td
+                              title={event.suspended ? "Reactivar" : undefined}
+                              style={{
+                                opacity: event.suspended ? 0.6 : 1,
+                                textDecoration:
+                                  event.suspended && "line-through",
+                              }}
+                            >
+                              {event.name}
                             </td>
-                            <td>
-                              <span
-                                style={{
-                                  textDecoration: event.suspended
-                                    ? "line-through"
-                                    : undefined,
-                                }}
-                              >
-                                <i className="fa fa-calendar-o"></i>{" "}
-                                {event.eventDate || "-"}
-                              </span>
+                            <td
+                              title={event.suspended ? "Reactivar" : undefined}
+                              style={{
+                                opacity: event.suspended ? 0.6 : 1,
+                                textDecoration:
+                                  event.suspended && "line-through",
+                              }}
+                            >
+                              <i className="fa fa-calendar-o"></i>{" "}
+                              {event.eventDate || "-"}
                             </td>
-                            <td>
-                              <span
-                                style={{
-                                  textDecoration: event.suspended
-                                    ? "line-through"
-                                    : undefined,
-                                }}
-                              >
-                                <i className="fa fa-clock-o"></i>{" "}
-                                {event.eventTime}
-                                {event.duration &&
-                                  ` - ${calculateEndTime(event.eventTime, event.duration)}`}
-                              </span>
+                            <td
+                              title={event.suspended ? "Reactivar" : undefined}
+                              style={{
+                                opacity: event.suspended ? 0.6 : 1,
+                                textDecoration:
+                                  event.suspended && "line-through",
+                              }}
+                            >
+                              <i className="fa fa-clock-o"></i>{" "}
+                              {event.eventTime}
+                              {event.duration &&
+                                ` - ${calculateEndTime(event.eventTime, event.duration)}`}
                             </td>
-                            <td>
-                              <span
-                                style={{
-                                  textDecoration: event.suspended
-                                    ? "line-through"
-                                    : undefined,
-                                }}
-                              >
-                                <i className="fa fa-map-marker"></i>{" "}
-                                {event.location || "-"}
-                              </span>
+                            <td
+                              title={event.suspended ? "Reactivar" : undefined}
+                              style={{
+                                opacity: event.suspended ? 0.6 : 1,
+                                textDecoration:
+                                  event.suspended && "line-through",
+                              }}
+                            >
+                              <i className="fa fa-map-marker"></i>{" "}
+                              {event.location || "-"}
                             </td>
                             <td>
                               <div
@@ -798,6 +790,7 @@ export const GroupDetail = () => {
                                 <Button
                                   className="btn btn-xs btn-warning"
                                   icon="fa-calendar"
+                                  disabled={event.suspended}
                                 >
                                   Reprogramar
                                 </Button>

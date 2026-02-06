@@ -9,6 +9,7 @@ export class CreateEventDto {
   eventDate: string;
   eventTime: string;
   suspended?: boolean;
+  rescheduled?: boolean;
 }
 
 /**
@@ -21,4 +22,5 @@ export class UpdateEventDto {
   eventDate?: string;
   eventTime?: string;
   suspended?: boolean;
+  rescheduled?: boolean;
 }

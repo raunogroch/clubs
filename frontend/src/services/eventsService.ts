@@ -16,6 +16,7 @@ export interface Event {
   eventDate: string; // ISO date string
   eventTime: string; // HH:mm format
   suspended?: boolean; // Si el evento está suspendido (default: false)
+  rescheduled?: boolean; // Si el evento fue reprogramado (default: false)
   createdAt: string;
   updatedAt: string;
 }
@@ -36,6 +37,7 @@ export interface UpdateEventRequest {
   eventDate?: string;
   eventTime?: string;
   suspended?: boolean;
+  rescheduled?: boolean;
 }
 
 /**
