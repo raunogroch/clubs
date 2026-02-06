@@ -1,4 +1,5 @@
 import "./EditSchedule.spinner.css";
+import { createPortal } from "react-dom";
 import { Button } from "../Button";
 
 const DayNameMap: Record<string, string> = {
@@ -23,28 +24,29 @@ export const EditScheduleModal = ({
 }) => {
   if (!isOpen) return null;
 
-  return (
+  const modalContent = (
     <div
       className="modal inmodal"
       style={{
+        position: "fixed",
+        inset: 0,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "rgba(0,0,0,.5)",
-        zIndex: 1050,
-        height: "100vh",
-        overflow: "auto",
+        backgroundColor: "rgba(0,0,0,0.6)",
+        zIndex: 99999,
+        overflowY: "auto",
       }}
     >
       <div
         className="modal-dialog modal-lg"
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
         style={{
-          maxWidth: "900px",
+          pointerEvents: "auto",
           width: "90vw",
-          maxHeight: "90vh",
-          display: "flex",
-          flexDirection: "column",
+          maxWidth: "900px",
           margin: "auto",
         }}
       >
@@ -53,8 +55,6 @@ export const EditScheduleModal = ({
           style={{
             display: "flex",
             flexDirection: "column",
-            height: "100%",
-            maxHeight: "90vh",
           }}
         >
           <div className="modal-header">
@@ -273,4 +273,6 @@ export const EditScheduleModal = ({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };

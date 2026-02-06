@@ -1,20 +1,8 @@
-/**
- * Página de Detalle de Grupo
- *
- * Vista independiente para mostrar detalles de un subgrupo
- * - Información general del grupo
- * - Miembros (coaches y atletas)
- * - Horarios
- * - Eventos
- *
- * Ruta: /clubs/:club_id/groups/:id_subgrupo/group
- */
-
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import toastr from "toastr";
-import { NavHeader } from "../components";
+import { Button, NavHeader } from "../components";
 import type { RootState, AppDispatch } from "../store/store";
 import {
   fetchGroupSummary,
@@ -44,8 +32,6 @@ export const GroupDetail = () => {
     club_id: string;
     id_subgrupo: string;
   }>();
-
-  const navigate = useNavigate();
 
   const dispatch = useDispatch<AppDispatch>();
   const {
@@ -106,10 +92,6 @@ export const GroupDetail = () => {
   };
 
   const addMemberModal = useAddMemberModal();
-
-  const handleAddCoach = async () => {
-    addMemberModal.openModal(id_subgrupo!, "coach");
-  };
 
   const handleSearchMember = async () => {
     if (!addMemberModal.searchCi.trim()) {
@@ -297,6 +279,68 @@ export const GroupDetail = () => {
     scheduleModal.closeModal();
   };
 
+  /**
+   * Agrupa horarios por hora y genera un formato de visualización compacto
+   */
+  const getGroupedSchedules = () => {
+    const schedules = group?.schedule || [];
+    if (schedules.length === 0) return [];
+
+    const grouped = schedules.reduce(
+      (acc: any, schedule: any) => {
+        const key = `${schedule.startTime}-${schedule.endTime}`;
+        if (!acc[key]) {
+          acc[key] = [];
+        }
+        acc[key].push(schedule.day);
+        return acc;
+      },
+      {} as Record<string, string[]>,
+    );
+
+    const dayOrder: Record<string, number> = {
+      Monday: 0,
+      Tuesday: 1,
+      Wednesday: 2,
+      Thursday: 3,
+      Friday: 4,
+      Saturday: 5,
+      Sunday: 6,
+    };
+
+    const dayNameMap: Record<string, string> = {
+      Monday: "Lunes",
+      Tuesday: "Martes",
+      Wednesday: "Miércoles",
+      Thursday: "Jueves",
+      Friday: "Viernes",
+      Saturday: "Sábado",
+      Sunday: "Domingo",
+    };
+
+    return Object.entries(grouped).map(([time, days]) => {
+      const sortedDays = (days as string[]).sort(
+        (a, b) => (dayOrder[a] || 0) - (dayOrder[b] || 0),
+      );
+      const [startTime, endTime] = time.split("-");
+
+      let displayDays = "";
+      if (sortedDays.length === 1) {
+        displayDays = dayNameMap[sortedDays[0]] || sortedDays[0];
+      } else if (sortedDays.length <= 3) {
+        displayDays = sortedDays.map((d) => dayNameMap[d] || d).join(", ");
+      } else {
+        displayDays = `${dayNameMap[sortedDays[0]] || sortedDays[0]} - ${dayNameMap[sortedDays[sortedDays.length - 1]] || sortedDays[sortedDays.length - 1]}`;
+      }
+
+      return {
+        days: displayDays,
+        startTime,
+        endTime,
+      };
+    });
+  };
+
   console.log("GroupDetail render", { group, status, error });
 
   // Build member details map and registration info for MemberList
@@ -355,7 +399,14 @@ export const GroupDetail = () => {
 
   return (
     <>
-      <NavHeader name={group?.name || "Grupo"} />
+      <NavHeader
+        name={group?.name || "Grupo"}
+        button={{
+          label: "Volver",
+          icon: "fa-arrow-left",
+          url: `/clubs/${club_id}/groups`,
+        }}
+      />
       <div className="wrapper wrapper-content animated fadeInRight">
         {/* Información General */}
         <div className="row m-t-md">
@@ -413,44 +464,6 @@ export const GroupDetail = () => {
           </div>
         </div>
 
-        {/* Detalles */}
-        <div className="row m-t-md">
-          <div className="col-lg-12">
-            <div className="ibox">
-              <div className="ibox-title">
-                <h5>
-                  <i className="fa fa-info-circle"></i> Información General
-                </h5>
-                <div className="ibox-tools">
-                  <a className="collapse-link">
-                    <i className="fa fa-chevron-up"></i>
-                  </a>
-                </div>
-              </div>
-              <div className="ibox-content">
-                <div className="row">
-                  <div className="col-sm-6">
-                    <dl className="dl-horizontal">
-                      <dt>
-                        <i className="fa fa-map-marker"></i> Ubicación
-                      </dt>
-                      <dd>{group?.location || "No especificada"}</dd>
-                    </dl>
-                  </div>
-                  <div className="col-sm-6">
-                    <button
-                      className="btn btn-sm btn-default float-right"
-                      onClick={() => navigate(`/clubs/${club_id}/groups`)}
-                    >
-                      <i className="fa fa-arrow-left"></i> Volver
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Horarios */}
         {group?.schedule &&
           Array.isArray(group.schedule) &&
@@ -464,34 +477,68 @@ export const GroupDetail = () => {
                       Entrenamiento
                     </h5>
                     <div className="ibox-tools">
-                      <button
-                        className="btn btn-success"
-                        onClick={handleAddCoach}
-                        title="Agregar entrenador"
+                      <Button
+                        className="btn btn-xs btn-success"
+                        icon="fa-plus"
+                        onClick={() =>
+                          scheduleModal.openModal(
+                            id_subgrupo!,
+                            group?.schedule || [],
+                          )
+                        }
                       >
-                        <i className="fa fa-plus"></i>
-                      </button>
+                        {(group?.schedule?.length || 0) > 0
+                          ? "Actualizar horarios"
+                          : "Asignar horarios"}
+                      </Button>
                       <a className="collapse-link">
                         <i className="fa fa-chevron-up"></i>
                       </a>
                     </div>
                   </div>
                   <div className="ibox-content">
-                    <ul className="list-group">
-                      {group!.schedule.map((schedule: any, idx: number) => (
-                        <li key={idx} className="list-group-item">
-                          <div className="row">
-                            <div className="col-md-4">
-                              <strong>{schedule.day}</strong>
-                            </div>
-                            <div className="col-md-8">
-                              <i className="fa fa-clock-o text-navy"></i>{" "}
-                              {schedule.startTime} - {schedule.endTime}
-                            </div>
-                          </div>
-                        </li>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "12px",
+                      }}
+                    >
+                      {getGroupedSchedules().map((item, idx) => (
+                        <div
+                          key={idx}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            padding: "10px 15px",
+                            backgroundColor: "#f9f9f9",
+                            borderRadius: "4px",
+                            border: "1px solid #e0e0e0",
+                          }}
+                        >
+                          <i
+                            className="fa fa-calendar-o text-navy"
+                            style={{ marginRight: "12px", fontSize: "16px" }}
+                          ></i>
+                          <span style={{ flex: 1 }}>
+                            <strong>{item.days}</strong>
+                          </span>
+                          <span
+                            style={{
+                              marginLeft: "12px",
+                              color: "#666",
+                              fontWeight: "500",
+                            }}
+                          >
+                            <i
+                              className="fa fa-clock-o"
+                              style={{ marginRight: "6px" }}
+                            ></i>
+                            {item.startTime} a {item.endTime}
+                          </span>
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 </div>
               </div>

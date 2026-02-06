@@ -1,11 +1,18 @@
 import { Link, useLocation } from "react-router-dom";
 
+interface buttonProps {
+  label?: string;
+  icon?: string;
+  url: string;
+}
+
 interface NavHeaderProps {
   name?: string;
   sub?: string;
   sub1?: string;
   pageCreate?: string;
   onCreateClick?: () => void;
+  button?: buttonProps;
 }
 
 function getUserSection(pathname: string) {
@@ -21,6 +28,7 @@ export const NavHeader = ({
   sub1,
   pageCreate,
   onCreateClick,
+  button,
 }: NavHeaderProps) => {
   const pageTitle = name || "Principal";
   const isPrincipalPage = pageTitle === "Principal";
@@ -73,22 +81,31 @@ export const NavHeader = ({
         <div className="d-flex align-items-center justify-content-between">
           <h2 className="mb-0">{pageTitle}</h2>
 
-          {pageCreate && (
-            <div className="title-action">
-              {onCreateClick ? (
-                <button onClick={onCreateClick} className="btn btn-primary">
-                  <i className="fa fa-plus"></i> {pageCreate}
-                </button>
-              ) : (
-                <Link
-                  to={`${location.pathname}/create`}
-                  className="btn btn-primary"
-                >
-                  <i className="fa fa-plus"></i> {pageCreate}
-                </Link>
-              )}
-            </div>
-          )}
+          <div className="d-flex gap-2 align-items-center">
+            {button?.url && (
+              <Link to={button.url} className="btn btn-sm btn-default">
+                <i className={`fa ${button.icon || "fa-arrow-left"}`}></i>{" "}
+                {button.label || "Volver"}
+              </Link>
+            )}
+
+            {pageCreate && (
+              <div className="title-action">
+                {onCreateClick ? (
+                  <button onClick={onCreateClick} className="btn btn-primary">
+                    <i className="fa fa-plus"></i> {pageCreate}
+                  </button>
+                ) : (
+                  <Link
+                    to={`${location.pathname}/create`}
+                    className="btn btn-primary"
+                  >
+                    <i className="fa fa-plus"></i> {pageCreate}
+                  </Link>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         <ol className="breadcrumb mt-2">{breadcrumbs}</ol>

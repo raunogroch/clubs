@@ -5,6 +5,7 @@
  */
 
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "../../components";
 
 interface CreateEventModalProps {
@@ -101,28 +102,29 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
 
   if (!isOpen) return null;
 
-  return (
+  const modalContent = (
     <div
       className="modal inmodal"
       style={{
+        position: "fixed",
+        inset: 0,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "rgba(0,0,0,.5)",
-        zIndex: 1050,
-        height: "100vh",
-        overflow: "auto",
+        backgroundColor: "rgba(0,0,0,0.6)",
+        zIndex: 99999,
+        overflowY: "auto",
       }}
     >
       <div
-        className="modal-dialog modal-md"
+        className="modal-dialog modal-lg"
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
         style={{
-          maxWidth: "600px",
+          pointerEvents: "auto",
           width: "90vw",
-          maxHeight: "90vh",
-          display: "flex",
-          flexDirection: "column",
+          maxWidth: "600px",
           margin: "auto",
         }}
       >
@@ -131,8 +133,6 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
           style={{
             display: "flex",
             flexDirection: "column",
-            height: "100%",
-            maxHeight: "90vh",
           }}
         >
           <div className="modal-header">
@@ -357,4 +357,6 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };

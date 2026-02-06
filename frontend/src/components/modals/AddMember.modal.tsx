@@ -52,7 +52,12 @@ export const AddMemberModal = ({
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
-        style={{ pointerEvents: "auto" }}
+        style={{
+          pointerEvents: "auto",
+          width: "90vw",
+          maxWidth: "700px",
+          margin: "auto",
+        }}
       >
         <div className="modal-content animated bounceInRight">
           <div className="modal-header">
