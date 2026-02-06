@@ -11,7 +11,7 @@ import {
   removeCoachFromGroup,
   addAthleteToGroup,
 } from "../store/groupsThunk";
-import { AddMemberModal } from "../components/modals";
+import { AddMemberModal, RescheduleEventModal } from "../components/modals";
 import { useAddMemberModal, useScheduleModal } from "../features/groups/hooks";
 import {
   MemberList,
@@ -219,6 +219,11 @@ export const GroupDetail = () => {
   // schedule & events helpers
   const scheduleModal = useScheduleModal();
   const [showEventModal, setShowEventModal] = useState(false);
+  const [rescheduleModal, setRescheduleModal] = useState({
+    isOpen: false,
+    event: null as any,
+    loading: false,
+  });
 
   const handleCreateEvent = async (eventData: any) => {
     if (!id_subgrupo) return;
@@ -239,6 +244,88 @@ export const GroupDetail = () => {
       toastr.error("Error al crear evento");
     } finally {
       setShowEventModal(false);
+    }
+  };
+
+  const handleOpenRescheduleModal = (event: any) => {
+    setRescheduleModal({
+      isOpen: true,
+      event,
+      loading: false,
+    });
+  };
+
+  const handleCloseRescheduleModal = () => {
+    setRescheduleModal({
+      isOpen: false,
+      event: null,
+      loading: false,
+    });
+  };
+
+  const handleSaveReschedule = async (eventDate: string, eventTime: string) => {
+    if (!id_subgrupo || !rescheduleModal.event) return;
+
+    const eventId = rescheduleModal.event._id;
+    const prevEvent = (group?.events_added || []).find(
+      (e: any) => e._id === eventId,
+    );
+    const prevState = prevEvent
+      ? { eventDate: prevEvent.eventDate, eventTime: prevEvent.eventTime }
+      : { eventDate: "", eventTime: "" };
+
+    // Optimistic update
+    dispatch(
+      updateEventInSelectedGroup({
+        eventId,
+        changes: {
+          eventDate,
+          eventTime,
+          rescheduled: true,
+        },
+      }),
+    );
+
+    setRescheduleModal((prev) => ({
+      ...prev,
+      loading: true,
+    }));
+
+    try {
+      const updated = await eventsService.update(eventId, {
+        eventDate,
+        eventTime,
+        rescheduled: true,
+      });
+
+      dispatch(
+        updateEventInSelectedGroup({
+          eventId,
+          changes: {
+            eventDate: updated.eventDate,
+            eventTime: updated.eventTime,
+            rescheduled: updated.rescheduled,
+            updatedAt: updated.updatedAt,
+          },
+        }),
+      );
+
+      toastr.success("Evento reprogramado exitosamente");
+      handleCloseRescheduleModal();
+    } catch (err) {
+      console.error(err);
+      // revert optimistic update
+      dispatch(
+        updateEventInSelectedGroup({
+          eventId,
+          changes: prevState,
+        }),
+      );
+      toastr.error("Error al reprogramar el evento");
+      setRescheduleModal((prev) => ({
+        ...prev,
+        loading: false,
+      }));
     }
   };
 
@@ -723,6 +810,12 @@ export const GroupDetail = () => {
                                   event.suspended && "line-through",
                               }}
                             >
+                              {event.rescheduled ? (
+                                <span className="text-warning">
+                                  ( Reprogramado )
+                                </span>
+                              ) : null}
+                              &nbsp;
                               {event.name}
                             </td>
                             <td
@@ -791,6 +884,9 @@ export const GroupDetail = () => {
                                   className="btn btn-xs btn-warning"
                                   icon="fa-calendar"
                                   disabled={event.suspended}
+                                  onClick={() =>
+                                    handleOpenRescheduleModal(event)
+                                  }
                                 >
                                   Reprogramar
                                 </Button>
@@ -850,6 +946,14 @@ export const GroupDetail = () => {
           onAddMember={handleAddMember}
           onCreateUser={handleCreateUser}
           onCreateUserDataChange={addMemberModal.updateCreateUserData}
+        />
+
+        <RescheduleEventModal
+          isOpen={rescheduleModal.isOpen}
+          event={rescheduleModal.event}
+          loading={rescheduleModal.loading}
+          onClose={handleCloseRescheduleModal}
+          onSave={handleSaveReschedule}
         />
       </div>
     </>

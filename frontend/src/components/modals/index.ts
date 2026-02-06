@@ -20,6 +20,7 @@ export { EditScheduleModal } from "./EditSchedule.modal";
 export { CreateEventModal } from "./CreateEvent.modal";
 export { GroupLevelsModal } from "./GroupLevels.modal";
 export { AddMemberModal } from "./AddMember.modal";
+export { RescheduleEventModal } from "./RescheduleEvent.modal";
 
 // General Modals
 export { ImageUploadModal } from "./ImageUpload.modal";
