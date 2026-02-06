@@ -34,6 +34,9 @@ import { fetchAllClubs } from "../../store/clubsThunk";
 import { fetchAllSports } from "../../store/sportsThunk";
 import { fetchUsersByRole } from "../../store/usersThunk";
 
+// Redux actions
+import { addEventToGroup, removeEventFromGroup } from "../../store/groupsSlice";
+
 // Servicios
 import userService from "../../services/userService";
 import eventsService from "../../services/eventsService";
@@ -605,8 +608,8 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
         [eventGroupId]: [...(prev[eventGroupId] || []), createdEvent],
       }));
 
-      // Refrescar los datos del grupo desde el servidor para obtener events_added actualizado
-      await dispatch(fetchGroupsByClub(clubId));
+      // Actualizar Redux sin recargar datos desde el servidor
+      dispatch(addEventToGroup({ groupId: eventGroupId, event: createdEvent }));
 
       toastr.success("Evento creado exitosamente");
     } catch (error) {
@@ -629,8 +632,8 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
         [groupId]: (prev[groupId] || []).filter((e: any) => e._id !== eventId),
       }));
 
-      // Refrescar los datos del grupo desde el servidor
-      await dispatch(fetchGroupsByClub(clubId));
+      // Actualizar Redux sin recargar datos desde el servidor
+      dispatch(removeEventFromGroup({ groupId, eventId }));
 
       toastr.success("Evento eliminado");
     } catch (error) {

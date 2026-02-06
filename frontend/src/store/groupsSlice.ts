@@ -65,6 +65,56 @@ const groupsSlice = createSlice({
         } as any;
       }
     },
+    // Agrega un evento a un grupo específico sin hacer llamada al servidor
+    addEventToGroup(
+      state,
+      action: PayloadAction<{ groupId: string; event: any }>,
+    ) {
+      const { groupId, event } = action.payload;
+
+      // Actualizar el grupo en la lista
+      const groupIdx = state.items.findIndex((g) => g._id === groupId);
+      if (groupIdx >= 0) {
+        if (!state.items[groupIdx].events_added) {
+          state.items[groupIdx].events_added = [];
+        }
+        state.items[groupIdx].events_added.push(event);
+      }
+
+      // Actualizar el grupo seleccionado si es el mismo
+      if (state.selectedGroup?._id === groupId) {
+        if (!state.selectedGroup.events_added) {
+          state.selectedGroup.events_added = [];
+        }
+        state.selectedGroup.events_added.push(event);
+      }
+    },
+    // Elimina un evento de un grupo específico sin hacer llamada al servidor
+    removeEventFromGroup(
+      state,
+      action: PayloadAction<{ groupId: string; eventId: string }>,
+    ) {
+      const { groupId, eventId } = action.payload;
+
+      // Actualizar el grupo en la lista
+      const groupIdx = state.items.findIndex((g) => g._id === groupId);
+      if (groupIdx >= 0 && state.items[groupIdx].events_added) {
+        state.items[groupIdx].events_added = state.items[
+          groupIdx
+        ].events_added.filter((evt: any) => evt._id !== eventId);
+      }
+
+      // Actualizar el grupo seleccionado si es el mismo
+      if (
+        state.selectedGroup?._id === groupId &&
+        state.selectedGroup.events_added
+      ) {
+        state.selectedGroup.events_added =
+          state.selectedGroup.events_added.filter(
+            (evt: any) => evt._id !== eventId,
+          );
+      }
+    },
     setSelectedGroup(state, action: PayloadAction<Group | null>) {
       state.selectedGroup = action.payload;
     },
@@ -301,6 +351,11 @@ const groupsSlice = createSlice({
   },
 });
 
-export const { clearGroups, setSelectedGroup, updateEventInSelectedGroup } =
-  groupsSlice.actions;
+export const {
+  clearGroups,
+  setSelectedGroup,
+  updateEventInSelectedGroup,
+  addEventToGroup,
+  removeEventFromGroup,
+} = groupsSlice.actions;
 export default groupsSlice.reducer;

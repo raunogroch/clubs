@@ -24,7 +24,10 @@ import {
   addScheduleToGroup,
   removeScheduleFromGroup,
 } from "../store/groupsThunk";
-import { updateEventInSelectedGroup } from "../store/groupsSlice";
+import {
+  updateEventInSelectedGroup,
+  addEventToGroup,
+} from "../store/groupsSlice";
 
 // Group and Event shape are dynamic; using `any` in UI layer for flexibility
 
@@ -228,16 +231,14 @@ export const GroupDetail = () => {
   const handleCreateEvent = async (eventData: any) => {
     if (!id_subgrupo) return;
     try {
-      await eventsService.create({ group_id: id_subgrupo, ...eventData });
-      const fields = [
-        "name",
-        "location",
-        "schedule",
-        "events_added",
-        "coaches",
-        "athletes_added",
-      ];
-      await dispatch(fetchGroupSummary({ id: id_subgrupo, fields }));
+      const createdEvent = await eventsService.create({
+        group_id: id_subgrupo,
+        ...eventData,
+      });
+
+      // Actualizar Redux sin hacer llamada extra al servidor
+      dispatch(addEventToGroup({ groupId: id_subgrupo, event: createdEvent }));
+
       toastr.success("Evento creado exitosamente");
     } catch (err) {
       console.error(err);
