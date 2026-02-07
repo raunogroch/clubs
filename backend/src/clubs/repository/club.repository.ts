@@ -19,6 +19,20 @@ export class ClubRepository {
   ) {}
 
   /**
+   * Verificar si ya existe un club con la misma combinación de assignment_id y sport_id
+   */
+  async existsBySportAndAssignment(
+    sport_id: string,
+    assignment_id: string,
+  ): Promise<boolean> {
+    const count = await this.clubModel.countDocuments({
+      sport_id: new Types.ObjectId(sport_id),
+      assignment_id: new Types.ObjectId(assignment_id),
+    });
+    return count > 0;
+  }
+
+  /**
    * Crear un nuevo club
    */
   async create(createClubDto: CreateClubDto, userId: string): Promise<Club> {
@@ -72,7 +86,7 @@ export class ClubRepository {
       .find({
         assignment_id: new Types.ObjectId(assignmentId),
       })
-      .populate('sport_id', 'name')
+      .populate('sport_id')
       .populate('created_by', 'name')
       .populate('groups')
       .populate('levels', 'position name description')
@@ -86,7 +100,7 @@ export class ClubRepository {
   async findById(clubId: string): Promise<Club | null> {
     return this.clubModel
       .findById(clubId)
-      .populate('sport_id', 'name')
+      .populate('sport_id')
       .populate('created_by', 'name')
       .populate('assignment_id', 'module_name')
       .populate('groups')

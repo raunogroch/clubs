@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 interface ClubsTableProps {
   clubs: Array<{
+    sport: string;
     _id: string;
     name: string;
     location: string;
@@ -53,7 +54,8 @@ export const ClubsTable: React.FC<ClubsTableProps> = ({
       <table className="table table-striped table-hover">
         <thead>
           <tr>
-            <th style={{ verticalAlign: "middle" }}>Nombre</th>
+            <th style={{ verticalAlign: "middle" }}>Club</th>
+            <th style={{ verticalAlign: "middle" }}>Disciplina</th>
             <th style={{ verticalAlign: "middle" }}>Ubicación</th>
             <th style={{ verticalAlign: "middle", textAlign: "center" }}>
               Grupos
@@ -61,8 +63,7 @@ export const ClubsTable: React.FC<ClubsTableProps> = ({
             <th style={{ verticalAlign: "middle", textAlign: "center" }}>
               Niveles
             </th>
-            <th style={{ verticalAlign: "middle" }}>Deportistas</th>
-            <th style={{ verticalAlign: "middle" }}>Entrenadores</th>
+
             <th style={{ verticalAlign: "middle", textAlign: "center" }}>
               Acciones
             </th>
@@ -73,6 +74,9 @@ export const ClubsTable: React.FC<ClubsTableProps> = ({
             <tr key={club._id}>
               <td style={{ verticalAlign: "middle" }}>
                 <strong>{club.name}</strong>
+              </td>
+              <td style={{ verticalAlign: "middle" }}>
+                <strong>{club.sport}</strong>
               </td>
               <td style={{ verticalAlign: "middle" }}>{club.location}</td>
               <td style={{ verticalAlign: "middle", textAlign: "center" }}>
@@ -92,12 +96,6 @@ export const ClubsTable: React.FC<ClubsTableProps> = ({
                 >
                   <i className="fa fa-trophy"></i>&nbsp;Gestionar
                 </button>
-              </td>
-              <td style={{ verticalAlign: "middle" }}>
-                Registrados ({club.athletes_added})
-              </td>
-              <td style={{ verticalAlign: "middle" }}>
-                Registrados ({club.coaches})
               </td>
               <td style={{ verticalAlign: "middle", textAlign: "center" }}>
                 <button

@@ -50,6 +50,17 @@ export class ClubsService {
       );
     }
 
+    // Validar que no existe un club con la misma combinación de deporte y asignación
+    const clubExists = await this.clubRepository.existsBySportAndAssignment(
+      createClubDto.sport_id,
+      createClubDto.assignment_id,
+    );
+    if (clubExists) {
+      throw new BadRequestException(
+        `Ya existe un club de ${sport.name} en esta asignación`,
+      );
+    }
+
     // Crear el club
     const club = await this.clubRepository.create(createClubDto, userId);
 
@@ -445,7 +456,8 @@ export class ClubsService {
 
       return {
         _id: club._id,
-        name: club.sport_id.name,
+        name: club.name || 'Sin nombre',
+        sport: club.sport_id.name,
         location: club.location || '-',
         athletes_added: totalAthletes,
         coaches: totalCoaches,

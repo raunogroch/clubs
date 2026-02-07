@@ -9,6 +9,15 @@ import { Document, Types } from 'mongoose';
 @Schema({ timestamps: true })
 export class Club extends Document {
   /**
+   * Nombre del club
+   */
+  @Prop({
+    type: String,
+    required: false,
+  })
+  name?: string;
+
+  /**
    * Deporte asociado al club
    * Referencia al documento de Sport
    */

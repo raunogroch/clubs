@@ -6,6 +6,13 @@ import { IsString, IsOptional, IsMongoId, IsArray } from 'class-validator';
 
 export class CreateClubDto {
   /**
+   * Nombre del club (opcional)
+   */
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  /**
    * ID del deporte (requerido)
    * Debe ser un deporte válido registrado en el sistema
    */

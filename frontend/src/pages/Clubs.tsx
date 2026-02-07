@@ -61,6 +61,7 @@ export const Clubs = ({ name }: { name?: string }) => {
     description?: string;
   }> | null>(null);
   const [formData, setFormData] = useState<CreateClubRequest>({
+    name: "",
     sport_id: "",
     location: "",
     assignment_id: "",
@@ -88,12 +89,16 @@ export const Clubs = ({ name }: { name?: string }) => {
   }, [dispatch]);
 
   // Datos locales del dashboard o valores por defecto
-  const clubs = dashboardData?.clubs || [];
+  const clubs = (dashboardData?.clubs || []).map((club) => ({
+    sport: "", // Set to empty string or map from another property if available
+    ...club,
+  }));
   const clubsStatus = dashboardLoading ? "loading" : "idle";
 
   // Funciones optimizadas
   const resetForm = useCallback(() => {
     setFormData({
+      name: "",
       sport_id: "",
       location: "",
       assignment_id:
@@ -114,6 +119,7 @@ export const Clubs = ({ name }: { name?: string }) => {
       if (result.payload) {
         const club = result.payload as any;
         setFormData({
+          name: club.name || "",
           sport_id: club.sport_id?._id || club.sport_id || "",
           location: club.location || "",
           assignment_id: club.assignment_id || "",
@@ -181,7 +187,14 @@ export const Clubs = ({ name }: { name?: string }) => {
     let result;
     if (editingId) {
       result = await dispatch(
-        updateClub({ id: editingId, club: { location: formData.location } }),
+        updateClub({
+          id: editingId,
+          club: {
+            name: formData.name,
+            sport_id: formData.sport_id,
+            location: formData.location,
+          },
+        }),
       );
     } else {
       result = await dispatch(createClub(formData));

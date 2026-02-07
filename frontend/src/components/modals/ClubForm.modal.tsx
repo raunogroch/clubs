@@ -1,4 +1,12 @@
+/**
+ * Modal para Crear/Editar Club
+ *
+ * Componente presentacional que maneja la UI del formulario.
+ * No tiene lógica de negocio, solo props.
+ */
+
 import React from "react";
+import { Button } from "../Button";
 import type { CreateClubRequest } from "../../services/clubs.service";
 
 interface ClubFormModalProps {
@@ -31,7 +39,6 @@ export const ClubFormModal: React.FC<ClubFormModalProps> = ({
   onSave,
   onChange,
 }) => {
-  // Debug logging
   React.useEffect(() => {
     if (isEditing && levels.length > 0) {
       console.log("DEBUG ClubFormModal - Rendering levels:", levels.length);
@@ -42,32 +49,70 @@ export const ClubFormModal: React.FC<ClubFormModalProps> = ({
 
   return (
     <div
-      className="modal"
-      style={{ display: "block", backgroundColor: "rgba(0,0,0,.5)" }}
+      className="modal inmodal"
+      style={{
+        display: "block",
+        backgroundColor: "rgba(0,0,0,.5)",
+      }}
+      onClick={onClose}
     >
       <div
         className="modal-dialog modal-lg"
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
       >
-        <div className="modal-content">
+        <div className="modal-content animated bounceInRight">
           <div className="modal-header">
+            <i className="fa fa-building modal-icon"></i>
             <h4 className="modal-title">
               {isEditing ? "Editar Club" : "Crear Club"}
             </h4>
-            <button type="button" className="close" onClick={onClose}>
+            <small className="font-bold">
+              {isEditing
+                ? "Actualiza los datos del club"
+                : "Completa los datos del nuevo club"}
+            </small>
+            <button
+              type="button"
+              className="close"
+              onClick={onClose}
+              aria-label="Cerrar"
+            >
               &times;
             </button>
           </div>
           <div className="modal-body">
             <div className="form-group">
-              <label>Deporte *</label>
+              <label htmlFor="club-name">Nombre del Club</label>
+              <input
+                id="club-name"
+                type="text"
+                className="form-control"
+                name="name"
+                value={formData.name || ""}
+                onChange={onChange}
+                placeholder="Ej: Club Deportivo Central"
+                disabled={isLoading}
+              />
+              <small className="form-text text-muted">
+                Nombre del club (opcional)
+              </small>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="sport-id">
+                Disciplina <span className="text-danger">*</span>
+              </label>
               <select
+                id="sport-id"
                 className="form-control"
                 name="sport_id"
                 value={formData.sport_id}
                 onChange={onChange}
+                disabled={isLoading}
               >
-                <option value="">-- Selecciona un deporte --</option>
+                <option value="">-- Selecciona una disciplina --</option>
                 {sports.map((sport) => (
                   <option key={sport._id} value={sport._id}>
                     {sport.name}
@@ -77,87 +122,41 @@ export const ClubFormModal: React.FC<ClubFormModalProps> = ({
             </div>
 
             <div className="form-group">
-              <label>Ubicación</label>
+              <label htmlFor="location">Ubicación</label>
               <input
+                id="location"
                 type="text"
                 className="form-control"
                 name="location"
                 value={formData.location || ""}
                 onChange={onChange}
                 placeholder="Ej: Cancha 1"
+                disabled={isLoading}
               />
+              <small className="form-text text-muted">
+                Lugar donde se realizan las actividades
+              </small>
             </div>
-
-            {isEditing && (
-              <div className="form-group">
-                <label>Niveles/Logros</label>
-                {levels && levels.length > 0 ? (
-                  <div
-                    className="table-responsive"
-                    style={{ maxHeight: "300px", overflowY: "auto" }}
-                  >
-                    <table className="table table-sm table-striped table-hover">
-                      <thead className="bg-light">
-                        <tr>
-                          <th style={{ width: "80px", textAlign: "center" }}>
-                            Posición
-                          </th>
-                          <th>Nombre</th>
-                          <th>Descripción</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {[...levels]
-                          .sort((a, b) => a.position - b.position)
-                          .map((level) => (
-                            <tr key={level._id || `level-${level.position}`}>
-                              <td style={{ textAlign: "center" }}>
-                                <span className="badge badge-info">
-                                  {level.position}
-                                </span>
-                              </td>
-                              <td>
-                                <strong>{level.name}</strong>
-                              </td>
-                              <td
-                                className="text-muted"
-                                style={{ fontSize: "0.9em" }}
-                              >
-                                {level.description || <em>Sin descripción</em>}
-                              </td>
-                            </tr>
-                          ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <div
-                    className="alert alert-info alert-sm"
-                    style={{ marginBottom: 0, padding: "10px" }}
-                  >
-                    <i className="fa fa-info-circle"></i> Este club no tiene
-                    niveles/logros configurados aún.
-                  </div>
-                )}
-              </div>
-            )}
           </div>
           <div className="modal-footer">
             <button
               type="button"
               className="btn btn-xs btn-default"
               onClick={onClose}
+              disabled={isLoading}
+              aria-label="Cancelar"
             >
               Cancelar
             </button>
-            <button
+            <Button
               type="button"
-              className="btn btn-xs btn-primary"
+              variant="primary"
+              className="btn-xs"
               onClick={onSave}
               disabled={isLoading}
             >
               {isEditing ? "Actualizar" : "Crear"}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
