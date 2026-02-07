@@ -11,6 +11,10 @@ import {
   removeCoachFromGroup,
   addAthleteToGroup,
 } from "../store/groupsThunk";
+import {
+  fetchSchedulesByGroupId,
+  replaceBatchSchedules,
+} from "../store/schedulesThunk";
 import { AddMemberModal, RescheduleEventModal } from "../components/modals";
 import { useAddMemberModal, useScheduleModal } from "../features/groups/hooks";
 import {
@@ -20,10 +24,6 @@ import {
 } from "../features/groups/components";
 import userService from "../services/userService";
 import eventsService from "../services/eventsService";
-import {
-  addScheduleToGroup,
-  removeScheduleFromGroup,
-} from "../store/groupsThunk";
 import {
   updateEventInSelectedGroup,
   addEventToGroup,
@@ -43,20 +43,45 @@ export const GroupDetail = () => {
     status,
     error,
   } = useSelector((s: RootState) => s.groups);
+  const schedules = useSelector((s: RootState) => s.schedules.items);
 
   const isLoading = status === "loading";
+
+  /**
+   * Ordena los horarios por día (Lunes a Domingo)
+   */
+  const sortSchedulesByDay = (scheds: any[]) => {
+    const dayOrder: Record<string, number> = {
+      Monday: 0,
+      Tuesday: 1,
+      Wednesday: 2,
+      Thursday: 3,
+      Friday: 4,
+      Saturday: 5,
+      Sunday: 6,
+    };
+
+    return [...scheds].sort((a, b) => {
+      const dayDiff = (dayOrder[a.day] || 0) - (dayOrder[b.day] || 0);
+      if (dayDiff !== 0) return dayDiff;
+      // Si es el mismo día, ordenar por hora de inicio
+      return a.startTime.localeCompare(b.startTime);
+    });
+  };
 
   useEffect(() => {
     if (!id_subgrupo) return;
     const fields = [
       "name",
       "location",
-      "schedule",
+      "schedules_added",
       "events_added",
       "coaches",
       "athletes_added",
     ];
     dispatch(fetchGroupSummary({ id: id_subgrupo, fields }));
+    // Cargar schedules del grupo
+    dispatch(fetchSchedulesByGroupId(id_subgrupo));
   }, [id_subgrupo, dispatch]);
 
   /**
@@ -414,41 +439,54 @@ export const GroupDetail = () => {
   };
 
   const handleSaveSchedules = async () => {
-    if (
-      !scheduleModal.editingGroupId ||
-      scheduleModal.editingSchedules.length === 0
-    ) {
-      toastr.warning("Debe haber al menos un horario");
+    if (!scheduleModal.editingGroupId) {
+      toastr.warning("No hay grupo seleccionado");
       return;
     }
 
-    const currentGroup = group;
-    const currentSchedules = currentGroup?.schedule || [];
-
-    for (let i = 0; i < currentSchedules.length; i++) {
-      await dispatch(
-        removeScheduleFromGroup({
-          groupId: scheduleModal.editingGroupId!,
-          scheduleIndex: 0,
-        }),
+    // Si la lista está vacía, pedir confirmación antes de eliminar todos los horarios
+    if (scheduleModal.editingSchedules.length === 0) {
+      const confirmed = window.confirm(
+        "¿Está seguro de que desea eliminar todos los horarios? Esta acción no se puede deshacer.",
       );
+      if (!confirmed) {
+        return;
+      }
     }
 
-    for (const schedule of scheduleModal.editingSchedules) {
+    try {
+      // Validar duplicados por si algo se filtró por error
+      const days = scheduleModal.editingSchedules.map((s) => s.day);
+      const hasDuplicate = days.some((d, i) => days.indexOf(d) !== i);
+      if (hasDuplicate) {
+        toastr.warning(
+          "Hay días duplicados en la lista. Elimine duplicados antes de guardar.",
+        );
+        return;
+      }
+
+      // Ordenar los schedules por día antes de guardar (si hay alguno)
+      const sortedSchedules = sortSchedulesByDay(
+        scheduleModal.editingSchedules,
+      );
+
+      // Usar batch operation para actualizar todos los schedules
+      // El backend se encarga de eliminar los antiguos y agregar los nuevos
       await dispatch(
-        addScheduleToGroup({
-          groupId: scheduleModal.editingGroupId!,
-          schedule: {
-            day: schedule.day,
-            startTime: schedule.startTime,
-            endTime: schedule.endTime,
-          },
+        replaceBatchSchedules({
+          groupId: scheduleModal.editingGroupId,
+          schedules: sortedSchedules.map((s) => ({
+            day: s.day,
+            startTime: s.startTime,
+            endTime: s.endTime,
+          })),
         }),
       );
-    }
 
-    toastr.success("Horarios guardados");
-    scheduleModal.closeModal();
+      scheduleModal.closeModal();
+    } catch (err) {
+      console.error("Error al actualizar horarios:", err);
+    }
   };
 
   /**
@@ -466,7 +504,6 @@ export const GroupDetail = () => {
    * Agrupa horarios por hora y genera un formato de visualización compacto
    */
   const getGroupedSchedules = () => {
-    const schedules = group?.schedule || [];
     if (schedules.length === 0) return [];
 
     const grouped = schedules.reduce(
@@ -501,27 +538,68 @@ export const GroupDetail = () => {
       Sunday: "Domingo",
     };
 
-    return Object.entries(grouped).map(([time, days]) => {
-      const sortedDays = (days as string[]).sort(
-        (a, b) => (dayOrder[a] || 0) - (dayOrder[b] || 0),
-      );
-      const [startTime, endTime] = time.split("-");
+    return Object.entries(grouped)
+      .map(([time, days]) => {
+        const sortedDays = (days as string[]).sort(
+          (a, b) => (dayOrder[a] || 0) - (dayOrder[b] || 0),
+        );
+        const [startTime, endTime] = time.split("-");
 
-      let displayDays = "";
-      if (sortedDays.length === 1) {
-        displayDays = dayNameMap[sortedDays[0]] || sortedDays[0];
-      } else if (sortedDays.length <= 3) {
-        displayDays = sortedDays.map((d) => dayNameMap[d] || d).join(", ");
-      } else {
-        displayDays = `${dayNameMap[sortedDays[0]] || sortedDays[0]} - ${dayNameMap[sortedDays[sortedDays.length - 1]] || sortedDays[sortedDays.length - 1]}`;
-      }
+        // Compress contiguous days into ranges (e.g. Lunes a Miércoles)
+        const compressDays = (daysArr: string[]) => {
+          if (!daysArr || daysArr.length === 0) return "";
+          const ranges: string[] = [];
+          let rangeStart = daysArr[0];
+          let prevIndex = dayOrder[daysArr[0]] ?? 0;
 
-      return {
-        days: displayDays,
-        startTime,
-        endTime,
-      };
-    });
+          for (let i = 1; i < daysArr.length; i++) {
+            const d = daysArr[i];
+            const idx = dayOrder[d] ?? 0;
+            if (idx === prevIndex + 1) {
+              // contiguous, extend range
+              prevIndex = idx;
+              continue;
+            }
+            // end current range at daysArr[i-1]
+            const rangeEnd = daysArr[i - 1];
+            if (rangeStart === rangeEnd) {
+              ranges.push(dayNameMap[rangeStart] || rangeStart);
+            } else {
+              ranges.push(
+                `${dayNameMap[rangeStart] || rangeStart} a ${dayNameMap[rangeEnd] || rangeEnd}`,
+              );
+            }
+            // start new range
+            rangeStart = d;
+            prevIndex = idx;
+          }
+
+          // push last range
+          const last = daysArr[daysArr.length - 1];
+          if (rangeStart === last) {
+            ranges.push(dayNameMap[rangeStart] || rangeStart);
+          } else {
+            ranges.push(
+              `${dayNameMap[rangeStart] || rangeStart} a ${dayNameMap[last] || last}`,
+            );
+          }
+
+          // Join multiple ranges with ' - '
+          return ranges.join(" - ");
+        };
+
+        const displayDays = compressDays(sortedDays);
+
+        return {
+          days: displayDays,
+          startTime,
+          endTime,
+        };
+      })
+      .sort((a, b) => {
+        // Ordenar los resultados por hora de inicio también
+        return a.startTime.localeCompare(b.startTime);
+      });
   };
 
   console.log("GroupDetail render", { group, status, error });
@@ -558,26 +636,6 @@ export const GroupDetail = () => {
         };
       }
     });
-  }
-
-  if (status === "loading") {
-    return (
-      <div className="wrapper wrapper-content">
-        <div className="row">
-          <div className="col-lg-12">
-            <div className="text-center" style={{ padding: "40px" }}>
-              <div
-                className="sk-spinner sk-spinner-pulse"
-                style={{ margin: "0 auto" }}
-              ></div>
-              <p style={{ marginTop: "20px" }}>
-                Cargando información del grupo...
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
   }
 
   return (
@@ -624,7 +682,7 @@ export const GroupDetail = () => {
           <div className="col-lg-3">
             <div className="ibox">
               <div className="ibox-content">
-                <h1 className="no-margins">{group?.schedule?.length || 0}</h1>
+                <h1 className="no-margins">{schedules?.length || 0}</h1>
                 <div className="stat-percent font-bold">
                   <i className="fa fa-calendar text-navy"></i> Horarios
                 </div>
@@ -648,85 +706,90 @@ export const GroupDetail = () => {
         </div>
 
         {/* Horarios */}
-        {group?.schedule &&
-          Array.isArray(group.schedule) &&
-          group.schedule.length > 0 && (
-            <div className="row m-t-md">
-              <div className="col-lg-12">
-                <div className="ibox">
-                  <div className="ibox-title">
-                    <h5>
-                      <i className="fa fa-calendar"></i> Horarios de
-                      Entrenamiento
-                    </h5>
-                    <div className="ibox-tools">
-                      <Button
-                        className="btn btn-xs btn-success"
-                        icon="fa-plus"
-                        onClick={() =>
-                          scheduleModal.openModal(
-                            id_subgrupo!,
-                            group?.schedule || [],
-                          )
-                        }
+        <div className="row m-t-md">
+          <div className="col-lg-12">
+            <div className="ibox">
+              <div className="ibox-title">
+                <h5>
+                  <i className="fa fa-calendar"></i> Horarios de Entrenamiento
+                </h5>
+                <div className="ibox-tools">
+                  <Button
+                    className="btn btn-xs btn-success"
+                    icon="fa-plus"
+                    onClick={() =>
+                      scheduleModal.openModal(id_subgrupo!, schedules || [])
+                    }
+                  >
+                    {(schedules?.length || 0) > 0
+                      ? "Actualizar horarios"
+                      : "Asignar horarios"}
+                  </Button>
+                  <a className="collapse-link">
+                    <i className="fa fa-chevron-up"></i>
+                  </a>
+                </div>
+              </div>
+              <div className="ibox-content">
+                {schedules && schedules.length > 0 ? (
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "12px",
+                    }}
+                  >
+                    {getGroupedSchedules().map((item, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          padding: "10px 15px",
+                          backgroundColor: "#f9f9f9",
+                          borderRadius: "4px",
+                          border: "1px solid #e0e0e0",
+                        }}
                       >
-                        {(group?.schedule?.length || 0) > 0
-                          ? "Actualizar horarios"
-                          : "Asignar horarios"}
-                      </Button>
-                      <a className="collapse-link">
-                        <i className="fa fa-chevron-up"></i>
-                      </a>
-                    </div>
-                  </div>
-                  <div className="ibox-content">
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "12px",
-                      }}
-                    >
-                      {getGroupedSchedules().map((item, idx) => (
-                        <div
-                          key={idx}
+                        <i
+                          className="fa fa-calendar-o text-navy"
+                          style={{ marginRight: "12px", fontSize: "16px" }}
+                        ></i>
+                        <span style={{ flex: 1 }}>
+                          <strong>{item.days}</strong>
+                        </span>
+                        <span
                           style={{
-                            display: "flex",
-                            alignItems: "center",
-                            padding: "10px 15px",
-                            backgroundColor: "#f9f9f9",
-                            borderRadius: "4px",
-                            border: "1px solid #e0e0e0",
+                            marginLeft: "12px",
+                            color: "#666",
+                            fontWeight: "500",
                           }}
                         >
                           <i
-                            className="fa fa-calendar-o text-navy"
-                            style={{ marginRight: "12px", fontSize: "16px" }}
+                            className="fa fa-clock-o"
+                            style={{ marginRight: "6px" }}
                           ></i>
-                          <span style={{ flex: 1 }}>
-                            <strong>{item.days}</strong>
-                          </span>
-                          <span
-                            style={{
-                              marginLeft: "12px",
-                              color: "#666",
-                              fontWeight: "500",
-                            }}
-                          >
-                            <i
-                              className="fa fa-clock-o"
-                              style={{ marginRight: "6px" }}
-                            ></i>
-                            {item.startTime} a {item.endTime}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                          {item.startTime} a {item.endTime}
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                </div>
+                ) : (
+                  <div
+                    style={{
+                      padding: "20px",
+                      textAlign: "center",
+                      color: "#999",
+                    }}
+                  >
+                    <p>No hay horarios asignados aún</p>
+                    <small>Haz clic en "Asignar horarios" para comenzar</small>
+                  </div>
+                )}
               </div>
             </div>
-          )}
+          </div>
+        </div>
         <div className="row m-t-md">
           <MemberList
             title="Entrenadores"

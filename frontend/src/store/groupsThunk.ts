@@ -206,3 +206,25 @@ export const removeScheduleFromGroup = createAsyncThunk(
     }
   },
 );
+export const updateSchedulesBatch = createAsyncThunk(
+  "groups/updateSchedulesBatch",
+  async (
+    payload: {
+      groupId: string;
+      schedules: Array<{ day: string; startTime: string; endTime: string }>;
+    },
+    { rejectWithValue },
+  ) => {
+    try {
+      const data = await groupsService.updateSchedulesBatch(
+        payload.groupId,
+        payload.schedules,
+      );
+      toastr.success("Horarios actualizados exitosamente");
+      return data;
+    } catch (err: any) {
+      toastr.error("Error al actualizar horarios");
+      return rejectWithValue(err.message || "Error al actualizar horarios");
+    }
+  },
+);

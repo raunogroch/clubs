@@ -236,6 +236,26 @@ export class GroupsController {
   }
 
   /**
+   * POST /groups/:groupId/schedule/batch
+   * Actualizar múltiples horarios en una operación batch
+   */
+  @Post(':groupId/schedule/batch')
+  async updateSchedulesBatch(
+    @Param('groupId') groupId: string,
+    @Body()
+    body: {
+      schedules: Array<{ day: string; startTime: string; endTime: string }>;
+    },
+    @CurrentUser() user: any,
+  ) {
+    return this.groupsService.updateSchedulesBatch(
+      groupId,
+      body.schedules,
+      user.sub,
+    );
+  }
+
+  /**
    * POST /groups/:groupId/levels
    * Agregar un nivel al grupo
    */

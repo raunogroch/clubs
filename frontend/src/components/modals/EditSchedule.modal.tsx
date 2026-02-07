@@ -1,6 +1,7 @@
 import "./EditSchedule.spinner.css";
 import { createPortal } from "react-dom";
 import { Button } from "../Button";
+import toastr from "toastr";
 
 const DayNameMap: Record<string, string> = {
   Monday: "Lunes",
@@ -147,9 +148,19 @@ export const EditScheduleModal = ({
                             <select
                               className="form-control "
                               value={schedule.day}
-                              onChange={(e) =>
-                                onUpdateRow(idx, "day", e.target.value)
-                              }
+                              onChange={(e) => {
+                                const newDay = e.target.value;
+                                const isDuplicate = schedules.some(
+                                  (s, i) => i !== idx && s.day === newDay,
+                                );
+                                if (isDuplicate) {
+                                  toastr.warning(
+                                    `El día ${DayNameMap[newDay]} ya está en la lista`,
+                                  );
+                                  return;
+                                }
+                                onUpdateRow(idx, "day", newDay);
+                              }}
                               disabled={loading}
                             >
                               <option value="Monday">
@@ -243,8 +254,8 @@ export const EditScheduleModal = ({
                   className="form-text text-muted"
                   style={{ display: "block", marginTop: "8px" }}
                 >
-                  <i className="fa fa-arrow-right"></i> Comienza agregando un
-                  nuevo horario de entrenamiento
+                  <i className="fa fa-info-circle"></i> Deja vacía para eliminar
+                  todos los horarios
                 </small>
               )}
             </div>
@@ -263,7 +274,7 @@ export const EditScheduleModal = ({
               type="button"
               variant="primary"
               onClick={onSave}
-              disabled={loading || schedules.length === 0}
+              disabled={loading}
               icon="fa-check"
             >
               Guardar Cambios

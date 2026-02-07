@@ -104,8 +104,20 @@ export class Group extends Document {
   monthly_fee?: number;
 
   /**
-   * Array de horarios del grupo
-   * Cada horario contiene día de la semana y rango de horas
+   * Array de IDs de horarios del grupo
+   * Referencias a documentos de Schedule
+   * Los schedules son entidades independientes
+   */
+  @Prop({
+    type: [Types.ObjectId],
+    ref: 'Schedule',
+    default: [],
+  })
+  schedules_added?: Types.ObjectId[];
+
+  /**
+   * Array de horarios del grupo (DEPRECATED - usar schedules_added)
+   * Se mantiene por compatibilidad hacia atrás
    */
   @Prop({
     type: [

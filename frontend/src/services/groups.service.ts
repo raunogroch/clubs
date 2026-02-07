@@ -398,9 +398,41 @@ class GroupsService {
   }
 
   /**
-   * Añadir un nivel al grupo
-   * POST /api/groups/:groupId/levels
+   * Actualizar múltiples horarios en una operación batch
+   * Elimina los que no están en la nueva lista y agrega los que faltan
+   * POST /api/groups/:groupId/schedule/batch
    */
+  async updateSchedulesBatch(
+    groupId: string,
+    newSchedules: Array<{ day: string; startTime: string; endTime: string }>,
+  ): Promise<Group> {
+    const response = await fetch(
+      `${API_URL}/groups/${groupId}/schedule/batch`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ schedules: newSchedules }),
+      },
+    );
+
+    if (!response.ok) {
+      let errorMessage = "Error al actualizar horarios";
+      try {
+        const error = await safeParseJson(response);
+        errorMessage = error.message || errorMessage;
+      } catch {
+        errorMessage = `Error ${response.status}: ${response.statusText}`;
+      }
+      throw new Error(errorMessage);
+    }
+
+    return safeParseJson(response);
+  }
+
+  /**
   async addLevel(
     groupId: string,
     level: { position: number; name: string; description?: string },

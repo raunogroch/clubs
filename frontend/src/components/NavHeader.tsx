@@ -22,14 +22,7 @@ function getUserSection(pathname: string) {
   return "";
 }
 
-export const NavHeader = ({
-  name,
-  sub,
-  sub1,
-  pageCreate,
-  onCreateClick,
-  button,
-}: NavHeaderProps) => {
+export const NavHeader = ({ name, sub, sub1, button }: NavHeaderProps) => {
   const pageTitle = name || "Principal";
   const isPrincipalPage = pageTitle === "Principal";
   const location = useLocation();
@@ -78,37 +71,22 @@ export const NavHeader = ({
   return (
     <div className="row wrapper border-bottom white-bg page-heading">
       <div className="col-12">
-        <div className="d-flex align-items-center justify-content-between">
-          <h2 className="mb-0">{pageTitle}</h2>
-
-          <div className="d-flex gap-2 align-items-center">
-            {button?.url && (
-              <Link to={button.url} className="btn btn-sm btn-default">
-                <i className={`fa ${button.icon || "fa-arrow-left"}`}></i>{" "}
-                {button.label || "Volver"}
-              </Link>
-            )}
-
-            {pageCreate && (
-              <div className="title-action">
-                {onCreateClick ? (
-                  <button onClick={onCreateClick} className="btn btn-primary">
-                    <i className="fa fa-plus"></i> {pageCreate}
-                  </button>
-                ) : (
-                  <Link
-                    to={`${location.pathname}/create`}
-                    className="btn btn-primary"
-                  >
-                    <i className="fa fa-plus"></i> {pageCreate}
-                  </Link>
-                )}
-              </div>
-            )}
+        <div
+          className="d-flex justify-content-between align-items-center"
+          style={{ minHeight: "60px" }}
+        >
+          <div>
+            <h2 className="mb-0">{pageTitle}</h2>
+            <ol className="breadcrumb mt-2">{breadcrumbs}</ol>
           </div>
-        </div>
 
-        <ol className="breadcrumb mt-2">{breadcrumbs}</ol>
+          {button?.url && (
+            <Link to={button.url} className="btn btn-default">
+              <i className={`fa ${button.icon || "fa-arrow-left"}`}></i>{" "}
+              {button.label || "Volver"}
+            </Link>
+          )}
+        </div>
       </div>
     </div>
   );

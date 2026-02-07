@@ -720,6 +720,85 @@ export class GroupsService {
   }
 
   /**
+   * Actualizar múltiples horarios en una operación batch
+   * Elimina todos los horarios actuales y agrega los nuevos
+   */
+  async updateSchedulesBatch(
+    groupId: string,
+    schedules: Array<{ day: string; startTime: string; endTime: string }>,
+    userId: string,
+  ): Promise<Group> {
+    try {
+      const group = await this.groupRepository.findById(groupId);
+      if (!group) {
+        throw new NotFoundException(`Grupo con ID ${groupId} no encontrado`);
+      }
+
+      // Extraer el ID del club
+      let clubId: string;
+      if (typeof group.club_id === 'object' && group.club_id !== null) {
+        clubId =
+          (group.club_id as any)._id?.toString?.() ||
+          (group.club_id as any)?.toString?.();
+      } else {
+        clubId = String(group.club_id);
+      }
+
+      // Verificar acceso al club
+      await this.verifyClubAccess(clubId, userId);
+
+      // Validar todos los horarios antes de hacer cambios
+      const VALID_DAYS = [
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+        'Sunday',
+      ];
+
+      for (const schedule of schedules) {
+        if (!VALID_DAYS.includes(schedule.day)) {
+          throw new BadRequestException(`Día inválido: ${schedule.day}`);
+        }
+        if (schedule.startTime >= schedule.endTime) {
+          throw new BadRequestException(
+            'La hora de inicio debe ser menor a la hora de fin',
+          );
+        }
+      }
+
+      // Eliminar todos los horarios actuales
+      const currentSchedules = group.schedule || [];
+      let updatedGroup: Group | null = group;
+
+      for (let i = currentSchedules.length - 1; i >= 0; i--) {
+        updatedGroup = await this.groupRepository.removeSchedule(groupId, i);
+        if (!updatedGroup)
+          throw new BadRequestException('Failed to remove schedule');
+      }
+
+      // Agregar los nuevos horarios
+      for (const schedule of schedules) {
+        updatedGroup = await this.groupRepository.addSchedule(groupId, {
+          day: schedule.day,
+          startTime: schedule.startTime,
+          endTime: schedule.endTime,
+        });
+        if (!updatedGroup)
+          throw new BadRequestException('Failed to add schedule');
+      }
+
+      if (!updatedGroup) throw new BadRequestException('No group updated');
+      return updatedGroup;
+    } catch (error) {
+      console.error('Error en updateSchedulesBatch:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Añadir un nivel al grupo
    */
   async addLevel(

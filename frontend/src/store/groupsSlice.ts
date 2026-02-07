@@ -12,6 +12,7 @@ import {
   removeAthleteFromGroup,
   addScheduleToGroup,
   removeScheduleFromGroup,
+  updateSchedulesBatch,
 } from "./groupsThunk";
 
 interface Group {
@@ -344,6 +345,28 @@ const groupsSlice = createSlice({
         },
       )
       .addCase(removeScheduleFromGroup.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload as string;
+      })
+      // updateSchedulesBatch (batch operation)
+      .addCase(updateSchedulesBatch.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(
+        updateSchedulesBatch.fulfilled,
+        (state, action: PayloadAction<any>) => {
+          state.status = "succeeded";
+          const idx = state.items.findIndex(
+            (i) => i._id === action.payload._id,
+          );
+          if (idx >= 0) state.items[idx] = action.payload;
+          if (state.selectedGroup?._id === action.payload._id) {
+            state.selectedGroup = action.payload;
+          }
+        },
+      )
+      .addCase(updateSchedulesBatch.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload as string;
       });
