@@ -3,7 +3,8 @@ import { Link, useLocation } from "react-router-dom";
 interface buttonProps {
   label?: string;
   icon?: string;
-  url: string;
+  url?: string;
+  onClick?: () => void;
 }
 
 interface NavHeaderProps {
@@ -80,12 +81,17 @@ export const NavHeader = ({ name, sub, sub1, button }: NavHeaderProps) => {
             <ol className="breadcrumb mt-2">{breadcrumbs}</ol>
           </div>
 
-          {button?.url && (
+          {button?.url ? (
             <Link to={button.url} className="btn btn-default">
               <i className={`fa ${button.icon || "fa-arrow-left"}`}></i>{" "}
               {button.label || "Volver"}
             </Link>
-          )}
+          ) : button?.onClick ? (
+            <button className="btn btn-primary" onClick={button.onClick}>
+              <i className={`fa ${button.icon || "fa-plus"}`}></i>{" "}
+              {button.label || "Crear"}
+            </button>
+          ) : null}
         </div>
       </div>
     </div>

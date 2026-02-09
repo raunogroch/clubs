@@ -321,6 +321,28 @@ class ClubsService {
 
     return safeParseJson(response);
   }
+
+  /**
+   * Actualizar logo/imagen del club
+   * PATCH /api/clubs/:id/logo
+   */
+  async updateLogo(id: string, imageBase64?: string): Promise<any> {
+    const response = await fetch(`${API_URL}/clubs/${id}/logo`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({ image: imageBase64 }),
+    });
+
+    if (!response.ok) {
+      const error = await safeParseJson(response);
+      throw new Error(error.message || "Error al actualizar logo del club");
+    }
+
+    return safeParseJson(response);
+  }
 }
 
 const clubsService = new ClubsService();

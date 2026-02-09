@@ -82,15 +82,30 @@ export class Club extends Document {
   created_by: Types.ObjectId;
 
   /**
-   * Timestamp de creación (automático)
+   * Imágenes/Logo del club en diferentes resoluciones
    */
-  @Prop()
+  @Prop({
+    type: {
+      small: { type: String },
+      medium: { type: String },
+      large: { type: String },
+    },
+    required: false,
+  })
+  images?: {
+    small: string;
+    medium: string;
+    large: string;
+  };
+
+  /**
+   * Timestamp de creación (automático) - generado por timestamps: true
+   */
   createdAt?: Date;
 
   /**
-   * Timestamp de última actualización (automático)
+   * Timestamp de última actualización (automático) - generado por timestamps: true
    */
-  @Prop()
   updatedAt?: Date;
 }
 

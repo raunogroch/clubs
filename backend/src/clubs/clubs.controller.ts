@@ -128,6 +128,20 @@ export class ClubsController {
   }
 
   /**
+   * PATCH /clubs/:clubId/logo
+   * Actualizar logo del club (imagen en base64)
+   */
+  @Patch(':clubId/logo')
+  async updateLogo(
+    @Param('clubId') clubId: string,
+    @Body() body: any,
+    @CurrentUser() user: any,
+  ) {
+    // body: { image: string }
+    return this.clubsService.updateClubLogo(clubId, body.image, user.sub);
+  }
+
+  /**
    * DELETE /clubs/:clubId
    * Eliminar un club
    */

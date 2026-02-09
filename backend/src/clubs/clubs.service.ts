@@ -8,7 +8,9 @@ import {
   BadRequestException,
   ForbiddenException,
   NotFoundException,
+  ServiceUnavailableException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { CreateClubDto } from './dto/create-club.dto';
 import { UpdateClubDto } from './dto/update-club.dto';
 import { ClubRepository } from './repository/club.repository';
@@ -23,6 +25,7 @@ export class ClubsService {
     private clubRepository: ClubRepository,
     private assignmentsService: AssignmentsService,
     private sportsService: SportsService,
+    private configService: ConfigService,
   ) {}
 
   /**
@@ -462,9 +465,149 @@ export class ClubsService {
         athletes_added: totalAthletes,
         coaches: totalCoaches,
         levels: club.levels || [],
+        images: {
+          small: club.images?.small || null,
+          medium: club.images?.medium || null,
+          large: club.images?.large || null,
+        },
       };
     });
 
     return { clubs: processedClubs };
+  }
+
+  /**
+   * Actualizar logo del club (procesa imagen con image-processor y guarda URLs)
+   */
+  async updateClubLogo(
+    clubId: string,
+    imageBase64: string | undefined,
+    userId: string,
+  ) {
+    try {
+      const club = await this.clubRepository.findById(clubId);
+      if (!club) throw new NotFoundException('Club no encontrado');
+
+      // Permisos: creador o admin de la asignación
+      const isCreator = club.created_by.toString() === userId;
+      const assignmentId =
+        typeof club.assignment_id === 'object' && club.assignment_id !== null
+          ? (club.assignment_id as any)._id.toString()
+          : (club.assignment_id as any).toString();
+      const isAssignmentAdmin =
+        await this.assignmentsService.isUserAdminOfAssignment(
+          userId,
+          assignmentId,
+        );
+
+      if (!isCreator && !isAssignmentAdmin) {
+        throw new ForbiddenException(
+          'No tienes permisos para actualizar el logo',
+        );
+      }
+
+      // Si no viene imagen, solo limpiar el logo
+      if (!imageBase64) {
+        const updated = await this.clubRepository.update(clubId, {
+          images: null,
+        } as any);
+        return updated;
+      }
+
+      // Procesar la imagen con image-processor
+      const images = await this.processImageWithImageProcessor(imageBase64);
+
+      // Actualizar club con las URLs devueltas
+      const updated = await this.clubRepository.update(clubId, {
+        images,
+      } as any);
+
+      return updated;
+    } catch (error: any) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      const message = error?.message || 'Error desconocido';
+      throw new ServiceUnavailableException(
+        `Error al procesar logo: ${message}`,
+      );
+    }
+  }
+
+  /**
+   * Procesa la imagen con el servicio image-processor
+   */
+  private async processImageWithImageProcessor(
+    imageBase64: string,
+  ): Promise<any> {
+    const axios = require('axios');
+    const imageProcessorApi = this.configService.get<string>(
+      'IMAGE_PROCESSOR_API',
+    );
+
+    if (!imageProcessorApi) {
+      throw new Error('IMAGE_PROCESSOR_API no configurada');
+    }
+
+    try {
+      // Primero, procesa la imagen
+      const processResponse = await axios.post(
+        `${imageProcessorApi}/api/process`,
+        {
+          image: imageBase64,
+        },
+      );
+
+      if (!processResponse.data || !processResponse.data.image) {
+        throw new Error(
+          'Respuesta inválida del procesador: ' +
+            JSON.stringify(processResponse.data),
+        );
+      }
+
+      // Luego, guarda las variantes (small, medium, large)
+      const saveResponse = await axios.post(
+        `${imageProcessorApi}/api/process/save`,
+        {
+          folder: 'clubs',
+          image: processResponse.data.image,
+        },
+      );
+
+      if (
+        !saveResponse.data ||
+        !saveResponse.data.images ||
+        !saveResponse.data.images.small ||
+        !saveResponse.data.images.medium ||
+        !saveResponse.data.images.large
+      ) {
+        throw new Error(
+          'Error al guardar variantes de imagen: ' +
+            JSON.stringify(saveResponse.data),
+        );
+      }
+
+      return saveResponse.data.images;
+    } catch (error: any) {
+      if (error?.response?.status) {
+        throw new Error(
+          `Image Processor error (${error.response.status}): ${
+            error.response.data?.message || error.message
+          }`,
+        );
+      } else if (error?.code === 'ECONNREFUSED') {
+        throw new Error(
+          `No se puede conectar a Image Processor en ${imageProcessorApi}. Verifique que el servicio esté corriendo.`,
+        );
+      } else {
+        throw new Error(
+          `Error al procesar imagen: ${error?.message || 'Error desconocido'}`,
+        );
+      }
+    }
   }
 }

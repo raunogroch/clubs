@@ -17,13 +17,17 @@ import {
 import { fetchAllSports } from "../store/sportsThunk";
 import type { Club, CreateClubRequest } from "../services/clubs.service";
 import type { UserAdmin } from "../interfaces/user";
-import { NavHeader } from "../components";
+import { Button, Image, NavHeader } from "../components";
+import ImageUploadModal from "../components/modals/ImageUpload.modal";
+import clubsService from "../services/clubs.service";
 import { ClubFormModal } from "../components/modals/ClubForm.modal";
-import { ClubsTable } from "../components/ClubsTable";
+// ClubsTable removed: rendering cards (profile widgets) inline instead
 import { GroupLevelsModal } from "../components/modals/GroupLevels.modal";
+import { useNavigate } from "react-router-dom";
 
 export const Clubs = ({ name }: { name?: string }) => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const user = useSelector((state: RootState) => state.auth.user);
 
   // Estado local para datos del dashboard
@@ -40,6 +44,14 @@ export const Clubs = ({ name }: { name?: string }) => {
         name: string;
         description?: string;
       }>;
+      images?:
+        | {
+            small?: string;
+            medium?: string;
+            large?: string;
+            [key: string]: any;
+          }
+        | any;
     }>;
   } | null>(null);
   const [dashboardLoading, setDashboardLoading] = useState(true);
@@ -94,6 +106,34 @@ export const Clubs = ({ name }: { name?: string }) => {
     ...club,
   }));
   const clubsStatus = dashboardLoading ? "loading" : "idle";
+
+  const [logoModalOpen, setLogoModalOpen] = useState(false);
+  const [logoModalClubId, setLogoModalClubId] = useState<string | null>(null);
+  const [logoCurrentImage, setLogoCurrentImage] = useState<string | undefined>(
+    undefined,
+  );
+
+  const handleOpenLevels = useCallback(
+    (clubId: string) => {
+      const clubData = clubs.find((c) => c._id === clubId);
+      if (clubData) {
+        setSelectedClubForLevels({
+          _id: clubId,
+          name: clubData.name || "",
+          sport_id: "",
+          location: clubData.location || "",
+          assignment_id: "",
+          created_by: "",
+          members: [],
+          levels: clubData.levels || [],
+          createdAt: "",
+          updatedAt: "",
+        });
+      }
+      setShowLevelsModal(true);
+    },
+    [clubs],
+  );
 
   // Funciones optimizadas
   const resetForm = useCallback(() => {
@@ -232,54 +272,147 @@ export const Clubs = ({ name }: { name?: string }) => {
     );
   }
 
+  console.log("Dashboard data:", clubs); // Debug: Ver datos del dashboard en consola
+
   return (
     <>
-      <NavHeader name="Clubs" />
+      <NavHeader
+        name="Clubs"
+        button={{
+          label: "Crear Club",
+          icon: "fa-plus",
+          onClick: handleOpenCreate,
+        }}
+      />
+
       <div className="wrapper wrapper-content">
-        <div className="row">
-          <div className="col-lg-12">
-            <div className="ibox">
-              <div className="ibox-title">
-                <h5>Gestión de Clubs</h5>
-                <div className="ibox-tools">
-                  <button
-                    className="btn btn-xs btn-primary"
-                    onClick={handleOpenCreate}
-                    disabled={clubsStatus === "loading"}
+        {clubsStatus === "loading" ? (
+          <div>Cargando clubs...</div>
+        ) : (
+          <div className="row">
+            {clubs.map((club) => (
+              <div key={club._id} className="col-lg-4">
+                <div
+                  className="widget-head-color-box navy-bg p-lg text-center"
+                  style={{ position: "relative" }}
+                >
+                  <div className="m-b-md">
+                    <h2 className="font-bold no-margins">{club.name}</h2>
+                    <small>{club.location}</small>
+                  </div>
+                  <div
+                    style={{ position: "relative", display: "inline-block" }}
                   >
-                    <i className="fa fa-plus"></i> Crear Club
-                  </button>
+                    <div
+                      style={{
+                        position: "relative",
+                        width: "fit-content",
+                        margin: "0 auto",
+                        marginBottom: "20px",
+                      }}
+                    >
+                      {club.images?.small ? (
+                        <Image
+                          src={club.images.small}
+                          alt={club.name}
+                          style={{
+                            width: "70px",
+                            height: "70px",
+
+                            borderRadius: "50%",
+                            objectFit: "cover",
+                            border: "1px solid #ddd",
+                          }}
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            width: "70px",
+                            height: "70px",
+                            borderRadius: "50%",
+                            backgroundColor: "#f0f0f0",
+                            border: "1px solid #ddd",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <i
+                            className="fa fa-user"
+                            style={{ fontSize: "24px", color: "#999" }}
+                          ></i>
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        className="btn btn-xs btn-info"
+                        style={{
+                          position: "absolute",
+                          bottom: "-5px",
+                          right: "-5px",
+                          borderRadius: "50%",
+                          width: "24px",
+                          height: "24px",
+                          padding: "0",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                        onClick={() => {
+                          setLogoModalClubId(club._id);
+                          setLogoCurrentImage(club.images?.small);
+                          setLogoModalOpen(true);
+                        }}
+                        title="Editar logo"
+                      >
+                        <i
+                          className="fa fa-pencil"
+                          style={{ fontSize: "12px" }}
+                        ></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <span>{club.athletes_added || 0} Atletas</span> |
+                    <span> {club.coaches || 0} Entrenadores</span> |
+                    <span> {club.levels ? club.levels.length : 0} Grupos</span>
+                  </div>
+                </div>
+                <div className="widget-text-box">
+                  <div className="justify-content-between d-flex">
+                    <Button
+                      className="btn btn-xs btn-white"
+                      onClick={() => handleOpenEdit(club._id)}
+                    >
+                      <i className="fa fa-pencil"></i> Editar
+                    </Button>
+                    <Button
+                      className="btn btn-info btn-xs"
+                      onClick={() => navigate(`/clubs/${club._id}/groups`)}
+                      icon="fa-sitemap"
+                    >
+                      Grupos
+                    </Button>
+                    <Button
+                      className="btn btn-xs btn-primary m-l-sm"
+                      onClick={() => handleOpenLevels(club._id)}
+                    >
+                      <i className="fa fa-list"></i> Rangos
+                    </Button>
+
+                    <Button
+                      className="btn btn-xs btn-danger m-l-sm"
+                      onClick={() => handleDelete(club._id)}
+                    >
+                      <i className="fa fa-trash"></i> Eliminar
+                    </Button>
+                  </div>
                 </div>
               </div>
-              <div className="ibox-content">
-                <ClubsTable
-                  clubs={clubs}
-                  isLoading={clubsStatus === "loading"}
-                  onEdit={handleOpenEdit}
-                  onDelete={handleDelete}
-                  onOpenLevels={(clubId) => {
-                    const clubData = clubs.find((c) => c._id === clubId);
-                    if (clubData) {
-                      setSelectedClubForLevels({
-                        _id: clubId,
-                        name: clubData.name || "",
-                        sport_id: "",
-                        location: clubData.location || "",
-                        assignment_id: "",
-                        created_by: "",
-                        members: [],
-                        levels: clubData.levels || [],
-                        createdAt: "",
-                        updatedAt: "",
-                      });
-                    }
-                    setShowLevelsModal(true);
-                  }}
-                />
-              </div>
-            </div>
+            ))}
           </div>
-        </div>
+        )}
       </div>
 
       <ClubFormModal
@@ -315,6 +448,28 @@ export const Clubs = ({ name }: { name?: string }) => {
           setShowLevelsModal(false);
           setSelectedClubForLevels(null);
         }}
+      />
+
+      <ImageUploadModal
+        open={logoModalOpen}
+        title="Actualizar logo del club"
+        currentImage={logoCurrentImage}
+        entityName={logoModalClubId || ""}
+        onClose={() => {
+          setLogoModalOpen(false);
+          setLogoModalClubId(null);
+          setLogoCurrentImage(undefined);
+        }}
+        onSave={async (imageBase64?: string) => {
+          if (!logoModalClubId) return Promise.reject("No club selected");
+          const result = await clubsService.updateLogo(
+            logoModalClubId,
+            imageBase64,
+          );
+          await reloadDashboard();
+          return result;
+        }}
+        saveLabel="Guardar logo"
       />
     </>
   );
