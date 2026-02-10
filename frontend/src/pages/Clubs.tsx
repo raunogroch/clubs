@@ -378,8 +378,7 @@ export const Clubs = ({ name }: { name?: string }) => {
                   </div>
                   <div>
                     <span>{club.athletes_added || 0} Atletas</span> |
-                    <span> {club.coaches || 0} Entrenadores</span> |
-                    <span> {club.levels ? club.levels.length : 0} Grupos</span>
+                    <span> {club.coaches || 0} Entrenadores</span>
                   </div>
                 </div>
                 <div className="widget-text-box">
