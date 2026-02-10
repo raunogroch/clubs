@@ -11,6 +11,7 @@ export { ScheduleList } from "./ScheduleList";
 export { MemberList } from "./MemberList";
 export { GroupCard } from "./GroupCard";
 export { GroupCardSimple } from "./GroupCardSimple";
+export { GroupsTable } from "./GroupsTable";
 export { EventsList } from "./EventsList";
 export { CreateEventModal } from "../../../components/modals/CreateEvent.modal";
 export { GroupLevelsModal } from "../../../components/modals/GroupLevels.modal";
