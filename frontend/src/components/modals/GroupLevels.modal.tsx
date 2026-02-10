@@ -2,6 +2,23 @@ import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import toastr from "toastr";
 import { useDispatch, useSelector } from "react-redux";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { Button } from "../Button";
 import type { AppDispatch, RootState } from "../../store/store";
 import {
@@ -24,6 +41,101 @@ interface GroupLevelsModalProps {
   }>;
 }
 
+// Componente para cada item ordenable
+const SortableLevelItem: React.FC<{
+  level: any;
+  isEditing: boolean;
+  isLoading: boolean;
+  onSelect: (level: any) => void;
+  onDelete: (levelId: string) => void;
+}> = ({ level, isEditing, isLoading, onSelect, onDelete }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: level._id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        ...style,
+        padding: "10px",
+        marginBottom: "8px",
+        backgroundColor: isEditing ? "#e3f2fd" : "#fff",
+        border: isEditing ? "2px solid #2196F3" : "1px solid #ddd",
+        borderRadius: "4px",
+        transition: "all 0.2s ease",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}
+    >
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          alignItems: "flex-start",
+          gap: "8px",
+        }}
+      >
+        <i
+          className="fa fa-bars"
+          style={{
+            color: "#999",
+            marginTop: "2px",
+            flexShrink: 0,
+            cursor: "grab",
+          }}
+          {...attributes}
+          {...listeners}
+        ></i>
+        <div
+          style={{ flex: 1, cursor: "pointer" }}
+          onClick={() => onSelect(level)}
+        >
+          <strong>{level.name}</strong>
+          {level.description && (
+            <p
+              style={{
+                fontSize: "0.85em",
+                color: "#999",
+                marginTop: "3px",
+                marginBottom: 0,
+              }}
+            >
+              {level.description.substring(0, 40)}
+              {level.description.length > 40 ? "..." : ""}
+            </p>
+          )}
+        </div>
+      </div>
+      <button
+        type="button"
+        className="btn btn-danger btn-xs"
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete(level._id);
+        }}
+        disabled={isLoading}
+        title="Eliminar nivel"
+        style={{ marginLeft: "8px" }}
+      >
+        <i className="fa fa-trash"></i>
+      </button>
+    </div>
+  );
+};
+
 const GroupLevelsModal: React.FC<GroupLevelsModalProps> = ({
   isOpen,
   group,
@@ -36,10 +148,17 @@ const GroupLevelsModal: React.FC<GroupLevelsModalProps> = ({
     name: "",
     description: "",
   });
-  const [draggedLevelId, setDraggedLevelId] = useState<string | null>(null);
 
   const dispatch = useDispatch<AppDispatch>();
   const { loading } = useSelector((state: RootState) => state.levels);
+
+  // Sensores para dnd-kit
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
 
   // Obtener levels del grupo/club que se pasa como prop o del initialLevels
   const rawLevels =
@@ -139,29 +258,18 @@ const GroupLevelsModal: React.FC<GroupLevelsModalProps> = ({
     }
   };
 
-  const handleDragStart = (levelId: string) => {
-    setDraggedLevelId(levelId);
-  };
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-  };
-
-  const handleDrop = async (targetLevel: any) => {
-    if (!draggedLevelId || draggedLevelId === targetLevel._id) return;
+    if (!over || active.id === over.id) return;
 
     try {
-      // Encontrar índices en la lista ordenada
-      const draggedIndex = levels.findIndex((l) => l._id === draggedLevelId);
-      const targetIndex = levels.findIndex((l) => l._id === targetLevel._id);
+      const oldIndex = levels.findIndex((l) => l._id === active.id);
+      const newIndex = levels.findIndex((l) => l._id === over.id);
 
-      if (draggedIndex === -1 || targetIndex === -1) return;
+      if (oldIndex === -1 || newIndex === -1) return;
 
-      // Crear copia y reorganizar
-      const newLevels = [...levels];
-      const [draggedLevel] = newLevels.splice(draggedIndex, 1);
-      newLevels.splice(targetIndex, 0, draggedLevel);
+      const newLevels = arrayMove(levels, oldIndex, newIndex);
 
       // Crear actualizaciones con nuevas posiciones secuenciales
       const updatesToMake = newLevels.map((level, index) => ({
@@ -186,8 +294,6 @@ const GroupLevelsModal: React.FC<GroupLevelsModalProps> = ({
       console.error("Error al reordenar niveles:", err);
       toastr.error("Error al reordenar los niveles");
     }
-
-    setDraggedLevelId(null);
   };
 
   if (!isOpen || !group) return null;
@@ -297,79 +403,38 @@ const GroupLevelsModal: React.FC<GroupLevelsModalProps> = ({
                     </span>
                   </div>
                 ) : (
-                  <div
-                    style={{
-                      border: "1px solid #ddd",
-                      borderRadius: "4px",
-                      padding: "10px",
-                      flex: 1,
-                      overflowY: "auto",
-                      backgroundColor: "#fafafa",
-                    }}
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
                   >
-                    {levels.map((level) => (
-                      <div
-                        key={level._id}
-                        draggable
-                        onDragStart={() => handleDragStart(level._id)}
-                        onDragOver={handleDragOver}
-                        onDrop={() => handleDrop(level)}
-                        onClick={() => handleSelectLevel(level)}
-                        style={{
-                          padding: "10px",
-                          marginBottom: "8px",
-                          backgroundColor:
-                            editingLevelId === level._id ? "#e3f2fd" : "#fff",
-                          border:
-                            editingLevelId === level._id
-                              ? "2px solid #2196F3"
-                              : "1px solid #ddd",
-                          borderRadius: "4px",
-                          cursor: "move",
-                          userSelect: "none",
-                          transition: "all 0.2s ease",
-                        }}
+                    <div
+                      style={{
+                        border: "1px solid #ddd",
+                        borderRadius: "4px",
+                        padding: "10px",
+                        maxHeight: "290px",
+                        overflowY: "auto",
+                        backgroundColor: "#fafafa",
+                      }}
+                    >
+                      <SortableContext
+                        items={levels.map((l) => l._id)}
+                        strategy={verticalListSortingStrategy}
                       >
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                          }}
-                        >
-                          <div style={{ flex: 1 }}>
-                            <strong>{level.name}</strong>
-                            {level.description && (
-                              <p
-                                style={{
-                                  fontSize: "0.85em",
-                                  color: "#999",
-                                  marginTop: "3px",
-                                  marginBottom: 0,
-                                }}
-                              >
-                                {level.description.substring(0, 40)}
-                                {level.description.length > 40 ? "..." : ""}
-                              </p>
-                            )}
-                          </div>
-                          <button
-                            type="button"
-                            className="btn btn-danger btn-xs"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteLevel(level._id);
-                            }}
-                            disabled={loading}
-                            title="Eliminar nivel"
-                            style={{ marginLeft: "8px" }}
-                          >
-                            <i className="fa fa-trash"></i>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                        {levels.map((level) => (
+                          <SortableLevelItem
+                            key={level._id}
+                            level={level}
+                            isEditing={editingLevelId === level._id}
+                            isLoading={loading}
+                            onSelect={handleSelectLevel}
+                            onDelete={handleDeleteLevel}
+                          />
+                        ))}
+                      </SortableContext>
+                    </div>
+                  </DndContext>
                 )}
               </div>
 
