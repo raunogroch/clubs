@@ -1,5 +1,4 @@
 import React from "react";
-import "./OverlayLoader.css";
 
 interface OverlayLoaderProps {
   isLoading: boolean;
