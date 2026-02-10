@@ -132,36 +132,32 @@ export const Groups = ({ clubId, createSignal }: GroupsProps) => {
 
   return (
     <>
-      <div className="wrapper wrapper-content groups-wrapper">
-        <div className="row">
-          {groupsStatus === "loading" ? (
-            <div className="col-12 text-center">
-              <OverlayLoader isLoading={true} message="Cargando grupos..." />
-            </div>
-          ) : groupsStatus === "failed" ? (
-            <div className="col-12 text-center text-danger">
-              Error al cargar los grupos
-            </div>
-          ) : groups.length === 0 ? (
-            <div className="col-12 text-center">No hay grupos registrados</div>
-          ) : (
-            <div className="col-12">
-              <GroupsTable
-                groups={groups as any}
-                onIngresar={(group) =>
-                  navigate(`/clubs/${clubId}/groups/${group._id}/group`)
-                }
-                onEdit={(group) => {
-                  groupForm.openForEdit(group as any);
-                  setShowGroupModal(true);
-                }}
-                onDelete={handleDeleteGroup}
-                isLoading={groupsStatus !== "succeeded"}
-              />
-            </div>
-          )}
+      {groupsStatus === "loading" ? (
+        <div className="col-12 text-center">
+          <OverlayLoader isLoading={true} message="Cargando grupos..." />
         </div>
-      </div>
+      ) : groupsStatus === "failed" ? (
+        <div className="col-12 text-center text-danger">
+          Error al cargar los grupos
+        </div>
+      ) : groups.length === 0 ? (
+        <div className="col-12 text-center">No hay grupos registrados</div>
+      ) : (
+        <div className="col-12">
+          <GroupsTable
+            groups={groups as any}
+            onIngresar={(group) =>
+              navigate(`/clubs/${clubId}/groups/${group._id}/group`)
+            }
+            onEdit={(group) => {
+              groupForm.openForEdit(group as any);
+              setShowGroupModal(true);
+            }}
+            onDelete={handleDeleteGroup}
+            isLoading={groupsStatus !== "succeeded"}
+          />
+        </div>
+      )}
 
       {/* Modal de crear/editar grupo */}
       {showGroupModal && (
