@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 import toastr from "toastr";
 import { useDispatch, useSelector } from "react-redux";
+import { Button } from "../Button";
 import type { AppDispatch, RootState } from "../../store/store";
 import {
   addClubLevel,
@@ -51,8 +53,6 @@ const GroupLevelsModal: React.FC<GroupLevelsModalProps> = ({
   const levels = [...rawLevels].sort(
     (a, b) => (a.position || 0) - (b.position || 0),
   );
-
-  if (!isOpen || !group) return null;
 
   const resetForm = () => {
     setFormData({ name: "", description: "" });
@@ -190,41 +190,111 @@ const GroupLevelsModal: React.FC<GroupLevelsModalProps> = ({
     setDraggedLevelId(null);
   };
 
-  return (
+  if (!isOpen || !group) return null;
+
+  const modalContent = (
     <div
-      className="modal"
-      style={{ display: "block", backgroundColor: "rgba(0,0,0,.5)" }}
-      onClick={onClose}
+      className="modal inmodal"
+      style={{
+        position: "fixed",
+        inset: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "rgba(0,0,0,0.6)",
+        zIndex: 99999,
+        overflowY: "auto",
+      }}
     >
       <div
         className="modal-dialog modal-xl"
         onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: "1000px" }}
+        role="dialog"
+        aria-modal="true"
+        style={{
+          pointerEvents: "auto",
+          width: "90vw",
+          maxWidth: "1000px",
+          margin: "auto",
+        }}
       >
-        <div className="modal-content">
+        <div
+          className="modal-content animated bounceInRight"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
           <div className="modal-header">
-            <h4 className="modal-title">
-              Logros del grupo: <strong>{group.name}</strong>
-            </h4>
-            <button type="button" className="close" onClick={onClose}>
-              &times;
-            </button>
+            <Button
+              type="button"
+              className="close"
+              onClick={onClose}
+              aria-label="Cerrar"
+              disabled={loading}
+            >
+              <span aria-hidden="true">&times;</span>
+            </Button>
+            <i className="fa fa-trophy modal-icon"></i>
+            <h4 className="modal-title">Logros del grupo</h4>
+            <small className="font-bold">
+              Gestiona los niveles y logros del grupo:{" "}
+              <strong>{group.name}</strong>
+            </small>
           </div>
 
           <div
             className="modal-body"
-            style={{ maxHeight: "600px", overflowY: "auto" }}
+            style={{
+              flex: 1,
+              overflowY: "auto",
+              display: "flex",
+              flexDirection: "column",
+              position: "relative",
+            }}
           >
-            <div className="row" style={{ height: "100%" }}>
+            {loading && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "rgba(255, 255, 255, 0.85)",
+                  zIndex: 100,
+                  borderRadius: "4px",
+                }}
+              >
+                <div className="sk-spinner sk-spinner-pulse"></div>
+              </div>
+            )}
+            <div className="row" style={{ height: "100%", display: "flex" }}>
               {/* Columna Izquierda - Lista con Drag & Drop */}
-              <div className="col-md-5">
+              <div
+                className="col-md-5"
+                style={{ display: "flex", flexDirection: "column" }}
+              >
                 <h5 style={{ marginBottom: "15px" }}>
                   <i className="fa fa-list"></i> Niveles
                 </h5>
 
                 {levels.length === 0 ? (
-                  <div className="alert alert-info">
-                    No hay niveles creados. Crea uno nuevo en el formulario.
+                  <div
+                    className="alert alert-info alert-with-icon"
+                    data-notify="container"
+                  >
+                    <span
+                      data-notify="icon"
+                      className="fa fa-info-circle"
+                    ></span>
+                    <span data-notify="message">
+                      <strong>Sin niveles:</strong> Crea uno nuevo en el
+                      formulario.
+                    </span>
                   </div>
                 ) : (
                   <div
@@ -232,7 +302,8 @@ const GroupLevelsModal: React.FC<GroupLevelsModalProps> = ({
                       border: "1px solid #ddd",
                       borderRadius: "4px",
                       padding: "10px",
-                      minHeight: "300px",
+                      flex: 1,
+                      overflowY: "auto",
                       backgroundColor: "#fafafa",
                     }}
                   >
@@ -283,6 +354,7 @@ const GroupLevelsModal: React.FC<GroupLevelsModalProps> = ({
                             )}
                           </div>
                           <button
+                            type="button"
                             className="btn btn-danger btn-xs"
                             onClick={(e) => {
                               e.stopPropagation();
@@ -302,7 +374,10 @@ const GroupLevelsModal: React.FC<GroupLevelsModalProps> = ({
               </div>
 
               {/* Columna Derecha - Formulario */}
-              <div className="col-md-7">
+              <div
+                className="col-md-7"
+                style={{ display: "flex", flexDirection: "column" }}
+              >
                 <h5 style={{ marginBottom: "15px" }}>
                   <i className="fa fa-plus-circle"></i>{" "}
                   {editingLevelId ? "Editar Nivel" : "Crear Nuevo Nivel"}
@@ -314,11 +389,15 @@ const GroupLevelsModal: React.FC<GroupLevelsModalProps> = ({
                     borderRadius: "4px",
                     padding: "15px",
                     backgroundColor: "#fff",
+                    flex: 1,
+                    display: "flex",
+                    flexDirection: "column",
                   }}
                 >
                   <div className="form-group">
-                    <label>Nombre del Nivel</label>
+                    <label htmlFor="level-name">Nombre del Nivel</label>
                     <input
+                      id="level-name"
                       type="text"
                       className="form-control"
                       value={formData.name}
@@ -330,9 +409,10 @@ const GroupLevelsModal: React.FC<GroupLevelsModalProps> = ({
                     />
                   </div>
 
-                  <div className="form-group">
-                    <label>Descripción</label>
+                  <div className="form-group" style={{ flex: 1 }}>
+                    <label htmlFor="level-description">Descripción</label>
                     <textarea
+                      id="level-description"
                       className="form-control"
                       value={formData.description}
                       onChange={(e) =>
@@ -344,6 +424,7 @@ const GroupLevelsModal: React.FC<GroupLevelsModalProps> = ({
                       rows={4}
                       disabled={loading}
                       placeholder="Describe los requisitos o características de este nivel..."
+                      style={{ resize: "vertical" }}
                     />
                   </div>
 
@@ -378,15 +459,18 @@ const GroupLevelsModal: React.FC<GroupLevelsModalProps> = ({
 
                 {editingLevelId && (
                   <div
-                    className="alert alert-info"
+                    className="alert alert-info alert-with-icon"
                     style={{ marginTop: "15px" }}
+                    data-notify="container"
                   >
-                    <small>
-                      <i className="fa fa-info-circle"></i> Nivel seleccionado
-                      para edición. Modifica los campos y haz clic en
-                      "Actualizar Nivel" o haz clic en "Limpiar" para
-                      deseleccionar.
-                    </small>
+                    <span
+                      data-notify="icon"
+                      className="fa fa-info-circle"
+                    ></span>
+                    <span data-notify="message">
+                      <strong>Edición:</strong> Modifica los campos y haz clic
+                      en "Actualizar Nivel" o "Limpiar" para deseleccionar.
+                    </span>
                   </div>
                 )}
               </div>
@@ -394,19 +478,21 @@ const GroupLevelsModal: React.FC<GroupLevelsModalProps> = ({
           </div>
 
           <div className="modal-footer">
-            <button
+            <Button
               type="button"
               className="btn btn-default"
               onClick={onClose}
               disabled={loading}
             >
               Cerrar
-            </button>
+            </Button>
           </div>
         </div>
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export { GroupLevelsModal };
