@@ -45,11 +45,11 @@ import { useGroupForm, useAddMemberModal } from "./hooks";
 
 // Componentes
 import { GroupFormModal, AddMemberModal, GroupCardSimple } from "./components";
-import { Spinner } from "../../components/Spinner";
 
 // Estilos y constantes
 import { MESSAGES } from "./constants";
 import { buildMemberDetailsMap } from "./utils";
+import OverlayLoader from "../../components/Loader/OverlayLoader";
 
 /**
  * Props del componente Groups
@@ -448,7 +448,7 @@ export const Groups = ({ clubId, createSignal }: GroupsProps) => {
         <div className="row">
           {groupsStatus === "loading" ? (
             <div className="col-12 text-center">
-              <Spinner variant="wave" />
+              <OverlayLoader isLoading={true} message="Cargando grupos..." />
             </div>
           ) : groupsStatus === "failed" ? (
             <div className="col-12 text-center text-danger">

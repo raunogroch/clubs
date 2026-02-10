@@ -18,13 +18,13 @@ import { fetchAllSports } from "../store/sportsThunk";
 import type { Club, CreateClubRequest } from "../services/clubs.service";
 import type { UserAdmin } from "../interfaces/user";
 import { Button, Image, NavHeader } from "../components";
-import { Spinner } from "../components/Spinner";
 import ImageUploadModal from "../components/modals/ImageUpload.modal";
 import clubsService from "../services/clubs.service";
 import { ClubFormModal } from "../components/modals/ClubForm.modal";
 // ClubsTable removed: rendering cards (profile widgets) inline instead
 import { GroupLevelsModal } from "../components/modals/GroupLevels.modal";
 import { useNavigate } from "react-router-dom";
+import OverlayLoader from "../components/Loader/OverlayLoader";
 
 export const Clubs = ({ name }: { name?: string }) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -289,7 +289,7 @@ export const Clubs = ({ name }: { name?: string }) => {
       <div className="wrapper wrapper-content">
         {clubsStatus === "loading" ? (
           <div className="col-12 text-center">
-            <Spinner variant="wave" />
+            <OverlayLoader isLoading={true} message="Cargando clubs..." />
           </div>
         ) : (
           <div className="row">

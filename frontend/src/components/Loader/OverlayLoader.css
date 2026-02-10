@@ -1,0 +1,80 @@
+/* Overlay Loader - usando estilos del proyecto */
+
+.overlay-loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: inherit;
+  z-index: inherit;
+  pointer-events: auto;
+}
+
+.overlay-loader-content {
+  text-align: center;
+  display: inline-block;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.overlay-loader-spinner {
+  width: 60px;
+  height: 30px;
+  margin: 0 auto 12px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Loader de tres bolas */
+.overlay-loader-spinner::before,
+.overlay-loader-spinner::after,
+.overlay-loader-spinner span {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background-color: #1ab394;
+  border-radius: 50%;
+  animation: sk-wave 1.2s infinite ease-in-out;
+}
+
+.overlay-loader-spinner::before {
+  left: 0;
+  animation-delay: -0.6s;
+}
+
+.overlay-loader-spinner span {
+  left: 50%;
+  transform: translateX(-50%);
+  animation-delay: 0s;
+}
+
+.overlay-loader-spinner::after {
+  right: 0;
+  animation-delay: 0.6s;
+}
+
+.overlay-loader-text {
+  margin: 0;
+  color: #1ab394;
+  font-size: 13px;
+  font-weight: normal;
+}
+
+@keyframes sk-wave {
+  0%,
+  40%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  20% {
+    transform: translateY(-12px);
+    opacity: 1;
+  }
+}
