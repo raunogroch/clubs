@@ -13,6 +13,11 @@ interface NavHeaderProps {
   sub1?: string;
   pageCreate?: string;
   onCreateClick?: () => void;
+  // Back button (optional)
+  backButton?: buttonProps;
+  // Primary action button (optional)
+  primaryButton?: buttonProps;
+  // legacy single button prop for backward compatibility
   button?: buttonProps;
 }
 
@@ -23,7 +28,16 @@ function getUserSection(pathname: string) {
   return "";
 }
 
-export const NavHeader = ({ name, sub, sub1, button }: NavHeaderProps) => {
+export const NavHeader = ({
+  name,
+  sub,
+  sub1,
+  backButton,
+  primaryButton,
+  button,
+  pageCreate,
+  onCreateClick,
+}: NavHeaderProps) => {
   const pageTitle = name || "Principal";
   const isPrincipalPage = pageTitle === "Principal";
   const location = useLocation();
@@ -80,18 +94,69 @@ export const NavHeader = ({ name, sub, sub1, button }: NavHeaderProps) => {
             <h2 className="mb-0">{pageTitle}</h2>
             <ol className="breadcrumb mt-2">{breadcrumbs}</ol>
           </div>
+          <div>
+            {/* Render backButton (leftmost of the right-side controls) */}
+            {backButton || (button && button.url) ? (
+              backButton?.url || button?.url ? (
+                <Link
+                  to={(backButton && backButton.url) || button?.url || ""}
+                  className="btn btn-default"
+                  style={{ marginRight: "8px" }}
+                >
+                  <i
+                    className={`fa ${(backButton && backButton.icon) || (button && button.icon) || "fa-arrow-left"}`}
+                  ></i>{" "}
+                  {(backButton && backButton.label) ||
+                    (button && button.label) ||
+                    "Volver"}
+                </Link>
+              ) : (
+                <button
+                  className="btn btn-default"
+                  style={{ marginRight: "8px" }}
+                  onClick={
+                    (backButton && backButton.onClick) || button?.onClick
+                  }
+                >
+                  <i
+                    className={`fa ${(backButton && backButton.icon) || (button && button.icon) || "fa-arrow-left"}`}
+                  ></i>{" "}
+                  {(backButton && backButton.label) ||
+                    (button && button.label) ||
+                    "Volver"}
+                </button>
+              )
+            ) : null}
 
-          {button?.url ? (
-            <Link to={button.url} className="btn btn-default">
-              <i className={`fa ${button.icon || "fa-arrow-left"}`}></i>{" "}
-              {button.label || "Volver"}
-            </Link>
-          ) : button?.onClick ? (
-            <button className="btn btn-primary" onClick={button.onClick}>
-              <i className={`fa ${button.icon || "fa-plus"}`}></i>{" "}
-              {button.label || "Crear"}
-            </button>
-          ) : null}
+            {/* Render primary action button (create/save style) */}
+            {primaryButton ? (
+              primaryButton.url ? (
+                <Link to={primaryButton.url} className="btn btn-primary">
+                  <i className={`fa ${primaryButton.icon || "fa-plus"}`}></i>{" "}
+                  {primaryButton.label || "Crear"}
+                </Link>
+              ) : (
+                <button
+                  className="btn btn-primary"
+                  onClick={primaryButton.onClick}
+                >
+                  <i className={`fa ${primaryButton.icon || "fa-plus"}`}></i>{" "}
+                  {primaryButton.label || "Crear"}
+                </button>
+              )
+            ) : // Fallback to legacy single `button` prop but render as primary
+            button?.onClick ? (
+              <button className="btn btn-primary" onClick={button.onClick}>
+                <i className={`fa ${button.icon || "fa-plus"}`}></i>{" "}
+                {button.label || "Crear"}
+              </button>
+            ) : // Older pages may provide `pageCreate` and `onCreateClick` props
+            pageCreate ? (
+              <button className="btn btn-primary" onClick={onCreateClick}>
+                <i className={`fa fa-plus`}></i> {pageCreate}
+              </button>
+            ) : null}
+          </div>
         </div>
       </div>
     </div>

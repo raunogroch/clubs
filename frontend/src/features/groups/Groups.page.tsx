@@ -12,7 +12,8 @@
  * 5. JSX Rendering
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import toastr from "toastr";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState, AppDispatch } from "../../store/store";
@@ -24,48 +25,29 @@ import {
   updateGroup,
   deleteGroup,
   addCoachToGroup,
-  removeCoachFromGroup,
   addAthleteToGroup,
-  removeAthleteFromGroup,
-  addScheduleToGroup,
-  removeScheduleFromGroup,
 } from "../../store/groupsThunk";
 import { fetchAllClubs } from "../../store/clubsThunk";
 import { fetchAllSports } from "../../store/sportsThunk";
 import { fetchUsersByRole } from "../../store/usersThunk";
 
 // Redux actions
-import { addEventToGroup, removeEventFromGroup } from "../../store/groupsSlice";
+// (removed unused imports)
 
 // Servicios
 import userService from "../../services/userService";
-import eventsService from "../../services/eventsService";
 
 // Tipos
-import type { Group, Sport, User, MemberDetail } from "./types";
+import type { Group, User, MemberDetail } from "./types";
 
 // Hooks custom
-import {
-  useGroupForm,
-  useGroupExpansion,
-  useAddMemberModal,
-  useScheduleModal,
-} from "./hooks";
+import { useGroupForm, useAddMemberModal } from "./hooks";
 
 // Componentes
-import {
-  GroupFormModal,
-  AddMemberModal,
-  EditScheduleModal,
-  GroupCard,
-  ScheduleList,
-  MemberList,
-  EventsList,
-  CreateEventModal,
-} from "./components";
+import { GroupFormModal, AddMemberModal, GroupCardSimple } from "./components";
+import { Spinner } from "../../components/Spinner";
 
 // Estilos y constantes
-import { groupsStyles } from "./styles/groups.styles";
 import { MESSAGES } from "./constants";
 import { buildMemberDetailsMap } from "./utils";
 
@@ -75,6 +57,8 @@ import { buildMemberDetailsMap } from "./utils";
 interface GroupsProps {
   clubId: string;
   onBack: () => void;
+  // optional signal from parent to open the Create Group modal (increment to trigger)
+  createSignal?: number;
 }
 
 /**
@@ -86,12 +70,13 @@ interface GroupsProps {
  * - Gestión de miembros (coaches/athletes)
  * - Gestión de horarios
  */
-export const Groups = ({ clubId, onBack }: GroupsProps) => {
+export const Groups = ({ clubId, createSignal }: GroupsProps) => {
   // ============================================
   // STATE MANAGEMENT - REDUX
   // ============================================
 
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const groupsData = useSelector((state: RootState) => state.groups);
   const groupsStatus = groupsData.status as
     | "idle"
@@ -99,41 +84,36 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
     | "succeeded"
     | "failed";
   const groups = groupsData.items;
-  const { items: clubs } = useSelector((state: RootState) => state.clubs);
-  const { items: sports } = useSelector((state: RootState) => state.sports);
 
   // ============================================
   // STATE MANAGEMENT - LOCAL
   // ============================================
 
-  const [clubName, setClubName] = useState<string>("");
   const [memberDetails, setMemberDetails] = useState<
     Record<string, MemberDetail>
-  >({});
-  const [athleteRegistrationInfo, setAthleteRegistrationInfo] = useState<
-    Record<string, Record<string, { registration_pay: boolean }>>
   >({});
 
   // Formulario de grupo
   const groupForm = useGroupForm(clubId);
 
-  // Estado de expansión
-  const groupExpansion = useGroupExpansion();
-
   // Modal de agregar miembro
   const addMemberModal = useAddMemberModal();
 
-  // Modal de editar horarios
-  const scheduleModal = useScheduleModal();
-
-  // Modal de crear evento
-  const [showEventModal, setShowEventModal] = useState(false);
-  const [eventGroupId, setEventGroupId] = useState<string | null>(null);
-  const [groupEvents, setGroupEvents] = useState<Record<string, any[]>>({});
-
   // Modal de crear/editar grupo
   const [showGroupModal, setShowGroupModal] = useState(false);
+  const prevCreateSignal = useRef<number | undefined>(undefined);
 
+  useEffect(() => {
+    if (typeof createSignal === "undefined") return;
+    if (
+      typeof prevCreateSignal.current !== "undefined" &&
+      createSignal !== prevCreateSignal.current
+    ) {
+      groupForm.openForCreate();
+      setShowGroupModal(true);
+    }
+    prevCreateSignal.current = createSignal;
+  }, [createSignal, groupForm]);
   // ============================================
   // EFECTOS
   // ============================================
@@ -148,37 +128,6 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
     dispatch(fetchUsersByRole("coach"));
     dispatch(fetchUsersByRole("athlete"));
   }, [clubId, dispatch]);
-
-  /**
-   * Actualizar nombre del club cuando cambian los datos
-   */
-  useEffect(() => {
-    if (clubs.length > 0) {
-      const club = clubs.find((c: any) => c._id === clubId);
-      if (club) {
-        const sport = (sports as Sport[]).find((s) => s._id === club.sport_id);
-        setClubName(sport?.name || `Deporte ID: ${club.sport_id}`);
-      }
-    }
-  }, [clubs, sports, clubId]);
-
-  /**
-   * Cargar eventos cuando se expande un grupo - ACTUALIZADO: usar eventos poblados
-   */
-  useEffect(() => {
-    // Los eventos ahora vienen poblados desde el servidor, no necesitamos cargarlos por separado
-    if (groupExpansion.expandedGroupId && groups.length > 0) {
-      const expandedGroup = groups.find(
-        (g: any) => g._id === groupExpansion.expandedGroupId,
-      );
-      if (expandedGroup && expandedGroup.events_added) {
-        setGroupEvents((prev) => ({
-          ...prev,
-          [groupExpansion.expandedGroupId]: expandedGroup.events_added || [],
-        }));
-      }
-    }
-  }, [groupExpansion.expandedGroupId, groups]);
 
   /**
    * Cargar detalles de miembros cuando cambian los grupos
@@ -214,7 +163,6 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
           }
         });
       });
-      setAthleteRegistrationInfo(regInfo);
 
       // Si no hay detalles, hacer llamada a API
       if (Object.keys(details).length === 0) {
@@ -487,332 +435,47 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
     }
   };
 
-  /**
-   * Remover entrenador de un grupo
-   */
-  const handleRemoveCoach = async (groupId: string, coachId: string) => {
-    if (
-      !window.confirm("¿Estás seguro de que deseas remover este entrenador?")
-    ) {
-      return;
-    }
-
-    await dispatch(removeCoachFromGroup({ groupId, coachId }));
-  };
-
-  /**
-   * Remover deportista de un grupo
-   */
-  const handleRemoveAthlete = async (groupId: string, athleteId: string) => {
-    // Verificar si el atleta tiene matrícula pagada
-    const regInfo = athleteRegistrationInfo[groupId]?.[athleteId];
-    if (regInfo?.registration_pay) {
-      toastr.error(
-        "No se puede remover un atleta con matrícula pagada. Contacta al administrador.",
-      );
-      return;
-    }
-
-    if (
-      !window.confirm("¿Estás seguro de que deseas remover este deportista?")
-    ) {
-      return;
-    }
-
-    await dispatch(removeAthleteFromGroup({ groupId, athleteId }));
-  };
-
-  // ============================================
-  // OPERACIONES CRUD - HORARIOS
-  // ============================================
-
-  /**
-   * Guarda todos los horarios de un grupo
-   */
-  const handleSaveSchedules = async () => {
-    if (
-      !scheduleModal.editingGroupId ||
-      scheduleModal.editingSchedules.length === 0
-    ) {
-      toastr.warning(MESSAGES.ERROR_AT_LEAST_ONE_SCHEDULE);
-      return;
-    }
-
-    const currentGroup = groups.find(
-      (g) => g._id === scheduleModal.editingGroupId,
-    );
-    const currentSchedules = currentGroup?.schedule || [];
-
-    // Remover horarios antiguos
-    for (let i = 0; i < currentSchedules.length; i++) {
-      await dispatch(
-        removeScheduleFromGroup({
-          groupId: scheduleModal.editingGroupId,
-          scheduleIndex: 0,
-        }),
-      );
-    }
-
-    // Agregar nuevos horarios
-    for (const schedule of scheduleModal.editingSchedules) {
-      await dispatch(
-        addScheduleToGroup({
-          groupId: scheduleModal.editingGroupId,
-          schedule: {
-            day: schedule.day,
-            startTime: schedule.startTime,
-            endTime: schedule.endTime,
-          },
-        }),
-      );
-    }
-
-    toastr.success(MESSAGES.SUCCESS_SCHEDULES_SAVED);
-    scheduleModal.closeModal();
-  };
-
-  /**
-   * Elimina un horario de un grupo
-   */
-  const handleRemoveSchedule = async (groupId: string, index: number) => {
-    if (!window.confirm(MESSAGES.CONFIRM_DELETE_SCHEDULE)) {
-      return;
-    }
-
-    await dispatch(removeScheduleFromGroup({ groupId, scheduleIndex: index }));
-  };
-
-  const handleOpenEventModal = (groupId: string) => {
-    setEventGroupId(groupId);
-    setShowEventModal(true);
-  };
-
-  const handleCreateEvent = async (eventData: {
-    name: string;
-    location: string;
-    duration: number;
-    eventDate: string;
-    eventTime: string;
-  }) => {
-    if (!eventGroupId) return;
-
-    try {
-      const createdEvent = await eventsService.create({
-        group_id: eventGroupId,
-        ...eventData,
-      });
-
-      // Actualizar estado local con el nuevo evento
-      setGroupEvents((prev) => ({
-        ...prev,
-        [eventGroupId]: [...(prev[eventGroupId] || []), createdEvent],
-      }));
-
-      // Actualizar Redux sin recargar datos desde el servidor
-      dispatch(addEventToGroup({ groupId: eventGroupId, event: createdEvent }));
-
-      toastr.success("Evento creado exitosamente");
-    } catch (error) {
-      console.error("Error al crear evento:", error);
-      toastr.error("Error al crear el evento");
-    }
-  };
-
-  const handleDeleteEvent = async (groupId: string, eventId: string) => {
-    if (!window.confirm("¿Eliminar este evento?")) {
-      return;
-    }
-
-    try {
-      await eventsService.delete(eventId);
-
-      // Actualizar estado local removiendo el evento
-      setGroupEvents((prev) => ({
-        ...prev,
-        [groupId]: (prev[groupId] || []).filter((e: any) => e._id !== eventId),
-      }));
-
-      // Actualizar Redux sin recargar datos desde el servidor
-      dispatch(removeEventFromGroup({ groupId, eventId }));
-
-      toastr.success("Evento eliminado");
-    } catch (error) {
-      console.error("Error al eliminar evento:", error);
-      toastr.error("Error al eliminar el evento");
-    }
-  };
-
   // ============================================
   // RENDER
   // ============================================
 
   return (
     <>
-      <style>{groupsStyles}</style>
-
       <div className="wrapper wrapper-content groups-wrapper">
+        <div className="row mb-3">
+          <div className="col-lg-12"></div>
+        </div>
         <div className="row">
-          <div className="col-lg-12">
-            <div className="ibox">
-              <div className="ibox-title">
-                <h5>Grupos del club de {clubName}</h5>
-                <div className="ibox-tools">
-                  <button
-                    className="btn  btn-default"
-                    onClick={onBack}
-                    title="Volver a clubs"
-                    disabled={groupsStatus === "loading"}
-                  >
-                    <i className="fa fa-arrow-left"></i> Volver
-                  </button>{" "}
-                  <button
-                    className="btn  btn-primary"
-                    onClick={() => {
-                      groupForm.openForCreate();
-                      setShowGroupModal(true);
-                    }}
-                    title="Crear nuevo grupo"
-                    disabled={groupsStatus === "loading"}
-                  >
-                    <i className="fa fa-plus"></i> Crear Grupo
-                  </button>
-                </div>
-              </div>
-
-              <div className="ibox-content">
-                {groupsStatus === "loading" ? (
-                  <div className="text-center">
-                    <p>{MESSAGES.STATE_LOADING}</p>
-                  </div>
-                ) : groups.length === 0 ? (
-                  <div className="text-center">
-                    <p className="text-muted">{MESSAGES.STATE_NO_GROUPS}</p>
-                  </div>
-                ) : (
-                  <div>
-                    {groups.map((group) => (
-                      <GroupCard
-                        key={group._id}
-                        group={group as any}
-                        clubId={clubId}
-                        isExpanded={groupExpansion.isExpanded(group._id)}
-                        isLoading={(groupsStatus as string) === "loading"}
-                        onToggleExpand={() =>
-                          groupExpansion.toggleGroupExpansion(group._id)
-                        }
-                        onEdit={() => {
-                          groupForm.openForEdit(group as any);
-                          setShowGroupModal(true);
-                        }}
-                        onDelete={() => handleDeleteGroup(group._id)}
-                      >
-                        {/* Contenido expandible del grupo */}
-                        <div className="row mt-3">
-                          <div className="col-md-12">
-                            <ScheduleList
-                              schedules={group.schedule || []}
-                              onEdit={() =>
-                                scheduleModal.openModal(
-                                  group._id,
-                                  group.schedule,
-                                )
-                              }
-                              onDeleteSchedule={(idx) =>
-                                handleRemoveSchedule(group._id, idx)
-                              }
-                              isEditing={
-                                scheduleModal.editingGroupId === group._id
-                              }
-                              isLoading={(groupsStatus as any) === "loading"}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Eventos */}
-                        <div className="row mt-3">
-                          <div className="col-md-12">
-                            <EventsList
-                              events={groupEvents[group._id] || []}
-                              onAdd={() => handleOpenEventModal(group._id)}
-                              onDelete={(eventId) =>
-                                handleDeleteEvent(group._id, eventId)
-                              }
-                              isLoading={(groupsStatus as any) === "loading"}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Coaches y Athletes */}
-                        <div className="row">
-                          <MemberList
-                            title="Entrenadores"
-                            type="coach"
-                            icon="fa-user-tie"
-                            members={group.coaches || []}
-                            memberDetails={memberDetails}
-                            memberCount={group.coaches?.length || 0}
-                            onAddMember={() =>
-                              addMemberModal.openModal(group._id, "coach")
-                            }
-                            onRemoveMember={(memberId: string) =>
-                              handleRemoveCoach(group._id, memberId)
-                            }
-                            isLoading={(groupsStatus as any) === "loading"}
-                          />
-
-                          <MemberList
-                            title="Deportistas"
-                            type="athlete"
-                            icon="fa-person-running"
-                            members={
-                              (group as any).athletes_added
-                                ? (group as any).athletes_added.map((r: any) =>
-                                    r && r.athlete_id
-                                      ? r.athlete_id._id || r.athlete_id
-                                      : r,
-                                  )
-                                : []
-                            }
-                            memberDetails={memberDetails}
-                            memberCount={
-                              (group as any).athletes_added?.length || 0
-                            }
-                            registrationInfo={
-                              athleteRegistrationInfo[group._id] || {}
-                            }
-                            onAddMember={() =>
-                              addMemberModal.openModal(group._id, "athlete")
-                            }
-                            onRemoveMember={(memberId: string) =>
-                              handleRemoveAthlete(group._id, memberId)
-                            }
-                            isLoading={(groupsStatus as any) === "loading"}
-                          />
-                        </div>
-                      </GroupCard>
-                    ))}
-                  </div>
-                )}
-              </div>
+          {groupsStatus === "loading" ? (
+            <div className="col-12 text-center">
+              <Spinner variant="wave" />
             </div>
-          </div>
+          ) : groupsStatus === "failed" ? (
+            <div className="col-12 text-center text-danger">
+              Error al cargar los grupos
+            </div>
+          ) : groups.length === 0 ? (
+            <div className="col-12 text-center">No hay grupos registrados</div>
+          ) : (
+            groups.map((group) => (
+              <GroupCardSimple
+                key={group._id}
+                group={group as any}
+                onIngresar={() =>
+                  navigate(`/clubs/${clubId}/groups/${group._id}/group`)
+                }
+                onEdit={() => {
+                  groupForm.openForEdit(group as any);
+                  setShowGroupModal(true);
+                }}
+                onDelete={() => handleDeleteGroup(group._id)}
+              />
+            ))
+          )}
         </div>
       </div>
 
       {/* Modales */}
-      <GroupFormModal
-        isOpen={showGroupModal}
-        isEditMode={!!groupForm.editingId}
-        formData={groupForm.formData}
-        loading={groupsStatus === "loading"}
-        onClose={() => {
-          setShowGroupModal(false);
-          groupForm.resetForm();
-        }}
-        onSave={handleSaveGroup}
-        onFieldChange={(field, value) => groupForm.updateField(field, value)}
-      />
-
       <AddMemberModal
         isOpen={addMemberModal.showModal}
         memberType={addMemberModal.memberType}
@@ -827,28 +490,6 @@ export const Groups = ({ clubId, onBack }: GroupsProps) => {
         onAddMember={handleAddMember}
         onCreateUser={handleCreateUser}
         onCreateUserDataChange={addMemberModal.updateCreateUserData}
-      />
-
-      <EditScheduleModal
-        isOpen={scheduleModal.showModal}
-        schedules={scheduleModal.editingSchedules}
-        loading={groupsStatus === "loading"}
-        onClose={scheduleModal.closeModal}
-        onSave={handleSaveSchedules}
-        onAddRow={scheduleModal.addScheduleRow}
-        onUpdateRow={scheduleModal.updateScheduleRow}
-        onRemoveRow={scheduleModal.removeScheduleRow}
-      />
-
-      <CreateEventModal
-        isOpen={showEventModal}
-        groupId={eventGroupId || ""}
-        onClose={() => {
-          setShowEventModal(false);
-          setEventGroupId(null);
-        }}
-        onCreate={handleCreateEvent}
-        isLoading={groupsStatus === "loading"}
       />
 
       {/* Modal de crear/editar grupo */}

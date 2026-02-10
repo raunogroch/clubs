@@ -5,7 +5,7 @@ import groupsService from "../services/groups.service";
 import { paymentsService } from "../services/paymentsService";
 import { useSelector } from "react-redux";
 import type { RootState } from "../store/store";
-import type { User, UserAdmin } from "../interfaces/user";
+import type { UserAdmin } from "../interfaces/user";
 import { Image, NavHeader } from "../components";
 
 const MONTH_NAMES = [

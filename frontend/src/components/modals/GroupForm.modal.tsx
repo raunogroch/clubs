@@ -32,19 +32,29 @@ export const GroupFormModal: React.FC<GroupFormModalProps> = ({
   onFieldChange,
 }) => {
   if (!isOpen) return null;
-
   return (
     <div
-      className="modal"
+      className="modal inmodal"
       style={{ display: "block", backgroundColor: "rgba(0,0,0,.5)" }}
       onClick={onClose}
     >
-      <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-content">
+      <div
+        className="modal-dialog modal-lg"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+      >
+        <div className="modal-content animated bounceInRight">
           <div className="modal-header">
+            <i className="fa fa-sitemap modal-icon"></i>
             <h4 className="modal-title">
               {isEditMode ? "Editar Grupo" : "Crear Grupo"}
             </h4>
+            <small className="font-bold">
+              {isEditMode
+                ? "Actualiza los datos del grupo"
+                : "Completa los datos del nuevo grupo"}
+            </small>
             <button
               type="button"
               className="close"
@@ -57,9 +67,7 @@ export const GroupFormModal: React.FC<GroupFormModalProps> = ({
 
           <div className="modal-body">
             <div className="form-group">
-              <label htmlFor="group-name">
-                Nombre del Grupo <span className="text-danger">*</span>
-              </label>
+              <label htmlFor="group-name">Nombre del Grupo</label>
               <input
                 id="group-name"
                 type="text"
@@ -67,10 +75,13 @@ export const GroupFormModal: React.FC<GroupFormModalProps> = ({
                 value={formData.name}
                 onChange={(e) => onFieldChange("name", e.target.value)}
                 placeholder="Ej: Grupo A"
+                disabled={loading}
               />
             </div>
 
-            <div className="form-group">{/* description removed */}</div>
+            <div className="form-group">
+              {/* description intentionally omitted */}
+            </div>
 
             <div className="form-group">
               <label htmlFor="group-monthly-fee">Precio Mensual (Bs.)</label>
@@ -88,6 +99,7 @@ export const GroupFormModal: React.FC<GroupFormModalProps> = ({
                 placeholder="Ej: 50.00"
                 step="0.01"
                 min="0"
+                disabled={loading}
               />
               <small className="form-text text-muted">
                 Costo de la inscripción mensual para este grupo
@@ -101,6 +113,7 @@ export const GroupFormModal: React.FC<GroupFormModalProps> = ({
               className="btn btn-xs btn-default"
               onClick={onClose}
               disabled={loading}
+              aria-label="Cancelar"
             >
               Cancelar
             </button>

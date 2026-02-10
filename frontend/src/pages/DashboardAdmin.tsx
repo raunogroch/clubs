@@ -1,8 +1,9 @@
 import { useSelector } from "react-redux";
 import { useState, useEffect, useMemo } from "react";
 import type { RootState } from "../store/store";
-import type { User, UserAdmin } from "../interfaces/user";
+import type { UserAdmin } from "../interfaces/user";
 import { NavHeader } from "../components/NavHeader";
+import { Button } from "../components";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import {
   format,
@@ -89,7 +90,7 @@ const calculateUnpaidAthletes = (breakdown: any): number => {
   }, 0);
 };
 
-const DashboardAssignments = ({ user }: { user: User | undefined }) => {
+const DashboardAssignments = ({ user }: { user: any | undefined }) => {
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<Array<any>>([]);
   const [breakdown, setBreakdown] = useState<any>(null);
