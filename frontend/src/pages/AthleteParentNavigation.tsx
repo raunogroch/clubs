@@ -1,5 +1,5 @@
 import { type ReactNode } from "react";
-import { Footer, TopNav } from "../layouts";
+import { Footer, SideNav, TopNav } from "../layouts";
 
 interface AthleteParentNavigationProps {
   children: ReactNode;
@@ -15,6 +15,7 @@ export const AthleteParentNavigation = ({
 }: AthleteParentNavigationProps) => {
   return (
     <div id="wrapper">
+      <SideNav />
       <div id="page-wrapper" className="gray-bg dashbard-1">
         <TopNav />
         <div style={{ padding: "20px" }}>{children}</div>
