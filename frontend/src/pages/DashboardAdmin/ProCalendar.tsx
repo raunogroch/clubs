@@ -21,6 +21,22 @@ const localizer = dateFnsLocalizer({
   locales: { es },
 });
 
+// Paleta de colores para grupos
+const GROUP_COLORS = [
+  "#FF6B6B", // Rojo
+  "#4ECDC4", // Turquesa
+  "#FFE66D", // Amarillo
+  "#95E1D3", // Menta
+  "#F38181", // Rosa coral
+  "#AA96DA", // Púrpura
+  "#FCBAD3", // Rosa pálido
+  "#A8D8EA", // Azul claro
+  "#FF8C42", // Naranja
+  "#FB6467", // Coral
+  "#6BCB77", // Verde
+  "#4D96FF", // Azul
+];
+
 const formats = {
   dateFormat: "dd",
   dayFormat: "EEE dd",
@@ -65,6 +81,7 @@ interface CalendarEvent {
   resource?: {
     club: string;
     group: string;
+    groupId?: string;
   };
 }
 
@@ -83,10 +100,20 @@ export const ProCalendar = ({ groups }: { groups: any[] }) => {
   const [date, setDate] = useState<Date>(new Date());
   const [view, setView] = useState<"month" | "week" | "day" | "agenda">("week");
   const [groupsWithEvents, setGroupsWithEvents] = useState<any[]>([]);
+  const [groupColorMap, setGroupColorMap] = useState<Record<string, string>>(
+    {},
+  );
 
   useEffect(() => {
     if (groups.length > 0) {
       setGroupsWithEvents(groups);
+
+      // Crear mapa de colores para cada grupo
+      const colorMap: Record<string, string> = {};
+      groups.forEach((group, index) => {
+        colorMap[group._id] = GROUP_COLORS[index % GROUP_COLORS.length];
+      });
+      setGroupColorMap(colorMap);
     }
   }, [groups]);
 
@@ -111,12 +138,13 @@ export const ProCalendar = ({ groups }: { groups: any[] }) => {
 
             calendarEvents.push({
               id: `event-${evt._id}`,
-              title: `[Evento] ${evt.name}${evt.location ? ` (${evt.location})` : ""} - ${group.name}`,
+              title: `[Evento] ${evt.name}`,
               start: startTime,
               end: endTime,
               resource: {
                 club: group.club?.name || "",
                 group: group.name,
+                groupId: group._id,
               },
             });
           } catch (e) {
@@ -144,12 +172,13 @@ export const ProCalendar = ({ groups }: { groups: any[] }) => {
 
           calendarEvents.push({
             id: `schedule-${group._id}-${sched.day}-${sched.startTime}`,
-            title: `[Horario] ${group.name} (${sched.startTime} - ${sched.endTime})`,
+            title: `${group.club?.name} ${group.name})`,
             start: startTime,
             end: endTime,
             resource: {
               club: group.club?.name || "",
               group: group.name,
+              groupId: group._id,
             },
           });
         });
@@ -160,14 +189,18 @@ export const ProCalendar = ({ groups }: { groups: any[] }) => {
   }, [groupsWithEvents, date]);
 
   const eventStyleGetter = (event: CalendarEvent) => {
+    const groupId = event.resource?.groupId;
+    const baseColor =
+      groupId && groupColorMap[groupId] ? groupColorMap[groupId] : "#4472C4";
+
     if (event.title.includes("[Evento]")) {
       return {
         style: {
-          backgroundColor: "#e91e63",
+          backgroundColor: "#000000",
           borderRadius: "5px",
           opacity: 1,
           color: "white",
-          border: "3px solid #c2185b",
+          border: "3px solid #000000",
           display: "block",
           fontWeight: "bold",
           zIndex: 999,
@@ -177,7 +210,7 @@ export const ProCalendar = ({ groups }: { groups: any[] }) => {
 
     return {
       style: {
-        backgroundColor: "#4472C4",
+        backgroundColor: baseColor,
         borderRadius: "5px",
         opacity: 0.7,
         color: "white",
