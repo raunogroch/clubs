@@ -53,10 +53,8 @@ export const createGroup = createAsyncThunk(
   async (group: any, { rejectWithValue }) => {
     try {
       const data = await groupsService.create(group);
-      toastr.success("Grupo creado");
       return data;
     } catch (err: any) {
-      toastr.error("Error al crear grupo");
       return rejectWithValue(err.message || "Error al crear grupo");
     }
   },
@@ -67,10 +65,8 @@ export const updateGroup = createAsyncThunk(
   async (payload: { id: string; group: any }, { rejectWithValue }) => {
     try {
       const data = await groupsService.update(payload.id, payload.group);
-      toastr.success("Grupo actualizado");
       return data;
     } catch (err: any) {
-      toastr.error("Error al actualizar grupo");
       return rejectWithValue(err.message || "Error al actualizar grupo");
     }
   },
@@ -81,10 +77,8 @@ export const deleteGroup = createAsyncThunk(
   async (id: string, { rejectWithValue }) => {
     try {
       await groupsService.delete(id);
-      toastr.success("Grupo eliminado");
       return { id };
     } catch (err: any) {
-      toastr.error("Error al eliminar grupo");
       return rejectWithValue(err.message || "Error al eliminar grupo");
     }
   },

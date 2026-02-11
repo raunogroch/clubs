@@ -45,7 +45,7 @@ export const ClubGroups = () => {
         }}
       />
       <div className="wrapper wrapper-content">
-        {club_id && <Groups clubId={club_id} onBack={handleBack} />}
+        {club_id && <Groups clubId={club_id} />}
       </div>
     </>
   );
