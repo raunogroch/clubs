@@ -17,7 +17,8 @@ import {
 import { fetchAllSports } from "../store/sportsThunk";
 import type { Club, CreateClubRequest } from "../services/clubs.service";
 import type { UserAdmin } from "../interfaces/user";
-import { Button, Image, NavHeader } from "../components";
+import { NavHeader } from "../components";
+import ClubsList from "../components/ClubsList";
 import ImageUploadModal from "../components/modals/ImageUpload.modal";
 import clubsService from "../services/clubs.service";
 import { ClubFormModal } from "../components/modals/ClubForm.modal";
@@ -277,14 +278,7 @@ export const Clubs = ({ name }: { name?: string }) => {
 
   return (
     <>
-      <NavHeader
-        name="Clubs"
-        button={{
-          label: "Crear Club",
-          icon: "fa-plus",
-          onClick: handleOpenCreate,
-        }}
-      />
+      <NavHeader name="Clubs" />
 
       <div className="wrapper wrapper-content">
         {clubsStatus === "loading" ? (
@@ -292,127 +286,21 @@ export const Clubs = ({ name }: { name?: string }) => {
             <OverlayLoader isLoading={true} message="Cargando clubs..." />
           </div>
         ) : (
-          <div className="row">
-            {clubs.map((club) => (
-              <div key={club._id} className="col-lg-4">
-                <div
-                  className="widget-head-color-box navy-bg p-lg text-center"
-                  style={{ position: "relative" }}
-                >
-                  <div className="m-b-md">
-                    <h2 className="font-bold no-margins">{club.name}</h2>
-                    <small>{club.location}</small>
-                  </div>
-                  <div
-                    style={{ position: "relative", display: "inline-block" }}
-                  >
-                    <div
-                      style={{
-                        position: "relative",
-                        width: "fit-content",
-                        margin: "0 auto",
-                        marginBottom: "20px",
-                      }}
-                    >
-                      {club.images?.small ? (
-                        <Image
-                          src={club.images.small}
-                          alt={club.name}
-                          style={{
-                            width: "70px",
-                            height: "70px",
-
-                            borderRadius: "50%",
-                            objectFit: "cover",
-                            border: "1px solid #ddd",
-                          }}
-                        />
-                      ) : (
-                        <div
-                          style={{
-                            width: "70px",
-                            height: "70px",
-                            borderRadius: "50%",
-                            backgroundColor: "#f0f0f0",
-                            border: "1px solid #ddd",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                        >
-                          <i
-                            className="fa fa-user"
-                            style={{ fontSize: "24px", color: "#999" }}
-                          ></i>
-                        </div>
-                      )}
-
-                      <button
-                        type="button"
-                        className="btn btn-xs btn-info"
-                        style={{
-                          position: "absolute",
-                          bottom: "-5px",
-                          right: "-5px",
-                          borderRadius: "50%",
-                          width: "24px",
-                          height: "24px",
-                          padding: "0",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                        onClick={() => {
-                          setLogoModalClubId(club._id);
-                          setLogoCurrentImage(club.images?.small);
-                          setLogoModalOpen(true);
-                        }}
-                        title="Editar logo"
-                      >
-                        <i
-                          className="fa fa-pencil"
-                          style={{ fontSize: "12px" }}
-                        ></i>
-                      </button>
-                    </div>
-                  </div>
-                  <div>
-                    <span>{club.athletes_added || 0} Atletas</span> |
-                    <span> {club.coaches || 0} Entrenadores</span>
-                  </div>
-                </div>
-                <div className="widget-text-box">
-                  <div className="justify-content-between d-flex">
-                    <Button
-                      className="btn btn-xs btn-white"
-                      onClick={() => handleOpenEdit(club._id)}
-                    >
-                      <i className="fa fa-pencil"></i> Editar
-                    </Button>
-                    <Button
-                      className="btn btn-info btn-xs"
-                      onClick={() => navigate(`/clubs/${club._id}/groups`)}
-                      icon="fa-sitemap"
-                    >
-                      Grupos
-                    </Button>
-                    <Button
-                      className="btn btn-xs btn-primary m-l-sm"
-                      onClick={() => handleOpenLevels(club._id)}
-                    >
-                      <i className="fa fa-list"></i> Rangos
-                    </Button>
-
-                    <Button
-                      className="btn btn-xs btn-danger m-l-sm"
-                      onClick={() => handleDelete(club._id)}
-                    >
-                      <i className="fa fa-trash"></i> Eliminar
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="col-12">
+            <ClubsList
+              clubs={clubs as any}
+              onEdit={handleOpenEdit}
+              onDelete={handleDelete}
+              onOpenLevels={handleOpenLevels}
+              onOpenGroups={(id: string) => navigate(`/clubs/${id}/groups`)}
+              onUpdateLogo={(id: string, current?: string) => {
+                setLogoModalClubId(id);
+                setLogoCurrentImage(current);
+                setLogoModalOpen(true);
+              }}
+              onCreateClub={handleOpenCreate}
+              isLoading={dashboardLoading}
+            />
           </div>
         )}
       </div>

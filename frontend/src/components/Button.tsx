@@ -7,6 +7,8 @@ export const Button = ({
   icon,
   children,
   hidden = false,
+  title,
+  form,
 }: {
   type?: "button" | "submit" | "reset";
   variant?: string;
@@ -16,6 +18,8 @@ export const Button = ({
   icon?: string;
   children?: React.ReactNode;
   hidden?: boolean;
+  title?: string;
+  form?: string;
 }) => {
   if (hidden) return null;
   const classes: string[] = ["btn"];
@@ -31,6 +35,8 @@ export const Button = ({
       className={classes.join(" ")}
       onClick={onClick}
       disabled={disabled}
+      {...(title ? { title } : {})}
+      {...(form ? { form } : {})}
     >
       {icon && (
         <i className={`fa ${icon}`} style={{ marginRight: children ? 8 : 0 }} />
