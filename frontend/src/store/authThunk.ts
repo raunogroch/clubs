@@ -15,13 +15,33 @@ export const loginThunk = createAsyncThunk(
     } catch (error: any) {
       if (error.response && error.response.status === 401) {
         toastr.error(
-          "<strong>Error de autenticación</strong><br/><small>Verifica tus credenciales e intenta nuevamente</small>"
+          "<strong>Error de autenticación</strong><br/><small>Verifica tus credenciales e intenta nuevamente</small>",
         );
       } else {
         toastr.error("Error de conexión o inesperado");
       }
     }
-  }
+  },
+);
+
+// Login por CI thunk (para atletas y padres)
+export const loginByCiThunk = createAsyncThunk(
+  "auth/loginByCiThunk",
+  async (formData: { ci: string }, { dispatch }) => {
+    try {
+      const response = await api.post("/auth/login-ci", formData);
+      const { user, authorization } = response.data.access;
+      dispatch(login({ user: user, token: authorization }));
+    } catch (error: any) {
+      if (error.response && error.response.status === 401) {
+        toastr.error(
+          "<strong>CI no válido</strong><br/><small>Verifica tu número de carnet e intenta nuevamente</small>",
+        );
+      } else {
+        toastr.error("Error de conexión o inesperado");
+      }
+    }
+  },
 );
 
 // Logout thunk
@@ -35,7 +55,7 @@ export const logoutThunk = createAsyncThunk(
     } finally {
       dispatch(logout());
     }
-  }
+  },
 );
 
 export const checkAuth = createAsyncThunk(
@@ -55,5 +75,5 @@ export const checkAuth = createAsyncThunk(
       dispatch(logout());
       return false;
     }
-  }
+  },
 );

@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useBodyClass } from "../hooks/useBodyClass";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState, AppDispatch } from "../store/store";
-import { loginThunk } from "../store/authThunk";
+import { loginThunk, loginByCiThunk } from "../store/authThunk";
 
 interface FormData {
   username: string;
@@ -66,6 +66,7 @@ export const Login = () => {
 
   const handleCarnetSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    await dispatch(loginByCiThunk(carnetFormData));
   };
 
   const handleBack = () => {

@@ -32,7 +32,11 @@ export class UserRepository implements IUserRepository {
    * Busca un usuario por su CI
    */
   async findByCi(ci: string): Promise<User | null> {
-    return this.userModel.findOne({ ci, role: Roles.ATHLETE });
+    // Buscar por CI usando únicamente el campo `role` (no buscar en `roles` array)
+    return this.userModel.findOne({
+      ci,
+      role: { $in: [Roles.ATHLETE, Roles.PARENT] },
+    });
   }
 
   /**

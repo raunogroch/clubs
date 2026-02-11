@@ -18,6 +18,8 @@ import {
   ProfileCoach,
   DashboardCoach,
   ScheduleCoach,
+  DashboardAthlete,
+  DashboardParent,
 } from "../pages";
 
 export type MenuRoute = {
@@ -155,26 +157,11 @@ export const roleRoutes: RoleRoutes = {
       path: "/",
       icon: "fa-home",
       label: "Principal",
-      element: <Dashboard />,
+      element: <DashboardAthlete />,
     },
     {
-      path: "/users",
-      icon: "fa-users",
-      label: "Users",
-      children: [
-        {
-          path: "/users/admins",
-          label: "Admins",
-          element: <Admins />,
-        },
-        {
-          path: "/users/assistants",
-          label: "Secretarios",
-          element: <Assistants />,
-        },
-        { path: "/users/coaches", label: "Entrenadores", element: <Coaches /> },
-        { path: "/users/athletes", label: "Atletas", element: <Athletes /> },
-      ],
+      path: "/profile",
+      element: <ProfileAdmin />,
     },
   ],
   parent: [
@@ -182,7 +169,11 @@ export const roleRoutes: RoleRoutes = {
       path: "/",
       icon: "fa-home",
       label: "Principal",
-      element: <Dashboard />,
+      element: <DashboardParent />,
+    },
+    {
+      path: "/profile",
+      element: <ProfileAdmin />,
     },
   ],
 };

@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { Navigation } from "../pages/Navigation";
+import { AthleteParentNavigation } from "../pages/AthleteParentNavigation";
 import { useSelector } from "react-redux";
 
 interface PrivateRouteProps {
@@ -32,11 +33,17 @@ export const PrivateRoute = ({ children, allowedRoles }: PrivateRouteProps) => {
     return <Navigate to="/" replace />;
   }
 
+  // Usar layout diferente para atletas y padres
+  const isAthleteOrParent = user?.role === "athlete" || user?.role === "parent";
+  const NavigationComponent = isAthleteOrParent
+    ? AthleteParentNavigation
+    : Navigation;
+
   return (
     <div className="app-container">
-      <Navigation>
+      <NavigationComponent>
         <main className="content">{children}</main>
-      </Navigation>
+      </NavigationComponent>
     </div>
   );
 };

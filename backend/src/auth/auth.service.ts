@@ -131,6 +131,90 @@ export class AuthService {
   }
 
   /**
+   * Realiza login por CI para atletas y padres
+   * @param loginCiDto - DTO con el CI del usuario
+   * @returns Objeto con el token JWT y información del usuario
+   * @throws UnauthorizedException si el CI no existe
+   */
+  async loginByCi(loginCiDto: any) {
+    // Buscar usuario por CI que sea atleta o padre
+    const user = await this.usersService.findByCi(loginCiDto.ci);
+
+    // Log temporal para depuración: ver qué usuario (si hay) encontró la consulta
+    try {
+      console.log(
+        'loginByCi - user found for CI',
+        loginCiDto.ci,
+        ':',
+        user
+          ? {
+              _id: (user as any)?._id,
+              ci: (user as any)?.ci,
+              role: (user as any)?.role,
+              roles: (user as any)?.roles,
+              active: (user as any)?.active,
+            }
+          : null,
+      );
+    } catch (e) {
+      // noop: logging should not break authentication
+    }
+
+    if (!user) {
+      throw new UnauthorizedException('CI no válido');
+    }
+
+    // Validar que el usuario sea atleta o padre
+    // Use `roles` array if it has entries, otherwise fallback to scalar `role`
+    const userRoles =
+      user.roles && (user.roles as any).length > 0
+        ? (user.roles as any)
+        : user.role
+          ? [user.role]
+          : [];
+    const isAthleteOrParent =
+      userRoles.includes(Roles.ATHLETE as any) ||
+      userRoles.includes(Roles.PARENT as any);
+
+    if (!isAthleteOrParent) {
+      throw new UnauthorizedException('CI no válido');
+    }
+
+    /**
+     * Generar un identificador único (jti) para el token
+     */
+    const jti = randomBytes(16).toString('hex');
+
+    /**
+     * Payload del JWT
+     */
+    const userRole =
+      user.roles && user.roles.length > 0 ? user.roles[0] : user.role;
+    const payload = {
+      sub: user._id,
+      ci: user.ci,
+      role: userRole,
+      roles: user.roles || (user.role ? [user.role] : []),
+      jti,
+    };
+
+    return {
+      access: {
+        authorization: this.jwtService.sign(payload),
+        user: {
+          code: user._id,
+          name: user.name,
+          lastname: user.lastname,
+          role: userRole,
+          roles: user.roles || (user.role ? [user.role] : []),
+          images: (user as any)?.images || undefined,
+          assignment_id: (user as any)?.assignment_id || null,
+        },
+      },
+    };
+  }
+
+  /**
    * Registra un nuevo usuario con rol SUPERADMIN
    */
   async register(user: Partial<User>) {

@@ -1,6 +1,14 @@
-import { Body, Controller, Post, HttpCode, HttpStatus, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  HttpCode,
+  HttpStatus,
+  Req,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { LoginCiDto } from './dto/login-ci.dto';
 import { RegisterDto } from './dto/register.dto';
 import { RevokedTokensService } from './revoked-tokens.service';
 import type { Request } from 'express';
@@ -24,6 +32,16 @@ export class AuthController {
   }
 
   /**
+   * Endpoint para login por CI (atletas y padres)
+   */
+  @Post('login-ci')
+  @HttpCode(HttpStatus.OK)
+  loginByCi(@Body() loginCiDto: LoginCiDto) {
+    console.log('Login CI DTO:', loginCiDto);
+    return this.authService.loginByCi(loginCiDto);
+  }
+
+  /**
    * Endpoint para registrar usuario SUPERADMIN
    */
   @Post('register')
@@ -40,12 +58,16 @@ export class AuthController {
   async logout(@Req() req: Request) {
     try {
       const auth = req.headers['authorization'] || req.headers['Authorization'];
-      const token = typeof auth === 'string' && auth.startsWith('Bearer ') ? auth.split(' ')[1] : null;
+      const token =
+        typeof auth === 'string' && auth.startsWith('Bearer ')
+          ? auth.split(' ')[1]
+          : null;
       if (token) {
         const decoded: any = jwt.decode(token);
         const jti = decoded?.jti || decoded?.sub || token;
         const exp = decoded?.exp || null;
-        if (jti && exp) await this.revokedTokensService.revoke(String(jti), Number(exp));
+        if (jti && exp)
+          await this.revokedTokensService.revoke(String(jti), Number(exp));
       }
     } catch (e) {
       // noop: logout should not fail the request
