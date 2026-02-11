@@ -27,7 +27,10 @@ export const loginThunk = createAsyncThunk(
 // Login por CI thunk (para atletas y padres)
 export const loginByCiThunk = createAsyncThunk(
   "auth/loginByCiThunk",
-  async (formData: { ci: string }, { dispatch }) => {
+  async (
+    formData: { ci: string; role: "athlete" | "parent" },
+    { dispatch },
+  ) => {
     try {
       const response = await api.post("/auth/login-ci", formData);
       const { user, authorization } = response.data.access;

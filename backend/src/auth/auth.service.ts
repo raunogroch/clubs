@@ -1,47 +1,20 @@
-/**
- * AuthService - Servicio de Autenticación
- *
- * Responsabilidades:
- * - Validar credenciales de usuario (username + password)
- * - Generar tokens JWT después de validar credenciales
- * - Revocar tokens (logout)
- * - Validar integridad de tokens revocados
- *
- * Flujo de autenticación:
- * 1. Usuario envía username y password
- * 2. Se validan las credenciales con bcrypt
- * 3. Si son válidas, se genera un JWT token
- * 4. El token se envía al cliente para futuras requests
- * 5. En logout, el token se añade a la lista de revocados
- */
-
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/schemas/user.schema';
 import { LoginDto } from './dto/login.dto';
+import { LoginCiDto } from './dto/login-ci.dto';
 import bcrypt from 'bcryptjs';
 import { Roles } from 'src/users/enum/roles.enum';
 import { randomBytes } from 'crypto';
 
 @Injectable()
 export class AuthService {
-  /**
-   * Constructor con inyección de dependencias
-   * @param usersService - Servicio para acceder a usuarios
-   * @param jwtService - Servicio para firmar y validar JWTs
-   */
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
   ) {}
 
-  /**
-   * Valida si un usuario tiene rol de parent o athlete
-   * Estos roles no tienen acceso a login mediante usuario y contraseña
-   * @param user - El usuario a validar
-   * @returns true si el usuario tiene rol de parent o athlete
-   */
   private hasRestrictedRoles(user: any): boolean {
     const userRoles = user.roles || (user.role ? [user.role] : []);
     const rolesArray = Array.isArray(userRoles) ? userRoles : [userRoles];
@@ -50,66 +23,32 @@ export class AuthService {
     );
   }
 
-  /**
-   * Valida las credenciales de un usuario
-   * Compara la contraseña enviada con la contraseña hasheada en la BD
-   *
-   * @param username - Usuario del que se valida la contraseña
-   * @param pass - Contraseña en texto plano a validar
-   * @returns Objeto del usuario sin la contraseña, o null si la validación falla
-   */
   async validateUser(username: string, pass: string): Promise<any> {
     const user = await this.usersService.findOneByUsername(username);
-
-    // Comparar contraseña en texto plano con hash usando bcrypt
     if (user && user.password && (await bcrypt.compare(pass, user.password))) {
-      // Bloquear login para usuarios con rol de parent o athlete
       if (this.hasRestrictedRoles(user)) {
-        return null; // Bloquear login
+        return null;
       }
-      // No devolver la contraseña en la respuesta (separar del objeto user)
       const { password, ...result } = user.toObject();
       return result;
     }
     return null;
   }
 
-  /**
-   * Realiza el login del usuario y genera un token JWT
-   *
-   * @param loginDto - DTO con username y password
-   * @returns Objeto con el token JWT y información del usuario
-   * @throws UnauthorizedException si las credenciales no son válidas
-   */
   async login(loginDto: LoginDto) {
-    // Validar credenciales primero
     const user = await this.validateUser(loginDto.username, loginDto.password);
-
     if (!user) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
-
-    /**
-     * Generar un identificador único (jti) para el token
-     * Esto permite revocar tokens específicos sin afectar otros tokens del mismo usuario
-     */
+    const userRole = user.role;
+    console.log(
+      `✓ Login exitoso | Usuario: ${loginDto.username} | Role identificado: ${userRole} | Nombre: ${user.name} ${user.lastname}`,
+    );
     const jti = randomBytes(16).toString('hex');
-
-    /**
-     * Payload del JWT contiene:
-     * - username: Usuario que se autenticó
-     * - sub: ID del usuario (Standard JWT claim)
-     * - role: Rol principal del usuario (para autorización - backward compatibility)
-     * - roles: Array de roles del usuario
-     * - jti: ID único del token (para revocación)
-     */
-    const userRole =
-      user.roles && user.roles.length > 0 ? user.roles[0] : user.role;
     const payload = {
       username: user.username,
       sub: user._id,
       role: userRole,
-      roles: user.roles || (user.role ? [user.role] : []),
       jti,
     };
     return {
@@ -120,81 +59,55 @@ export class AuthService {
           name: user.name,
           lastname: user.lastname,
           role: userRole,
-          roles: user.roles || (user.role ? [user.role] : []),
-          // Return the images object (preferred) - keep backward compatibility by including image? not included
           images: (user as any)?.images || undefined,
-          // assignment_id para admins (singular)
           assignment_id: (user as any)?.assignment_id || null,
         },
       },
     };
   }
 
-  /**
-   * Realiza login por CI para atletas y padres
-   * @param loginCiDto - DTO con el CI del usuario
-   * @returns Objeto con el token JWT y información del usuario
-   * @throws UnauthorizedException si el CI no existe
-   */
-  async loginByCi(loginCiDto: any) {
-    // Buscar usuario por CI que sea atleta o padre
-    const user = await this.usersService.findByCi(loginCiDto.ci);
+  async loginByCi(loginCiDto: LoginCiDto) {
+    const roleFilter = loginCiDto.role
+      ? loginCiDto.role === 'athlete'
+        ? Roles.ATHLETE
+        : Roles.PARENT
+      : undefined;
 
-    // Log temporal para depuración: ver qué usuario (si hay) encontró la consulta
-    try {
-      console.log(
-        'loginByCi - user found for CI',
-        loginCiDto.ci,
-        ':',
-        user
-          ? {
-              _id: (user as any)?._id,
-              ci: (user as any)?.ci,
-              role: (user as any)?.role,
-              roles: (user as any)?.roles,
-              active: (user as any)?.active,
-            }
-          : null,
-      );
-    } catch (e) {
-      // noop: logging should not break authentication
-    }
+    const user = await this.usersService.findByCiByRole(
+      loginCiDto.ci,
+      roleFilter,
+    );
 
     if (!user) {
+      if (!roleFilter) {
+        const fallback = await this.usersService.findByCi(loginCiDto.ci);
+        if (!fallback) throw new UnauthorizedException('CI no válido');
+      }
       throw new UnauthorizedException('CI no válido');
     }
 
-    // Validar que el usuario sea atleta o padre
-    // Use `roles` array if it has entries, otherwise fallback to scalar `role`
-    const userRoles =
-      user.roles && (user.roles as any).length > 0
-        ? (user.roles as any)
-        : user.role
-          ? [user.role]
-          : [];
-    const isAthleteOrParent =
-      userRoles.includes(Roles.ATHLETE as any) ||
-      userRoles.includes(Roles.PARENT as any);
-
-    if (!isAthleteOrParent) {
-      throw new UnauthorizedException('CI no válido');
-    }
-
-    /**
-     * Generar un identificador único (jti) para el token
-     */
-    const jti = randomBytes(16).toString('hex');
-
-    /**
-     * Payload del JWT
-     */
     const userRole =
       user.roles && user.roles.length > 0 ? user.roles[0] : user.role;
+
+    if (loginCiDto.role) {
+      const selectedRoleEnum =
+        loginCiDto.role === 'athlete' ? Roles.ATHLETE : Roles.PARENT;
+      if (userRole !== selectedRoleEnum) {
+        console.log(
+          `✗ Login CI rechazado | CI: ${loginCiDto.ci} | Role seleccionado: ${loginCiDto.role} | Role real: ${userRole} | Usuario: ${user.name} ${user.lastname}`,
+        );
+        throw new UnauthorizedException(
+          'El role seleccionado no coincide con tu usuario',
+        );
+      }
+    }
+
+    const jti = randomBytes(16).toString('hex');
+
     const payload = {
       sub: user._id,
       ci: user.ci,
       role: userRole,
-      roles: user.roles || (user.role ? [user.role] : []),
       jti,
     };
 
@@ -206,7 +119,6 @@ export class AuthService {
           name: user.name,
           lastname: user.lastname,
           role: userRole,
-          roles: user.roles || (user.role ? [user.role] : []),
           images: (user as any)?.images || undefined,
           assignment_id: (user as any)?.assignment_id || null,
         },
@@ -214,9 +126,6 @@ export class AuthService {
     };
   }
 
-  /**
-   * Registra un nuevo usuario con rol SUPERADMIN
-   */
   async register(user: Partial<User>) {
     if (!user.username || !user.password) {
       throw new Error('username and password are required');

@@ -14,6 +14,7 @@ interface FormData {
 
 interface CarnetFormData {
   ci: string;
+  role: "athlete" | "parent";
 }
 
 type UserType = "athlete" | "parent" | "other" | null;
@@ -27,6 +28,7 @@ export const Login = () => {
   });
   const [carnetFormData, setCarnetFormData] = useState<CarnetFormData>({
     ci: "",
+    role: "athlete",
   });
   const dispatch = useDispatch<AppDispatch>();
   const isAuthenticated = useSelector(
@@ -72,7 +74,14 @@ export const Login = () => {
   const handleBack = () => {
     setUserType((prev) => (prev === "athlete" ? "other" : "athlete"));
     setFormData({ username: "", password: "" });
-    setCarnetFormData({ ci: "" });
+    setCarnetFormData({ ci: "", role: "athlete" });
+  };
+
+  const handleRoleChange = (role: "athlete" | "parent") => {
+    setCarnetFormData((prev) => ({
+      ...prev,
+      role,
+    }));
   };
 
   const toggleLabel =
@@ -131,6 +140,48 @@ export const Login = () => {
                   value={carnetFormData.ci}
                   onChange={handleCarnetChange}
                 />
+              </div>
+
+              <div style={{ marginTop: "15px", marginBottom: "15px" }}>
+                <p style={{ marginBottom: "10px", fontWeight: 500 }}>
+                  ¿Qué tipo de usuario eres?
+                </p>
+                <div style={{ display: "flex", gap: "20px" }}>
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="role"
+                      value="athlete"
+                      checked={carnetFormData.role === "athlete"}
+                      onChange={() => handleRoleChange("athlete")}
+                      style={{ marginRight: "8px", cursor: "pointer" }}
+                    />
+                    <span>Soy Deportista</span>
+                  </label>
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="role"
+                      value="parent"
+                      checked={carnetFormData.role === "parent"}
+                      onChange={() => handleRoleChange("parent")}
+                      style={{ marginRight: "8px", cursor: "pointer" }}
+                    />
+                    <span>Soy Tutor</span>
+                  </label>
+                </div>
               </div>
 
               <button
