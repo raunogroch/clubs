@@ -61,6 +61,16 @@ export class Club extends Document {
   groups?: Types.ObjectId[];
 
   /**
+   * Array de IDs de eventos agregados al club
+   */
+  @Prop({
+    type: [Types.ObjectId],
+    ref: 'Event',
+    default: [],
+  })
+  events_added?: Types.ObjectId[];
+
+  /**
    * IDs de los niveles/logros del club
    * Referencias a documentos de ClubLevel
    */
@@ -120,3 +130,4 @@ ClubSchema.index({ created_by: 1 });
 ClubSchema.index({ sport_id: 1 });
 ClubSchema.index({ assignment_id: 1 });
 ClubSchema.index({ created_by: 1 });
+ClubSchema.index({ events_added: 1 });

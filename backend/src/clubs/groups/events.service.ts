@@ -12,24 +12,24 @@ import {
 import { EventRepository } from '../repository/event.repository';
 import { CreateEventDto, UpdateEventDto } from '../dto/event.dto';
 import { Event } from '../schemas/event.schema';
-import { GroupRepository } from '../repository/group.repository';
+import { ClubRepository } from '../repository/club.repository';
 import { Types } from 'mongoose';
 
 @Injectable()
 export class EventsService {
   constructor(
     private readonly eventRepository: EventRepository,
-    private readonly groupsRepository: GroupRepository,
+    private readonly clubRepository: ClubRepository,
   ) {}
 
   /**
    * Crear un nuevo evento
    */
   async create(createEventDto: CreateEventDto): Promise<Event> {
-    // Validar que el grupo existe
-    const group = await this.groupsRepository.findById(createEventDto.group_id);
-    if (!group) {
-      throw new NotFoundException('Grupo no encontrado');
+    // Validar que el club existe
+    const club = await this.clubRepository.findById(createEventDto.club_id);
+    if (!club) {
+      throw new NotFoundException('Club no encontrado');
     }
 
     // Validar formato de fecha
@@ -49,12 +49,12 @@ export class EventsService {
 
     const event = await this.eventRepository.create(createEventDto);
 
-    // Agregar evento a grupo.events_added
-    if (!group.events_added) {
-      group.events_added = [];
+    // Agregar evento a club.events_added
+    if (!club.events_added) {
+      club.events_added = [];
     }
-    group.events_added.push(new Types.ObjectId(event._id));
-    await group.save();
+    club.events_added.push(new Types.ObjectId(event._id));
+    await club.save();
 
     return event;
   }
@@ -73,14 +73,14 @@ export class EventsService {
   /**
    * Obtener todos los eventos de un grupo
    */
-  async findByGroupId(groupId: string): Promise<Event[]> {
-    // Validar que el grupo existe
-    const group = await this.groupsRepository.findById(groupId);
-    if (!group) {
-      throw new NotFoundException('Grupo no encontrado');
+  async findByClubId(clubId: string): Promise<Event[]> {
+    // Validar que el club existe
+    const club = await this.clubRepository.findById(clubId);
+    if (!club) {
+      throw new NotFoundException('Club no encontrado');
     }
 
-    return this.eventRepository.findByGroupId(groupId);
+    return this.eventRepository.findByClubId(clubId);
   }
 
   /**
@@ -125,34 +125,32 @@ export class EventsService {
       throw new NotFoundException('Evento no encontrado');
     }
 
-    // Remover evento de grupo.events_added
-    const group = await this.groupsRepository.findById(
-      event.group_id.toString(),
-    );
-    if (group && group.events_added) {
-      group.events_added = group.events_added.filter(
+    // Remover evento de club.events_added
+    const club = await this.clubRepository.findById(event.club_id.toString());
+    if (club && club.events_added) {
+      club.events_added = club.events_added.filter(
         (eventId) => eventId.toString() !== id,
       );
-      await group.save();
+      await club.save();
     }
 
     await this.eventRepository.delete(id);
   }
 
   /**
-   * Obtener eventos en rango de fechas
+   * Obtener eventos en rango de fechas para un club
    */
   async findByDateRange(
-    groupId: string,
+    clubId: string,
     startDate: string,
     endDate: string,
   ): Promise<Event[]> {
-    // Validar que el grupo existe
-    const group = await this.groupsRepository.findById(groupId);
-    if (!group) {
-      throw new NotFoundException('Grupo no encontrado');
+    // Validar que el club existe
+    const club = await this.clubRepository.findById(clubId);
+    if (!club) {
+      throw new NotFoundException('Club no encontrado');
     }
 
-    return this.eventRepository.findByDateRange(groupId, startDate, endDate);
+    return this.eventRepository.findByDateRange(clubId, startDate, endDate);
   }
 }

@@ -13,10 +13,10 @@ export class Event extends Document {
    */
   @Prop({
     type: Types.ObjectId,
-    ref: 'Group',
+    ref: 'Club',
     required: true,
   })
-  group_id: Types.ObjectId;
+  club_id: Types.ObjectId;
 
   /**
    * Nombre del evento
@@ -85,5 +85,5 @@ export const EventSchema = SchemaFactory.createForClass(Event);
 /**
  * Índices para mejor performance
  */
-EventSchema.index({ group_id: 1 });
-EventSchema.index({ group_id: 1, eventDate: 1 });
+EventSchema.index({ club_id: 1 });
+EventSchema.index({ club_id: 1, eventDate: 1 });

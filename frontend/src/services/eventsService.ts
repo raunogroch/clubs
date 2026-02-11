@@ -9,7 +9,7 @@ const API_URL = BASE_URL.endsWith("/api") ? BASE_URL : `${BASE_URL}/api`;
 
 export interface Event {
   _id: string;
-  group_id: string;
+  club_id: string;
   name: string;
   location?: string;
   duration: number;
@@ -22,7 +22,7 @@ export interface Event {
 }
 
 export interface CreateEventRequest {
-  group_id: string;
+  club_id: string;
   name: string;
   location?: string;
   duration: number;
@@ -97,6 +97,26 @@ class EventsService {
     if (!response.ok) {
       const error = await safeParseJson(response);
       throw new Error(error.message || "Error al obtener los eventos");
+    }
+
+    return safeParseJson(response);
+  }
+
+  /**
+   * Obtener todos los eventos de un club
+   * GET /api/events/club/:clubId
+   */
+  async getByClub(clubId: string): Promise<Event[]> {
+    const response = await fetch(`${API_URL}/events/club/${clubId}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await safeParseJson(response);
+      throw new Error(error.message || "Error al obtener los eventos del club");
     }
 
     return safeParseJson(response);

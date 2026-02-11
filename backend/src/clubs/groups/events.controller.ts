@@ -40,9 +40,9 @@ export class EventsController {
    * Obtener eventos en rango de fechas
    * Query params: startDate (YYYY-MM-DD), endDate (YYYY-MM-DD)
    */
-  @Get('group/:groupId/range')
+  @Get('club/:clubId/range')
   async findByDateRange(
-    @Param('groupId') groupId: string,
+    @Param('clubId') groupId: string,
     @Body('startDate') startDate?: string,
     @Body('endDate') endDate?: string,
   ) {
@@ -56,9 +56,9 @@ export class EventsController {
    * GET /events/group/:groupId
    * Obtener todos los eventos de un grupo
    */
-  @Get('group/:groupId')
-  async findByGroupId(@Param('groupId') groupId: string) {
-    return this.eventsService.findByGroupId(groupId);
+  @Get('club/:clubId')
+  async findByClubId(@Param('clubId') clubId: string) {
+    return this.eventsService.findByClubId(clubId);
   }
 
   /**

@@ -15,7 +15,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../store/store";
 import { fetchGroupsByClub } from "../store/groupsThunk";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { NavHeader } from "../components";
 import { Groups } from "./Groups";
 
@@ -23,7 +23,6 @@ export const ClubGroups = () => {
   const { club_id } = useParams<{ club_id: string }>();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
-  const [createSignal, setCreateSignal] = useState(0);
 
   useEffect(() => {
     if (club_id) {
@@ -44,20 +43,9 @@ export const ClubGroups = () => {
           icon: "fa-arrow-left",
           onClick: handleBack,
         }}
-        primaryButton={{
-          label: "Crear Grupo",
-          icon: "fa-plus",
-          onClick: () => setCreateSignal((s) => s + 1),
-        }}
       />
       <div className="wrapper wrapper-content">
-        {club_id && (
-          <Groups
-            clubId={club_id}
-            onBack={handleBack}
-            createSignal={createSignal}
-          />
-        )}
+        {club_id && <Groups clubId={club_id} onBack={handleBack} />}
       </div>
     </>
   );

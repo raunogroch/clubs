@@ -333,7 +333,7 @@ export const MonthlyPayments = () => {
 
   return (
     <>
-      <NavHeader name="Pago de mensualidad" />
+      <NavHeader name="Mensualidad" />
       <div className="wrapper wrapper-content">
         <div className="row">
           <div className="col-md-12">

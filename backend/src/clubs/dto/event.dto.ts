@@ -2,7 +2,7 @@
  * DTO para crear un evento
  */
 export class CreateEventDto {
-  group_id: string;
+  club_id: string;
   name: string;
   location?: string;
   duration: number;

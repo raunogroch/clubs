@@ -33,11 +33,17 @@ export class EventRepository {
   /**
    * Obtener todos los eventos de un grupo
    */
-  async findByGroupId(groupId: string): Promise<Event[]> {
-    return this.eventModel
-      .find({ group_id: new Types.ObjectId(groupId) })
-      .sort({ eventDate: -1 })
-      .exec();
+  async findByClubId(clubId: string): Promise<Event[]> {
+    // Fallback: intentar con el valor tal cual (string), por si los documentos almacenan string
+    try {
+      const dataByString = await this.eventModel
+        .find({ club_id: clubId as any })
+        .sort({ eventDate: -1 });
+      return dataByString;
+    } catch (err) {
+      console.error('findByClubId - error querying by string clubId:', err);
+      return [];
+    }
   }
 
   /**
@@ -62,9 +68,9 @@ export class EventRepository {
   /**
    * Eliminar todos los eventos de un grupo
    */
-  async deleteByGroupId(groupId: string): Promise<void> {
+  async deleteByClubId(clubId: string): Promise<void> {
     await this.eventModel
-      .deleteMany({ group_id: new Types.ObjectId(groupId) })
+      .deleteMany({ club_id: new Types.ObjectId(clubId) })
       .exec();
   }
 
@@ -72,13 +78,13 @@ export class EventRepository {
    * Obtener eventos en rango de fechas
    */
   async findByDateRange(
-    groupId: string,
+    clubId: string,
     startDate: string,
     endDate: string,
   ): Promise<Event[]> {
     return this.eventModel
       .find({
-        group_id: new Types.ObjectId(groupId),
+        club_id: new Types.ObjectId(clubId),
         eventDate: {
           $gte: startDate,
           $lte: endDate,
