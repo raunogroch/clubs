@@ -66,8 +66,6 @@ export const Login = () => {
 
   const handleCarnetSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implementar lógica de login por carnet
-    console.log("Login por carnet:", carnetFormData.ci);
   };
 
   const handleBack = () => {

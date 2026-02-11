@@ -29,11 +29,9 @@ export const GroupDetail = () => {
   }>();
 
   const dispatch = useDispatch<AppDispatch>();
-  const {
-    selectedGroup: group,
-    status,
-    error,
-  } = useSelector((s: RootState) => s.groups);
+  const { selectedGroup: group, status } = useSelector(
+    (s: RootState) => s.groups,
+  );
   const schedules = useSelector((s: RootState) => s.schedules.items);
 
   const isLoading = status === "loading";
@@ -390,8 +388,6 @@ export const GroupDetail = () => {
         return a.startTime.localeCompare(b.startTime);
       });
   };
-
-  console.log("GroupDetail render", { group, status, error });
 
   // Build member details map and registration info for MemberList
   const memberDetails: Record<string, any> = {};

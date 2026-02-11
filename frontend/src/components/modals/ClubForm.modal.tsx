@@ -34,17 +34,10 @@ export const ClubFormModal: React.FC<ClubFormModalProps> = ({
   isEditing,
   formData,
   sports,
-  levels = [],
   onClose,
   onSave,
   onChange,
 }) => {
-  React.useEffect(() => {
-    if (isEditing && levels.length > 0) {
-      console.log("DEBUG ClubFormModal - Rendering levels:", levels.length);
-    }
-  }, [isEditing, levels]);
-
   if (!isOpen) return null;
 
   return (

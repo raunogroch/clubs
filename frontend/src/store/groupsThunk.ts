@@ -32,10 +32,6 @@ export const fetchGroupSummary = createAsyncThunk(
   "groups/fetchSummary",
   async (payload: { id: string; fields?: string[] }, { rejectWithValue }) => {
     try {
-      console.log(
-        `[fetchGroupSummary] Requesting group ${payload.id} with fields:`,
-        payload.fields,
-      );
       const data = await groupsService.getById(payload.id, payload.fields);
       return data;
     } catch (err: any) {
