@@ -99,7 +99,7 @@ export class UserRepository implements IUserRepository {
    * Busca un usuario por su ID
    */
   async findById(id: string): Promise<User | null> {
-    return this.userModel.findById(id);
+    return this.userModel.findById(id).populate('parent_id');
   }
 
   /**

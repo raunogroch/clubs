@@ -172,6 +172,18 @@ export const roleRoutes: RoleRoutes = {
       element: <DashboardParent />,
     },
     {
+      path: "/athletes",
+      icon: "fa-users",
+      label: "Atletas",
+      element: <DashboardParent />, // vista de lista de atletas asociados al padre
+    },
+    {
+      path: "/schedules",
+      icon: "fa-calendar",
+      label: "Horarios",
+      element: <DashboardParent />, // vista de lista de horarios asociados al padre
+    },
+    {
       path: "/profile",
       element: <ProfileAdmin />,
     },

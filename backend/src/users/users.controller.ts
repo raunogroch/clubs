@@ -159,7 +159,14 @@ export class UsersController {
    * Endpoint para obtener un usuario por ID
    */
   @Get(':id')
-  @Roles(Role.SUPERADMIN, Role.ADMIN, Role.ASSISTANT, Role.COACH, Role.ATHLETE)
+  @Roles(
+    Role.SUPERADMIN,
+    Role.ADMIN,
+    Role.ASSISTANT,
+    Role.COACH,
+    Role.ATHLETE,
+    Role.PARENT,
+  )
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
   }
