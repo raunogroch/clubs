@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../store/store";
-import { Image, NavHeader } from "../components";
+import { Image } from "../components";
 import toastr from "toastr";
 import { userService } from "../services/userService";
 
