@@ -18,6 +18,7 @@ import {
   ProfileCoach,
   DashboardCoach,
   ScheduleCoach,
+  SchedulesAdmin,
   DashboardAthlete,
   DashboardParent,
 } from "../pages";
@@ -106,6 +107,12 @@ export const roleRoutes: RoleRoutes = {
       icon: "fa-money",
       label: "Mensualidad",
       element: <MonthlyPayments />,
+    },
+    {
+      path: "/schedules",
+      icon: "fa-calendar",
+      label: "Horarios",
+      element: <SchedulesAdmin />,
     },
     {
       path: "/users",

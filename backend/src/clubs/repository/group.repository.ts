@@ -50,6 +50,7 @@ export class GroupRepository {
         'events_added',
         'name location duration eventDate eventTime suspended rescheduled',
       )
+      .populate('schedules_added', 'day startTime endTime')
       .sort({ createdAt: -1 })
       .exec();
   }

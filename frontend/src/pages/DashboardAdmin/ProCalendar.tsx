@@ -205,6 +205,7 @@ export const ProCalendar = ({ groups }: { groups: any[] }) => {
             const [endHour, endMin] = sched.endTime.split(":").map(Number);
 
             const dayOffset = getDayOffset(sched.day);
+
             const eventDate = new Date(weekStart);
             eventDate.setDate(
               eventDate.getDate() + (dayOffset === 0 ? 6 : dayOffset - 1),
@@ -216,7 +217,7 @@ export const ProCalendar = ({ groups }: { groups: any[] }) => {
             const endTime = new Date(eventDate);
             endTime.setHours(endHour, endMin, 0, 0);
 
-            calendarEvents.push({
+            const calendarEvent = {
               id: `schedules_added-${group._id}-${sched.day}-${sched.startTime}`,
               title: `${group.club?.name} ${group.name}`,
               start: startTime,
@@ -226,7 +227,9 @@ export const ProCalendar = ({ groups }: { groups: any[] }) => {
                 group: group.name,
                 groupId: group._id,
               },
-            });
+            };
+
+            calendarEvents.push(calendarEvent);
           } catch (e) {
             console.error("Error processing schedule:", sched, e);
           }
@@ -287,8 +290,8 @@ export const ProCalendar = ({ groups }: { groups: any[] }) => {
           eventPropGetter={eventStyleGetter}
           popup
           selectable
-          min={new Date(2024, 0, 1, 6, 0, 0)}
-          max={new Date(2024, 0, 1, 23, 59, 59)}
+          min={new Date(2026, 0, 1, 6, 0, 0)}
+          max={new Date(2026, 11, 31, 23, 59, 59)}
           step={30}
           showMultiDayTimes
           views={["month", "week", "day", "agenda"]}

@@ -1,17 +1,14 @@
 import {
   useDashboardData,
-  useCalendarEvents,
   useUnpaidModal,
   usePaymentModal,
   useDateEditing,
 } from "../../customHooks/useDashboardAdmin";
-import { ProCalendar } from "./ProCalendar";
 import { UnpaidModal } from "../../components/modals/Unpaid.modal";
 import { PaymentModal } from "../../components/modals/Payment.modal";
 
 export const DashboardContent = ({ user }: { user: any | undefined }) => {
   const { loading, totalAthletes, unpaidCount } = useDashboardData(user);
-  const { calendarGroups, calendarLoading } = useCalendarEvents(user);
   const {
     showUnpaidModal,
     unpaidAthletes,
@@ -133,31 +130,6 @@ export const DashboardContent = ({ user }: { user: any | undefined }) => {
                 </div>
                 <div className="ibox-content text-center">
                   <h2 className="font-bold text-danger">{unpaidCount}</h2>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="wrapper wrapper-content">
-        <div className="animated fadeInRightBig">
-          <div className="row">
-            <div className="col-md-12">
-              <div className="ibox">
-                <div className="ibox-title">
-                  <h5>Calendario de Horarios de Grupos</h5>
-                </div>
-                <div className="ibox-content">
-                  {calendarLoading ? (
-                    <div className="text-center">Cargando calendario...</div>
-                  ) : calendarGroups.length === 0 ? (
-                    <div className="text-center text-muted">
-                      No hay grupos con horarios en esta asignación.
-                    </div>
-                  ) : (
-                    <ProCalendar groups={calendarGroups} />
-                  )}
                 </div>
               </div>
             </div>

@@ -125,11 +125,8 @@ export class GroupsService {
     // requested multiple times by the frontend. Include coachId and count.
     try {
       const names = groups.map((g) => (g as any).name || '(sin nombre)');
-      console.log(
-        `COACH SCHEDULES for ${userId}: ${groups.length} groups -> ${names.join(', ')}`,
-      );
     } catch (e) {
-      console.log(`COACH SCHEDULES for ${userId}: ${groups.length} groups`);
+      console.error(`error: ${e.message}`);
     }
     return groups;
   }

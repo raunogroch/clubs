@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { registrationsService } from "../services/registrationsService";
 import clubsService from "../services/clubs.service";
 import groupsService from "../services/groups.service";
-import schedulesService from "../services/schedulesService";
 
 const calculateTotalAthletes = (breakdown: any): number => {
   if (!breakdown?.clubs) return 0;
@@ -102,22 +101,18 @@ export const useCalendarEvents = (user: any | undefined) => {
             try {
               const gs = await groupsService.getByClub(c._id);
 
-              // Cargar schedules para cada grupo
-              const gsWithSchedules = await Promise.all(
-                gs.map(async (g: any) => {
-                  try {
-                    const schedules = await schedulesService.getByGroupId(
-                      g._id,
-                    );
-                    return { ...g, club: c, schedule: schedules };
-                  } catch (e) {
-                    return { ...g, club: c, schedule: [] };
-                  }
-                }),
-              );
+              // Los grupos ya traen schedules_added desde el backend
+              // Simplemente agregar la referencia del club
+              const gsWithClub = gs.map((g: any) => ({
+                ...g,
+                club: c,
+                // Asegurar que schedules_added existe (puede venir vacío o no definido)
+                schedules_added: g.schedules_added || [],
+              }));
 
-              return gsWithSchedules;
+              return gsWithClub;
             } catch (e) {
+              console.error(`Error loading groups for club ${c._id}:`, e);
               return [];
             }
           }),
@@ -126,6 +121,7 @@ export const useCalendarEvents = (user: any | undefined) => {
         const allGroups = groupsPerClub.flat();
         setCalendarGroups(allGroups);
       } catch (e) {
+        console.error("Error loading groups for calendar:", e);
         setCalendarGroups([]);
       } finally {
         setCalendarLoading(false);

@@ -41,9 +41,6 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales inválidas');
     }
     const userRole = user.role;
-    console.log(
-      `✓ Login exitoso | Usuario: ${loginDto.username} | Role identificado: ${userRole} | Nombre: ${user.name} ${user.lastname}`,
-    );
     const jti = randomBytes(16).toString('hex');
     const payload = {
       username: user.username,
@@ -93,9 +90,6 @@ export class AuthService {
       const selectedRoleEnum =
         loginCiDto.role === 'athlete' ? Roles.ATHLETE : Roles.PARENT;
       if (userRole !== selectedRoleEnum) {
-        console.log(
-          `✗ Login CI rechazado | CI: ${loginCiDto.ci} | Role seleccionado: ${loginCiDto.role} | Role real: ${userRole} | Usuario: ${user.name} ${user.lastname}`,
-        );
         throw new UnauthorizedException(
           'El role seleccionado no coincide con tu usuario',
         );

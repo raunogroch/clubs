@@ -350,18 +350,6 @@ export const ScheduleCoach = ({ name }: pageParamProps) => {
         }
 
         const data = await response.json();
-        // DEBUG: mostrar en consola lo que recibe ScheduleCoach desde el backend
-        try {
-          console.log(
-            "ScheduleCoach - /api/groups/my-coach-groups response:",
-            data,
-          );
-        } catch (e) {
-          console.log(
-            "ScheduleCoach - received response (unable to stringify)",
-          );
-        }
-
         setGroups(data);
       } catch (err) {
         const errorMsg =

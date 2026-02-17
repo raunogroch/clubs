@@ -24,3 +24,4 @@ export * from "./ProfileAdmin";
 export * from "./ProfileCoach";
 export * from "./MonthlyPayments";
 export * from "./ScheduleCoach";
+export * from "./SchedulesAdmin";

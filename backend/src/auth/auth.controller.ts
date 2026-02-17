@@ -37,7 +37,6 @@ export class AuthController {
   @Post('login-ci')
   @HttpCode(HttpStatus.OK)
   loginByCi(@Body() loginCiDto: LoginCiDto) {
-    console.log('Login CI DTO:', loginCiDto);
     return this.authService.loginByCi(loginCiDto);
   }
 
