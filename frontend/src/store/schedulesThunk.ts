@@ -117,3 +117,20 @@ export const replaceBatchSchedules = createAsyncThunk(
     }
   },
 );
+
+/**
+ * Obtener todos los schedules para el calendario del admin
+ * Endpoint optimizado para mejor rendimiento
+ */
+export const fetchAdminSchedules = createAsyncThunk(
+  "schedules/fetchAdminSchedules",
+  async (_, { rejectWithValue }) => {
+    try {
+      const data = await schedulesService.getAdminSchedules();
+      return data;
+    } catch (err: any) {
+      toastr.error("Error al obtener horarios");
+      return rejectWithValue(err.message || "Error al obtener horarios");
+    }
+  },
+);

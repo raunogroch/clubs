@@ -39,6 +39,16 @@ export class GroupsController {
   }
 
   /**
+   * GET /groups/admin/schedules
+   * Obtener horarios de los grupos asignados al administrador
+   * Endpoint optimizado solo para horarios
+   */
+  @Get('admin/schedules')
+  async getAdminGroupsSchedules(@CurrentUser() user: any) {
+    return this.groupsService.getAdminGroupsSchedules(user.sub);
+  }
+
+  /**
    * POST /groups
    * Crear un nuevo grupo
    * Solo administradores de la asignación del club

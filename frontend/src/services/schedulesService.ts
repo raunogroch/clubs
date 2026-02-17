@@ -184,6 +184,25 @@ class SchedulesService {
 
     return safeParseJson(response);
   }
+
+  /**
+   * Obtener todos los schedules para el calendario del admin
+   * GET /api/groups/admin/schedules
+   * Endpoint optimizado para mejor rendimiento
+   */
+  async getAdminSchedules(): Promise<any[]> {
+    const response = await fetch(`${API_URL}/groups/admin/schedules`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Error al obtener horarios");
+    }
+
+    return safeParseJson(response);
+  }
 }
 
 const schedulesService = new SchedulesService();

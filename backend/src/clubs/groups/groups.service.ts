@@ -132,6 +132,54 @@ export class GroupsService {
   }
 
   /**
+   * Obtener horarios de los grupos asignados al administrador
+   * Endpoint optimizado que retorna solo los datos necesarios para el calendario
+   */
+  async getAdminGroupsSchedules(userId: string): Promise<any[]> {
+    // Obtener el usuario para verificar que es admin
+    const user = await this.userModel.findById(userId);
+    if (!user || user.role !== 'admin') {
+      throw new ForbiddenException(
+        'Solo los administradores pueden acceder a este endpoint',
+      );
+    }
+
+    const assignmentId = (user as any).assignment_id;
+    if (!assignmentId) {
+      return [];
+    }
+
+    // Obtener todos los clubs del admin
+    const clubs = await this.clubRepository.findByAssignment(assignmentId);
+
+    // Para cada club, obtener los grupos y sus horarios
+    const allSchedules: any[] = [];
+
+    for (const club of clubs) {
+      const groups = await this.groupRepository.findByClub(club._id.toString());
+
+      groups.forEach((group: any) => {
+        // Extraer solo los datos necesarios para el calendario
+        if (group.schedules_added && group.schedules_added.length > 0) {
+          group.schedules_added.forEach((schedule: any) => {
+            allSchedules.push({
+              _id: group._id,
+              name: group.name,
+              club_id: group.club_id,
+              club: { _id: club._id, name: club.name },
+              day: schedule.day,
+              startTime: schedule.startTime,
+              endTime: schedule.endTime,
+            });
+          });
+        }
+      });
+    }
+
+    return allSchedules;
+  }
+
+  /**
    * Obtener todos los grupos de un club
    */
   async getGroupsByClub(clubId: string, userId: string): Promise<Group[]> {

@@ -5,6 +5,7 @@ import {
   updateSchedule,
   deleteSchedule,
   replaceBatchSchedules,
+  fetchAdminSchedules,
 } from "./schedulesThunk";
 
 interface Schedule {
@@ -147,6 +148,23 @@ const schedulesSlice = createSlice({
         },
       )
       .addCase(replaceBatchSchedules.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload as string;
+      })
+      // fetchAdminSchedules
+      .addCase(fetchAdminSchedules.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(
+        fetchAdminSchedules.fulfilled,
+        (state, action: PayloadAction<any[]>) => {
+          state.status = "succeeded";
+          // Transform admin schedules to Schedule format if needed
+          state.items = action.payload || [];
+        },
+      )
+      .addCase(fetchAdminSchedules.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload as string;
       });

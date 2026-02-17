@@ -290,8 +290,8 @@ export const ProCalendar = ({ groups }: { groups: any[] }) => {
           eventPropGetter={eventStyleGetter}
           popup
           selectable
-          min={new Date(2026, 0, 1, 6, 0, 0)}
-          max={new Date(2026, 11, 31, 23, 59, 59)}
+          min={new Date(2026, 0, 1, 8, 0, 0)}
+          max={new Date(2026, 11, 31, 22, 0, 0)}
           step={30}
           showMultiDayTimes
           views={["month", "week", "day", "agenda"]}

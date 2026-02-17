@@ -1,27 +1,13 @@
 import { NavHeader } from "../components/NavHeader";
 import type { pageParamProps } from "../interfaces/pageParamProps";
-import { useEffect, useState } from "react";
-import { useCalendarEvents } from "../customHooks/useDashboardAdmin";
 import { useSelector } from "react-redux";
 import type { RootState } from "../store/store";
 import { ProCalendar } from "./DashboardAdmin/ProCalendar";
+import { useAdminSchedules } from "../customHooks/useAdminSchedules";
 
 export const SchedulesAdmin = ({ name }: pageParamProps) => {
   const user = useSelector((state: RootState) => state.auth.user);
-  const { calendarGroups, calendarLoading } = useCalendarEvents(user);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Si hay error en la carga, guardarlo
-    if (!calendarLoading && calendarGroups.length === 0) {
-      const hasAssignment = (user as any)?.assignment_id;
-      if (!hasAssignment) {
-        setError(
-          "No tienes una asignación configurada. Contacta al administrador.",
-        );
-      }
-    }
-  }, [calendarLoading, calendarGroups, user]);
+  const { calendarGroups, calendarLoading, error } = useAdminSchedules(user);
 
   return (
     <>
@@ -35,7 +21,7 @@ export const SchedulesAdmin = ({ name }: pageParamProps) => {
                   <h5>Calendario de Horarios de Grupos</h5>
                 </div>
                 <div className="ibox-content">
-                  {calendarLoading && (
+                  {calendarLoading === "loading" && (
                     <div className="text-center">
                       <div
                         className="spinner-border text-primary"
@@ -53,7 +39,7 @@ export const SchedulesAdmin = ({ name }: pageParamProps) => {
                     </div>
                   )}
 
-                  {!calendarLoading &&
+                  {calendarLoading !== "loading" &&
                     calendarGroups.length === 0 &&
                     !error && (
                       <div className="text-center text-muted">
@@ -61,9 +47,9 @@ export const SchedulesAdmin = ({ name }: pageParamProps) => {
                       </div>
                     )}
 
-                  {!calendarLoading && calendarGroups.length > 0 && !error && (
-                    <ProCalendar groups={calendarGroups} />
-                  )}
+                  {calendarLoading !== "loading" &&
+                    calendarGroups.length > 0 &&
+                    !error && <ProCalendar groups={calendarGroups} />}
                 </div>
               </div>
             </div>
