@@ -6,9 +6,12 @@ import {
   format,
   parse,
   startOfWeek,
+  startOfMonth,
+  endOfMonth,
   getDay,
   addDays,
   addMonths,
+  addWeeks,
 } from "date-fns";
 import { es } from "date-fns/locale";
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -36,6 +39,7 @@ interface Group {
     name: string;
   };
   schedule?: Schedule[];
+  schedules_added?: Schedule[];
   events_added?: Event[];
 }
 
@@ -86,14 +90,56 @@ const formats = {
   slotLabelFormat: "HH:mm",
 };
 
-const dayNameMap: Record<string, number> = {
-  Sunday: 0,
-  Monday: 1,
-  Tuesday: 2,
-  Wednesday: 3,
-  Thursday: 4,
-  Friday: 5,
-  Saturday: 6,
+const getDayOffset = (day?: string) => {
+  if (!day) return 0;
+  const d = day.trim().toLowerCase();
+
+  const map: Record<string, number> = {
+    sunday: 0,
+    sun: 0,
+    domingo: 0,
+    dom: 0,
+
+    monday: 1,
+    mon: 1,
+    lunes: 1,
+    lun: 1,
+
+    tuesday: 2,
+    tue: 2,
+    martes: 2,
+    mar: 2,
+
+    wednesday: 3,
+    wed: 3,
+    miercoles: 3,
+    miércoles: 3,
+    mie: 3,
+
+    thursday: 4,
+    thu: 4,
+    jueves: 4,
+    jue: 4,
+
+    friday: 5,
+    fri: 5,
+    viernes: 5,
+    vie: 5,
+
+    saturday: 6,
+    sat: 6,
+    sabado: 6,
+    sábado: 6,
+    sab: 6,
+  };
+
+  if (map[d] !== undefined) return map[d];
+
+  const asNumber = Number(d);
+  if (!Number.isNaN(asNumber) && asNumber >= 0 && asNumber <= 6)
+    return asNumber;
+
+  return 0;
 };
 
 const messages = {
@@ -120,7 +166,20 @@ const ProCalendar = ({ groups }: { groups: Group[] }) => {
 
   useEffect(() => {
     const calendarEvents: CalendarEvent[] = [];
-    const weekStart = startOfWeek(date, { weekStartsOn: 1 });
+
+    // Build an array of week starts to generate events for visible range.
+    const weekStarts: Date[] = [];
+    if (view === "month") {
+      const monthStart = startOfMonth(date);
+      const monthEnd = endOfMonth(date);
+      let cursor = startOfWeek(monthStart, { weekStartsOn: 1 });
+      while (cursor <= monthEnd) {
+        weekStarts.push(new Date(cursor));
+        cursor = addWeeks(cursor, 1);
+      }
+    } else {
+      weekStarts.push(startOfWeek(date, { weekStartsOn: 1 }));
+    }
 
     groups.forEach((group) => {
       // Agregar primero eventos especiales (events_added) para que tengan prioridad visual
@@ -157,34 +216,38 @@ const ProCalendar = ({ groups }: { groups: Group[] }) => {
         });
       }
 
-      // Agregar eventos de horarios (schedule) después
-      if (group.schedule && group.schedule.length > 0) {
-        group.schedule.forEach((sched) => {
+      // Mostrar solo `schedules_added` (usar `schedule` está deprecado)
+
+      if (group.schedules_added && group.schedules_added.length > 0) {
+        group.schedules_added.forEach((sched) => {
           const [startHour, startMin] = sched.startTime.split(":").map(Number);
           const [endHour, endMin] = sched.endTime.split(":").map(Number);
 
-          const dayOffset = dayNameMap[sched.day] || 0;
-          const eventDate = new Date(weekStart);
-          eventDate.setDate(
-            eventDate.getDate() + (dayOffset === 0 ? 6 : dayOffset - 1),
-          );
+          const dayOffset = getDayOffset(sched.day);
 
-          const startTime = new Date(eventDate);
-          startTime.setHours(startHour, startMin, 0, 0);
+          weekStarts.forEach((wk) => {
+            const eventDate = new Date(wk);
+            eventDate.setDate(
+              eventDate.getDate() + (dayOffset === 0 ? 6 : dayOffset - 1),
+            );
 
-          const endTime = new Date(eventDate);
-          endTime.setHours(endHour, endMin, 0, 0);
+            const startTime = new Date(eventDate);
+            startTime.setHours(startHour, startMin, 0, 0);
 
-          calendarEvents.push({
-            id: `${group._id}-${sched.day}-${sched.startTime}`,
-            title: group.name,
-            start: startTime,
-            end: endTime,
-            eventType: "schedule",
-            resource: {
-              club: group.club_id?.name || "",
-              group: group.name,
-            },
+            const endTime = new Date(eventDate);
+            endTime.setHours(endHour, endMin, 0, 0);
+
+            calendarEvents.push({
+              id: `${group._id}-schedules_added-${sched.day}-${sched.startTime}-${eventDate.toISOString()}`,
+              title: group.name,
+              start: startTime,
+              end: endTime,
+              eventType: "schedule",
+              resource: {
+                club: group.club_id?.name || "",
+                group: group.name,
+              },
+            });
           });
         });
       }
@@ -287,6 +350,18 @@ export const ScheduleCoach = ({ name }: pageParamProps) => {
         }
 
         const data = await response.json();
+        // DEBUG: mostrar en consola lo que recibe ScheduleCoach desde el backend
+        try {
+          console.log(
+            "ScheduleCoach - /api/groups/my-coach-groups response:",
+            data,
+          );
+        } catch (e) {
+          console.log(
+            "ScheduleCoach - received response (unable to stringify)",
+          );
+        }
+
         setGroups(data);
       } catch (err) {
         const errorMsg =

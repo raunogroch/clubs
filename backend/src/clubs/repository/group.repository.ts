@@ -419,18 +419,19 @@ export class GroupRepository {
    * Obtener grupos donde un usuario es coach
    */
   async findByCoach(coachId: string): Promise<Group[]> {
-    return this.groupModel
+    return (await this.groupModel
       .find({
         coaches: new Types.ObjectId(coachId),
       })
-      .select('name club_id schedule events_added')
       .populate('club_id', 'name')
+      .populate('schedules_added', 'day startTime endTime')
       .populate(
         'events_added',
         'name location duration eventDate eventTime suspended rescheduled',
       )
       .sort({ createdAt: -1 })
-      .exec();
+      .lean()
+      .exec()) as unknown as Group[];
   }
 
   /**
@@ -446,6 +447,9 @@ export class GroupRepository {
           groupId,
           { $push: { schedule: schedule } },
           { new: true },
+        )
+        .select(
+          '_id name club_id schedule events_added created_by athletes_added coaches levels',
         )
         .populate('created_by', 'name')
         .populate({

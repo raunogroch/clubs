@@ -85,14 +85,56 @@ interface CalendarEvent {
   };
 }
 
-const dayNameMap: Record<string, number> = {
-  Sunday: 0,
-  Monday: 1,
-  Tuesday: 2,
-  Wednesday: 3,
-  Thursday: 4,
-  Friday: 5,
-  Saturday: 6,
+const getDayOffset = (day?: string) => {
+  if (!day) return 0;
+  const d = day.trim().toLowerCase();
+
+  const map: Record<string, number> = {
+    sunday: 0,
+    sun: 0,
+    domingo: 0,
+    dom: 0,
+
+    monday: 1,
+    mon: 1,
+    lunes: 1,
+    lun: 1,
+
+    tuesday: 2,
+    tue: 2,
+    martes: 2,
+    mar: 2,
+
+    wednesday: 3,
+    wed: 3,
+    miercoles: 3,
+    miércoles: 3,
+    mie: 3,
+
+    thursday: 4,
+    thu: 4,
+    jueves: 4,
+    jue: 4,
+
+    friday: 5,
+    fri: 5,
+    viernes: 5,
+    vie: 5,
+
+    saturday: 6,
+    sat: 6,
+    sabado: 6,
+    sábado: 6,
+    sab: 6,
+  };
+
+  if (map[d] !== undefined) return map[d];
+
+  const asNumber = Number(d);
+  if (!Number.isNaN(asNumber) && asNumber >= 0 && asNumber <= 6)
+    return asNumber;
+
+  return 0;
 };
 
 export const ProCalendar = ({ groups }: { groups: any[] }) => {
@@ -153,34 +195,41 @@ export const ProCalendar = ({ groups }: { groups: any[] }) => {
         });
       }
 
-      if (group.schedule && group.schedule.length > 0) {
-        group.schedule.forEach((sched: any) => {
-          const [startHour, startMin] = sched.startTime.split(":").map(Number);
-          const [endHour, endMin] = sched.endTime.split(":").map(Number);
+      // Mostrar solo `schedules_added` (ignorar `schedule` deprecated)
+      if (group.schedules_added && group.schedules_added.length > 0) {
+        group.schedules_added.forEach((sched: any) => {
+          try {
+            const [startHour, startMin] = sched.startTime
+              .split(":")
+              .map(Number);
+            const [endHour, endMin] = sched.endTime.split(":").map(Number);
 
-          const dayOffset = dayNameMap[sched.day] || 0;
-          const eventDate = new Date(weekStart);
-          eventDate.setDate(
-            eventDate.getDate() + (dayOffset === 0 ? 6 : dayOffset - 1),
-          );
+            const dayOffset = getDayOffset(sched.day);
+            const eventDate = new Date(weekStart);
+            eventDate.setDate(
+              eventDate.getDate() + (dayOffset === 0 ? 6 : dayOffset - 1),
+            );
 
-          const startTime = new Date(eventDate);
-          startTime.setHours(startHour, startMin, 0, 0);
+            const startTime = new Date(eventDate);
+            startTime.setHours(startHour, startMin, 0, 0);
 
-          const endTime = new Date(eventDate);
-          endTime.setHours(endHour, endMin, 0, 0);
+            const endTime = new Date(eventDate);
+            endTime.setHours(endHour, endMin, 0, 0);
 
-          calendarEvents.push({
-            id: `schedule-${group._id}-${sched.day}-${sched.startTime}`,
-            title: `${group.club?.name} ${group.name})`,
-            start: startTime,
-            end: endTime,
-            resource: {
-              club: group.club?.name || "",
-              group: group.name,
-              groupId: group._id,
-            },
-          });
+            calendarEvents.push({
+              id: `schedules_added-${group._id}-${sched.day}-${sched.startTime}`,
+              title: `${group.club?.name} ${group.name}`,
+              start: startTime,
+              end: endTime,
+              resource: {
+                club: group.club?.name || "",
+                group: group.name,
+                groupId: group._id,
+              },
+            });
+          } catch (e) {
+            console.error("Error processing schedule:", sched, e);
+          }
         });
       }
     });

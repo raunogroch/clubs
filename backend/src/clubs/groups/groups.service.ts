@@ -120,7 +120,18 @@ export class GroupsService {
    * Obtener todos los grupos donde el usuario autenticado es coach
    */
   async getMyCoachGroups(userId: string): Promise<Group[]> {
-    return this.groupRepository.findByCoach(userId);
+    const groups = await this.groupRepository.findByCoach(userId);
+    // Log a concise summary to avoid noisy duplicate outputs when endpoint is
+    // requested multiple times by the frontend. Include coachId and count.
+    try {
+      const names = groups.map((g) => (g as any).name || '(sin nombre)');
+      console.log(
+        `COACH SCHEDULES for ${userId}: ${groups.length} groups -> ${names.join(', ')}`,
+      );
+    } catch (e) {
+      console.log(`COACH SCHEDULES for ${userId}: ${groups.length} groups`);
+    }
+    return groups;
   }
 
   /**
