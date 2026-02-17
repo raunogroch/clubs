@@ -89,6 +89,12 @@ export const roleRoutes: RoleRoutes = {
       element: <DashboardAdmin />,
     },
     {
+      path: "/schedules",
+      icon: "fa-calendar",
+      label: "Horarios",
+      element: <SchedulesAdmin />,
+    },
+    {
       path: "/clubs",
       icon: "fa-object-group",
       label: "Clubs",
@@ -101,18 +107,6 @@ export const roleRoutes: RoleRoutes = {
     {
       path: "/clubs/:club_id/groups/:id_subgrupo/group",
       element: <GroupDetail />,
-    },
-    {
-      path: "/mensualidad",
-      icon: "fa-money",
-      label: "Mensualidad",
-      element: <MonthlyPayments />,
-    },
-    {
-      path: "/schedules",
-      icon: "fa-calendar",
-      label: "Horarios",
-      element: <SchedulesAdmin />,
     },
     {
       path: "/users",
@@ -131,6 +125,12 @@ export const roleRoutes: RoleRoutes = {
           element: <AthletesAdmin />,
         },
       ],
+    },
+    {
+      path: "/mensualidad",
+      icon: "fa-money",
+      label: "Pagos",
+      element: <MonthlyPayments />,
     },
   ],
   assistant: [
