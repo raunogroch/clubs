@@ -282,7 +282,9 @@ export const ProfileCoach = () => {
                         className="btn btn-sm btn-primary"
                         onClick={handleOpenImageEdit}
                         disabled={uploading}
-                        style={{ cursor: uploading ? "not-allowed" : "pointer" }}
+                        style={{
+                          cursor: uploading ? "not-allowed" : "pointer",
+                        }}
                       >
                         <i className="fa fa-camera m-r-xs"></i>
                         Cambiar Foto

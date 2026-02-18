@@ -2,7 +2,11 @@ import { useState, useEffect, useCallback } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../store/store";
 import { Image } from "../components";
-import { ImageEditModal, CIEditModal, PDFPreviewModal } from "../components/modals";
+import {
+  ImageEditModal,
+  CIEditModal,
+  PDFPreviewModal,
+} from "../components/modals";
 import toastr from "toastr";
 import { userService } from "../services/userService";
 
@@ -294,7 +298,7 @@ export const ProfileAdmin = () => {
           toastr.success("Carnet cargado exitosamente");
           handleCloseCIModal();
           await loadUserProfile();
-          
+
           // Mostrar el PDF en preview
           if (response?.data?.documentPath) {
             setPDFPreviewPath(response.data.documentPath);
@@ -418,7 +422,9 @@ export const ProfileAdmin = () => {
                           className="btn btn-sm btn-primary"
                           onClick={handleOpenImageEdit}
                           disabled={uploading}
-                          style={{ cursor: uploading ? "not-allowed" : "pointer" }}
+                          style={{
+                            cursor: uploading ? "not-allowed" : "pointer",
+                          }}
                         >
                           <i className="fa fa-camera m-r-xs"></i>
                           Cambiar Foto
@@ -467,29 +473,33 @@ export const ProfileAdmin = () => {
                       </span>
                     </div>
 
-                    {canEdit && isAthleteMinor && !displayUser?.documentPath && (
-                      <div
-                        style={{
-                          marginBottom: "15px",
-                          padding: "8px",
-                          backgroundColor: "#f0f8ff",
-                          borderRadius: "4px",
-                        }}
-                      >
-                        <button
-                          className="btn btn-sm btn-info"
-                          onClick={handleOpenCIEdit}
-                          disabled={uploading}
-                          style={{ cursor: uploading ? "not-allowed" : "pointer" }}
+                    {canEdit &&
+                      isAthleteMinor &&
+                      !displayUser?.documentPath && (
+                        <div
+                          style={{
+                            marginBottom: "15px",
+                            padding: "8px",
+                            backgroundColor: "#f0f8ff",
+                            borderRadius: "4px",
+                          }}
                         >
-                          <i className="fa fa-file-pdf-o m-r-xs"></i>
-                          Cargar Carnet (PDF)
-                        </button>
-                        <small className="text-muted d-block m-t-xs">
-                          Máximo 10MB, formato PDF
-                        </small>
-                      </div>
-                    )}
+                          <button
+                            className="btn btn-sm btn-info"
+                            onClick={handleOpenCIEdit}
+                            disabled={uploading}
+                            style={{
+                              cursor: uploading ? "not-allowed" : "pointer",
+                            }}
+                          >
+                            <i className="fa fa-file-pdf-o m-r-xs"></i>
+                            Cargar Carnet (PDF)
+                          </button>
+                          <small className="text-muted d-block m-t-xs">
+                            Máximo 10MB, formato PDF
+                          </small>
+                        </div>
+                      )}
 
                     {displayUser?.documentPath && (
                       <div
@@ -501,12 +511,24 @@ export const ProfileAdmin = () => {
                           border: "1px solid #4caf50",
                         }}
                       >
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                          }}
+                        >
                           <i
                             className="fa fa-file-pdf-o"
                             style={{ color: "#4caf50", fontSize: "18px" }}
                           ></i>
-                          <span style={{ flex: 1, fontWeight: "500", color: "#2e7d32" }}>
+                          <span
+                            style={{
+                              flex: 1,
+                              fontWeight: "500",
+                              color: "#2e7d32",
+                            }}
+                          >
                             Carnet Cargado
                           </span>
                           <button

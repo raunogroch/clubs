@@ -230,7 +230,14 @@ export class UsersController {
    */
   @Post('upload-image')
   @HttpCode(200)
-  @Roles(Role.SUPERADMIN, Role.ADMIN, Role.ASSISTANT, Role.COACH, Role.ATHLETE, Role.PARENT)
+  @Roles(
+    Role.SUPERADMIN,
+    Role.ADMIN,
+    Role.ASSISTANT,
+    Role.COACH,
+    Role.ATHLETE,
+    Role.PARENT,
+  )
   async uploadImage(@Body() payload: any) {
     return this.usersService.uploadUserImage(payload);
   }
@@ -245,7 +252,14 @@ export class UsersController {
    */
   @Post('upload-ci')
   @HttpCode(200)
-  @Roles(Role.SUPERADMIN, Role.ADMIN, Role.ASSISTANT, Role.COACH, Role.ATHLETE, Role.PARENT)
+  @Roles(
+    Role.SUPERADMIN,
+    Role.ADMIN,
+    Role.ASSISTANT,
+    Role.COACH,
+    Role.ATHLETE,
+    Role.PARENT,
+  )
   async uploadCI(@Body() payload: any) {
     return this.usersService.uploadAthleteCI(payload);
   }
