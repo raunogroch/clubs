@@ -9,6 +9,7 @@ import {
 } from "../components/modals";
 import toastr from "toastr";
 import { userService } from "../services/userService";
+import { Role } from "../interfaces";
 
 export const ProfileAdmin = () => {
   const user = useSelector((state: RootState) => state.auth.user);
@@ -416,28 +417,31 @@ export const ProfileAdmin = () => {
                       )}
                     </div>
 
-                    {canEdit && (
-                      <div style={{ marginBottom: "15px" }}>
-                        <button
-                          className="btn btn-sm btn-primary"
-                          onClick={handleOpenImageEdit}
-                          disabled={uploading}
-                          style={{
-                            cursor: uploading ? "not-allowed" : "pointer",
-                          }}
-                        >
-                          <i className="fa fa-camera m-r-xs"></i>
-                          Cambiar Foto
-                        </button>
-                      </div>
-                    )}
+                    {canEdit &&
+                      (!isAthleteMinor || user?.role === "parent") && (
+                        <div style={{ marginBottom: "15px" }}>
+                          <button
+                            className="btn btn-sm btn-primary"
+                            onClick={handleOpenImageEdit}
+                            disabled={uploading}
+                            style={{
+                              cursor: uploading ? "not-allowed" : "pointer",
+                            }}
+                          >
+                            <i className="fa fa-camera m-r-xs"></i>
+                            Cambiar Foto
+                          </button>
+                        </div>
+                      )}
 
                     <h3 className="m-b-xs">
                       {displayUser?.name} {displayUser?.lastname}
                     </h3>
                     <p className="text-muted m-b-md">
                       <i className="fa fa-shield m-r-xs"></i>
-                      <span className="font-bold">{displayUser?.role}</span>
+                      <span className="font-bold">
+                        {Role[displayUser?.role]}
+                      </span>
                     </p>
                   </div>
 
@@ -475,6 +479,7 @@ export const ProfileAdmin = () => {
 
                     {canEdit &&
                       isAthleteMinor &&
+                      user?.role === "parent" &&
                       !displayUser?.documentPath && (
                         <div
                           style={{
