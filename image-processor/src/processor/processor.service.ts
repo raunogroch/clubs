@@ -211,7 +211,6 @@ export class ProcessorService {
       const pdfPath = path.join(baseDir, pdfFilename);
 
       await fs.promises.writeFile(pdfPath, buffer);
-      this.logger.debug(`PDF saved at ${pdfPath}`);
 
       return {
         fileIdentifier: identifier,

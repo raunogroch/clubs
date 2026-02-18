@@ -666,6 +666,7 @@ export class UsersService {
         },
         createdAt: a.createdAt || null,
         bio: a.bio || null,
+        documentPath: a.documentPath || null,
       }));
 
       return result;
