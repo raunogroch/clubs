@@ -6,6 +6,7 @@ import {
   uploadAthleteImage,
   uploadAthleteCI,
   fetchAthleteParent,
+  fetchMyAthletes,
 } from "./athletesThunk";
 import { updateUser } from "./usersThunk";
 
@@ -34,10 +35,12 @@ interface Parent {
 
 interface AthletesState {
   athletes: Athlete[];
+  myAthletes: Athlete[];
   allParents: Parent[];
   searchedParent: Parent | null;
   athleteParent: Parent | null;
   loading: boolean;
+  loadingMyAthletes: boolean;
   loadingParent: boolean;
   searchingParent: boolean;
   uploadingImage: boolean;
@@ -47,10 +50,12 @@ interface AthletesState {
 
 const initialState: AthletesState = {
   athletes: [],
+  myAthletes: [],
   allParents: [],
   searchedParent: null,
   athleteParent: null,
   loading: false,
+  loadingMyAthletes: false,
   loadingParent: false,
   searchingParent: false,
   uploadingImage: false,
@@ -159,6 +164,22 @@ const athletesSlice = createSlice({
       .addCase(fetchAthleteParent.rejected, (state, action) => {
         state.loadingParent = false;
         state.error = action.payload as string;
+      });
+
+    // Fetch My Athletes (for parent)
+    builder
+      .addCase(fetchMyAthletes.pending, (state) => {
+        state.loadingMyAthletes = true;
+        state.error = null;
+      })
+      .addCase(fetchMyAthletes.fulfilled, (state, action) => {
+        state.loadingMyAthletes = false;
+        state.myAthletes = action.payload;
+      })
+      .addCase(fetchMyAthletes.rejected, (state, action) => {
+        state.loadingMyAthletes = false;
+        state.error = action.payload as string;
+        state.myAthletes = [];
       });
 
     // Update User (for athletes)

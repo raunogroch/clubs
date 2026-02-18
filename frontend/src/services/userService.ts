@@ -238,6 +238,20 @@ export const userService = {
     }
   },
 
+  async getMyAthletes(): Promise<ApiResponse<any[]>> {
+    try {
+      const response = await api.get("/users/parent/my-athletes");
+      const data = response.data?.data || response.data;
+      return {
+        code: response.status,
+        message: "Tus atletas obtenidos",
+        data: Array.isArray(data) ? data : [],
+      };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  },
+
   async getMe(): Promise<ApiResponse<any>> {
     try {
       const response = await api.get("/users/me");

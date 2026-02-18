@@ -137,6 +137,21 @@ export class UsersController {
     return this.usersService.getAthletesBreakdownByAssignment(user);
   }
 
+  /**
+   * GET /api/users/parent/my-athletes
+   * Obtener todos los atletas del parent autenticado
+   *
+   * Roles permitidos: PARENT
+   *
+   * @param currentUser Usuario autenticado (parent)
+   * @returns Array de atletas del parent
+   */
+  @Get('parent/my-athletes')
+  @Roles(Role.PARENT)
+  async getMyAthletes(@CurrentUser() user: currentAuth) {
+    return this.usersService.getMyAthletes(user);
+  }
+
   @Get()
   @Roles(Role.SUPERADMIN, Role.ADMIN, Role.ASSISTANT, Role.COACH)
   findAll(

@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { userService } from "../services/userService";
+import userService from "../services/userService";
 
 export const fetchAthletes = createAsyncThunk(
   "athletes/fetchAthletes",
@@ -93,6 +93,21 @@ export const fetchAthleteParent = createAsyncThunk(
       return rejectWithValue(
         error?.message || "Error al cargar datos del tutor",
       );
+    }
+  },
+);
+
+export const fetchMyAthletes = createAsyncThunk(
+  "athletes/fetchMyAthletes",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await userService.getMyAthletes();
+      if (response.code === 200 && Array.isArray(response.data)) {
+        return response.data;
+      }
+      return [];
+    } catch (error: any) {
+      return rejectWithValue(error?.message || "Error al cargar tus atletas");
     }
   },
 );

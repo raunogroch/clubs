@@ -11,6 +11,7 @@ import {
   CoachesSuperadmin,
   Athletes,
   AthletesAdmin,
+  AthletesParent,
   Sports,
   ProfileAdmin,
   DashboardAdmin,
@@ -184,7 +185,7 @@ export const roleRoutes: RoleRoutes = {
       path: "/athletes",
       icon: "fa-users",
       label: "Atletas",
-      element: <DashboardParent />, // vista de lista de atletas asociados al padre
+      element: <AthletesParent />,
     },
     {
       path: "/schedules",

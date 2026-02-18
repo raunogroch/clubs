@@ -631,6 +631,51 @@ export class UsersService {
   }
 
   /**
+   * Obtiene todos los atletas del parent autenticado
+   * Solo un parent puede obtener sus propios atletas
+   * Filtra atletas cuyo parent_id coincida con el ID del usuario autenticado
+   */
+  async getMyAthletes(requestingUser: currentAuth): Promise<any[]> {
+    try {
+      // Buscar todos los atletas cuyo parent_id sea el del usuario autenticado
+      const athletes = await this.userRepository.findAthletesByParentId(
+        requestingUser.sub,
+      );
+
+      if (!athletes || athletes.length === 0) {
+        return [];
+      }
+
+      // Mapear al JSON solicitado
+      const result = athletes.map((a: any) => ({
+        role: a.role,
+        username: a.username || null,
+        password: a.password || null,
+        name: a.name || null,
+        lastname: a.lastname || null,
+        gender: a.gender || null,
+        birth_date: a.birth_date || null,
+        ci: a.ci || null,
+        active: typeof a.active === 'boolean' ? a.active : true,
+        phone: a.phone || null,
+        _id: a._id,
+        images: {
+          small: a.images?.small || null,
+          medium: a.images?.medium || null,
+          large: a.images?.large || null,
+        },
+        createdAt: a.createdAt || null,
+        bio: a.bio || null,
+      }));
+
+      return result;
+    } catch (error) {
+      console.error('Error al obtener atletas del parent:', error);
+      return [];
+    }
+  }
+
+  /**
    * Devuelve, por cada assignment del admin, la cantidad de atletas (únicos)
    * dentro del assignment cuyo `registration_pay` es `null` (no pagado).
    * Resultado: [{ assignment_id, assignment_name, unpaidCount }]

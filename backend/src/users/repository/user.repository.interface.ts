@@ -18,4 +18,5 @@ export interface IUserRepository {
   findById(id: string): Promise<User | null>;
   updateById(id: string, updateUserDto: UpdateUserDto): Promise<User | null>;
   deleteById(id: string): Promise<User | null>;
+  findAthletesByParentId(parentId: string): Promise<User[]>;
 }

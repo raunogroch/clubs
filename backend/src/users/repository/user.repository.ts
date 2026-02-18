@@ -125,4 +125,14 @@ export class UserRepository implements IUserRepository {
   async deleteById(id: string): Promise<User | null> {
     return this.userModel.findByIdAndDelete(id);
   }
+
+  /**
+   * Busca todos los atletas cuyo parent_id sea el ID especificado
+   */
+  async findAthletesByParentId(parentId: string): Promise<User[]> {
+    return this.userModel.find({
+      parent_id: parentId,
+      role: Roles.ATHLETE,
+    });
+  }
 }

@@ -19,6 +19,7 @@ export * from "./CoachesSuperadmin";
 export * from "./Parents";
 export * from "./Athletes";
 export * from "./AthletesAdmin";
+export * from "./AthletesParent";
 export * from "./Sports";
 export * from "./ProfileAdmin";
 export * from "./ProfileCoach";

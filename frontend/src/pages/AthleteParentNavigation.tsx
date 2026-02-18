@@ -18,7 +18,7 @@ export const AthleteParentNavigation = ({
       <SideNav />
       <div id="page-wrapper" className="gray-bg dashbard-1">
         <TopNav />
-        <div style={{ padding: "20px" }}>{children}</div>
+        {children}
         <Footer />
       </div>
     </div>
