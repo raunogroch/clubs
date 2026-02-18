@@ -1091,11 +1091,11 @@ export class UsersService {
         );
       }
 
-      // Construir URL absoluta del PDF
-      const absolutePdfUrl = `${imageProcessorApi}${saveResponse.data.pdfPath}`;
+      // Guardar solo la ruta relativa sin el dominio
+      const relativePdfPath = saveResponse.data.pdfPath;
 
       return {
-        pdfPath: absolutePdfUrl,
+        pdfPath: relativePdfPath,
         fileIdentifier: saveResponse.data.fileIdentifier,
       };
     } catch (error: any) {

@@ -8,8 +8,8 @@ import {
   uploadAthleteCI,
 } from "../store/athletesThunk";
 import { Image } from "../components/Image";
-import ImageUploadModal from "../components/ImageUploadModal";
-import { CIEditModal } from "../components/modals/CIEdit.modal";
+import ImageUploadModal from "../components/modals/ImageUpload.modal";
+import CIUploadModal from "../components/modals/CIUpload.modal";
 
 export const AthletesParent = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -21,8 +21,6 @@ export const AthletesParent = () => {
   const [selectedAthlete, setSelectedAthlete] = useState<any | null>(null);
   const [showImageModal, setShowImageModal] = useState(false);
   const [showCIModal, setShowCIModal] = useState(false);
-  const [ciLoading, setCILoading] = useState(false);
-  const [uploadedCIBase64, setUploadedCIBase64] = useState("");
 
   useEffect(() => {
     dispatch(fetchMyAthletes());
@@ -62,12 +60,10 @@ export const AthletesParent = () => {
   const handleOpenCIModal = (athlete: any) => {
     setSelectedAthlete(athlete);
     setShowCIModal(true);
-    setUploadedCIBase64("");
   };
   const handleCloseCIModal = () => {
     setShowCIModal(false);
     setSelectedAthlete(null);
-    setUploadedCIBase64("");
   };
 
   // Handlers conectados a Redux
@@ -84,29 +80,17 @@ export const AthletesParent = () => {
     dispatch(fetchMyAthletes());
   };
 
-  const handleCISubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedAthlete?._id || !uploadedCIBase64) return;
-    setCILoading(true);
+  const handleSaveCI = async (pdfBase64: string) => {
+    if (!selectedAthlete?._id) return;
     await dispatch(
       uploadAthleteCI({
         userId: selectedAthlete._id,
-        pdfBase64: uploadedCIBase64,
+        pdfBase64,
         role: "athlete",
       }),
     );
-    setCILoading(false);
     handleCloseCIModal();
     dispatch(fetchMyAthletes());
-  };
-  const handleCIFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      setUploadedCIBase64(ev.target?.result as string);
-    };
-    reader.readAsDataURL(file);
   };
 
   return (
@@ -210,7 +194,7 @@ export const AthletesParent = () => {
                               </span>
                             ) : (
                               <button
-                                className="btn btn-xs btn-primary mr-2"
+                                className="btn btn-primary mr-2"
                                 onClick={() => handleOpenImageModal(athlete)}
                               >
                                 Foto de perfil
@@ -229,7 +213,7 @@ export const AthletesParent = () => {
                               </span>
                             ) : (
                               <button
-                                className="btn btn-xs btn-info"
+                                className="btn btn-info"
                                 onClick={() => handleOpenCIModal(athlete)}
                               >
                                 Cargar CI (PDF)
@@ -250,7 +234,6 @@ export const AthletesParent = () => {
       {/* Modal para actualizar foto de perfil */}
       <ImageUploadModal
         open={showImageModal}
-        title="Actualizar foto de perfil"
         entityName={
           selectedAthlete
             ? `${selectedAthlete.name} ${selectedAthlete.lastname}`
@@ -263,13 +246,17 @@ export const AthletesParent = () => {
       />
 
       {/* Modal para cargar CI en PDF */}
-      <CIEditModal
-        showModal={showCIModal}
-        loading={ciLoading}
-        uploadedCIBase64={uploadedCIBase64}
+      <CIUploadModal
+        open={showCIModal}
+        title="Cargar Carnet de Identidad"
+        entityName={
+          selectedAthlete
+            ? `${selectedAthlete.name} ${selectedAthlete.lastname}`
+            : ""
+        }
         onClose={handleCloseCIModal}
-        onFileChange={handleCIFileChange}
-        onSubmit={handleCISubmit}
+        onSave={handleSaveCI}
+        saveLabel="Guardar"
       />
     </div>
   );

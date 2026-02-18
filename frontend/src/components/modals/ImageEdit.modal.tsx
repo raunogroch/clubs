@@ -25,121 +25,59 @@ export const ImageEditModal: React.FC<ImageModalProps> = ({
 
   return (
     <div
-      className="modal fade show"
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        backgroundColor: "rgba(0,0,0,.5)",
-        animation: "fadeIn 0.3s ease-in-out",
-        zIndex: 1050,
-      }}
+      className="modal inmodal"
+      style={{ display: "block", backgroundColor: "rgba(0,0,0,.5)" }}
       onClick={onClose}
     >
       <div
-        className="modal-dialog"
+        className="modal-dialog modal-lg"
         onClick={(e) => e.stopPropagation()}
-        style={{
-          margin: 0,
-          maxWidth: "480px",
-          width: "90%",
-          animation: "slideUp 0.3s ease-out",
-        }}
+        role="dialog"
+        aria-modal="true"
       >
-        <div
-          className="modal-content"
-          style={{
-            borderRadius: "12px",
-            border: "none",
-            boxShadow: "0 8px 24px rgba(0,0,0,.15)",
-            overflow: "hidden",
-          }}
-        >
-          {/* Header */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "20px 24px",
-              borderBottom: "1px solid #e8e8e8",
-              backgroundColor: "#fafafa",
-            }}
-          >
-            <h5
-              style={{
-                margin: 0,
-                fontSize: "18px",
-                fontWeight: "600",
-                color: "#333",
-              }}
-            >
-              Actualizar Foto de Perfil
-            </h5>
+        <div className="modal-content animated bounceInRight">
+          <div className="modal-header">
+            <i className="fa fa-image modal-icon"></i>
+            <h4 className="modal-title">Actualizar Foto de Perfil</h4>
+            <small className="font-bold">
+              {uploadedImageBase64
+                ? "Ajusta tu imagen"
+                : "Selecciona una imagen para editar"}
+            </small>
             <button
+              type="button"
+              className="close"
               onClick={onClose}
-              style={{
-                background: "none",
-                border: "none",
-                fontSize: "20px",
-                cursor: "pointer",
-                color: "#999",
-                transition: "color 0.2s",
-                padding: "4px 8px",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#333")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#999")}
+              aria-label="Cerrar"
             >
-              ✕
+              &times;
             </button>
           </div>
 
-          {/* Body */}
-          <div style={{ padding: "24px" }}>
+          <div className="modal-body">
             <form onSubmit={onSubmit}>
-              <div style={{ marginBottom: "20px" }}>
-                <label
-                  style={{
-                    display: "block",
-                    marginBottom: "8px",
-                    fontWeight: "500",
-                    color: "#333",
-                  }}
-                >
-                  Selecciona una imagen
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={onFileChange}
-                  style={{
-                    display: "block",
-                    padding: "8px",
-                    border: "1px solid #d0d0d0",
-                    borderRadius: "4px",
-                    width: "100%",
-                    boxSizing: "border-box",
-                  }}
-                />
+              <div className="form-group">
+                <div className="custom-file">
+                  <input
+                    id="image-file"
+                    type="file"
+                    accept="image/*"
+                    onChange={onFileChange}
+                    disabled={loading}
+                    className="custom-file-input"
+                  />
+                  <label htmlFor="image-file" className="custom-file-label">
+                    Selecciona una imagen
+                  </label>
+                </div>
+                <small className="form-text text-muted">
+                  Formatos soportados: jpg, png, gif
+                </small>
               </div>
 
               {uploadedImageBase64 && (
-                <div style={{ marginBottom: "20px" }}>
-                  <label
-                    style={{
-                      display: "block",
-                      marginBottom: "8px",
-                      fontWeight: "500",
-                      color: "#333",
-                    }}
-                  >
-                    Ajusta la imagen
-                  </label>
+                <div className="form-group">
+                  <label>Ajusta la imagen</label>
                   <Cropper
                     ref={cropperRef}
                     src={uploadedImageBase64}
@@ -151,67 +89,28 @@ export const ImageEditModal: React.FC<ImageModalProps> = ({
                   />
                 </div>
               )}
-
-              {/* Buttons */}
-              <div
-                style={{
-                  display: "flex",
-                  gap: "8px",
-                  justifyContent: "flex-end",
-                }}
-              >
-                <button
-                  type="button"
-                  onClick={onClose}
-                  style={{
-                    padding: "8px 18px",
-                    borderRadius: "6px",
-                    border: "1px solid #d0d0d0",
-                    backgroundColor: "white",
-                    color: "#333",
-                    fontWeight: "500",
-                    fontSize: "14px",
-                    cursor: "pointer",
-                    transition: "all 0.2s",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = "#f5f5f5";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "white";
-                  }}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading || !uploadedImageBase64}
-                  style={{
-                    padding: "8px 20px",
-                    borderRadius: "6px",
-                    border: "none",
-                    backgroundColor: loading ? "#ccc" : "#3498db",
-                    color: "white",
-                    fontWeight: "500",
-                    fontSize: "14px",
-                    cursor: loading ? "not-allowed" : "pointer",
-                    transition: "all 0.2s",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!loading) {
-                      e.currentTarget.style.backgroundColor = "#2980b9";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!loading) {
-                      e.currentTarget.style.backgroundColor = "#3498db";
-                    }
-                  }}
-                >
-                  {loading ? "Guardando..." : "Guardar"}
-                </button>
-              </div>
             </form>
+          </div>
+
+          <div className="modal-footer">
+            <button
+              type="button"
+              className="btn btn-xs btn-default"
+              onClick={onClose}
+              disabled={loading}
+              aria-label="Cancelar"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="btn btn-xs btn-primary"
+              disabled={loading || !uploadedImageBase64}
+              onClick={onSubmit}
+              aria-label={`${loading ? "Guardando..." : "Guardar"}`}
+            >
+              {loading ? "Guardando..." : "Guardar"}
+            </button>
           </div>
         </div>
       </div>

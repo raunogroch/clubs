@@ -16,23 +16,26 @@ const CropperImageInput = ({
       const file = e.target.files?.[0];
       if (file) onImageSelect(file);
     },
-    [onImageSelect]
+    [onImageSelect],
   );
   return (
-    <div className="custom-file">
-      <Input
-        type="file"
-        id="cropper-image"
-        name="image"
-        accept="image/*"
-        className={`form-control custom-file-input ${
-          error ? " is-invalid" : ""
-        }`}
-        onChange={handleFileChange}
-      />
-      <label htmlFor="cropper-image" className="custom-file-label">
-        Selecciona una imagen
-      </label>
+    <div className="form-group">
+      <div className="custom-file">
+        <Input
+          type="file"
+          id="cropper-image"
+          name="image"
+          accept="image/*"
+          className={`custom-file-input ${error ? " is-invalid" : ""}`}
+          onChange={handleFileChange}
+        />
+        <label htmlFor="cropper-image" className="custom-file-label">
+          Selecciona una imagen
+        </label>
+      </div>
+      <small className="form-text text-muted">
+        Formatos soportados: jpg, png, gif
+      </small>
       {error && <div className="invalid-feedback d-block">{error}</div>}
     </div>
   );
@@ -71,7 +74,7 @@ export const ImageCropperWithInput = ({
       };
       reader.readAsDataURL(file);
     },
-    [onChange, name]
+    [onChange, name],
   );
 
   const handleCrop = useCallback(() => {
@@ -134,8 +137,8 @@ export const ImageCropperWithInput = ({
 
   if (isUrl) {
     return (
-      <div className="image-cropper-container text-center">
-        <h3>Foto de perfil</h3>
+      <div className="text-center">
+        <h5 className="mb-3">Foto de perfil</h5>
         <Image
           src={`/${value.replace(/^\/+/, "")}`}
           alt="Imagen recuperada"
@@ -143,10 +146,11 @@ export const ImageCropperWithInput = ({
         />
         <div className="mt-3">
           <button
-            className="btn btn-xs btn-outline-danger btn-rounded"
+            className="btn btn-warning"
             onClick={handleReset}
+            title="Cambiar imagen"
           >
-            Cambiar imagen
+            <i className="fa fa-edit"></i> Cambiar imagen
           </button>
         </div>
       </div>
@@ -160,10 +164,10 @@ export const ImageCropperWithInput = ({
   }
 
   return (
-    <div className="image-cropper-container text-center">
+    <div className="image-cropper-container">
       <div className="d-flex justify-content-around flex-wrap gap-4">
         <div className="cropped-preview text-center" style={{ width: 220 }}>
-          <h3>Previsualización</h3>
+          <h5 className="mb-3">Previsualización</h5>
           {croppedPreview ? (
             <Image
               src={croppedPreview}
@@ -179,7 +183,7 @@ export const ImageCropperWithInput = ({
             />
           ) : (
             <div
-              className="bg-light border rounded"
+              className="bg-light border rounded-circle"
               style={{
                 width: "200px",
                 height: "200px",
@@ -189,7 +193,7 @@ export const ImageCropperWithInput = ({
           )}
         </div>
         <div className="cropper-editor text-center" style={{ width: 220 }}>
-          <h3>Editor de recorte</h3>
+          <h5 className="mb-3">Editor de recorte</h5>
           <Cropper
             style={{ width: "100%", height: 200 }}
             src={selectedImage}
@@ -207,12 +211,13 @@ export const ImageCropperWithInput = ({
           />
         </div>
       </div>
-      <div className="mt-3">
+      <div className="mt-3 text-center">
         <button
-          className="btn btn-xs btn-outline-danger btn-rounded"
+          className="btn btn-warning"
           onClick={handleReset}
+          title="Cambiar imagen"
         >
-          Cambiar imagen
+          <i className="fa fa-edit"></i> Cambiar imagen
         </button>
       </div>
     </div>

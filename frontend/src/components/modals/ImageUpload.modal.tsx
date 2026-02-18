@@ -14,7 +14,6 @@ interface Props {
 
 export const ImageUploadModal: React.FC<Props> = ({
   open,
-  title = "Actualizar imagen",
   entityName = "",
   currentImage,
   onClose,
@@ -58,52 +57,52 @@ export const ImageUploadModal: React.FC<Props> = ({
 
   return (
     <div
-      className="modal-overlay"
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: "rgba(0,0,0,0.6)",
-        zIndex: 9999,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
+      className="modal inmodal"
+      style={{ display: "block", backgroundColor: "rgba(0,0,0,.5)" }}
       onClick={onClose}
     >
       <div
-        className="modal-content card p-4"
-        style={{ width: 760 }}
+        className="modal-dialog modal-lg"
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
       >
-        <div className="d-flex justify-content-between align-items-center mb-2">
-          <h4>
-            {title} {entityName ? `- ${entityName}` : ""}
-          </h4>
-        </div>
+        <div className="modal-content animated bounceInRight">
+          <div className="modal-header">
+            <i className="fa fa-image modal-icon"></i>
+            <h4 className="modal-title">{entityName ? `${entityName}` : ""}</h4>
+            <small className="font-bold">Carga y ajusta tu imagen</small>
+          </div>
 
-        <div>
-          <ImageCropperWithInput
-            value={imageData || ""}
-            onChange={(e) => setImageData(e.target.value)}
-          />
-        </div>
+          <div className="modal-body">
+            <ImageCropperWithInput
+              value={imageData || ""}
+              onChange={(e) => setImageData(e.target.value)}
+            />
+          </div>
 
-        <div className="mt-3 d-flex justify-content-end gap-3">
-          <button className="btn btn-xs btn-secondary mx-2" onClick={onClose}>
-            {hasImage ? "Cancelar" : "Salir"}
-          </button>
-          {hasImage && (
+          <div className="modal-footer">
             <button
-              className="btn btn-xs btn-primary"
-              onClick={handleSave}
+              type="button"
+              className="btn btn-default"
+              onClick={onClose}
               disabled={saving}
+              aria-label="Cancelar"
             >
-              {saving ? "Guardando..." : saveLabel}
+              {hasImage ? "Cancelar" : "Salir"}
             </button>
-          )}
+            {hasImage && (
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={handleSave}
+                disabled={saving}
+                aria-label={`${saving ? "Guardando..." : saveLabel}`}
+              >
+                {saving ? "Guardando..." : saveLabel}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
