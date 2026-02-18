@@ -168,6 +168,8 @@ export const roleRoutes: RoleRoutes = {
     },
     {
       path: "/profile",
+      icon: "fa-user",
+      label: "Mi Perfil",
       element: <ProfileAdmin />,
     },
   ],
@@ -192,6 +194,8 @@ export const roleRoutes: RoleRoutes = {
     },
     {
       path: "/profile",
+      icon: "fa-user",
+      label: "Mi Perfil",
       element: <ProfileAdmin />,
     },
   ],

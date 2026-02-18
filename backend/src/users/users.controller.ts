@@ -226,10 +226,11 @@ export class UsersController {
   /**
    * Endpoint para cargar una imagen de usuario
    * Recibe imagen en base64 y la procesa con image-processor
+   * Permitido para todos los roles que necesitan actualizar su foto de perfil
    */
   @Post('upload-image')
   @HttpCode(200)
-  @Roles(Role.SUPERADMIN, Role.ADMIN, Role.ASSISTANT, Role.COACH)
+  @Roles(Role.SUPERADMIN, Role.ADMIN, Role.ASSISTANT, Role.COACH, Role.ATHLETE, Role.PARENT)
   async uploadImage(@Body() payload: any) {
     return this.usersService.uploadUserImage(payload);
   }
@@ -237,13 +238,14 @@ export class UsersController {
   /**
    * POST /api/users/upload-ci
    * Cargar PDF de Carnet de Identidad del atleta
+   * Permitido para administradores, coaches, athletes y parents
    *
-   * @param payload - { userId: string, pdfBase64: string, role: string }
-   * @returns { message: string, code: number, data: { documentPath: string } }
+   * @param payload - { userId: string, ci_file: string, role: string }
+   * @returns { message: string, code: number, data: { documentPath: string, pdfPath: string } }
    */
   @Post('upload-ci')
   @HttpCode(200)
-  @Roles(Role.SUPERADMIN, Role.ADMIN, Role.ASSISTANT, Role.COACH, Role.ATHLETE)
+  @Roles(Role.SUPERADMIN, Role.ADMIN, Role.ASSISTANT, Role.COACH, Role.ATHLETE, Role.PARENT)
   async uploadCI(@Body() payload: any) {
     return this.usersService.uploadAthleteCI(payload);
   }

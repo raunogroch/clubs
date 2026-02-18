@@ -1,15 +1,24 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../store/store";
 import { Image } from "../components";
+import { ImageEditModal, CIEditModal, PDFPreviewModal } from "../components/modals";
 import toastr from "toastr";
 import { userService } from "../services/userService";
 
 export const ProfileAdmin = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [showCIModal, setShowCIModal] = useState(false);
+  const [showPDFPreviewModal, setShowPDFPreviewModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
   const [profileData, setProfileData] = useState<any>(null);
+  const [uploadedImageBase64, setUploadedImageBase64] = useState<string>("");
+  const [uploadedCIBase64, setUploadedCIBase64] = useState<string>("");
+  const [pdfPreviewPath, setPDFPreviewPath] = useState<string>("");
+  const [pdfPreviewFileName, setPDFPreviewFileName] = useState<string>("");
 
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
@@ -38,6 +47,44 @@ export const ProfileAdmin = () => {
     } catch (error) {
       console.error("Error loading profile:", error);
     }
+  };
+
+  /**
+   * Calcula si un usuario es menor de edad (< 18 años)
+   */
+  const isUnderAge = (birthDate?: string): boolean => {
+    if (!birthDate) return false;
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birth.getDate())
+    ) {
+      age--;
+    }
+    return age < 18;
+  };
+
+  /**
+   * Verifica si el usuario actual puede editar el perfil
+   * - Un usuario puede editar su propio perfil
+   * - Un tutor puede editar el perfil de un atleta menor
+   */
+  const canEditProfile = (): boolean => {
+    const displayUser = profileData;
+    // El usuario siempre puede editar su propio perfil
+    if (user?.code === displayUser?._id || user?.code === displayUser?.code) {
+      return true;
+    }
+    // Un tutor (parent) puede editar el perfil de un atleta menor
+    if (user?.role === "parent" && displayUser?.role === "athlete") {
+      const isAthleteMinor = isUnderAge(displayUser?.birth_date);
+      const isParentOfAthlete = displayUser?.parent_id?._id === user?.code;
+      return isAthleteMinor && isParentOfAthlete;
+    }
+    return false;
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,6 +142,179 @@ export const ProfileAdmin = () => {
     }
   };
 
+  /**
+   * Abre el modal de edición de imagen de perfil
+   */
+  const handleOpenImageEdit = useCallback(() => {
+    setUploadedImageBase64("");
+    setShowImageModal(true);
+  }, []);
+
+  /**
+   * Cierra el modal de edición de imagen
+   */
+  const handleCloseImageModal = useCallback(() => {
+    setShowImageModal(false);
+    setUploadedImageBase64("");
+  }, []);
+
+  /**
+   * Maneja el cambio de archivo de imagen
+   */
+  const handleImageFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      // Validar que sea una imagen
+      if (!file.type.startsWith("image/")) {
+        toastr.error("Por favor selecciona un archivo de imagen");
+        return;
+      }
+
+      // Validar tamaño (máximo 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toastr.error("La imagen debe ser menor a 5MB");
+        return;
+      }
+
+      try {
+        const reader = new FileReader();
+        reader.onload = () => {
+          setUploadedImageBase64(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      } catch (error) {
+        toastr.error("Error al leer la imagen");
+      }
+    },
+    [],
+  );
+
+  /**
+   * Maneja el envío del formulario de imagen de perfil
+   */
+  const handleImageSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!uploadedImageBase64) return;
+
+      try {
+        setUploading(true);
+        const response = await userService.uploadCoachImage({
+          userId: user?.code || user?._id,
+          imageBase64: uploadedImageBase64,
+          role: user?.role,
+        });
+
+        if (response?.code === 200 || response?.code === 201) {
+          toastr.success("Foto de perfil cargada exitosamente");
+          handleCloseImageModal();
+          await loadUserProfile();
+        }
+      } catch (error: any) {
+        const errorMessage =
+          error?.response?.data?.message ||
+          error?.message ||
+          "Error al cargar la foto de perfil";
+        toastr.error(errorMessage);
+      } finally {
+        setUploading(false);
+      }
+    },
+    [uploadedImageBase64, handleCloseImageModal],
+  );
+
+  /**
+   * Abre el modal de edición de carnet (CI)
+   */
+  const handleOpenCIEdit = useCallback(() => {
+    setUploadedCIBase64("");
+    setShowCIModal(true);
+  }, []);
+
+  /**
+   * Cierra el modal de edición de carnet
+   */
+  const handleCloseCIModal = useCallback(() => {
+    setShowCIModal(false);
+    setUploadedCIBase64("");
+  }, []);
+
+  /**
+   * Maneja el cambio de archivo PDF del carnet
+   */
+  const handleCIFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      // Validar que sea PDF
+      if (file.type !== "application/pdf") {
+        toastr.error("Por favor selecciona un archivo en formato PDF");
+        return;
+      }
+
+      // Validar tamaño (máximo 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        toastr.error("El archivo PDF debe ser menor a 10MB");
+        return;
+      }
+
+      try {
+        const reader = new FileReader();
+        reader.onload = () => {
+          setUploadedCIBase64(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      } catch (error) {
+        toastr.error("Error al leer el archivo PDF");
+      }
+    },
+    [],
+  );
+
+  /**
+   * Maneja el envío del formulario de carnet
+   */
+  const handleCISubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!uploadedCIBase64) return;
+
+      try {
+        setUploading(true);
+        const response = await userService.uploadAthleteCI({
+          userId: user?.code || user?._id,
+          pdfBase64: uploadedCIBase64,
+          role: user?.role,
+        });
+
+        if (response?.code === 200 || response?.code === 201) {
+          toastr.success("Carnet cargado exitosamente");
+          handleCloseCIModal();
+          await loadUserProfile();
+          
+          // Mostrar el PDF en preview
+          if (response?.data?.documentPath) {
+            setPDFPreviewPath(response.data.documentPath);
+            setPDFPreviewFileName("Carnet.pdf");
+            setShowPDFPreviewModal(true);
+          }
+        }
+      } catch (error: any) {
+        const errorMessage =
+          error?.response?.data?.message ||
+          error?.message ||
+          "Error al cargar el carnet";
+        toastr.error(errorMessage);
+      } finally {
+        setUploading(false);
+      }
+    },
+    [user?.code, user?._id, user?.role, uploadedCIBase64, handleCloseCIModal],
+  );
+
   if (!user) {
     return (
       <>
@@ -137,6 +357,9 @@ export const ProfileAdmin = () => {
 
   // Mostrar datos del usuario desde Redux
   const displayUser = profileData;
+  const canEdit = canEditProfile();
+  const isAthleteMinor =
+    displayUser?.role === "athlete" && isUnderAge(displayUser?.birth_date);
 
   return (
     <>
@@ -165,6 +388,7 @@ export const ProfileAdmin = () => {
                         alignItems: "center",
                         justifyContent: "center",
                         backgroundColor: "#f5f5f5",
+                        position: "relative",
                       }}
                     >
                       {displayUser?.images?.medium ? (
@@ -187,6 +411,20 @@ export const ProfileAdmin = () => {
                         ></i>
                       )}
                     </div>
+
+                    {canEdit && (
+                      <div style={{ marginBottom: "15px" }}>
+                        <button
+                          className="btn btn-sm btn-primary"
+                          onClick={handleOpenImageEdit}
+                          disabled={uploading}
+                          style={{ cursor: uploading ? "not-allowed" : "pointer" }}
+                        >
+                          <i className="fa fa-camera m-r-xs"></i>
+                          Cambiar Foto
+                        </button>
+                      </div>
+                    )}
 
                     <h3 className="m-b-xs">
                       {displayUser?.name} {displayUser?.lastname}
@@ -228,6 +466,64 @@ export const ProfileAdmin = () => {
                         {displayUser?.ci || "-"}
                       </span>
                     </div>
+
+                    {canEdit && isAthleteMinor && !displayUser?.documentPath && (
+                      <div
+                        style={{
+                          marginBottom: "15px",
+                          padding: "8px",
+                          backgroundColor: "#f0f8ff",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        <button
+                          className="btn btn-sm btn-info"
+                          onClick={handleOpenCIEdit}
+                          disabled={uploading}
+                          style={{ cursor: uploading ? "not-allowed" : "pointer" }}
+                        >
+                          <i className="fa fa-file-pdf-o m-r-xs"></i>
+                          Cargar Carnet (PDF)
+                        </button>
+                        <small className="text-muted d-block m-t-xs">
+                          Máximo 10MB, formato PDF
+                        </small>
+                      </div>
+                    )}
+
+                    {displayUser?.documentPath && (
+                      <div
+                        style={{
+                          marginBottom: "15px",
+                          padding: "10px",
+                          backgroundColor: "#e8f5e9",
+                          borderRadius: "4px",
+                          border: "1px solid #4caf50",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <i
+                            className="fa fa-file-pdf-o"
+                            style={{ color: "#4caf50", fontSize: "18px" }}
+                          ></i>
+                          <span style={{ flex: 1, fontWeight: "500", color: "#2e7d32" }}>
+                            Carnet Cargado
+                          </span>
+                          <button
+                            className="btn btn-xs btn-info"
+                            onClick={() => {
+                              setPDFPreviewPath(displayUser.documentPath);
+                              setPDFPreviewFileName("Carnet.pdf");
+                              setShowPDFPreviewModal(true);
+                            }}
+                            style={{ padding: "4px 8px" }}
+                          >
+                            <i className="fa fa-eye m-r-xs"></i>
+                            Ver
+                          </button>
+                        </div>
+                      </div>
+                    )}
 
                     <div
                       style={{
@@ -482,8 +778,6 @@ export const ProfileAdmin = () => {
         </div>
       </div>
 
-      {/* Modal Editar Perfil - REMOVIDO */}
-
       {/* Modal Cambiar Contraseña */}
       {showPasswordModal && (
         <div
@@ -567,6 +861,34 @@ export const ProfileAdmin = () => {
           </div>
         </div>
       )}
+
+      {/* Modal Editar Foto de Perfil */}
+      <ImageEditModal
+        showModal={showImageModal}
+        loading={uploading}
+        uploadedImageBase64={uploadedImageBase64}
+        onClose={handleCloseImageModal}
+        onFileChange={handleImageFileChange}
+        onSubmit={handleImageSubmit}
+      />
+
+      {/* Modal Cargar Carnet (CI) */}
+      <CIEditModal
+        showModal={showCIModal}
+        loading={uploading}
+        uploadedCIBase64={uploadedCIBase64}
+        onClose={handleCloseCIModal}
+        onFileChange={handleCIFileChange}
+        onSubmit={handleCISubmit}
+      />
+
+      {/* Modal Preview PDF */}
+      <PDFPreviewModal
+        showModal={showPDFPreviewModal}
+        pdfPath={pdfPreviewPath}
+        fileName={pdfPreviewFileName}
+        onClose={() => setShowPDFPreviewModal(false)}
+      />
     </>
   );
 };

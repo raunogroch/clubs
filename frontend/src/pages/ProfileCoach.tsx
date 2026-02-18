@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../store/store";
 import { Image } from "../components";
+import { ImageEditModal } from "../components/modals";
 import toastr from "toastr";
 import { userService } from "../services/userService";
 import { MemberRole } from "../features/groups/types";
@@ -9,8 +10,11 @@ import { MemberRole } from "../features/groups/types";
 export const ProfileCoach = () => {
   const user = useSelector((state: RootState) => state.auth.user);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
   const [profileData, setProfileData] = useState<any>(null);
+  const [uploadedImageBase64, setUploadedImageBase64] = useState<string>("");
 
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
@@ -48,6 +52,89 @@ export const ProfileCoach = () => {
       [name]: value,
     });
   };
+
+  /**
+   * Abre el modal de edición de imagen de perfil
+   */
+  const handleOpenImageEdit = useCallback(() => {
+    setUploadedImageBase64("");
+    setShowImageModal(true);
+  }, []);
+
+  /**
+   * Cierra el modal de edición de imagen
+   */
+  const handleCloseImageModal = useCallback(() => {
+    setShowImageModal(false);
+    setUploadedImageBase64("");
+  }, []);
+
+  /**
+   * Maneja el cambio de archivo de imagen
+   */
+  const handleImageFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      // Validar que sea una imagen
+      if (!file.type.startsWith("image/")) {
+        toastr.error("Por favor selecciona un archivo de imagen");
+        return;
+      }
+
+      // Validar tamaño (máximo 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toastr.error("La imagen debe ser menor a 5MB");
+        return;
+      }
+
+      try {
+        const reader = new FileReader();
+        reader.onload = () => {
+          setUploadedImageBase64(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      } catch (error) {
+        toastr.error("Error al leer la imagen");
+      }
+    },
+    [],
+  );
+
+  /**
+   * Maneja el envío del formulario de imagen de perfil
+   */
+  const handleImageSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!uploadedImageBase64) return;
+
+      try {
+        setUploading(true);
+        const response = await userService.uploadCoachImage({
+          userId: user?.code || user?._id,
+          imageBase64: uploadedImageBase64,
+          role: user?.role,
+        });
+
+        if (response?.code === 200 || response?.code === 201) {
+          toastr.success("Foto de perfil cargada exitosamente");
+          handleCloseImageModal();
+          await loadUserProfile();
+        }
+      } catch (error: any) {
+        const errorMessage =
+          error?.response?.data?.message ||
+          error?.message ||
+          "Error al cargar la foto de perfil";
+        toastr.error(errorMessage);
+      } finally {
+        setUploading(false);
+      }
+    },
+    [uploadedImageBase64, handleCloseImageModal],
+  );
 
   const handleChangePassword = async () => {
     if (
@@ -166,6 +253,7 @@ export const ProfileCoach = () => {
                         alignItems: "center",
                         justifyContent: "center",
                         backgroundColor: "#f5f5f5",
+                        position: "relative",
                       }}
                     >
                       {displayUser?.images?.medium ? (
@@ -187,6 +275,18 @@ export const ProfileCoach = () => {
                           }}
                         ></i>
                       )}
+                    </div>
+
+                    <div style={{ marginBottom: "15px" }}>
+                      <button
+                        className="btn btn-sm btn-primary"
+                        onClick={handleOpenImageEdit}
+                        disabled={uploading}
+                        style={{ cursor: uploading ? "not-allowed" : "pointer" }}
+                      >
+                        <i className="fa fa-camera m-r-xs"></i>
+                        Cambiar Foto
+                      </button>
                     </div>
 
                     <h3 className="m-b-xs">
@@ -378,7 +478,15 @@ export const ProfileCoach = () => {
         </div>
       </div>
 
-      {/* Modal Editar Perfil - REMOVIDO */}
+      {/* Modal Editar Foto de Perfil */}
+      <ImageEditModal
+        showModal={showImageModal}
+        loading={uploading}
+        uploadedImageBase64={uploadedImageBase64}
+        onClose={handleCloseImageModal}
+        onFileChange={handleImageFileChange}
+        onSubmit={handleImageSubmit}
+      />
 
       {/* Modal Cambiar Contraseña */}
       {showPasswordModal && (

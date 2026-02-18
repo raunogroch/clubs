@@ -195,16 +195,20 @@ export const SideNav = () => {
               <ul
                 className={`dropdown-menu animated fadeInRight m-t-xs${isProfileDropdownOpen ? " show" : ""}`}
               >
-                <li>
-                  <Link
-                    className="dropdown-item"
-                    to="/profile"
-                    onClick={() => setIsProfileDropdownOpen(false)}
-                  >
-                    Perfil de usuario
-                  </Link>
-                </li>
-                <li className="dropdown-divider"></li>
+                {role !== "athlete" && role !== "parent" && (
+                  <>
+                    <li>
+                      <Link
+                        className="dropdown-item"
+                        to="/profile"
+                        onClick={() => setIsProfileDropdownOpen(false)}
+                      >
+                        Perfil de usuario
+                      </Link>
+                    </li>
+                    <li className="dropdown-divider"></li>
+                  </>
+                )}
                 <li>
                   <a className="dropdown-item" href="#" onClick={handleLogout}>
                     Cerrar Sesión
