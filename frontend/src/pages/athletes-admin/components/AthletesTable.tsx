@@ -40,13 +40,7 @@ interface AthleteRowProps {
 }
 
 const AthleteRow: React.FC<AthleteRowProps> = React.memo(
-  ({
-    athlete,
-    onEditClick,
-    onImageEditClick,
-    onCIEditClick,
-    onPDFPreviewClick,
-  }) => (
+  ({ athlete, onEditClick, onImageEditClick }) => (
     <tr>
       <td
         style={{
@@ -71,7 +65,7 @@ const AthleteRow: React.FC<AthleteRowProps> = React.memo(
                 height: "50px",
                 borderRadius: "50%",
                 objectFit: "cover",
-                border: "1px solid #ddd",
+                border: `5px solid ${athlete.gender === "female" ? "#ff69b4" : athlete.gender === "male" ? "#001eff" : "#999"}`,
               }}
             />
           ) : (
@@ -81,7 +75,7 @@ const AthleteRow: React.FC<AthleteRowProps> = React.memo(
                 height: "50px",
                 borderRadius: "50%",
                 backgroundColor: "#f0f0f0",
-                border: "1px solid #ddd",
+                border: `5px solid ${athlete.gender === "female" ? "#ff69b4" : athlete.gender === "male" ? "#001eff" : "#999"}`,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -129,40 +123,6 @@ const AthleteRow: React.FC<AthleteRowProps> = React.memo(
         )}
       </td>
       <td style={{ verticalAlign: "middle" }}>
-        {athlete.documentPath ? (
-          <div>
-            <button
-              onClick={() =>
-                onPDFPreviewClick(
-                  athlete.documentPath,
-                  `CI_${athlete.ci || athlete._id}.pdf`,
-                )
-              }
-              title="Ver PDF"
-              style={{
-                textDecoration: "none",
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                color: "#676a6c",
-                padding: "0",
-                font: "inherit",
-              }}
-            >
-              <i className="fa fa-search"></i> Previsualizar
-            </button>
-          </div>
-        ) : (
-          <button
-            className="btn btn-xs btn-primary"
-            onClick={() => onCIEditClick(athlete)}
-            title="Cargar Carnet"
-          >
-            <i className="fa fa-upload"></i> Cargar archivo
-          </button>
-        )}
-      </td>
-      <td style={{ verticalAlign: "middle" }}>
         {athlete.parent_id ? (
           <ParentTooltip parentId={athlete.parent_id}>
             <span
@@ -189,19 +149,7 @@ const AthleteRow: React.FC<AthleteRowProps> = React.memo(
           </span>
         )}
       </td>
-      <td style={{ verticalAlign: "middle" }}>
-        {athlete.gender &&
-        (athlete.gender === "male" || athlete.gender === "female") ? (
-          genderLabel(athlete.gender)
-        ) : (
-          <span title="Género inválido o no especificado">
-            <i
-              className="fa fa-exclamation-triangle"
-              style={{ color: "red" }}
-            ></i>
-          </span>
-        )}
-      </td>
+
       <td style={{ verticalAlign: "middle" }}>
         {athlete.birth_date ? (
           `${calculateAge(athlete.birth_date)} años`
@@ -306,12 +254,10 @@ export const AthletesTable: React.FC<AthletesTableProps> = React.memo(
       >
         <thead>
           <tr>
-            <th style={{ verticalAlign: "middle" }}>Foto de Perfil</th>
+            <th style={{ verticalAlign: "middle" }}>Foto</th>
             <th style={{ verticalAlign: "middle" }}>Nombre</th>
             <th style={{ verticalAlign: "middle" }}>Carnet</th>
-            <th style={{ verticalAlign: "middle" }}>Carnet - PDF</th>
             <th style={{ verticalAlign: "middle" }}>Teléfono</th>
-            <th style={{ verticalAlign: "middle" }}>Género</th>
             <th style={{ verticalAlign: "middle" }}>Edad</th>
             <th style={{ verticalAlign: "middle" }}>Fecha de Inscripción</th>
             <th style={{ textAlign: "center", verticalAlign: "middle" }}>
