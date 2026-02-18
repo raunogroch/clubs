@@ -3,7 +3,6 @@ import { Image } from "../../../components";
 import { ParentTooltip } from "../../../components/ParentTooltip";
 import {
   formatDateWithLiteralMonth,
-  genderLabel,
   calculateAge,
 } from "../../../utils/athleteUtils";
 
