@@ -1,5 +1,6 @@
 import React from "react";
 import { Button, Image } from "./index";
+import Dropdown from "./Dropdown";
 
 interface ClubItem {
   _id: string;
@@ -43,7 +44,7 @@ export const ClubsList: React.FC<ClubsListProps> = ({
         </h5>
         {onCreateClub && (
           <Button
-            className="btn btn-xs btn-primary"
+            className="btn btn-primary"
             icon="fa-plus"
             onClick={onCreateClub}
             disabled={isLoading}
@@ -169,6 +170,7 @@ export const ClubsList: React.FC<ClubsListProps> = ({
                         style={{ verticalAlign: "middle" }}
                       >
                         <div
+                          className="btn-group"
                           style={{
                             display: "flex",
                             justifyContent: "center",
@@ -176,15 +178,6 @@ export const ClubsList: React.FC<ClubsListProps> = ({
                             alignItems: "center",
                           }}
                         >
-                          <Button
-                            className="btn btn-xs btn-white"
-                            onClick={() => onEdit(club._id)}
-                            disabled={isLoading}
-                            icon="fa-pencil"
-                            title="Editar"
-                          >
-                            Editar
-                          </Button>
                           <Button
                             className="btn btn-xs btn-info"
                             onClick={() => onOpenGroups(club._id)}
@@ -203,15 +196,42 @@ export const ClubsList: React.FC<ClubsListProps> = ({
                           >
                             Rangos
                           </Button>
-                          <Button
-                            className="btn btn-xs btn-danger"
-                            onClick={() => onDelete(club._id)}
-                            disabled={isLoading}
-                            icon="fa-trash"
-                            title="Eliminar"
+                          <Dropdown
+                            options={[
+                              {
+                                label: "Editar",
+                                icon: "fa-pencil",
+                                onClick: () => onEdit(club._id),
+                                disabled: isLoading,
+                              },
+                              {
+                                label: "Eliminar",
+                                icon: "fa-trash",
+                                onClick: () => onDelete(club._id),
+                                disabled: isLoading,
+                              },
+                            ]}
                           >
-                            Eliminar
-                          </Button>
+                            <button
+                              type="button"
+                              className="btn btn btn-white"
+                              title="Más"
+                              style={{
+                                background: "none",
+                                border: "none",
+                                padding: "0 8px",
+                              }}
+                            >
+                              <i
+                                className="fa fa-ellipsis-v"
+                                style={{
+                                  fontSize: 15,
+                                  letterSpacing: 4,
+                                  marginRight: 0,
+                                }}
+                              ></i>
+                            </button>
+                          </Dropdown>
                         </div>
                       </td>
                     </tr>

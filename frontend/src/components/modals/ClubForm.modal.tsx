@@ -66,14 +66,6 @@ export const ClubFormModal: React.FC<ClubFormModalProps> = ({
                 ? "Actualiza los datos del club"
                 : "Completa los datos del nuevo club"}
             </small>
-            <button
-              type="button"
-              className="close"
-              onClick={onClose}
-              aria-label="Cerrar"
-            >
-              &times;
-            </button>
           </div>
           <div className="modal-body">
             <div className="form-group">
