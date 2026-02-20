@@ -22,6 +22,7 @@ export interface Club {
   assignment_id: string;
   created_by: string;
   members: string[];
+  assistants_added?: string[];
   levels?: Array<{
     _id?: string;
     position: number;
@@ -43,6 +44,7 @@ export interface UpdateClubRequest {
   name?: string;
   sport_id?: string;
   location?: string;
+  assistants_added?: string[];
 }
 
 /**
@@ -185,6 +187,50 @@ class ClubsService {
    * Eliminar un club
    * DELETE /api/clubs/:id
    */
+  async updateAssistants(id: string, assistants: string[]): Promise<Club> {
+    return this.update(id, { assistants_added: assistants });
+  }
+
+  /**
+   * Assign a single assistant to a club
+   * POST /api/clubs/:clubId/assistants { assistantId }
+   */
+  async addAssistant(clubId: string, assistantId: string): Promise<Club> {
+    const response = await fetch(`${API_URL}/clubs/${clubId}/assistants`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({ assistantId }),
+    });
+    if (!response.ok) {
+      const error = await safeParseJson(response);
+      throw new Error(error.message || "Error al asignar assistant");
+    }
+    return safeParseJson(response);
+  }
+
+  /**
+   * Remove an assistant from a club
+   */
+  async removeAssistant(clubId: string, assistantId: string): Promise<Club> {
+    const response = await fetch(
+      `${API_URL}/clubs/${clubId}/assistants/${assistantId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      },
+    );
+    if (!response.ok) {
+      const error = await safeParseJson(response);
+      throw new Error(error.message || "Error al eliminar assistant");
+    }
+    return safeParseJson(response);
+  }
+
   async delete(id: string): Promise<void> {
     const response = await fetch(`${API_URL}/clubs/${id}`, {
       method: "DELETE",

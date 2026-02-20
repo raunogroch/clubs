@@ -176,6 +176,29 @@ export class ClubRepository {
   }
 
   /**
+   * Añadir un asistente al club (agrega su ID al arreglo assistants_added)
+   */
+  async addAssistantToClub(clubId: string, assistantId: string): Promise<void> {
+    await this.clubModel.updateOne(
+      { _id: new Types.ObjectId(clubId) },
+      { $addToSet: { assistants_added: new Types.ObjectId(assistantId) } },
+    );
+  }
+
+  /**
+   * Remover un asistente del club
+   */
+  async removeAssistantFromClub(
+    clubId: string,
+    assistantId: string,
+  ): Promise<void> {
+    await this.clubModel.updateOne(
+      { _id: new Types.ObjectId(clubId) },
+      { $pull: { assistants_added: new Types.ObjectId(assistantId) } },
+    );
+  }
+
+  /**
    * Añadir un nivel al club (crea documento separado de ClubLevel)
    */
   async addLevel(

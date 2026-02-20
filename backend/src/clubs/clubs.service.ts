@@ -302,6 +302,64 @@ export class ClubsService {
    * Eliminar un club
    * Solo el creador o admin de la asignación pueden eliminar
    */
+  async addAssistantToClub(
+    clubId: string,
+    userId: string,
+    assistantId: string,
+  ) {
+    const club = await this.clubRepository.findById(clubId);
+    if (!club) throw new NotFoundException('Club no encontrado');
+
+    const isCreator = club.created_by.toString() === userId;
+    const assignmentId =
+      typeof club.assignment_id === 'object' && club.assignment_id !== null
+        ? (club.assignment_id as any)._id.toString()
+        : (club.assignment_id as any).toString();
+    const isAssignmentAdmin =
+      await this.assignmentsService.isUserAdminOfAssignment(
+        userId,
+        assignmentId,
+      );
+
+    if (!isCreator && !isAssignmentAdmin) {
+      throw new ForbiddenException(
+        'No tienes permisos para asignar secretarios',
+      );
+    }
+
+    await this.clubRepository.addAssistantToClub(clubId, assistantId);
+    return this.clubRepository.findById(clubId);
+  }
+
+  async removeAssistantFromClub(
+    clubId: string,
+    userId: string,
+    assistantId: string,
+  ) {
+    const club = await this.clubRepository.findById(clubId);
+    if (!club) throw new NotFoundException('Club no encontrado');
+
+    const isCreator = club.created_by.toString() === userId;
+    const assignmentId =
+      typeof club.assignment_id === 'object' && club.assignment_id !== null
+        ? (club.assignment_id as any)._id.toString()
+        : (club.assignment_id as any).toString();
+    const isAssignmentAdmin =
+      await this.assignmentsService.isUserAdminOfAssignment(
+        userId,
+        assignmentId,
+      );
+
+    if (!isCreator && !isAssignmentAdmin) {
+      throw new ForbiddenException(
+        'No tienes permisos para quitar secretarios',
+      );
+    }
+
+    await this.clubRepository.removeAssistantFromClub(clubId, assistantId);
+    return this.clubRepository.findById(clubId);
+  }
+
   async deleteClub(clubId: string, userId: string) {
     try {
       // Validar que el ID sea un ObjectId válido

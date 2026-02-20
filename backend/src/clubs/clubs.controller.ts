@@ -142,6 +142,36 @@ export class ClubsController {
   }
 
   /**
+   * POST /clubs/:clubId/assistants
+   * Asignar un assistant al club
+   */
+  @Post(':clubId/assistants')
+  async addAssistant(
+    @Param('clubId') clubId: string,
+    @Body('assistantId') assistantId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.clubsService.addAssistantToClub(clubId, user.sub, assistantId);
+  }
+
+  /**
+   * DELETE /clubs/:clubId/assistants/:assistantId
+   * Remover un assistant del club
+   */
+  @Delete(':clubId/assistants/:assistantId')
+  async removeAssistant(
+    @Param('clubId') clubId: string,
+    @Param('assistantId') assistantId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.clubsService.removeAssistantFromClub(
+      clubId,
+      user.sub,
+      assistantId,
+    );
+  }
+
+  /**
    * DELETE /clubs/:clubId
    * Eliminar un club
    */

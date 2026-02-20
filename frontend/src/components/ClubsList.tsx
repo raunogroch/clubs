@@ -1,15 +1,19 @@
 import React from "react";
 import { Button, Image } from "./index";
 import Dropdown from "./Dropdown";
+import { ClubAssistantsModal } from "./modals/ClubAssistants.modal";
+import { userService } from "../services/userService";
+import clubsService from "../services/clubs.service";
 
 interface ClubItem {
   _id: string;
-  name: string;
+  name?: string; // may be missing when only minimal info is loaded
   location?: string;
   athletes_added?: number;
   coaches?: number;
+  assistants_added?: string[];
   images?: any;
-  sport?: string;
+  sport?: string | { _id: string; name: string; active: boolean };
 }
 
 interface ClubsListProps {
@@ -33,6 +37,118 @@ export const ClubsList: React.FC<ClubsListProps> = ({
   isLoading,
   onCreateClub,
 }) => {
+  const [assistantsModalClubId, setAssistantsModalClubId] = React.useState<
+    string | null
+  >(null);
+  const [currentClub, setCurrentClub] = React.useState<ClubItem | null>(null);
+  const [assistantsLoading, setAssistantsLoading] = React.useState(false);
+  const [assistants, setAssistants] = React.useState<any[]>([]);
+  const [assignedIds, setAssignedIds] = React.useState<string[]>([]);
+
+  const handleOpenAssistants = async (club: ClubItem) => {
+    setAssistantsModalClubId(club._id);
+    setAssistantsLoading(true);
+    try {
+      // fetch fresh club details (might include updated assistants_added)
+      const clubResp = await clubsService.getById(club._id);
+      const fullClub = clubResp || club;
+      setCurrentClub(fullClub);
+
+      let list: any[] = [];
+      if (fullClub.assistants_added && fullClub.assistants_added.length > 0) {
+        const resp = await userService.getUsersById(fullClub.assistants_added);
+        list = resp.data || [];
+      }
+      setAssistants(list);
+
+      setAssignedIds((prev) => {
+        if (!currentClub || currentClub._id !== fullClub._id) {
+          return fullClub.assistants_added || [];
+        }
+        const fromClub = fullClub.assistants_added || [];
+        return Array.from(new Set([...fromClub, ...prev]));
+      });
+    } catch (err) {
+      console.error(err);
+    }
+    setAssistantsLoading(false);
+  };
+
+  const handleCloseAssistants = () => {
+    setAssistantsModalClubId(null);
+    setCurrentClub(null);
+    setAssignedIds([]); // ensure no leftovers when closing
+  };
+
+  // search is now handled inside modal
+
+  const handleCreateAssistant = async (
+    name: string,
+    lastname: string,
+    ci: string,
+  ) => {
+    setAssistantsLoading(true);
+    const resp = await userService.createUser({
+      name,
+      lastname,
+      ci,
+      role: "assistant",
+    });
+    if (resp.code === 201 || resp.code === 200) {
+      const created = resp.data;
+      await handleAssignAssistant(created._id);
+      // refresh list using current club state
+      if (currentClub) {
+        handleOpenAssistants(currentClub);
+      }
+    }
+    setAssistantsLoading(false);
+  };
+
+  const handleAssignAssistant = async (assistantId: string) => {
+    if (!assistantsModalClubId) return;
+    setAssistantsLoading(true);
+    try {
+      await clubsService.addAssistant(assistantsModalClubId, assistantId);
+      setAssignedIds((prev) => [...new Set([...prev, assistantId])]);
+      // also update currentClub to keep it in sync
+      setCurrentClub((c) => {
+        if (!c) return c;
+        const existing = c.assistants_added || [];
+        return {
+          ...c,
+          assistants_added: Array.from(new Set([...existing, assistantId])),
+        };
+      });
+      // refresh list from backend to ensure state consistency
+      if (currentClub) handleOpenAssistants(currentClub);
+    } catch (err) {
+      console.error(err);
+    }
+    setAssistantsLoading(false);
+  };
+
+  const handleRemoveAssistant = async (assistantId: string) => {
+    if (!assistantsModalClubId) return;
+    setAssistantsLoading(true);
+    try {
+      await clubsService.removeAssistant(assistantsModalClubId, assistantId);
+      setAssignedIds((prev) => prev.filter((id) => id !== assistantId));
+      setCurrentClub((c) => {
+        if (!c) return c;
+        const existing = c.assistants_added || [];
+        return {
+          ...c,
+          assistants_added: existing.filter((id) => id !== assistantId),
+        };
+      });
+      // refresh list as well
+      if (currentClub) handleOpenAssistants(currentClub);
+    } catch (err) {
+      console.error(err);
+    }
+    setAssistantsLoading(false);
+  };
   return (
     <>
       <div
@@ -63,8 +179,6 @@ export const ClubsList: React.FC<ClubsListProps> = ({
                   <th>Nombre del Club</th>
                   <th>Disciplina</th>
                   <th>Ubicación</th>
-                  <th className="text-center">Atletas</th>
-                  <th className="text-center">Entrenadores</th>
                   <th className="text-center">Acciones</th>
                 </tr>
               </thead>
@@ -148,22 +262,12 @@ export const ClubsList: React.FC<ClubsListProps> = ({
                         <strong>{club.name}</strong>
                       </td>
                       <td style={{ verticalAlign: "middle" }}>
-                        {club.sport || "-"}
+                        {typeof club.sport === "string"
+                          ? club.sport
+                          : club.sport?.name || "-"}
                       </td>
                       <td style={{ verticalAlign: "middle" }}>
                         {club.location || "-"}
-                      </td>
-                      <td
-                        className="text-center"
-                        style={{ verticalAlign: "middle" }}
-                      >
-                        {club.athletes_added || 0}
-                      </td>
-                      <td
-                        className="text-center"
-                        style={{ verticalAlign: "middle" }}
-                      >
-                        {club.coaches || 0}
                       </td>
                       <td
                         className="text-center"
@@ -186,6 +290,15 @@ export const ClubsList: React.FC<ClubsListProps> = ({
                             title="Grupos"
                           >
                             Grupos
+                          </Button>
+                          <Button
+                            className="btn btn-xs btn-warning"
+                            onClick={() => handleOpenAssistants(club)}
+                            disabled={isLoading}
+                            icon="fa-user-secret"
+                            title="Secretarios(as)"
+                          >
+                            Secretarios(as)
                           </Button>
                           <Button
                             className="btn btn-xs btn-primary"
@@ -242,6 +355,19 @@ export const ClubsList: React.FC<ClubsListProps> = ({
           </div>
         </div>
       </div>
+      {assistantsModalClubId && (
+        <ClubAssistantsModal
+          isOpen={!!assistantsModalClubId}
+          isLoading={assistantsLoading}
+          clubName={currentClub?.name || ""}
+          assistants={assistants}
+          onClose={handleCloseAssistants}
+          onCreate={handleCreateAssistant}
+          onAssign={handleAssignAssistant}
+          onRemove={handleRemoveAssistant}
+          assignedIds={assignedIds}
+        />
+      )}
     </>
   );
 };

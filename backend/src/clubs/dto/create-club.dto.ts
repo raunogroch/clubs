@@ -40,4 +40,12 @@ export class CreateClubDto {
   @IsArray()
   @IsMongoId({ each: true })
   groups?: string[];
+
+  /**
+   * IDs de secretarios/as asignados al club
+   */
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  assistants_added?: string[];
 }

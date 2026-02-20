@@ -85,6 +85,19 @@ export const userService = {
     }
   },
 
+  async createUser(userData: any): Promise<ApiResponse<any>> {
+    try {
+      const response = await api.post("/users", userData);
+      return {
+        code: response.status,
+        message: "Usuario creado",
+        data: response.data,
+      };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  },
+
   async createAthlete(athleteData: any): Promise<ApiResponse<any>> {
     try {
       const response = await api.post("/users", athleteData);

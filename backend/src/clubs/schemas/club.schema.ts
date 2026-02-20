@@ -71,6 +71,17 @@ export class Club extends Document {
   events_added?: Types.ObjectId[];
 
   /**
+   * IDs de los secretarios/as asignados al club
+   * Referencias a documentos de User con rol 'assistant'
+   */
+  @Prop({
+    type: [Types.ObjectId],
+    ref: 'User',
+    default: [],
+  })
+  assistants_added?: Types.ObjectId[];
+
+  /**
    * IDs de los niveles/logros del club
    * Referencias a documentos de ClubLevel
    */
@@ -131,3 +142,4 @@ ClubSchema.index({ sport_id: 1 });
 ClubSchema.index({ assignment_id: 1 });
 ClubSchema.index({ created_by: 1 });
 ClubSchema.index({ events_added: 1 });
+ClubSchema.index({ assistants_added: 1 });
