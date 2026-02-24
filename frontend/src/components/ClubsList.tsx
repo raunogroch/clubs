@@ -80,18 +80,41 @@ export const ClubsList: React.FC<ClubsListProps> = ({
     setAssignedIds([]); // ensure no leftovers when closing
   };
 
+  const handleRemoveAssistant = async (assistantId: string) => {
+    if (!assistantsModalClubId) return;
+    setAssistantsLoading(true);
+    try {
+      await clubsService.removeAssistant(assistantsModalClubId, assistantId);
+      setAssignedIds((prev) => prev.filter((id) => id !== assistantId));
+      setCurrentClub((c) => {
+        if (!c) return c;
+        const existing = c.assistants_added || [];
+        return {
+          ...c,
+          assistants_added: existing.filter((id) => id !== assistantId),
+        };
+      });
+      if (currentClub) handleOpenAssistants(currentClub);
+    } catch (err) {
+      console.error(err);
+    }
+    setAssistantsLoading(false);
+  };
+
   // search is now handled inside modal
 
   const handleCreateAssistant = async (
     name: string,
     lastname: string,
     ci: string,
+    cellphone?: string,
   ) => {
     setAssistantsLoading(true);
     const resp = await userService.createUser({
       name,
       lastname,
       ci,
+      cellphone,
       role: "assistant",
     });
     if (resp.code === 201 || resp.code === 200) {
@@ -128,27 +151,6 @@ export const ClubsList: React.FC<ClubsListProps> = ({
     setAssistantsLoading(false);
   };
 
-  const handleRemoveAssistant = async (assistantId: string) => {
-    if (!assistantsModalClubId) return;
-    setAssistantsLoading(true);
-    try {
-      await clubsService.removeAssistant(assistantsModalClubId, assistantId);
-      setAssignedIds((prev) => prev.filter((id) => id !== assistantId));
-      setCurrentClub((c) => {
-        if (!c) return c;
-        const existing = c.assistants_added || [];
-        return {
-          ...c,
-          assistants_added: existing.filter((id) => id !== assistantId),
-        };
-      });
-      // refresh list as well
-      if (currentClub) handleOpenAssistants(currentClub);
-    } catch (err) {
-      console.error(err);
-    }
-    setAssistantsLoading(false);
-  };
   return (
     <>
       <div
