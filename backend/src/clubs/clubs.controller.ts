@@ -97,6 +97,18 @@ export class ClubsController {
   }
 
   /**
+   * GET /clubs/assistants
+   * Obtener todos los asistentes que están registrados en los clubs de las
+   * asignaciones administradas por el usuario actual. Cada objeto trae los
+   * clubes asociados para facilitar la visualización en el frontend.
+   * IMPORTANTE: Esta ruta debe ir ANTES de @Get(':clubId')
+   */
+  @Get('assistants')
+  async getAssistants(@CurrentUser() user: any) {
+    return this.clubsService.getAssistantsForAdmin(user.sub);
+  }
+
+  /**
    * GET /clubs
    * Obtener todos los clubs del usuario (de sus asignaciones)
    */

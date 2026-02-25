@@ -26,6 +26,7 @@ import { SchedulesController } from './groups/schedules.controller';
 import { AssignmentsModule } from '../assignments/assignments.module';
 import { SportsModule } from '../sports/sports.module';
 import { RegistrationsModule } from '../registrations/registrations.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { RegistrationsModule } from '../registrations/registrations.module';
     AssignmentsModule,
     SportsModule,
     RegistrationsModule,
+    UsersModule,
   ],
   controllers: [
     ClubsController,

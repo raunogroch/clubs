@@ -86,6 +86,19 @@ export const deleteClub = createAsyncThunk(
   },
 );
 
+export const fetchAssignmentAssistants = createAsyncThunk(
+  "clubs/fetchAssignmentAssistants",
+  async (_, { rejectWithValue }) => {
+    try {
+      const data = await clubsService.getAssignmentAssistants();
+      return data;
+    } catch (err: any) {
+      toastr.error("Error al obtener asistentes de la asignación");
+      return rejectWithValue(err.response?.data || { message: err.message });
+    }
+  },
+);
+
 // Note: restoreClub functionality not available in the current ClubsService
 // export const restoreClub = createAsyncThunk(
 //   "clubs/restore",

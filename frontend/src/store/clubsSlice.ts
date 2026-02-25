@@ -5,6 +5,7 @@ import {
   createClub,
   updateClub,
   deleteClub,
+  fetchAssignmentAssistants,
 } from "./clubsThunk";
 import { addClubLevel, updateClubLevel, deleteClubLevel } from "./levelsThunk";
 
@@ -18,6 +19,10 @@ interface ClubsState {
   selectedClub: Club | null;
   status: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
+  // listado de asistentes agrupados por club para las asignaciones del admin
+  assignmentAssistants: any[];
+  assignmentAssistantsStatus: "idle" | "loading" | "succeeded" | "failed";
+  assignmentAssistantsError: string | null;
 }
 
 const initialState: ClubsState = {
@@ -25,6 +30,9 @@ const initialState: ClubsState = {
   selectedClub: null,
   status: "idle",
   error: null,
+  assignmentAssistants: [],
+  assignmentAssistantsStatus: "idle",
+  assignmentAssistantsError: null,
 };
 
 const clubsSlice = createSlice({
@@ -118,6 +126,25 @@ const clubsSlice = createSlice({
         state.status = "failed";
         state.error = action.payload as string;
       });
+
+    // nuevo thunk de asistentes por asignación
+    builder
+      .addCase(fetchAssignmentAssistants.pending, (state) => {
+        state.assignmentAssistantsStatus = "loading";
+        state.assignmentAssistantsError = null;
+      })
+      .addCase(
+        fetchAssignmentAssistants.fulfilled,
+        (state, action: PayloadAction<any[]>) => {
+          state.assignmentAssistantsStatus = "succeeded";
+          state.assignmentAssistants = action.payload || [];
+        },
+      )
+      .addCase(fetchAssignmentAssistants.rejected, (state, action) => {
+        state.assignmentAssistantsStatus = "failed";
+        state.assignmentAssistantsError = action.payload as string;
+      });
+
     // handle club levels actions
     builder
       .addCase(addClubLevel.pending, (state) => {

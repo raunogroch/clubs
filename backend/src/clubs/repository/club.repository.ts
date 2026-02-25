@@ -199,6 +199,28 @@ export class ClubRepository {
   }
 
   /**
+   * Buscar clubs pertenecientes a una o varias asignaciones que tengan
+   * asistentes registrados. El arreglo `assistants_added` se mantiene tal cual,
+   * y la llamada de servicio podrá hacer `populate` si lo requiere.
+   */
+  async findByAssignmentsWithAssistants(
+    assignmentIds: string[],
+  ): Promise<Club[]> {
+    if (!assignmentIds || assignmentIds.length === 0) return [];
+    const objectIds = assignmentIds.map((id) => new Types.ObjectId(id));
+    return (
+      this.clubModel
+        .find({
+          assignment_id: { $in: objectIds },
+          assistants_added: { $exists: true, $ne: [] },
+        })
+        // traer algunos campos del usuario para facilitar el mapeo posterior
+        .populate('assistants_added', 'name lastname username')
+        .exec()
+    );
+  }
+
+  /**
    * Añadir un nivel al club (crea documento separado de ClubLevel)
    */
   async addLevel(

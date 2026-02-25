@@ -292,6 +292,37 @@ class ClubsService {
   }
 
   /**
+   * Obtener asistentes registrados en los clubes de las asignaciones del admin
+   * GET /api/clubs/assistants
+   */
+  async getAssignmentAssistants(): Promise<
+    Array<{
+      _id: string;
+      name?: string;
+      lastname?: string;
+      username?: string;
+      clubs: Array<{ _id: string; name?: string }>;
+    }>
+  > {
+    const response = await fetch(`${API_URL}/clubs/assistants`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await safeParseJson(response);
+      throw new Error(
+        error.message || "Error al obtener asistentes de los clubes",
+      );
+    }
+
+    return safeParseJson(response);
+  }
+
+  /**
    * Añadir un nivel al club
    * POST /api/clubs/:clubId/levels
    */

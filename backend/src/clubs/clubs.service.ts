@@ -18,6 +18,7 @@ import { CreateClubLevelDto, UpdateClubLevelDto } from './dto/club-level.dto';
 import { AssignmentsService } from '../assignments/assignments.service';
 import { SportsService } from '../sports/sports.service';
 import { Assignment } from '../assignments/schemas/assignment.schema';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class ClubsService {
@@ -26,6 +27,7 @@ export class ClubsService {
     private assignmentsService: AssignmentsService,
     private sportsService: SportsService,
     private configService: ConfigService,
+    private usersService: UsersService,
   ) {}
 
   /**
@@ -450,6 +452,61 @@ export class ClubsService {
     }
 
     return club;
+  }
+
+  /**
+   * Retorna todos los asistentes asignados a los clubes de las asignaciones donde
+   * el usuario es administrador. El resultado agrupa clubes por asistente para
+   * que el frontend pueda mostrar los clubes en los que cada uno está registrado.
+   */
+  async getAssistantsForAdmin(userId: string): Promise<any[]> {
+    // Obtener asignaciones donde el usuario es admin
+    const assignments =
+      await this.assignmentsService.getAssignmentsByAdmin(userId);
+
+    if (!assignments || assignments.length === 0) {
+      return [];
+    }
+
+    const assignmentIds = assignments.map((a: Assignment) =>
+      (a._id as any).toString(),
+    );
+
+    // Obtener clubs que pertenecen a dichas asignaciones y que tienen asistentes
+    const clubs =
+      await this.clubRepository.findByAssignmentsWithAssistants(assignmentIds);
+
+    // Mapear asistentes únicos y acumular clubes donde figuran
+    const assistantMap = new Map<
+      string,
+      { assistant: any; clubs: Array<{ _id: string; name?: string }> }
+    >();
+
+    clubs.forEach((club: any) => {
+      const clubSummary = { _id: club._id, name: club.name };
+      const list: any[] = club.assistants_added || [];
+      list.forEach((assistant: any) => {
+        const id = assistant._id.toString();
+        if (!assistantMap.has(id)) {
+          assistantMap.set(id, { assistant, clubs: [] });
+        }
+        assistantMap.get(id)!.clubs.push(clubSummary);
+      });
+    });
+
+    // Convertir a arreglo con la forma deseada
+    const result = Array.from(assistantMap.values()).map((entry) => {
+      const u = entry.assistant;
+      return {
+        _id: u._id,
+        name: u.name,
+        lastname: u.lastname,
+        username: u.username,
+        clubs: entry.clubs,
+      };
+    });
+
+    return result;
   }
 
   /**
