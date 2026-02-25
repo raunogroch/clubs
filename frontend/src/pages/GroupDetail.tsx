@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import toastr from "toastr";
 import { Button, NavHeader } from "../components";
+import Ibox from "../components/Ibox";
 import type { RootState, AppDispatch } from "../store/store";
 import {
   fetchGroupSummary,
@@ -493,86 +494,82 @@ export const GroupDetail = () => {
         {/* Horarios */}
         <div className="row m-t-md">
           <div className="col-lg-12">
-            <div className="ibox">
-              <div className="ibox-title">
-                <h5>
+            <Ibox
+              title={
+                <>
                   <i className="fa fa-calendar"></i> Horarios de Entrenamiento
-                </h5>
-                <div className="ibox-tools">
-                  <Button
-                    className="btn btn-xs btn-success"
-                    icon="fa-plus"
-                    onClick={() =>
-                      scheduleModal.openModal(id_subgrupo!, schedules || [])
-                    }
-                  >
-                    {(schedules?.length || 0) > 0
-                      ? "Actualizar horarios"
-                      : "Asignar horarios"}
-                  </Button>
-                  <a className="collapse-link">
-                    <i className="fa fa-chevron-up"></i>
-                  </a>
-                </div>
-              </div>
-              <div className="ibox-content">
-                {schedules && schedules.length > 0 ? (
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "12px",
-                    }}
-                  >
-                    {getGroupedSchedules().map((item, idx) => (
-                      <div
-                        key={idx}
+                </>
+              }
+              tools={
+                <Button
+                  className="btn btn-xs btn-success"
+                  icon="fa-plus"
+                  onClick={() =>
+                    scheduleModal.openModal(id_subgrupo!, schedules || [])
+                  }
+                >
+                  {(schedules?.length || 0) > 0
+                    ? "Actualizar horarios"
+                    : "Asignar horarios"}
+                </Button>
+              }
+            >
+              {schedules && schedules.length > 0 ? (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "12px",
+                  }}
+                >
+                  {getGroupedSchedules().map((item, idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        padding: "10px 15px",
+                        backgroundColor: "#f9f9f9",
+                        borderRadius: "4px",
+                        border: "1px solid #e0e0e0",
+                      }}
+                    >
+                      <i
+                        className="fa fa-calendar-o text-navy"
+                        style={{ marginRight: "12px", fontSize: "16px" }}
+                      ></i>
+                      <span style={{ flex: 1 }}>
+                        <strong>{item.days}</strong>
+                      </span>
+                      <span
                         style={{
-                          display: "flex",
-                          alignItems: "center",
-                          padding: "10px 15px",
-                          backgroundColor: "#f9f9f9",
-                          borderRadius: "4px",
-                          border: "1px solid #e0e0e0",
+                          marginLeft: "12px",
+                          color: "#666",
+                          fontWeight: "500",
                         }}
                       >
                         <i
-                          className="fa fa-calendar-o text-navy"
-                          style={{ marginRight: "12px", fontSize: "16px" }}
+                          className="fa fa-clock-o"
+                          style={{ marginRight: "6px" }}
                         ></i>
-                        <span style={{ flex: 1 }}>
-                          <strong>{item.days}</strong>
-                        </span>
-                        <span
-                          style={{
-                            marginLeft: "12px",
-                            color: "#666",
-                            fontWeight: "500",
-                          }}
-                        >
-                          <i
-                            className="fa fa-clock-o"
-                            style={{ marginRight: "6px" }}
-                          ></i>
-                          {item.startTime} a {item.endTime}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div
-                    style={{
-                      padding: "20px",
-                      textAlign: "center",
-                      color: "#999",
-                    }}
-                  >
-                    <p>No hay horarios asignados aún</p>
-                    <small>Haz clic en "Asignar horarios" para comenzar</small>
-                  </div>
-                )}
-              </div>
-            </div>
+                        {item.startTime} a {item.endTime}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div
+                  style={{
+                    padding: "20px",
+                    textAlign: "center",
+                    color: "#999",
+                  }}
+                >
+                  <p>No hay horarios asignados aún</p>
+                  <small>Haz clic en "Asignar horarios" para comenzar</small>
+                </div>
+              )}
+            </Ibox>
           </div>
         </div>
         <div className="row m-t-md">

@@ -298,6 +298,7 @@ export const DashboardContent = ({ user }: { user: any | undefined }) => {
                 onEditDateValue={setEditingDateValue}
                 onOpenPayModal={handleOpenPayModal}
               />
+              <br />
             </div>
           </div>
         </div>
