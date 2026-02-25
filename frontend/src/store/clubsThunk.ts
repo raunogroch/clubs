@@ -26,7 +26,10 @@ export const fetchAllClubs = createAsyncThunk(
       return data;
     } catch (err: any) {
       toastr.error("Error al obtener clubs");
-      return rejectWithValue(err.message || "Error al obtener clubs");
+      // incluir código de status si está disponible
+      const payload: any = { message: err.message || "Error al obtener clubs" };
+      if (err.status) payload.status = err.status;
+      return rejectWithValue(payload);
     }
   },
 );

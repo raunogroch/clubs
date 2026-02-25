@@ -14,6 +14,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AssignmentRequiredGuard } from '../common/guards/assignment-required.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { ClubsService } from './clubs.service';
 import { CreateClubDto } from './dto/create-club.dto';
@@ -21,7 +22,7 @@ import { UpdateClubDto } from './dto/update-club.dto';
 import { CreateClubLevelDto, UpdateClubLevelDto } from './dto/club-level.dto';
 
 @Controller('clubs')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, AssignmentRequiredGuard)
 export class ClubsController {
   constructor(private clubsService: ClubsService) {}
 

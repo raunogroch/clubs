@@ -132,12 +132,25 @@ class ClubsService {
       },
     });
 
-    if (!response.ok) {
-      const error = await safeParseJson(response);
-      throw new Error(error.message || "Error al obtener los clubs");
+    const text = await response.text();
+    let data: any;
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch (e) {
+      data = text;
     }
 
-    return safeParseJson(response);
+    if (!response.ok) {
+      const err: any = new Error(
+        (data && data.message) ||
+          `Error al obtener los clubs (${response.status})`,
+      );
+      err.status = response.status;
+      err.payload = data;
+      throw err;
+    }
+
+    return data;
   }
 
   /**

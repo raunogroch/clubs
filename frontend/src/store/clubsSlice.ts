@@ -18,7 +18,7 @@ interface ClubsState {
   items: Club[];
   selectedClub: Club | null;
   status: "idle" | "loading" | "succeeded" | "failed";
-  error: string | null;
+  error: any;
   // listado de asistentes agrupados por club para las asignaciones del admin
   assignmentAssistants: any[];
   assignmentAssistantsStatus: "idle" | "loading" | "succeeded" | "failed";
@@ -65,7 +65,7 @@ const clubsSlice = createSlice({
       )
       .addCase(fetchAllClubs.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.payload as string;
+        state.error = action.payload; // puede ser objeto {message, status}
       })
       // fetchClubById
       .addCase(fetchClubById.pending, (state) => {
