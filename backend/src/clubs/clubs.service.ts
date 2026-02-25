@@ -196,17 +196,12 @@ export class ClubsService {
       return [];
     }
 
-    // Obtener todos los clubs de estas asignaciones
-    const clubsByAssignment = await Promise.all(
-      assignments.map((assignment: Assignment) =>
-        this.clubRepository.findByAssignment(
-          (assignment._id as any).toString(),
-        ),
-      ),
+    const assignmentIds = assignments.map((a: Assignment) =>
+      (a._id as any).toString(),
     );
 
-    // Aplanar el array y retornar
-    return clubsByAssignment.flat();
+    // Ahora hacemos UNA sola consulta en lugar de N
+    return this.clubRepository.findByAssignments(assignmentIds);
   }
 
   /**

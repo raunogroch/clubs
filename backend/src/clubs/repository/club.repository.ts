@@ -79,6 +79,21 @@ export class ClubRepository {
   }
 
   /**
+   * Obtener todos los clubes cuyas asignaciones estén en la lista dada.
+   * Esto evita ejecutar múltiples consultas paralelas cuando el usuario tiene
+   * varias asignaciones y mejora significativamente el rendimiento.
+   */
+  async findByAssignments(assignmentIds: string[]): Promise<Club[]> {
+    if (!assignmentIds || assignmentIds.length === 0) return [];
+    const objectIds = assignmentIds.map((id) => new Types.ObjectId(id));
+    return this.clubModel
+      .find({ assignment_id: { $in: objectIds } })
+      .populate('created_by', 'name')
+      .sort({ createdAt: -1 })
+      .exec();
+  }
+
+  /**
    * Obtener clubs de una asignación con sport y levels populados
    */
   async findByAssignmentWithPopulate(assignmentId: string): Promise<Club[]> {

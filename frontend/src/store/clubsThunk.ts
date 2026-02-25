@@ -23,6 +23,7 @@ export const fetchAllClubs = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const data = await clubsService.getAll();
+      console.log("✅ Clubs fetched successfully:", data);
       return data;
     } catch (err: any) {
       toastr.error("Error al obtener clubs");

@@ -16,19 +16,6 @@ export const DashboardAdmin = ({ name }: pageParamProps) => {
     forbidden,
   });
 
-  if (!user) return null;
-
-  if (checking) {
-    return (
-      <>
-        <NavHeader name={name} />
-        <div className="middle-box text-center animated fadeInRightBig">
-          <div className="spinner-border text-primary" role="status"></div>
-        </div>
-      </>
-    );
-  }
-
   if (forbidden) {
     return (
       <>
