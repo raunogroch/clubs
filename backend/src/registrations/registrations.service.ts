@@ -44,6 +44,20 @@ export class RegistrationsService {
     return this.registrationsRepository.findByGroup(groupId);
   }
 
+  /**
+   * Delegates to repository to obtain registrations for a given athlete
+   */
+  async findByAthlete(athleteId: string) {
+    return this.registrationsRepository.findByAthlete(athleteId);
+  }
+
+  /**
+   * Delegates to repository to obtain registrations for a list of athletes
+   */
+  async findByAthletes(athleteIds: string[]) {
+    return this.registrationsRepository.findByAthletes(athleteIds);
+  }
+
   async findByGroups(groupIds: string[]) {
     return this.registrationsRepository.findByGroups(groupIds);
   }

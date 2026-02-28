@@ -6,6 +6,9 @@ import {
   deleteSchedule,
   replaceBatchSchedules,
   fetchAdminSchedules,
+  fetchAthleteSchedules,
+  fetchParentSchedules,
+  fetchAssistantSchedules,
 } from "./schedulesThunk";
 
 interface Schedule {
@@ -165,6 +168,54 @@ const schedulesSlice = createSlice({
         },
       )
       .addCase(fetchAdminSchedules.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload as string;
+      })
+      // athlete
+      .addCase(fetchAthleteSchedules.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(
+        fetchAthleteSchedules.fulfilled,
+        (state, action: PayloadAction<any[]>) => {
+          state.status = "succeeded";
+          state.items = action.payload || [];
+        },
+      )
+      .addCase(fetchAthleteSchedules.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload as string;
+      })
+      // parent
+      .addCase(fetchParentSchedules.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(
+        fetchParentSchedules.fulfilled,
+        (state, action: PayloadAction<any[]>) => {
+          state.status = "succeeded";
+          state.items = action.payload || [];
+        },
+      )
+      .addCase(fetchParentSchedules.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload as string;
+      })
+      // assistant
+      .addCase(fetchAssistantSchedules.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(
+        fetchAssistantSchedules.fulfilled,
+        (state, action: PayloadAction<any[]>) => {
+          state.status = "succeeded";
+          state.items = action.payload || [];
+        },
+      )
+      .addCase(fetchAssistantSchedules.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload as string;
       });

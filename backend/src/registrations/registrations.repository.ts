@@ -32,7 +32,7 @@ export class RegistrationsRepository {
   }
 
   async findById(id: string): Promise<Registration | null> {
-    return this.registrationModel.findById(id).exec();
+    return this.registrationModel.findById(id);
   }
 
   async findByGroup(groupId: string): Promise<Registration[]> {
@@ -42,8 +42,44 @@ export class RegistrationsRepository {
         'athlete_id',
         'name lastname ci role phone images createdAt birth_date gender username parent_id documentPath fileIdentifier',
       )
-      .lean()
-      .exec()) as any;
+      .lean()) as any;
+  }
+
+  /**
+   * Obtiene todas las inscripciones asociadas a un atleta específico
+   */
+  async findByAthlete(athleteId: string): Promise<Registration[]> {
+    return (await this.registrationModel
+      .find({ athlete_id: new Types.ObjectId(athleteId) })
+      .populate(
+        'athlete_id',
+        'name lastname ci role phone images createdAt birth_date gender username parent_id documentPath fileIdentifier',
+      )
+      .populate({
+        path: 'group_id',
+        select: 'name club_id schedules_added',
+        populate: { path: 'schedules_added', select: 'day startTime endTime' },
+      })
+      .lean()) as any;
+  }
+
+  /**
+   * Obtiene inscripciones para varios atletas (útil para padres con múltiples hijos)
+   */
+  async findByAthletes(athleteIds: string[]): Promise<Registration[]> {
+    const ids = athleteIds.map((id) => new Types.ObjectId(id));
+    return (await this.registrationModel
+      .find({ athlete_id: { $in: ids } })
+      .populate(
+        'athlete_id',
+        'name lastname ci role phone images createdAt birth_date gender username parent_id documentPath fileIdentifier',
+      )
+      .populate({
+        path: 'group_id',
+        select: 'name club_id schedules_added',
+        populate: { path: 'schedules_added', select: 'day startTime endTime' },
+      })
+      .lean()) as any;
   }
 
   async findByGroups(groupIds: string[]): Promise<Registration[]> {
@@ -54,8 +90,7 @@ export class RegistrationsRepository {
         'athlete_id',
         'name lastname ci role phone images createdAt birth_date gender username parent_id documentPath fileIdentifier',
       )
-      .lean()
-      .exec()) as any;
+      .lean()) as any;
   }
 
   async findByAssignment(assignmentId: string): Promise<Registration[]> {
@@ -73,8 +108,7 @@ export class RegistrationsRepository {
           select: 'name',
         },
       })
-      .lean()
-      .exec()) as any;
+      .lean()) as any;
   }
 
   async findByGroupsAndAssignment(
@@ -91,33 +125,28 @@ export class RegistrationsRepository {
         'athlete_id',
         'name lastname ci role phone images createdAt birth_date gender username parent_id documentPath fileIdentifier',
       )
-      .lean()
-      .exec()) as any;
+      .lean()) as any;
   }
 
   async findByGroupAndAthlete(
     groupId: string,
     athleteId: string,
   ): Promise<Registration | null> {
-    return this.registrationModel
-      .findOne({
-        group_id: new Types.ObjectId(groupId),
-        athlete_id: new Types.ObjectId(athleteId),
-      })
-      .exec();
+    return this.registrationModel.findOne({
+      group_id: new Types.ObjectId(groupId),
+      athlete_id: new Types.ObjectId(athleteId),
+    });
   }
 
   async update(
     id: string,
     payload: Partial<Registration>,
   ): Promise<Registration | null> {
-    return this.registrationModel
-      .findByIdAndUpdate(id, payload, { new: true })
-      .exec();
+    return this.registrationModel.findByIdAndUpdate(id, payload, { new: true });
   }
 
   async delete(id: string): Promise<Registration | null> {
-    return this.registrationModel.findByIdAndDelete(id).exec();
+    return this.registrationModel.findByIdAndDelete(id);
   }
 
   async getPaidAthletesByGroup(groupId: string): Promise<any> {
@@ -135,7 +164,6 @@ export class RegistrationsRepository {
         model: 'Payment',
         select: 'amount payment_date payment_start payment_end',
       })
-      .lean()
-      .exec()) as any;
+      .lean()) as any;
   }
 }

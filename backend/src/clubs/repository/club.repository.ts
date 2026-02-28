@@ -74,8 +74,7 @@ export class ClubRepository {
         assignment_id: new Types.ObjectId(assignmentId),
       })
       .populate('created_by', 'name')
-      .sort({ createdAt: -1 })
-      .exec();
+      .sort({ createdAt: -1 });
   }
 
   /**
@@ -89,8 +88,7 @@ export class ClubRepository {
     return this.clubModel
       .find({ assignment_id: { $in: objectIds } })
       .populate('created_by', 'name')
-      .sort({ createdAt: -1 })
-      .exec();
+      .sort({ createdAt: -1 });
   }
 
   /**
@@ -105,8 +103,7 @@ export class ClubRepository {
       .populate('created_by', 'name')
       .populate('groups')
       .populate('levels', 'position name description')
-      .sort({ createdAt: -1 })
-      .exec();
+      .sort({ createdAt: -1 });
   }
 
   /**
@@ -119,8 +116,7 @@ export class ClubRepository {
       .populate('created_by', 'name')
       .populate('assignment_id', 'module_name')
       .populate('groups')
-      .populate('levels', 'position name description')
-      .exec();
+      .populate('levels', 'position name description');
   }
 
   /**
@@ -177,8 +173,7 @@ export class ClubRepository {
         created_by: new Types.ObjectId(userId),
       })
       .populate('assignment_id', 'module_name')
-      .sort({ createdAt: -1 })
-      .exec();
+      .sort({ createdAt: -1 });
   }
 
   /**
@@ -233,6 +228,15 @@ export class ClubRepository {
         .populate('assistants_added', 'name lastname username')
         .exec()
     );
+  }
+
+  /**
+   * Obtener clubs a los que fue agregado un asistente específico
+   */
+  async findByAssistant(assistantId: string): Promise<Club[]> {
+    return this.clubModel
+      .find({ assistants_added: new Types.ObjectId(assistantId) })
+      .populate('assignment_id', 'module_name');
   }
 
   /**

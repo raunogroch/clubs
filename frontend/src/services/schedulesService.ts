@@ -203,6 +203,54 @@ class SchedulesService {
 
     return safeParseJson(response);
   }
+
+  /**
+   * GET /api/groups/athlete/schedules
+   * Horarios del atleta autenticado
+   */
+  async getAthleteSchedules(): Promise<any[]> {
+    const response = await fetch(`${API_URL}/groups/athlete/schedules`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Error al obtener horarios del atleta");
+    }
+    return safeParseJson(response);
+  }
+
+  /**
+   * GET /api/groups/parent/schedules
+   * Horarios de los hijos del padre autenticado
+   */
+  async getParentSchedules(): Promise<any[]> {
+    const response = await fetch(`${API_URL}/groups/parent/schedules`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Error al obtener horarios del padre");
+    }
+    return safeParseJson(response);
+  }
+
+  /**
+   * GET /api/groups/assistant/schedules
+   * Horarios de los grupos donde el asistente está asignado
+   */
+  async getAssistantSchedules(): Promise<any[]> {
+    const response = await fetch(`${API_URL}/groups/assistant/schedules`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Error al obtener horarios del asistente");
+    }
+    return safeParseJson(response);
+  }
 }
 
 const schedulesService = new SchedulesService();

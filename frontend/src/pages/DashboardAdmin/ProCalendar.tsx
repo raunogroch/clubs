@@ -140,7 +140,7 @@ const getDayOffset = (day?: string) => {
 export const ProCalendar = ({ groups }: { groups: any[] }) => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [date, setDate] = useState<Date>(new Date());
-  const [view, setView] = useState<"month" | "week" | "day" | "agenda">("week");
+  const [view, setView] = useState<"week" | "day">("week");
   const [groupsWithEvents, setGroupsWithEvents] = useState<any[]>([]);
   const [groupColorMap, setGroupColorMap] = useState<Record<string, string>>(
     {},
@@ -274,32 +274,27 @@ export const ProCalendar = ({ groups }: { groups: any[] }) => {
   };
 
   return (
-    <div className="mb-4">
-      <div style={{ height: "600px" }}>
-        <Calendar
-          localizer={localizer}
-          events={events}
-          startAccessor="start"
-          endAccessor="end"
-          style={{ height: "100%" }}
-          view={view}
-          onView={(v: any) => setView(v)}
-          date={date}
-          onNavigate={(d: any) => setDate(d)}
-          defaultView="week"
-          eventPropGetter={eventStyleGetter}
-          popup
-          selectable
-          min={new Date(2026, 0, 1, 8, 0, 0)}
-          max={new Date(2026, 11, 31, 22, 0, 0)}
-          step={30}
-          showMultiDayTimes
-          views={["month", "week", "day", "agenda"]}
-          culture="es"
-          formats={formats}
-          messages={messages}
-        />
-      </div>
-    </div>
+    <Calendar
+      localizer={localizer}
+      events={events}
+      startAccessor="start"
+      endAccessor="end"
+      view={view}
+      onView={(v: any) => setView(v)}
+      date={date}
+      onNavigate={(d: any) => setDate(d)}
+      defaultView="week"
+      eventPropGetter={eventStyleGetter}
+      popup
+      selectable
+      min={new Date(2026, 0, 1, 8, 0, 0)}
+      max={new Date(2026, 11, 31, 22, 0, 0)}
+      step={30}
+      showMultiDayTimes
+      views={["week", "day"]}
+      culture="es"
+      formats={formats}
+      messages={messages}
+    />
   );
 };

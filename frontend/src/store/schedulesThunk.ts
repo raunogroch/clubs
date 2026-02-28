@@ -134,3 +134,51 @@ export const fetchAdminSchedules = createAsyncThunk(
     }
   },
 );
+
+// athlete schedules
+export const fetchAthleteSchedules = createAsyncThunk(
+  "schedules/fetchAthlete",
+  async (_, { rejectWithValue }) => {
+    try {
+      const data = await schedulesService.getAthleteSchedules();
+      return data;
+    } catch (err: any) {
+      toastr.error("Error al obtener horarios del atleta");
+      return rejectWithValue(
+        err.message || "Error al obtener horarios del atleta",
+      );
+    }
+  },
+);
+
+// parent schedules
+export const fetchParentSchedules = createAsyncThunk(
+  "schedules/fetchParent",
+  async (_, { rejectWithValue }) => {
+    try {
+      const data = await schedulesService.getParentSchedules();
+      return data;
+    } catch (err: any) {
+      toastr.error("Error al obtener horarios del padre");
+      return rejectWithValue(
+        err.message || "Error al obtener horarios del padre",
+      );
+    }
+  },
+);
+
+// assistant schedules
+export const fetchAssistantSchedules = createAsyncThunk(
+  "schedules/fetchAssistant",
+  async (_, { rejectWithValue }) => {
+    try {
+      const data = await schedulesService.getAssistantSchedules();
+      return data;
+    } catch (err: any) {
+      toastr.error("Error al obtener horarios del asistente");
+      return rejectWithValue(
+        err.message || "Error al obtener horarios del asistente",
+      );
+    }
+  },
+);

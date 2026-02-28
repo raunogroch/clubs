@@ -14,6 +14,8 @@ import {
   UseGuards,
   Query,
 } from '@nestjs/common';
+import { Roles } from '../../auth/decorators/roles.decorator';
+import { Roles as Role } from '../../users/enum/roles.enum';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { GroupsService } from './groups.service';
@@ -46,6 +48,36 @@ export class GroupsController {
   @Get('admin/schedules')
   async getAdminGroupsSchedules(@CurrentUser() user: any) {
     return this.groupsService.getAdminGroupsSchedules(user.sub);
+  }
+
+  /**
+   * GET /groups/athlete/schedules
+   * Schedules correspondientes al atleta autenticado
+   */
+  @Get('athlete/schedules')
+  @Roles(Role.ATHLETE)
+  async getAthleteSchedules(@CurrentUser() user: any) {
+    return this.groupsService.getAthleteGroupsSchedules(user.sub);
+  }
+
+  /**
+   * GET /groups/parent/schedules
+   * Schedules de los hijos del padre/tutor autenticado
+   */
+  @Get('parent/schedules')
+  @Roles(Role.PARENT)
+  async getParentSchedules(@CurrentUser() user: any) {
+    return this.groupsService.getParentGroupsSchedules(user.sub);
+  }
+
+  /**
+   * GET /groups/assistant/schedules
+   * Schedules de los grupos donde el asistente está asignado (a nivel de club)
+   */
+  @Get('assistant/schedules')
+  @Roles(Role.ASSISTANT)
+  async getAssistantSchedules(@CurrentUser() user: any) {
+    return this.groupsService.getAssistantGroupsSchedules(user.sub);
   }
 
   /**

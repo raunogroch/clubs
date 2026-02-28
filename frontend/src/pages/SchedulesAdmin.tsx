@@ -15,7 +15,7 @@ export const SchedulesAdmin = ({ name }: pageParamProps) => {
       <div className="wrapper wrapper-content">
         <div className="container-fluid">
           <div className="row">
-            <div className="col-md-12">
+            <div className="col-md-12 px-0">
               <div className="ibox">
                 <div className="ibox-title">
                   <h5>Calendario de Horarios de Grupos</h5>

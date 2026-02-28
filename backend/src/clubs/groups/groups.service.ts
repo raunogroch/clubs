@@ -180,6 +180,139 @@ export class GroupsService {
   }
 
   /**
+   * Horarios accesibles por un atleta (su propio calendario)
+   */
+  async getAthleteGroupsSchedules(userId: string): Promise<any[]> {
+    const user = await this.userModel.findById(userId);
+    if (
+      !user ||
+      !(
+        user.role === 'athlete' ||
+        (user.roles && (user.roles as any).includes('athlete'))
+      )
+    ) {
+      throw new ForbiddenException(
+        'Solo atletas pueden acceder a este endpoint',
+      );
+    }
+
+    if (!this.registrationsService) {
+      throw new Error('RegistrationsService no está inyectado');
+    }
+    const regs: any[] = await this.registrationsService.findByAthlete(userId);
+    const result: any[] = [];
+
+    regs.forEach((reg) => {
+      const group: any = reg.group_id;
+      if (group && group.schedules_added && group.schedules_added.length) {
+        group.schedules_added.forEach((s: any) => {
+          result.push({
+            group_id: group._id,
+            group_name: group.name,
+            club_id: group.club_id,
+            day: s.day,
+            startTime: s.startTime,
+            endTime: s.endTime,
+          });
+        });
+      }
+    });
+
+    return result;
+  }
+
+  /**
+   * Horarios visibles por un padre / tutor (calendario de sus hijos)
+   */
+  async getParentGroupsSchedules(userId: string): Promise<any[]> {
+    const user = await this.userModel.findById(userId);
+    if (
+      !user ||
+      !(
+        user.role === 'parent' ||
+        (user.roles && (user.roles as any).includes('parent'))
+      )
+    ) {
+      throw new ForbiddenException(
+        'Solo padres pueden acceder a este endpoint',
+      );
+    }
+
+    // obtener los ids de los hijos
+    const children = await this.userModel.find({ parent_id: userId }).lean();
+    const childIds = children.map((c: any) => c._id.toString());
+    if (childIds.length === 0) return [];
+
+    if (!this.registrationsService) {
+      throw new Error('RegistrationsService no está inyectado');
+    }
+    const regs: any[] =
+      await this.registrationsService.findByAthletes(childIds);
+    const result: any[] = [];
+
+    regs.forEach((reg) => {
+      const group: any = reg.group_id;
+      if (group && group.schedules_added && group.schedules_added.length) {
+        group.schedules_added.forEach((s: any) => {
+          result.push({
+            group_id: group._id,
+            group_name: group.name,
+            club_id: group.club_id,
+            day: s.day,
+            startTime: s.startTime,
+            endTime: s.endTime,
+          });
+        });
+      }
+    });
+
+    return result;
+  }
+
+  /**
+   * Horarios de los grupos donde el usuario actúa como asistente
+   */
+  async getAssistantGroupsSchedules(userId: string): Promise<any[]> {
+    const user = await this.userModel.findById(userId);
+    if (
+      !user ||
+      !(
+        user.role === 'assistant' ||
+        (user.roles && (user.roles as any).includes('assistant'))
+      )
+    ) {
+      throw new ForbiddenException(
+        'Solo asistentes pueden acceder a este endpoint',
+      );
+    }
+
+    const clubs = await this.clubRepository.findByAssistant(userId);
+    if (!clubs || clubs.length === 0) return [];
+
+    const allSchedules: any[] = [];
+    for (const club of clubs) {
+      const groups = await this.groupRepository.findByClub(club._id.toString());
+      groups.forEach((group: any) => {
+        if (group.schedules_added && group.schedules_added.length > 0) {
+          group.schedules_added.forEach((schedule: any) => {
+            allSchedules.push({
+              _id: group._id,
+              name: group.name,
+              club_id: group.club_id,
+              club: { _id: club._id, name: club.name },
+              day: schedule.day,
+              startTime: schedule.startTime,
+              endTime: schedule.endTime,
+            });
+          });
+        }
+      });
+    }
+
+    return allSchedules;
+  }
+
+  /**
    * Obtener todos los grupos de un club
    */
   async getGroupsByClub(clubId: string, userId: string): Promise<Group[]> {
