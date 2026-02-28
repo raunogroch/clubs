@@ -55,7 +55,7 @@ export const uploadAthleteImage = createAsyncThunk(
     try {
       const response = await userService.uploadCoachImage(payload);
       if (response.code === 200) {
-        return response.data;
+        return response.data || { _id: payload.userId };
       }
       return rejectWithValue(response.message || "Error al procesar la imagen");
     } catch (error: any) {
@@ -73,7 +73,7 @@ export const uploadAthleteCI = createAsyncThunk(
     try {
       const response = await userService.uploadAthleteCI(payload);
       if (response.code === 200) {
-        return response.data;
+        return response.data || { _id: payload.userId, documentPath: "" };
       }
       return rejectWithValue(response.message || "Error al procesar el PDF");
     } catch (error: any) {

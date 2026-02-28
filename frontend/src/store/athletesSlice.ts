@@ -130,8 +130,30 @@ const athletesSlice = createSlice({
         state.uploadingImage = true;
         state.error = null;
       })
-      .addCase(uploadAthleteImage.fulfilled, (state) => {
+      .addCase(uploadAthleteImage.fulfilled, (state, action) => {
         state.uploadingImage = false;
+        // Actualizar atleta en ambas listas si existe
+        const updatedAthlete = action.payload;
+        if (updatedAthlete?._id) {
+          const athleteIndex = state.athletes.findIndex(
+            (a) => a._id === updatedAthlete._id,
+          );
+          if (athleteIndex !== -1) {
+            state.athletes[athleteIndex] = {
+              ...state.athletes[athleteIndex],
+              ...updatedAthlete,
+            };
+          }
+          const myAthleteIndex = state.myAthletes.findIndex(
+            (a) => a._id === updatedAthlete._id,
+          );
+          if (myAthleteIndex !== -1) {
+            state.myAthletes[myAthleteIndex] = {
+              ...state.myAthletes[myAthleteIndex],
+              ...updatedAthlete,
+            };
+          }
+        }
       })
       .addCase(uploadAthleteImage.rejected, (state, action) => {
         state.uploadingImage = false;
@@ -144,8 +166,30 @@ const athletesSlice = createSlice({
         state.uploadingCI = true;
         state.error = null;
       })
-      .addCase(uploadAthleteCI.fulfilled, (state) => {
+      .addCase(uploadAthleteCI.fulfilled, (state, action) => {
         state.uploadingCI = false;
+        // Actualizar atleta en ambas listas si existe
+        const updatedAthlete = action.payload;
+        if (updatedAthlete?._id) {
+          const athleteIndex = state.athletes.findIndex(
+            (a) => a._id === updatedAthlete._id,
+          );
+          if (athleteIndex !== -1) {
+            state.athletes[athleteIndex] = {
+              ...state.athletes[athleteIndex],
+              ...updatedAthlete,
+            };
+          }
+          const myAthleteIndex = state.myAthletes.findIndex(
+            (a) => a._id === updatedAthlete._id,
+          );
+          if (myAthleteIndex !== -1) {
+            state.myAthletes[myAthleteIndex] = {
+              ...state.myAthletes[myAthleteIndex],
+              ...updatedAthlete,
+            };
+          }
+        }
       })
       .addCase(uploadAthleteCI.rejected, (state, action) => {
         state.uploadingCI = false;

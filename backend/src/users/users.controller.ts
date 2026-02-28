@@ -152,6 +152,23 @@ export class UsersController {
     return this.usersService.getMyAthletes(user);
   }
 
+  /**
+   * GET /api/users/assigned-athletes
+   * Obtener todos los atletas asignados al usuario actual
+   * Para PARENT: sus propios atletas
+   * Para COACH: atletas de los grupos que administra
+   *
+   * Roles permitidos: PARENT, COACH
+   *
+   * @param currentUser Usuario autenticado
+   * @returns Array de atletas asignados al usuario
+   */
+  @Get('assigned-athletes')
+  @Roles(Role.PARENT, Role.COACH)
+  async getAssignedAthletes(@CurrentUser() user: currentAuth) {
+    return this.usersService.getAssignedAthletes(user);
+  }
+
   @Get()
   @Roles(Role.SUPERADMIN, Role.ADMIN, Role.ASSISTANT, Role.COACH)
   findAll(

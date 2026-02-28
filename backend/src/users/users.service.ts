@@ -677,6 +677,24 @@ export class UsersService {
   }
 
   /**
+   * Devuelve todos los atletas asignados al usuario actual. Para un parent
+   * son sus propios atletas, para un coach los atletas de los grupos que
+   * administra. Se puede ampliar en el futuro para otros roles.
+   */
+  async getAssignedAthletes(requestingUser: currentAuth): Promise<any[]> {
+    if (requestingUser.role === Roles.PARENT) {
+      return this.getMyAthletes(requestingUser);
+    }
+
+    if (requestingUser.role === Roles.COACH) {
+      return this.getAthletesFromGroups(requestingUser);
+    }
+
+    // otros roles no tienen atletas asignados por defecto
+    return [];
+  }
+
+  /**
    * Devuelve, por cada assignment del admin, la cantidad de atletas (únicos)
    * dentro del assignment cuyo `registration_pay` es `null` (no pagado).
    * Resultado: [{ assignment_id, assignment_name, unpaidCount }]

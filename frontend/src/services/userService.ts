@@ -253,7 +253,7 @@ export const userService = {
 
   async getMyAthletes(): Promise<ApiResponse<any[]>> {
     try {
-      const response = await api.get("/users/parent/my-athletes");
+      const response = await api.get("/users/assigned-athletes");
       const data = response.data?.data || response.data;
       return {
         code: response.status,

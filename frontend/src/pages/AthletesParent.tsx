@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { NavHeader } from "../components";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState, AppDispatch } from "../store/store";
@@ -13,14 +13,23 @@ import CIUploadModal from "../components/modals/CIUpload.modal";
 
 export const AthletesParent = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { myAthletes, loadingMyAthletes, error } = useSelector(
-    (state: RootState) => state.athletes,
-  );
+  const { myAthletes, loadingMyAthletes, uploadingImage, uploadingCI, error } =
+    useSelector((state: RootState) => state.athletes);
 
   // Modal state
   const [selectedAthlete, setSelectedAthlete] = useState<any | null>(null);
   const [showImageModal, setShowImageModal] = useState(false);
   const [showCIModal, setShowCIModal] = useState(false);
+
+  // Estadísticas memoizadas
+  const stats = useMemo(() => {
+    return {
+      total: myAthletes.length,
+      active: myAthletes.filter((a) => a.active).length,
+      withPhoto: myAthletes.filter((a) => a.images?.small).length,
+      withCI: myAthletes.filter((a) => a.documentPath).length,
+    };
+  }, [myAthletes]);
 
   useEffect(() => {
     dispatch(fetchMyAthletes());
@@ -69,59 +78,129 @@ export const AthletesParent = () => {
   // Handlers conectados a Redux
   const handleSaveImage = async (imageBase64?: string) => {
     if (!selectedAthlete?._id || !imageBase64) return;
-    await dispatch(
+    const result = await dispatch(
       uploadAthleteImage({
         userId: selectedAthlete._id,
         imageBase64,
         role: "athlete",
       }),
     );
-    handleCloseImageModal();
-    dispatch(fetchMyAthletes());
+    if (result.payload) {
+      handleCloseImageModal();
+    }
   };
 
   const handleSaveCI = async (pdfBase64: string) => {
     if (!selectedAthlete?._id) return;
-    await dispatch(
+    const result = await dispatch(
       uploadAthleteCI({
         userId: selectedAthlete._id,
         pdfBase64,
         role: "athlete",
       }),
     );
-    handleCloseCIModal();
-    dispatch(fetchMyAthletes());
+    if (result.payload) {
+      handleCloseCIModal();
+    }
   };
 
   return (
     <div>
       <NavHeader name="Mis Atletas" />
       <div className="wrapper wrapper-content">
+        {myAthletes.length > 0 && !loadingMyAthletes && !error && (
+          <div className="row mb-3">
+            <div className="col-sm-3">
+              <div className="ibox">
+                <div className="ibox-content text-center">
+                  <h4>
+                    <strong>{stats.total}</strong>
+                  </h4>
+                  <p className="text-muted">Total de atletas</p>
+                </div>
+              </div>
+            </div>
+            <div className="col-sm-3">
+              <div className="ibox">
+                <div className="ibox-content text-center">
+                  <h4>
+                    <strong style={{ color: "green" }}>{stats.active}</strong>
+                  </h4>
+                  <p className="text-muted">Activos</p>
+                </div>
+              </div>
+            </div>
+            <div className="col-sm-3">
+              <div className="ibox">
+                <div className="ibox-content text-center">
+                  <h4>
+                    <strong style={{ color: "blue" }}>{stats.withPhoto}</strong>
+                  </h4>
+                  <p className="text-muted">Con foto</p>
+                </div>
+              </div>
+            </div>
+            <div className="col-sm-3">
+              <div className="ibox">
+                <div className="ibox-content text-center">
+                  <h4>
+                    <strong style={{ color: "purple" }}>{stats.withCI}</strong>
+                  </h4>
+                  <p className="text-muted">Con cédula</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="ibox">
           <div className="ibox-content">
             {loadingMyAthletes ? (
-              <div className="text-center">
-                <p>Cargando atletas...</p>
+              <div className="text-center py-4">
+                <div className="spinner-border" role="status">
+                  <span className="sr-only">Cargando...</span>
+                </div>
+                <p className="mt-2">Cargando atletas...</p>
               </div>
             ) : error ? (
-              <div className="alert alert-danger">
+              <div className="alert alert-danger alert-dismissible fade show">
+                <button
+                  type="button"
+                  className="close"
+                  onClick={() => dispatch(fetchMyAthletes())}
+                >
+                  <span>&times;</span>
+                </button>
+                <h5 className="alert-heading">Error</h5>
                 <p>{error}</p>
               </div>
             ) : myAthletes.length === 0 ? (
               <div className="alert alert-info">
-                <p>No tienes atletas registrados.</p>
+                <h5 className="alert-heading">Sin atletas registrados</h5>
+                <p>
+                  No tienes atletas asignados. Una vez que se te asignen
+                  atletas, aparecerán en esta lista.
+                </p>
               </div>
             ) : (
               <div className="table-responsive">
                 <table className="table table-striped table-hover">
                   <thead>
                     <tr>
-                      <th className="align-middle">Foto</th>
+                      <th className="align-middle" style={{ width: "60px" }}>
+                        Foto
+                      </th>
                       <th className="align-middle">Nombre</th>
                       <th className="align-middle">Cédula</th>
-                      <th className="align-middle">Edad</th>
-                      <th className="align-middle">Género</th>
-                      <th className="align-middle">Estado</th>
+                      <th className="align-middle" style={{ width: "60px" }}>
+                        Edad
+                      </th>
+                      <th className="align-middle" style={{ width: "90px" }}>
+                        Género
+                      </th>
+                      <th className="align-middle" style={{ width: "80px" }}>
+                        Estado
+                      </th>
                       <th className="align-middle text-center">Acciones</th>
                     </tr>
                   </thead>
@@ -129,7 +208,7 @@ export const AthletesParent = () => {
                     {myAthletes.map((athlete) => (
                       <tr key={athlete._id}>
                         <td className="align-middle">
-                          {athlete.images.small ? (
+                          {athlete.images?.small ? (
                             <Image
                               src={athlete.images.small + `?t=${Date.now()}`}
                               alt={athlete.name}
@@ -146,7 +225,6 @@ export const AthletesParent = () => {
                               style={{
                                 width: "50px",
                                 height: "50px",
-                                margin: "0 auto 12px",
                                 backgroundColor: "#e8e8e8",
                                 display: "flex",
                                 alignItems: "center",
@@ -155,7 +233,7 @@ export const AthletesParent = () => {
                             >
                               <i
                                 className="fa fa-user"
-                                style={{ fontSize: "40px", color: "#999" }}
+                                style={{ fontSize: "24px", color: "#999" }}
                               ></i>
                             </div>
                           )}
@@ -179,44 +257,41 @@ export const AthletesParent = () => {
                             <span className="badge badge-danger">Inactivo</span>
                           )}
                         </td>
-                        <td className="align-middle ">
-                          {/* Foto de perfil */}
-                          <div className="row justify-content-around d-flex">
-                            {athlete.images && athlete.images.small ? (
-                              <span title="Foto de perfil cargada">
-                                <i
-                                  className="fa fa-check-circle"
-                                  style={{
-                                    color: "green",
-                                  }}
-                                />
-                                &nbsp; Foto de perfil
+                        <td className="align-middle">
+                          <div className="btn-group btn-group-sm">
+                            {athlete.images?.small ? (
+                              <span
+                                className="btn btn-success btn-sm disabled"
+                                title="Foto de perfil cargada"
+                              >
+                                <i className="fa fa-check"></i> Foto
                               </span>
                             ) : (
                               <button
-                                className="btn btn-primary mr-2"
+                                className="btn btn-primary btn-sm"
                                 onClick={() => handleOpenImageModal(athlete)}
+                                disabled={uploadingImage}
+                                title="Cargar foto de perfil"
                               >
-                                Foto de perfil
+                                <i className="fa fa-camera"></i> Foto
                               </button>
                             )}
 
-                            {/* CI en PDF */}
-                            {athlete.documentPath &&
-                            athlete.documentPath !== "" ? (
-                              <span title="Carnet cargado">
-                                <i
-                                  className="fa fa-check-circle"
-                                  style={{ color: "green" }}
-                                />
-                                &nbsp; Cédula de identidad
+                            {athlete.documentPath ? (
+                              <span
+                                className="btn btn-success btn-sm disabled"
+                                title="Cédula cargada"
+                              >
+                                <i className="fa fa-check"></i> CI
                               </span>
                             ) : (
                               <button
-                                className="btn btn-info"
+                                className="btn btn-warning btn-sm"
                                 onClick={() => handleOpenCIModal(athlete)}
+                                disabled={uploadingCI}
+                                title="Cargar cédula de identidad"
                               >
-                                Cargar CI (PDF)
+                                <i className="fa fa-file-pdf-o"></i> CI
                               </button>
                             )}
                           </div>
@@ -242,7 +317,7 @@ export const AthletesParent = () => {
         currentImage={selectedAthlete?.image || ""}
         onClose={handleCloseImageModal}
         onSave={handleSaveImage}
-        saveLabel="Guardar"
+        saveLabel={uploadingImage ? "Guardando..." : "Guardar"}
       />
 
       {/* Modal para cargar CI en PDF */}
@@ -256,7 +331,7 @@ export const AthletesParent = () => {
         }
         onClose={handleCloseCIModal}
         onSave={handleSaveCI}
-        saveLabel="Guardar"
+        saveLabel={uploadingCI ? "Guardando..." : "Guardar"}
       />
     </div>
   );
