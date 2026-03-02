@@ -14,6 +14,7 @@ import {
   AthletesParent,
   Sports,
   ProfileAdmin,
+  ProfileAssistant,
   DashboardAdmin,
   MonthlyPayments,
   ProfileCoach,
@@ -141,6 +142,12 @@ export const roleRoutes: RoleRoutes = {
       icon: "fa-home",
       label: "Principal",
       element: <Dashboard />,
+    },
+    {
+      path: "/profile",
+      icon: "fa-user",
+      label: "Mi Perfil",
+      element: <ProfileAssistant />,
     },
   ],
   coach: [

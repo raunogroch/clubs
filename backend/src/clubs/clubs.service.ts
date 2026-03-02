@@ -497,6 +497,7 @@ export class ClubsService {
         name: u.name,
         lastname: u.lastname,
         username: u.username,
+        images: u.images,
         clubs: entry.clubs,
       };
     });

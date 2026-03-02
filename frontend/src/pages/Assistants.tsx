@@ -18,6 +18,8 @@ export const Assistants = () => {
     dispatch(fetchAssignmentAssistants());
   }, [dispatch]);
 
+  console.log("Asistentes asignados:", assignmentAssistants);
+
   return (
     <div>
       <NavHeader name="Secretarios" />
@@ -45,7 +47,7 @@ export const Assistants = () => {
                         <td>
                           {a.images?.small ? (
                             <Image
-                              src={a.images.small + `?t=${Date.now()}`}
+                              src={a.images.small}
                               alt={`${a.name} ${a.lastname}`}
                               className="rounded-circle"
                               style={{

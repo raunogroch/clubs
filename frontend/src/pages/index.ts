@@ -23,6 +23,7 @@ export * from "./AthletesParent";
 export * from "./Sports";
 export * from "./ProfileAdmin";
 export * from "./ProfileCoach";
+export * from "./ProfileAssistant";
 export * from "./MonthlyPayments";
 export * from "./ScheduleCoach";
 export * from "./ScheduleParent";

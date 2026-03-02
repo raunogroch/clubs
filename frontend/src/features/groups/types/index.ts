@@ -148,5 +148,5 @@ export enum MemberRole {
   "superadmin" = "Superadministrador(a)",
   "admin" = "Administrador(a)",
   "coach" = "Entrenador(a)",
-  "assistant" = "Asistente(a)",
+  "assistant" = "Secretario",
 }

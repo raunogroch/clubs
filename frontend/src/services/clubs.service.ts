@@ -314,6 +314,7 @@ class ClubsService {
       name?: string;
       lastname?: string;
       username?: string;
+      images?: { small?: string; medium?: string; large?: string };
       clubs: Array<{ _id: string; name?: string }>;
     }>
   > {

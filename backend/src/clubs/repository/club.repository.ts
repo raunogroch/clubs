@@ -225,7 +225,8 @@ export class ClubRepository {
           assistants_added: { $exists: true, $ne: [] },
         })
         // traer algunos campos del usuario para facilitar el mapeo posterior
-        .populate('assistants_added', 'name lastname username')
+        // also fetch the images subdocument so frontend can display profile photos
+        .populate('assistants_added', 'name lastname username images')
         .exec()
     );
   }
