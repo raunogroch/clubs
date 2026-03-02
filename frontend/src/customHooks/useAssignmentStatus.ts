@@ -14,15 +14,25 @@ export const useAssignmentStatus = (user: any | undefined) => {
   const dispatch = useDispatch<any>();
   const { status, error } = useSelector((state: RootState) => state.clubs);
 
+  // Verificar si el usuario es admin sin asignación
+  const isAdminWithoutAssignment =
+    user?.role === "admin" &&
+    (user?.assignment_id === null || user?.assignment_id === undefined);
+
   useEffect(() => {
     if (!user) return;
+    // Si es admin sin assignment, no hacer petición
+    if (isAdminWithoutAssignment) return;
+
     // recargar cada vez que cambie el identificador relevante
     dispatch(fetchAllClubs());
-  }, [dispatch, user?.code, user?.sub]);
+  }, [dispatch, user?.code, user?.sub, isAdminWithoutAssignment]);
 
   const checking = status === "loading";
-  // si la petición falló con status 403, tratamos como forbidden
-  const forbidden = status === "failed" && error && error.status === 403;
+  // si es admin sin assignment, tratar como forbidden
+  const forbidden =
+    isAdminWithoutAssignment ||
+    (status === "failed" && error && error.status === 403);
   const otherError = status === "failed" && !forbidden;
 
   return {

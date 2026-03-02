@@ -37,6 +37,15 @@ export const useDashboardData = (user: any | undefined) => {
 
   useEffect(() => {
     const load = async () => {
+      // Si no tiene assignment_id, no hacer petición
+      const assignmentId = (user as any)?.assignment_id;
+      if (!assignmentId) {
+        setItems([]);
+        setBreakdown(null);
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       const userService = (await import("../services/userService.ts"))
         .userService;
@@ -84,7 +93,6 @@ export const useCalendarEvents = (user: any | undefined) => {
 
   useEffect(() => {
     const loadGroupsForCalendar = async () => {
-      setCalendarLoading(true);
       try {
         const assignmentId = (user as any)?.assignment_id;
         if (!assignmentId) {
@@ -92,6 +100,7 @@ export const useCalendarEvents = (user: any | undefined) => {
           return;
         }
 
+        setCalendarLoading(true);
         const clubs = await clubsService.getAll();
         const myClubs = clubs.filter(
           (c: any) => c.assignment_id === assignmentId,
