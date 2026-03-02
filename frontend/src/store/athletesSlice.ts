@@ -76,6 +76,54 @@ const athletesSlice = createSlice({
     clearAthleteParent: (state) => {
       state.athleteParent = null;
     },
+    // Optimistic UI updates: set image immediately before server response
+    optimisticSetAthleteImage(
+      state,
+      action: { payload: { userId: string; imageDataUrl: string } },
+    ) {
+      const { userId, imageDataUrl } = action.payload;
+      const idx = state.myAthletes.findIndex((a) => a._id === userId);
+      if (idx !== -1) {
+        state.myAthletes[idx] = {
+          ...state.myAthletes[idx],
+          images: {
+            ...(state.myAthletes[idx].images || {}),
+            small: imageDataUrl,
+          },
+        } as any;
+      }
+      const allIdx = state.athletes.findIndex((a) => a._id === userId);
+      if (allIdx !== -1) {
+        state.athletes[allIdx] = {
+          ...state.athletes[allIdx],
+          images: {
+            ...(state.athletes[allIdx].images || {}),
+            small: imageDataUrl,
+          },
+        } as any;
+      }
+    },
+    // Optimistic UI updates: set document path immediately
+    optimisticSetAthleteCI(
+      state,
+      action: { payload: { userId: string; documentPath: string } },
+    ) {
+      const { userId, documentPath } = action.payload;
+      const idx = state.myAthletes.findIndex((a) => a._id === userId);
+      if (idx !== -1) {
+        state.myAthletes[idx] = {
+          ...state.myAthletes[idx],
+          documentPath,
+        } as any;
+      }
+      const allIdx = state.athletes.findIndex((a) => a._id === userId);
+      if (allIdx !== -1) {
+        state.athletes[allIdx] = {
+          ...state.athletes[allIdx],
+          documentPath,
+        } as any;
+      }
+    },
   },
   extraReducers: (builder) => {
     // Fetch Athletes
@@ -264,7 +312,12 @@ const athletesSlice = createSlice({
   },
 });
 
-export const { clearError, clearSearchedParent, clearAthleteParent } =
-  athletesSlice.actions;
+export const {
+  clearError,
+  clearSearchedParent,
+  clearAthleteParent,
+  optimisticSetAthleteImage,
+  optimisticSetAthleteCI,
+} = athletesSlice.actions;
 
 export default athletesSlice.reducer;

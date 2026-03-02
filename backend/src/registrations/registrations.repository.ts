@@ -77,7 +77,10 @@ export class RegistrationsRepository {
       .populate({
         path: 'group_id',
         select: 'name club_id schedules_added',
-        populate: { path: 'schedules_added', select: 'day startTime endTime' },
+        populate: [
+          { path: 'schedules_added', select: 'day startTime endTime' },
+          { path: 'club_id', select: 'name' },
+        ],
       })
       .lean()) as any;
   }

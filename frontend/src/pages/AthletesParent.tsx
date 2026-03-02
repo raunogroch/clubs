@@ -7,6 +7,10 @@ import {
   uploadAthleteImage,
   uploadAthleteCI,
 } from "../store/athletesThunk";
+import {
+  optimisticSetAthleteImage,
+  optimisticSetAthleteCI,
+} from "../store/athletesSlice";
 import { Image } from "../components/Image";
 import ImageUploadModal from "../components/modals/ImageUpload.modal";
 import CIUploadModal from "../components/modals/CIUpload.modal";
@@ -78,6 +82,15 @@ export const AthletesParent = () => {
   // Handlers conectados a Redux
   const handleSaveImage = async (imageBase64?: string) => {
     if (!selectedAthlete?._id || !imageBase64) return;
+    // Optimistic update: show the image immediately using a data URL
+    const dataUrl = `data:image/*;base64,${imageBase64}`;
+    dispatch(
+      optimisticSetAthleteImage({
+        userId: selectedAthlete._id,
+        imageDataUrl: dataUrl,
+      }),
+    );
+
     const result = await dispatch(
       uploadAthleteImage({
         userId: selectedAthlete._id,
@@ -85,13 +98,25 @@ export const AthletesParent = () => {
         role: "athlete",
       }),
     );
-    if (result.payload) {
-      handleCloseImageModal();
+
+    if (result.meta?.requestStatus === "rejected") {
+      // Revert: refetch to restore authoritative state
+      await dispatch(fetchMyAthletes());
     }
+    handleCloseImageModal();
   };
 
   const handleSaveCI = async (pdfBase64: string) => {
     if (!selectedAthlete?._id) return;
+    // Optimistic update: mark document as present
+    const optimisticPath = "optimistic://document";
+    dispatch(
+      optimisticSetAthleteCI({
+        userId: selectedAthlete._id,
+        documentPath: optimisticPath,
+      }),
+    );
+
     const result = await dispatch(
       uploadAthleteCI({
         userId: selectedAthlete._id,
@@ -99,9 +124,12 @@ export const AthletesParent = () => {
         role: "athlete",
       }),
     );
-    if (result.payload) {
-      handleCloseCIModal();
+
+    if (result.meta?.requestStatus === "rejected") {
+      // Revert: refetch to restore authoritative state
+      await dispatch(fetchMyAthletes());
     }
+    handleCloseCIModal();
   };
 
   return (
@@ -257,14 +285,18 @@ export const AthletesParent = () => {
                             <span className="badge badge-danger">Inactivo</span>
                           )}
                         </td>
-                        <td className="align-middle">
-                          <div className="btn-group btn-group-sm">
+                        <td className="text-center align-middle">
+                          <div className="d-flex gap-2 justify-content-around">
                             {athlete.images?.small ? (
                               <span
-                                className="btn btn-success btn-sm disabled"
+                                className="disabled"
                                 title="Foto de perfil cargada"
                               >
-                                <i className="fa fa-check"></i> Foto
+                                <i
+                                  className="fa fa-check-circle"
+                                  style={{ color: "green" }}
+                                ></i>{" "}
+                                Foto
                               </span>
                             ) : (
                               <button
@@ -278,11 +310,12 @@ export const AthletesParent = () => {
                             )}
 
                             {athlete.documentPath ? (
-                              <span
-                                className="btn btn-success btn-sm disabled"
-                                title="Cédula cargada"
-                              >
-                                <i className="fa fa-check"></i> CI
+                              <span className="disabled" title="Cédula cargada">
+                                <i
+                                  className="fa fa-check-circle"
+                                  style={{ color: "green" }}
+                                ></i>{" "}
+                                Carnet
                               </span>
                             ) : (
                               <button
@@ -291,7 +324,7 @@ export const AthletesParent = () => {
                                 disabled={uploadingCI}
                                 title="Cargar cédula de identidad"
                               >
-                                <i className="fa fa-file-pdf-o"></i> CI
+                                <i className="fa fa-file-pdf-o"></i> Carnet
                               </button>
                             )}
                           </div>

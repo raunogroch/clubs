@@ -210,6 +210,10 @@ export class GroupsService {
             group_id: group._id,
             group_name: group.name,
             club_id: group.club_id,
+            club_name:
+              group.club_id && typeof group.club_id === 'object'
+                ? (group.club_id as any).name
+                : undefined,
             day: s.day,
             startTime: s.startTime,
             endTime: s.endTime,
@@ -249,19 +253,31 @@ export class GroupsService {
     const regs: any[] =
       await this.registrationsService.findByAthletes(childIds);
     const result: any[] = [];
+    const seenSchedules = new Set<string>(); // Deduplicación
 
     regs.forEach((reg) => {
       const group: any = reg.group_id;
       if (group && group.schedules_added && group.schedules_added.length) {
         group.schedules_added.forEach((s: any) => {
-          result.push({
-            group_id: group._id,
-            group_name: group.name,
-            club_id: group.club_id,
-            day: s.day,
-            startTime: s.startTime,
-            endTime: s.endTime,
-          });
+          // Crear una key única para esta combinación de group_id + day + times
+          const scheduleKey = `${group._id}|${s.day}|${s.startTime}|${s.endTime}`;
+
+          // Solo agregar si no ya existe
+          if (!seenSchedules.has(scheduleKey)) {
+            seenSchedules.add(scheduleKey);
+            result.push({
+              group_id: group._id,
+              group_name: group.name,
+              club_id: group.club_id,
+              club_name:
+                group.club_id && typeof group.club_id === 'object'
+                  ? (group.club_id as any).name
+                  : undefined,
+              day: s.day,
+              startTime: s.startTime,
+              endTime: s.endTime,
+            });
+          }
         });
       }
     });
@@ -290,20 +306,29 @@ export class GroupsService {
     if (!clubs || clubs.length === 0) return [];
 
     const allSchedules: any[] = [];
+    const seenSchedules = new Set<string>(); // Deduplicación
+
     for (const club of clubs) {
       const groups = await this.groupRepository.findByClub(club._id.toString());
       groups.forEach((group: any) => {
         if (group.schedules_added && group.schedules_added.length > 0) {
           group.schedules_added.forEach((schedule: any) => {
-            allSchedules.push({
-              _id: group._id,
-              name: group.name,
-              club_id: group.club_id,
-              club: { _id: club._id, name: club.name },
-              day: schedule.day,
-              startTime: schedule.startTime,
-              endTime: schedule.endTime,
-            });
+            // Crear una key única para esta combinación de group_id + day + times
+            const scheduleKey = `${group._id}|${schedule.day}|${schedule.startTime}|${schedule.endTime}`;
+
+            // Solo agregar si no ya existe
+            if (!seenSchedules.has(scheduleKey)) {
+              seenSchedules.add(scheduleKey);
+              allSchedules.push({
+                _id: group._id,
+                name: group.name,
+                club_id: group.club_id,
+                club: { _id: club._id, name: club.name },
+                day: schedule.day,
+                startTime: schedule.startTime,
+                endTime: schedule.endTime,
+              });
+            }
           });
         }
       });

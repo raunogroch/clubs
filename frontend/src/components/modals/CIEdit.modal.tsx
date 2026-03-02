@@ -124,21 +124,6 @@ export const CIEditModal: React.FC<CIModalProps> = ({
                 />
               </div>
 
-              {uploadedCIBase64 && (
-                <div
-                  style={{
-                    marginBottom: "20px",
-                    padding: "12px",
-                    backgroundColor: "#e8f5e9",
-                    border: "1px solid #4caf50",
-                    borderRadius: "4px",
-                    color: "#2e7d32",
-                  }}
-                >
-                  ✓ Archivo cargado correctamente
-                </div>
-              )}
-
               {/* Buttons */}
               <div
                 style={{

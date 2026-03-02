@@ -274,17 +274,6 @@ export const CIUploadModal: React.FC<Props> = ({
                 </div>
               </div>
             )}
-
-            {/* Información de carga exitosa */}
-            {uploadedPDFBase64 && (
-              <div
-                className="alert alert-success mt-3"
-                style={{ marginBottom: 0 }}
-              >
-                <i className="fa fa-check-circle"></i> Archivo cargado
-                correctamente
-              </div>
-            )}
           </div>
 
           <div className="modal-footer">

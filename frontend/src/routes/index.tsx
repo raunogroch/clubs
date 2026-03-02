@@ -19,6 +19,7 @@ import {
   ProfileCoach,
   DashboardCoach,
   ScheduleCoach,
+  ScheduleParent,
   SchedulesAdmin,
   DashboardAthlete,
   DashboardParent,
@@ -191,7 +192,7 @@ export const roleRoutes: RoleRoutes = {
       path: "/schedules",
       icon: "fa-calendar",
       label: "Horarios",
-      element: <DashboardParent />, // vista de lista de horarios asociados al padre
+      element: <ScheduleParent />, // vista de lista de horarios asociados al padre
     },
     {
       path: "/profile",
