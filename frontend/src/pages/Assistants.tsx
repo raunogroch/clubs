@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { NavHeader } from "../components";
+import { Image } from "../components/Image";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../store/store";
 import { fetchAssignmentAssistants } from "../store/clubsThunk";
@@ -19,7 +20,7 @@ export const Assistants = () => {
 
   return (
     <div>
-      <NavHeader name="Secretarios(as)" />
+      <NavHeader name="Secretarios" />
       <div className="wrapper wrapper-content">
         <div className="ibox">
           <div className="ibox-content">
@@ -32,6 +33,7 @@ export const Assistants = () => {
                 <table className="table table-striped">
                   <thead>
                     <tr>
+                      <th style={{ width: "60px" }}>Foto</th>
                       <th>Apellidos</th>
                       <th>Nombres</th>
                       <th>Clubs</th>
@@ -40,9 +42,44 @@ export const Assistants = () => {
                   <tbody>
                     {assignmentAssistants.map((a: any) => (
                       <tr key={a._id}>
-                        <td>{a.lastname}</td>
-                        <td>{a.name}</td>
-                        <td>{a.clubs.map((c: any) => c.name).join(", ")}</td>
+                        <td>
+                          {a.images?.small ? (
+                            <Image
+                              src={a.images.small + `?t=${Date.now()}`}
+                              alt={`${a.name} ${a.lastname}`}
+                              className="rounded-circle"
+                              style={{
+                                width: 50,
+                                height: 50,
+                                objectFit: "cover",
+                              }}
+                            />
+                          ) : (
+                            <div
+                              className="rounded-circle"
+                              style={{
+                                width: "50px",
+                                height: "50px",
+                                backgroundColor: "#e8e8e8",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                            >
+                              <i
+                                className="fa fa-user"
+                                style={{ fontSize: "24px", color: "#999" }}
+                              ></i>
+                            </div>
+                          )}
+                        </td>
+                        <td className="align-middle">{a.lastname}</td>
+                        <td className="align-middle">{a.name}</td>
+                        <td className="align-middle">
+                          {a.clubs.map((c: any, idx: number) => (
+                            <div key={idx}>- {c.name}</div>
+                          ))}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
