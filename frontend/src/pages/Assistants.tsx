@@ -18,8 +18,6 @@ export const Assistants = () => {
     dispatch(fetchAssignmentAssistants());
   }, [dispatch]);
 
-  console.log("Asistentes asignados:", assignmentAssistants);
-
   return (
     <div>
       <NavHeader name="Secretarios" />

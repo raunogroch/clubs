@@ -8,13 +8,7 @@ import useAssignmentStatus from "../customHooks/useAssignmentStatus";
 
 export const DashboardAdmin = ({ name }: pageParamProps) => {
   const user = useSelector((state: RootState) => state.auth.user);
-  const { checking, forbidden } = useAssignmentStatus(user);
-
-  console.log("DashboardAdmin render - assignment status:", {
-    user,
-    checking,
-    forbidden,
-  });
+  const { forbidden } = useAssignmentStatus(user);
 
   if (forbidden) {
     return (
