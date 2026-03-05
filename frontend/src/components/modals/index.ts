@@ -21,6 +21,7 @@ export { CreateEventModal } from "./CreateEvent.modal";
 export { GroupLevelsModal } from "./GroupLevels.modal";
 export { AddMemberModal } from "./AddMember.modal";
 export { RescheduleEventModal } from "./RescheduleEvent.modal";
+export { ViewAthletesModal } from "./ViewAthletes.modal";
 
 // General Modals
 export { ImageUploadModal } from "./ImageUpload.modal";

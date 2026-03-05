@@ -9,6 +9,7 @@ interface GenericModalProps {
   size?: "sm" | "md" | "lg";
   children?: React.ReactNode;
   footer?: React.ReactNode;
+  style?: React.CSSProperties;
 }
 
 const sizeClass = (size?: string) => {
@@ -30,6 +31,7 @@ export const GenericModal: React.FC<GenericModalProps> = ({
   size = "md",
   children,
   footer,
+  style,
 }) => {
   if (!isOpen) return null;
 
@@ -58,6 +60,7 @@ export const GenericModal: React.FC<GenericModalProps> = ({
           width: "90vw",
           maxWidth: size === "lg" ? 900 : 600,
           margin: "auto",
+          ...style,
         }}
       >
         <div

@@ -24,6 +24,7 @@ import {
   SchedulesAdmin,
   DashboardAthlete,
   DashboardParent,
+  AssistantClubs,
 } from "../pages";
 
 export type MenuRoute = {
@@ -142,6 +143,12 @@ export const roleRoutes: RoleRoutes = {
       icon: "fa-home",
       label: "Principal",
       element: <Dashboard />,
+    },
+    {
+      path: "/assistant/clubs",
+      icon: "fa-object-group",
+      label: "Inscripciones",
+      element: <AssistantClubs />,
     },
     {
       path: "/profile",

@@ -5,6 +5,7 @@ import {
   fetchAthleteSchedules,
   fetchParentSchedules,
   fetchAssistantSchedules,
+  fetchAssistantClubs,
 } from "../store/schedulesThunk";
 import type { RootState, AppDispatch } from "../store/store";
 
@@ -15,9 +16,8 @@ import type { RootState, AppDispatch } from "../store/store";
  */
 export const useSchedules = (user: any | undefined) => {
   const dispatch = useDispatch<AppDispatch>();
-  const { items, status, error } = useSelector(
-    (state: RootState) => state.schedules,
-  );
+  const { items, status, error, assistantClubs, assistantClubsStatus } =
+    useSelector((state: RootState) => state.schedules);
 
   useEffect(() => {
     if (!user) return;
@@ -36,6 +36,7 @@ export const useSchedules = (user: any | undefined) => {
         break;
       case "assistant":
         dispatch(fetchAssistantSchedules());
+        dispatch(fetchAssistantClubs());
         break;
       default:
         // otros roles no tienen calendarios propios
@@ -43,5 +44,5 @@ export const useSchedules = (user: any | undefined) => {
     }
   }, [user, dispatch]);
 
-  return { items, status, error };
+  return { items, status, error, assistantClubs, assistantClubsStatus };
 };

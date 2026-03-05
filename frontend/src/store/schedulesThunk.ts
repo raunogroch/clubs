@@ -184,6 +184,22 @@ export const fetchAssistantSchedules = createAsyncThunk(
   },
 );
 
+// assistant clubs (nuevo)
+export const fetchAssistantClubs = createAsyncThunk(
+  "schedules/fetchAssistantClubs",
+  async (_, { rejectWithValue }) => {
+    try {
+      const data = await schedulesService.getAssistantClubs();
+      return data;
+    } catch (err: any) {
+      toastr.error("Error al obtener clubes del asistente");
+      return rejectWithValue(
+        err.message || "Error al obtener clubes del asistente",
+      );
+    }
+  },
+);
+
 /**
  * Recupera los mismos datos que el hook `useParentSchedules` hacía manualmente.
  *

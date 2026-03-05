@@ -28,3 +28,4 @@ export * from "./MonthlyPayments";
 export * from "./ScheduleCoach";
 export * from "./ScheduleParent";
 export * from "./SchedulesAdmin";
+export * from "./AssistantClubs";

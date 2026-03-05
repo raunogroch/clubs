@@ -9,6 +9,7 @@ import {
   fetchAthleteSchedules,
   fetchParentSchedules,
   fetchAssistantSchedules,
+  fetchAssistantClubs,
   fetchParentCalendarGroups,
 } from "./schedulesThunk";
 import type { Group } from "../pages/schedule/types";
@@ -26,19 +27,25 @@ interface Schedule {
 interface SchedulesState {
   items: Schedule[];
   parentGroups: Group[]; // calendar-friendly groups for parent view
+  assistantClubs: any[]; // listado de clubs/grupos para asistente
   status: "idle" | "loading" | "succeeded" | "failed";
   parentStatus: "idle" | "loading" | "succeeded" | "failed";
+  assistantClubsStatus: "idle" | "loading" | "succeeded" | "failed";
   error: string | null;
   parentError: string | null;
+  assistantClubsError: string | null;
 }
 
 const initialState: SchedulesState = {
   items: [],
   parentGroups: [],
+  assistantClubs: [],
   status: "idle",
   parentStatus: "idle",
+  assistantClubsStatus: "idle",
   error: null,
   parentError: null,
+  assistantClubsError: null,
 };
 
 /**
@@ -226,6 +233,22 @@ const schedulesSlice = createSlice({
       .addCase(fetchAssistantSchedules.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload as string;
+      })
+      // assistant clubs
+      .addCase(fetchAssistantClubs.pending, (state) => {
+        state.assistantClubsStatus = "loading";
+        state.assistantClubsError = null;
+      })
+      .addCase(
+        fetchAssistantClubs.fulfilled,
+        (state, action: PayloadAction<any[]>) => {
+          state.assistantClubsStatus = "succeeded";
+          state.assistantClubs = action.payload || [];
+        },
+      )
+      .addCase(fetchAssistantClubs.rejected, (state, action) => {
+        state.assistantClubsStatus = "failed";
+        state.assistantClubsError = action.payload as string;
       })
       // parent-calendar-groups (used by ScheduleParent page)
       .addCase(fetchParentCalendarGroups.pending, (state) => {

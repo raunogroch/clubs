@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../store/store";
 import { Image } from "../components";
 import { ImageEditModal } from "../components/modals";
+import { useSchedules } from "../customHooks/useSchedules";
 import toastr from "toastr";
 import { userService } from "../services/userService";
 import { MemberRole } from "../features/groups/types";
@@ -15,6 +16,9 @@ export const ProfileAssistant = () => {
   const [uploading, setUploading] = useState(false);
   const [profileData, setProfileData] = useState<any>(null);
   const [uploadedImageBase64, setUploadedImageBase64] = useState<string>("");
+
+  // si es asistente tendremos una lista de clubs + grupos
+  const { assistantClubs, assistantClubsStatus } = useSchedules(user);
 
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
@@ -181,6 +185,34 @@ export const ProfileAssistant = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // helper para renderizar la lista de clubes/grupos cuando el usuario es
+  // asistente
+  const renderAssistantClubs = () => {
+    if (assistantClubsStatus === "loading") {
+      return <p>Cargando clubes asociados...</p>;
+    }
+    if (!assistantClubs || assistantClubs.length === 0) {
+      return <p>No estás asignado a ningún club.</p>;
+    }
+
+    return (
+      <ul className="list-unstyled">
+        {assistantClubs.map((club: any) => (
+          <li key={club._id} className="m-b-xs">
+            <strong>{club.name}</strong>
+            {club.groups && club.groups.length > 0 && (
+              <ul className="m-l-md">
+                {club.groups.map((g: any) => (
+                  <li key={g._id}>{g.name}</li>
+                ))}
+              </ul>
+            )}
+          </li>
+        ))}
+      </ul>
+    );
   };
 
   if (!user) {
@@ -473,6 +505,13 @@ export const ProfileAssistant = () => {
                       <i className="fa fa-key m-r-xs"></i>Cambiar Contraseña
                     </button>
                   </div>
+
+                  {user?.role === "assistant" && (
+                    <div className="m-t-lg">
+                      <h5>Clubes a los que estás asignado</h5>
+                      {renderAssistantClubs()}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

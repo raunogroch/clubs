@@ -35,8 +35,20 @@ export class GroupsService {
   ) {}
 
   /**
-   * Verificar si el usuario tiene permiso para acceder a un club
-   * Extrae el ID de asignación correctamente (puede estar populated)
+   * Verifica si un usuario tiene un rol específico
+   * @param user Usuario a verificar
+   * @param role Rol a buscar
+   * @returns true si el usuario tiene el rol
+   */
+  private hasRole(user: any, role: string): boolean {
+    return (
+      user && (user.role === role || (user.roles && user.roles.includes(role)))
+    );
+  }
+
+  /**
+   * Verifica si el usuario tiene permiso para acceder a un club
+   * Permite: admins de la asignación O asistentes asignados al club
    */
   private async verifyClubAccess(
     clubId: string,
@@ -73,11 +85,26 @@ export class GroupsService {
       assignmentId,
     );
 
-    if (!isAdmin) {
-      throw new ForbiddenException(
-        'No tienes permiso para acceder a este club',
-      );
+    if (isAdmin) {
+      return; // Admin tiene acceso
     }
+
+    // Verificar si el usuario es un asistente asignado a este club
+    const user = await this.userModel.findById(userId);
+    if (
+      user &&
+      (user.role === 'assistant' ||
+        (user.roles && (user.roles as any).includes('assistant')))
+    ) {
+      const isAssistantInClub =
+        club.assistants_added &&
+        club.assistants_added.some((aid) => aid.toString() === userId);
+      if (isAssistantInClub) {
+        return; // Assistant está asignado al club
+      }
+    }
+
+    throw new ForbiddenException('No tienes permiso para acceder a este club');
   }
 
   /**
@@ -120,15 +147,7 @@ export class GroupsService {
    * Obtener todos los grupos donde el usuario autenticado es coach
    */
   async getMyCoachGroups(userId: string): Promise<Group[]> {
-    const groups = await this.groupRepository.findByCoach(userId);
-    // Log a concise summary to avoid noisy duplicate outputs when endpoint is
-    // requested multiple times by the frontend. Include coachId and count.
-    try {
-      const names = groups.map((g) => (g as any).name || '(sin nombre)');
-    } catch (e) {
-      console.error(`error: ${e.message}`);
-    }
-    return groups;
+    return this.groupRepository.findByCoach(userId);
   }
 
   /**
@@ -184,13 +203,7 @@ export class GroupsService {
    */
   async getAthleteGroupsSchedules(userId: string): Promise<any[]> {
     const user = await this.userModel.findById(userId);
-    if (
-      !user ||
-      !(
-        user.role === 'athlete' ||
-        (user.roles && (user.roles as any).includes('athlete'))
-      )
-    ) {
+    if (!user || !this.hasRole(user, 'athlete')) {
       throw new ForbiddenException(
         'Solo atletas pueden acceder a este endpoint',
       );
@@ -230,19 +243,13 @@ export class GroupsService {
    */
   async getParentGroupsSchedules(userId: string): Promise<any[]> {
     const user = await this.userModel.findById(userId);
-    if (
-      !user ||
-      !(
-        user.role === 'parent' ||
-        (user.roles && (user.roles as any).includes('parent'))
-      )
-    ) {
+    if (!user || !this.hasRole(user, 'parent')) {
       throw new ForbiddenException(
         'Solo padres pueden acceder a este endpoint',
       );
     }
 
-    // obtener los ids de los hijos
+    // Obtener los IDs de los hijos
     const children = await this.userModel.find({ parent_id: userId }).lean();
     const childIds = children.map((c: any) => c._id.toString());
     if (childIds.length === 0) return [];
@@ -290,26 +297,21 @@ export class GroupsService {
    */
   async getAssistantGroupsSchedules(userId: string): Promise<any[]> {
     const user = await this.userModel.findById(userId);
-    if (
-      !user ||
-      !(
-        user.role === 'assistant' ||
-        (user.roles && (user.roles as any).includes('assistant'))
-      )
-    ) {
+    if (!user || !this.hasRole(user, 'assistant')) {
       throw new ForbiddenException(
         'Solo asistentes pueden acceder a este endpoint',
       );
     }
 
-    const clubs = await this.clubRepository.findByAssistant(userId);
+    // Obtener clubes donde el asistente está asignado con sus grupos populados
+    const clubs = await this.clubRepository.findByAssistantWithGroups(userId);
     if (!clubs || clubs.length === 0) return [];
 
     const allSchedules: any[] = [];
     const seenSchedules = new Set<string>(); // Deduplicación
 
     for (const club of clubs) {
-      const groups = await this.groupRepository.findByClub(club._id.toString());
+      const groups = (club.groups as any[]) || [];
       groups.forEach((group: any) => {
         if (group.schedules_added && group.schedules_added.length > 0) {
           group.schedules_added.forEach((schedule: any) => {
@@ -335,6 +337,97 @@ export class GroupsService {
     }
 
     return allSchedules;
+  }
+
+  /**
+   * Procesa registros de atletas filtrando por estado de pago
+   * @param registrations Array de registros de atletas con datos expandidos
+   * @param paid Filtro: true (solo pagados), false (solo no pagados), null (todos)
+   */
+  private formatAthletes(registrations: any[], paid: boolean | null): any[] {
+    if (!Array.isArray(registrations)) return [];
+
+    return registrations
+      .filter((reg) => this.shouldIncludeRegistration(reg, paid))
+      .map((reg) => this.mapRegistrationToAthlete(reg));
+  }
+
+  /**
+   * Determina si una inscripción debe incluirse según el filtro de pago
+   */
+  private shouldIncludeRegistration(
+    registration: any,
+    paid: boolean | null,
+  ): boolean {
+    if (paid === null) return true; // Incluir todos
+    const isPaid = registration.registration_pay != null;
+    return isPaid === paid;
+  }
+
+  /**
+   * Convierte una inscripción MongoDB en objeto de atleta para la respuesta)
+   */
+  private mapRegistrationToAthlete(registration: any): any {
+    const athlete =
+      typeof registration.athlete_id === 'object'
+        ? registration.athlete_id
+        : { _id: registration.athlete_id, name: '', lastname: '', ci: '' };
+
+    return {
+      _id: athlete._id,
+      name: athlete.name,
+      lastname: athlete.lastname,
+      ci: athlete.ci,
+      registrationId: registration._id,
+      isPaid: registration.registration_pay != null,
+      registrationPayDate: registration.registration_pay,
+    };
+  }
+
+  /**
+   * Para un usuario con rol assistant: devuelve un arreglo de clubes en los
+   * cuales está asignado junto con los grupos que pertenecen a cada club.
+   * Sólo se requieren los campos básicos de grupo (nombre e _id) para uso
+   * en la interfaz.
+   *
+   * @param userId ID del usuario assistant
+   * @param paid Filtro: true (solo pagados), false (solo no pagados), null (todos)
+   */
+  async getAssistantClubs(
+    userId: string,
+    paid: boolean | null = false,
+  ): Promise<any[]> {
+    const user = await this.userModel.findById(userId);
+    if (!user || !this.hasRole(user, 'assistant')) {
+      throw new ForbiddenException(
+        'Solo asistentes pueden acceder a este endpoint',
+      );
+    }
+
+    // Obtener clubes del asistente con grupos, horarios y atletas populados
+    const clubs = await this.clubRepository.findByAssistantWithGroups(userId);
+    if (!clubs || clubs.length === 0) return [];
+
+    return clubs.map((club: any) => ({
+      _id: club._id,
+      name: club.name,
+      groups: (club.groups || []).map((g: any) => ({
+        _id: g._id,
+        name: g.name,
+        schedules:
+          g.schedules_added && Array.isArray(g.schedules_added)
+            ? g.schedules_added.map((s: any) => ({
+                day: s.day,
+                startTime: s.startTime,
+                endTime: s.endTime,
+              }))
+            : [],
+        athletes:
+          g.athletes_added && Array.isArray(g.athletes_added)
+            ? this.formatAthletes(g.athletes_added, paid)
+            : [],
+      })),
+    }));
   }
 
   /**

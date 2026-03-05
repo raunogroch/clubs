@@ -81,6 +81,25 @@ export class GroupsController {
   }
 
   /**
+   * GET /groups/assistant/clubs?paid=false|true
+   * Lista de clubes en los cuales el asistente está asignado junto con los
+   * grupos que pertenecen a cada club. Esta ruta se utiliza típicamente en la
+   * interfaz de usuario para mostrar rápidamente la jerarquía de clubs y
+   * grupos disponible para el asistente.
+   * Query params:
+   *   - paid: 'true' (solo pagados), 'false' (solo no pagados), omitido o null (todos)
+   */
+  @Get('assistant/clubs')
+  @Roles(Role.ASSISTANT)
+  async getAssistantClubs(
+    @CurrentUser() user: any,
+    @Query('paid') paid?: string,
+  ) {
+    const paidFilter = paid === 'true' ? true : paid === 'false' ? false : null;
+    return this.groupsService.getAssistantClubs(user.sub, paidFilter);
+  }
+
+  /**
    * POST /groups
    * Crear un nuevo grupo
    * Solo administradores de la asignación del club

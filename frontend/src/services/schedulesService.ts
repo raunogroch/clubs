@@ -251,6 +251,26 @@ class SchedulesService {
     }
     return safeParseJson(response);
   }
+
+  /**
+   * GET /api/groups/assistant/clubs?paid=false
+   * Clubes en los que el asistente está asignado junto a sus grupos
+   * Solo retorna atletas que NO han pagado matrícula (registration_pay === null)
+   */
+  async getAssistantClubs(): Promise<any[]> {
+    const response = await fetch(
+      `${API_URL}/groups/assistant/clubs?paid=false`,
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      },
+    );
+    if (!response.ok) {
+      throw new Error("Error al obtener clubes del asistente");
+    }
+    return safeParseJson(response);
+  }
 }
 
 const schedulesService = new SchedulesService();

@@ -241,6 +241,30 @@ export class ClubRepository {
   }
 
   /**
+   * Similar to `findByAssistant` but populate the clubs' groups subdocuments
+   * (only basic fields) so callers can know which groups are part of each
+   * club. Used by services that need to return a club-with-groups list for an
+   * assistant user. Also populates athletes and their details.
+   */
+  async findByAssistantWithGroups(assistantId: string): Promise<Club[]> {
+    return this.clubModel
+      .find({ assistants_added: new Types.ObjectId(assistantId) })
+      .populate('assignment_id', 'module_name')
+      .populate({
+        path: 'groups',
+        select: 'name schedules_added athletes_added',
+        populate: [
+          { path: 'schedules_added', select: 'day startTime endTime' },
+          {
+            path: 'athletes_added',
+            select: 'athlete_id registration_pay',
+            populate: { path: 'athlete_id', select: 'name lastname ci' },
+          },
+        ],
+      });
+  }
+
+  /**
    * Añadir un nivel al club (crea documento separado de ClubLevel)
    */
   async addLevel(
