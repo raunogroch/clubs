@@ -604,6 +604,21 @@ export class GroupsService {
         throw new NotFoundException(`Grupo con ID ${groupId} no encontrado`);
       }
 
+      // Verificar si el atleta ya está registrado en el grupo
+      if (this.registrationsService) {
+        const existingRegistration =
+          await this.registrationsService.findByGroupAndAthlete(
+            groupId,
+            athleteId,
+          );
+        if (existingRegistration) {
+          const athleteName = `${athlete.name} ${athlete.lastname}`;
+          throw new BadRequestException(
+            `El atleta ${athleteName} ya está registrado en el grupo`,
+          );
+        }
+      }
+
       // Extraer el ID del club (puede estar poblado como objeto o ser un string)
       let clubId: string;
       if (typeof group.club_id === 'object' && group.club_id !== null) {

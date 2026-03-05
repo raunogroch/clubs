@@ -6,6 +6,7 @@ import { AddMemberModal, ViewAthletesModal } from "../components/modals";
 import { useSchedules } from "../customHooks/useSchedules";
 import { useAddMemberModal } from "../features/groups/hooks";
 import { addAthleteToGroup } from "../store/groupsThunk";
+import { updateGroupInAssistantClubs } from "../store/schedulesSlice";
 import userService from "../services/userService";
 import type { RootState, AppDispatch } from "../store/store";
 import Ibox from "../components/Ibox";
@@ -31,9 +32,57 @@ export const AssistantClubs = () => {
     }
   }, [assistantClubs]);
 
+  // Sincronizar atletasModalGroup cuando localClubs cambia
+  useEffect(() => {
+    if (athletesModalGroup && localClubs.length > 0) {
+      let updatedGroup = null;
+      for (const club of localClubs) {
+        const found = club.groups?.find(
+          (g: any) => g._id === athletesModalGroup._id,
+        );
+        if (found) {
+          updatedGroup = found;
+          break;
+        }
+      }
+      if (updatedGroup) {
+        setAthletesModalGroup(updatedGroup);
+      }
+    }
+  }, [localClubs]);
+
   useEffect(() => {
     // el hook ya dispara la carga cuando cambia el usuario, no hay nada qué hacer aquí
   }, [user]);
+
+  // Función para transformar athletes_added a athletes format
+  const formatGroupAthletes = (group: any): any => {
+    if (!group || !group.athletes_added) return group;
+
+    return {
+      ...group,
+      athletes: Array.isArray(group.athletes_added)
+        ? group.athletes_added
+            .filter((reg: any) => reg.registration_pay === null) // Solo sin pagar
+            .map((reg: any) => {
+              const athlete =
+                typeof reg.athlete_id === "object"
+                  ? reg.athlete_id
+                  : { _id: reg.athlete_id, name: "", lastname: "", ci: "" };
+              return {
+                _id: athlete._id,
+                name: athlete.name,
+                lastname: athlete.lastname,
+                ci: athlete.ci,
+                registrationId: reg._id,
+                isPaid: reg.registration_pay != null,
+                registrationPayDate: reg.registration_pay,
+              };
+            })
+        : [],
+      athletes_added: undefined, // Eliminar el campo original
+    };
+  };
 
   if (assistantClubsStatus === "loading") {
     return (
@@ -89,20 +138,82 @@ export const AssistantClubs = () => {
     }
 
     if (addMemberModal.memberType === "athlete") {
-      await dispatch(
+      // Validar que el atleta no esté ya registrado en el grupo
+      const selectedGroup = localClubs
+        .flatMap((club) => club.groups || [])
+        .find((g: any) => g._id === addMemberModal.selectedGroupId);
+
+      if (selectedGroup) {
+        const existingAthlete = selectedGroup.athletes_added?.some(
+          (reg: any) => {
+            const athleteId =
+              typeof reg.athlete_id === "object"
+                ? reg.athlete_id._id
+                : reg.athlete_id;
+            return athleteId === addMemberModal.searchResult._id;
+          },
+        );
+
+        if (existingAthlete) {
+          toastr.error("Este atleta ya está registrado en este grupo");
+          addMemberModal.closeModal();
+          return;
+        }
+      }
+
+      const result = await dispatch(
         addAthleteToGroup({
           groupId: addMemberModal.selectedGroupId,
           athleteId: addMemberModal.searchResult._id,
         }),
       );
-    }
 
-    toastr.success("Deportista añadido");
-    addMemberModal.closeModal();
+      // Si la adición fue exitosa, actualizar el grupo en Redux de forma eficiente
+      if (result.type === addAthleteToGroup.fulfilled.type) {
+        const updatedGroup = result.payload;
+        const formattedGroup = formatGroupAthletes(updatedGroup);
+        dispatch(updateGroupInAssistantClubs(formattedGroup));
+        // Si el modal de atletas está abierto, actualizar también su estado
+        if (athletesModalGroup?._id === addMemberModal.selectedGroupId) {
+          setAthletesModalGroup(formattedGroup);
+        }
+        toastr.success("Deportista añadido");
+        addMemberModal.closeModal();
+      } else if (result.type === addAthleteToGroup.rejected.type) {
+        // Mostrar mensaje de error del backend
+        const errorMessage = result.payload as string;
+        toastr.error(errorMessage || "Error al añadir deportista");
+      }
+      return;
+    }
   };
 
   const handlePaymentSuccess = (registrationId: string) => {
     // Remover el atleta pagado de la lista sin refrescar
+    setLocalClubs((prevClubs) =>
+      prevClubs.map((club) => ({
+        ...club,
+        groups: (club.groups || []).map((group) => ({
+          ...group,
+          athletes: (group.athletes || []).filter(
+            (athlete: any) => athlete.registrationId !== registrationId,
+          ),
+        })),
+      })),
+    );
+    // Actualizar modal con la lista actualizada
+    if (athletesModalGroup) {
+      setAthletesModalGroup((prev: any) => ({
+        ...prev,
+        athletes: (prev.athletes || []).filter(
+          (a: any) => a.registrationId !== registrationId,
+        ),
+      }));
+    }
+  };
+
+  const handleAthleteDelete = (registrationId: string) => {
+    // Remover el atleta eliminado de la lista sin refrescar
     setLocalClubs((prevClubs) =>
       prevClubs.map((club) => ({
         ...club,
@@ -342,6 +453,7 @@ export const AssistantClubs = () => {
         group={athletesModalGroup}
         onClose={() => setAthletesModalGroup(null)}
         onPaymentSuccess={handlePaymentSuccess}
+        onAthleteDelete={handleAthleteDelete}
       />
     </div>
   );

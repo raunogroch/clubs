@@ -79,6 +79,22 @@ const schedulesSlice = createSlice({
       state.status = "idle";
       state.error = null;
     },
+    updateGroupInAssistantClubs(state, action: PayloadAction<any>) {
+      // Actualiza un grupo específico en assistantClubs eficientemente
+      const updatedGroup = action.payload;
+      const clubIndex = state.assistantClubs.findIndex((club) =>
+        club.groups?.some((g: any) => g._id === updatedGroup._id),
+      );
+
+      if (clubIndex >= 0) {
+        const groupIndex = state.assistantClubs[clubIndex].groups.findIndex(
+          (g: any) => g._id === updatedGroup._id,
+        );
+        if (groupIndex >= 0) {
+          state.assistantClubs[clubIndex].groups[groupIndex] = updatedGroup;
+        }
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -269,5 +285,6 @@ const schedulesSlice = createSlice({
   },
 });
 
-export const { clearSchedules } = schedulesSlice.actions;
+export const { clearSchedules, updateGroupInAssistantClubs } =
+  schedulesSlice.actions;
 export default schedulesSlice.reducer;

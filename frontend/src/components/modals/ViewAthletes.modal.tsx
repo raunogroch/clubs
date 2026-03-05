@@ -13,6 +13,7 @@ interface ViewAthletesModalProps {
   group?: any;
   onClose: () => void;
   onPaymentSuccess?: (registrationId: string, athleteId: string) => void;
+  onAthleteDelete?: (registrationId: string) => void;
 }
 
 export const ViewAthletesModal: React.FC<ViewAthletesModalProps> = ({
@@ -20,9 +21,11 @@ export const ViewAthletesModal: React.FC<ViewAthletesModalProps> = ({
   group,
   onClose,
   onPaymentSuccess,
+  onAthleteDelete,
 }) => {
   const [paymentAmount, setPaymentAmount] = useState<string>("");
   const [payingId, setPayingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [selectedRegistrationId, setSelectedRegistrationId] = useState<
     string | null
   >(null);
@@ -69,6 +72,37 @@ export const ViewAthletesModal: React.FC<ViewAthletesModalProps> = ({
       );
     } finally {
       setPayingId(null);
+    }
+  };
+
+  const handleDeleteAthlete = async (registrationId: string, athlete: any) => {
+    if (
+      !window.confirm(
+        `¿Estás seguro de que deseas eliminar a ${athlete.name} ${athlete.lastname}?`,
+      )
+    ) {
+      return;
+    }
+
+    setDeletingId(registrationId);
+    try {
+      const res = await registrationsService.delete(registrationId);
+
+      if (res.code === 200 || res.code === 204) {
+        toastr.success("Atleta eliminado");
+        if (onAthleteDelete) {
+          onAthleteDelete(registrationId);
+        }
+      } else {
+        toastr.error("Error eliminando atleta");
+      }
+    } catch (error: any) {
+      console.error(error);
+      toastr.error(
+        error?.response?.data?.message || "Error al eliminar atleta",
+      );
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -169,14 +203,50 @@ export const ViewAthletesModal: React.FC<ViewAthletesModalProps> = ({
                               </button>
                             </div>
                           ) : (
-                            <button
-                              className="btn btn-xs btn-warning"
-                              onClick={() =>
-                                handlePayClick(athlete.registrationId)
-                              }
+                            <div
+                              style={{
+                                display: "flex",
+                                gap: "4px",
+                                justifyContent: "center",
+                                flexWrap: "wrap",
+                              }}
                             >
-                              <i className="fa fa-credit-card"></i> Pagar
-                            </button>
+                              <button
+                                className="btn btn-xs btn-warning"
+                                onClick={() =>
+                                  handlePayClick(athlete.registrationId)
+                                }
+                                disabled={deletingId === athlete.registrationId}
+                              >
+                                <i className="fa fa-credit-card"></i> Pagar
+                              </button>
+                              <button
+                                className="btn btn-xs btn-danger"
+                                onClick={() =>
+                                  handleDeleteAthlete(
+                                    athlete.registrationId,
+                                    athlete,
+                                  )
+                                }
+                                disabled={deletingId === athlete.registrationId}
+                              >
+                                {deletingId === athlete.registrationId ? (
+                                  <>
+                                    <span
+                                      className="spinner-border spinner-border-sm"
+                                      role="status"
+                                      aria-hidden="true"
+                                      style={{ marginRight: "3px" }}
+                                    ></span>
+                                    Eliminando...
+                                  </>
+                                ) : (
+                                  <>
+                                    <i className="fa fa-trash"></i> Eliminar
+                                  </>
+                                )}
+                              </button>
+                            </div>
                           )}
                         </>
                       )}
@@ -197,7 +267,7 @@ export const ViewAthletesModal: React.FC<ViewAthletesModalProps> = ({
           type="button"
           className="btn btn-default"
           onClick={onClose}
-          disabled={payingId !== null}
+          disabled={payingId !== null || deletingId !== null}
         >
           Cerrar
         </button>

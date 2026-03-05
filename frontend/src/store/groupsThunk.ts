@@ -131,11 +131,18 @@ export const addAthleteToGroup = createAsyncThunk(
         payload.groupId,
         payload.athleteId,
       );
-      toastr.success("Atleta añadido");
       return data;
     } catch (err: any) {
-      toastr.error("Error al añadir atleta");
-      return rejectWithValue(err.message || "Error al añadir atleta");
+      // Extraer el mensaje de error del backend
+      let errorMessage = "Error al añadir atleta";
+
+      if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
+      return rejectWithValue(errorMessage);
     }
   },
 );

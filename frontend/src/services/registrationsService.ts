@@ -82,6 +82,23 @@ export const registrationsService = {
       return handleApiError(error);
     }
   },
+
+  /**
+   * Eliminar una registration
+   */
+  async delete(id: string): Promise<ApiResponse<any>> {
+    try {
+      const response = await api.delete(`/registrations/${id}`);
+      const resData = response.data?.data || response.data;
+      return {
+        code: response.status,
+        message: "Registration eliminada",
+        data: resData,
+      };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  },
 };
 
 export default registrationsService;
